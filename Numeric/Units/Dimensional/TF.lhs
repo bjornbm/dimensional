@@ -1,4 +1,4 @@
-Numeric.Dimensional -- Statically checked physical dimensions
+Numeric.Units.Dimensional.TF -- Statically checked physical dimensions
 Bjorn Buckwalter, bjorn.buckwalter@gmail.com
 License: BSD3
 
@@ -40,11 +40,9 @@ where to fit it in.
 
 = Preliminaries =
 
-This module requires GHC 6.6 or later. We utilize multi-parameter
-type classes, phantom types, functional dependencies and undecidable
-instances (and possibly additional unidentified GHC extensions).
-Clients of the module are generally not required to use these
-extensions.
+This module requires GHC 7.0 or later. We utilize the following GHC
+extensions. Clients of the module are generally not required to use
+these extensions.
 
 > {-# LANGUAGE UndecidableInstances
 >            , ScopedTypeVariables
@@ -183,7 +181,7 @@ dimensions in 'Dimensional' instead of creating a new data type
 'Dim'. However, that would have made any type signatures involving
 'Dimensional' very cumbersome.  By encompassing the physical dimension
 in a single type variable we can "hide" the cumbersome type arithmetic
-behind convenient type classes as will be seen later.
+behind convenient type families as will be seen later.
 
 Using our 'Dim' data type we define some type synonyms for convenience
 and illustrative purposes. We start with the base dimensions.
@@ -217,8 +215,7 @@ Quantities with the base dimensions.
 When performing arithmetic on units and quantities the arithmetics
 must be applied to both the numerical values of the Dimensionals
 but also to their physical dimensions. The type level arithmetic
-on physical dimensions is governed by multi-parameter type classes
-and functional dependences.
+on physical dimensions is governed by type families.
 
 Multiplication of dimensions corresponds to adding of the base
 dimensions' exponents.
@@ -247,12 +244,6 @@ dimensions' exponents.
 >                        (Sub th th')
 >                        (Sub n  n')
 >                        (Sub j  j')
-
-We could provide the 'Mul' and 'Div' classes with full functional
-dependencies but that would be of limited utility as there is no
-obvious use for "backwards" type inference and would also limit
-what we can achieve overlapping instances. (In particular, it breaks
-the 'Extensible' module.)
 
 We limit ourselves to integer powers of Dimensionals as fractional
 powers make little physical sense. Since the value of the exponent
@@ -569,58 +560,60 @@ second.
 For completeness we should also show an example of the error messages
 we will get from GHC when performing invalid arithmetic. In the
 best case GHC will be able to use the type synonyms we have defined
-in its error messages.
+in its error messages. In other cases the error messages aren't very
+friendly.
 
 ] x = 1 *~ meter + 1 *~ second
 
-    Couldn't match expected type `Pos1' against inferred type `Zero'
-      Expected type: Unit DLength t
-      Inferred type: Unit DTime a
+    Couldn't match expected type `Numeric.NumType.TF.S
+                                    Numeric.NumType.TF.Z'
+                with actual type `Numeric.NumType.TF.Z'
+    Expected type: Unit DLength a1
+      Actual type: Unit DTime a0
     In the second argument of `(*~)', namely `second'
     In the second argument of `(+)', namely `1 *~ second'
 
-In other cases the error messages aren't very friendly.
 
 ] x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
 
-    Couldn't match expected type `Zero'
-           against inferred type `Neg Zero'
-    When using functional dependencies to combine
-      Sub Zero (Pos Zero) (Neg Zero),
-        arising from use of `/' at Numeric/Dimensional.lhs:425:9-20
-      Sub Zero (Pos Zero) Zero,
-        arising from use of `/' at Numeric/Dimensional.lhs:532:5-30
+1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+
+    Couldn't match type `Numeric.NumType.TF.S Numeric.NumType.TF.Z'
+                   with `Numeric.NumType.TF.Zero'
+    Expected type: Quantity DMass Double
+      Actual type: Numeric.Units.Dimensional.TF.Dimensional
+                     DQuantity (Div DLength DTime) Double
+    In the first argument of `(+)', namely `1 *~ meter / (1 *~ second)'
+    In the expression: 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+
+    Couldn't match type `Numeric.NumType.TF.Z'
+                   with `Numeric.NumType.TF.Pos1'
+    Expected type: Quantity DMass Double
+      Actual type: Numeric.Units.Dimensional.TF.Dimensional
+                     DQuantity (Div DLength DTime) Double
+    In the first argument of `(+)', namely `1 *~ meter / (1 *~ second)'
+    In the expression: 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+
+    Couldn't match type `Numeric.NumType.TF.N
+                           (Numeric.NumType.TF.S Numeric.NumType.TF.Z)'
+                   with `Numeric.NumType.TF.Zero'
+    Expected type: Quantity DMass Double
+      Actual type: Numeric.Units.Dimensional.TF.Dimensional
+                     DQuantity (Div DLength DTime) Double
+    In the first argument of `(+)', namely `1 *~ meter / (1 *~ second)'
+    In the expression: 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
 
 It is the author's experience that the usefullness of the compiler
 error messages is more often than not limited to pinpointing the
 location of errors.
 
 
-= Future work =
-
-While there is an insane amount of units in use around the world
-it is reasonable to provide at least all SI units. Units outside
-of SI will most likely be added on an as-needed basis.
-
-There are also plenty of elementary functions to add. The 'Floating'
-class can be used as reference.
-
-Another useful addition would be decent 'Show' and 'Read' instances.
-The 'show' implementation could output the numerical value and the
-unit expressed in (base?) SI units, along the lines of:
-
-] instance (Fractional a, Show a) => Show (Length a)
-]   where show x = show (x /~ meter) ++ " m"
-
-Additional functions could be provided for "showing" with any unit
-and prefix.  The 'read' implementation should be able to read values
-with any unit and prefix. It is not clear to the author how to best
-implement these.
-
-Additional physics models could be implemented. See [3] for ideas.
-
-
 = Related work =
+
+This module is a port of the Numeric.Units.Dimensional module in
+the dimensional [3] package. This module differs from
+Numeric.Units.Dimensional in that the dimension tracking is implemented
+using type families rather than functional dependencies.
 
 Henning Thielemann numeric prelude has a physical units library,
 however, checking of dimensions is dynamic rather than static.
@@ -641,7 +634,7 @@ particularly noteworthy.
 
 [1] http://physics.nist.gov/Pubs/SP811/
 [2] http://en.wikipedia.org/wiki/Escape_velocity
-[3] http://jscience.org/api/org/jscience/physics/models/package-summary.html
+[3] http://dimensional.googlecode.com
 [4] http://www.haskell.org/haskellwiki/Physical_units
 [5] http://liftm.wordpress.com/2007/06/03/scientificdimension-type-arithmetic-and-physical-units-in-haskell/
 [6] http://jscience.org/
