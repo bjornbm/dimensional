@@ -50,6 +50,7 @@ these extensions.
 >            , GeneralizedNewtypeDeriving
 >            , TypeFamilies
 >            , TypeSynonymInstances
+>            , FlexibleInstances
 > #-}
 
 > {- |
