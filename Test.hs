@@ -1,6 +1,6 @@
-import qualified Numeric.Units.Dimensional.TF.Test
-import qualified Numeric.Units.Dimensional.TF.QuantitiesTest
+import qualified Numeric.Units.Dimensional.DK.Test
+import qualified Numeric.Units.Dimensional.DK.QuantitiesTest
 
 main = do
-  Numeric.Units.Dimensional.TF.Test.main
-  Numeric.Units.Dimensional.TF.QuantitiesTest.main
+  Numeric.Units.Dimensional.DK.Test.main
+  Numeric.Units.Dimensional.DK.QuantitiesTest.main

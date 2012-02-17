@@ -22,11 +22,11 @@ referenced are from [1] unless otherwise specified.
 > and implementation.
 > -}
 
-> module Numeric.Units.Dimensional.TF.SIUnits where
+> module Numeric.Units.Dimensional.DK.SIUnits where
 
-> import Numeric.Units.Dimensional.TF
-> import Numeric.Units.Dimensional.TF.Quantities
-> import Numeric.NumType.TF ( neg1, neg2, pos2, pos3 )
+> import Numeric.Units.Dimensional.DK
+> import Numeric.Units.Dimensional.DK.Quantities
+> import Numeric.NumType.DK ( neg1, neg2, pos2, pos3 )
 > import Data.Time.Clock (DiffTime)
 > import Prelude ( (.), Num, Real (toRational), Fractional (fromRational), Floating, recip )
 > import qualified Prelude

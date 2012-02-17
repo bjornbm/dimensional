@@ -15,6 +15,8 @@ exponents. Then a type synonym for the corresponding quantity type
 is defined. If there are several quantity types with the same
 dimensionality type synonyms are provided for each quantity type.
 
+> {-# LANGUAGE DataKinds #-}
+
 > {- |
 >    Copyright  : Copyright (C) 2006-2012 Bjorn Buckwalter
 >    License    : BSD3
@@ -27,14 +29,14 @@ dimensionality type synonyms are provided for each quantity type.
 > and implementation.
 > -}
 
-> module Numeric.Units.Dimensional.TF.Quantities where
+> module Numeric.Units.Dimensional.DK.Quantities where
 
-> import Numeric.Units.Dimensional.TF
->   ( Dim, Quantity, Dimensionless
+> import Numeric.Units.Dimensional.DK
+>   ( DimK (Dim), Quantity, Dimensionless
 >   , DOne, DLuminousIntensity, DThermodynamicTemperature
 >   , Unit, DLength, (^+) -- Used only for 'square' and 'cubic'.
 >   )
-> import Numeric.NumType.TF
+> import Numeric.NumType.DK
 >   ( Neg3, Neg2, Neg1, Zero, Pos1, Pos2, Pos3, Pos4
 >   , pos2, pos3 -- Used only for 'square' and 'cubic'.
 >   )

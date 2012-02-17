@@ -24,9 +24,9 @@ otherwise specified.
 > and implementation.
 > -}
 
-> module Numeric.Units.Dimensional.TF.NonSI where
+> module Numeric.Units.Dimensional.DK.NonSI where
 
-> import Numeric.Units.Dimensional.TF.Prelude
+> import Numeric.Units.Dimensional.DK.Prelude
 > import qualified Prelude
 
 

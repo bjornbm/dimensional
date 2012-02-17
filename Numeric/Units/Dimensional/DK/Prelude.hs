@@ -1,20 +1,20 @@
-module Numeric.Units.Dimensional.TF.Prelude
-    ( module Numeric.Units.Dimensional.TF
-    , module Numeric.Units.Dimensional.TF.Quantities
-    , module Numeric.Units.Dimensional.TF.SIUnits
-    , module Numeric.NumType.TF
+module Numeric.Units.Dimensional.DK.Prelude
+    ( module Numeric.Units.Dimensional.DK
+    , module Numeric.Units.Dimensional.DK.Quantities
+    , module Numeric.Units.Dimensional.DK.SIUnits
+    , module Numeric.NumType.DK
     , module Prelude
     ) where
 
-import Numeric.Units.Dimensional.TF hiding
+import Numeric.Units.Dimensional.DK hiding
     ( Dimensional (Dimensional)
     )
 
-import Numeric.Units.Dimensional.TF.Quantities
+import Numeric.Units.Dimensional.DK.Quantities
 
-import Numeric.Units.Dimensional.TF.SIUnits
+import Numeric.Units.Dimensional.DK.SIUnits
 
-import Numeric.NumType.TF
+import Numeric.NumType.DK
     ( neg5, neg4, neg3, neg2, neg1, zero, pos1, pos2, pos3, pos4, pos5
     )  -- Used in exponents.
 

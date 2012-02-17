@@ -1,4 +1,4 @@
-Numeric.Units.Dimensional.TF -- Statically checked physical dimensions
+Numeric.Units.Dimensional.DK -- Statically checked physical dimensions
 Bjorn Buckwalter, bjorn.buckwalter@gmail.com
 License: BSD3
 
@@ -51,6 +51,7 @@ these extensions.
 >            , TypeFamilies
 >            , TypeSynonymInstances
 >            , FlexibleInstances
+>            , DataKinds
 > #-}
 
 > {- |
@@ -65,7 +66,7 @@ these extensions.
 > and implementation.
 > -}
 
-> module Numeric.Units.Dimensional.TF
+> module Numeric.Units.Dimensional.DK
 >       -- TODO discriminate exports, in particular Variants and Dims.
 >   where
 
@@ -77,11 +78,13 @@ these extensions.
 > import qualified Prelude
 > import Data.List (genericLength)
 > import Data.Maybe (Maybe (Just, Nothing), catMaybes)
-> import Numeric.NumType.TF
->   ( NumType, Zero, toNum, Add, Sub
->   , Pos1, Pos2, pos2, Pos3, pos3
+> import Numeric.NumType.DK
+>   ( Add, Sub, INT 
+>   , Zero, Pos1, Pos2, Pos3
+>   , INTRep, ToNum, toNum
+>   , pos2, pos3
 >   )
-> import qualified Numeric.NumType.TF as N (Mul, Div)
+> import qualified Numeric.NumType.DK as N (Mul, Div)
 
 We will reuse the operators and function names from the Prelude.
 To prevent unpleasant surprises we give operators the same fixity
@@ -105,7 +108,7 @@ to occasionally cumbersome type classes.
 We call this data type 'Dimensional' to capture the notion that the
 units and quantities it represents have physical dimensions.
 
-> newtype Dimensional v d a = Dimensional a deriving (Eq, Ord, Enum)
+> newtype Dimensional (v::Variety) (d::DimK) a = Dimensional a deriving (Eq, Ord, Enum)
 
 The type variable 'a' is the only non-phantom type variable and
 represents the numerical value of a quantity or the scale (w.r.t.
@@ -122,8 +125,7 @@ Since 'a' is the only non-phantom type we were able to define
 The phantom type variable v is used to distinguish between units
 and quantities. It should be one of the following:
 
-> data DUnit
-> data DQuantity
+> data Variety = DUnit | DQuantity
 
 For convenience we define type synonyms for units and quantities.
 
@@ -162,9 +164,9 @@ which can be combined in integer powers to a given physical dimension.
 We represent physical dimensions as the powers of the seven base
 dimensions that make up the given dimension. The powers are represented
 using NumTypes. For convenience we collect all seven base dimensions
-in a data type 'Dim'.
+in a data type `Dim` of kind `DimK`.
 
-> data Dim l m t i th n j
+> data DimK = Dim INT INT INT INT INT INT INT
 
 where the respective dimensions are represented by type variables
 using the following convention.
@@ -179,12 +181,12 @@ using the following convention.
 
 We could have chosen to provide type variables for the seven base
 dimensions in 'Dimensional' instead of creating a new data type
-'Dim'. However, that would have made any type signatures involving
+Dim'. However, that would have made any type signatures involving
 'Dimensional' very cumbersome.  By encompassing the physical dimension
 in a single type variable we can "hide" the cumbersome type arithmetic
 behind convenient type families as will be seen later.
 
-Using our 'Dim' data type we define some type synonyms for convenience
+Using our Dim data type we define some type synonyms for convenience
 and illustrative purposes. We start with the base dimensions.
 
 > type DOne         = Dim Zero Zero Zero Zero Zero Zero Zero
@@ -221,7 +223,7 @@ on physical dimensions is governed by type families.
 Multiplication of dimensions corresponds to adding of the base
 dimensions' exponents.
 
-> type family Mul a b
+> type family   Mul (a::DimK) (b::DimK) :: DimK
 > type instance Mul (Dim l  m  t  i  th  n  j)
 >                   (Dim l' m' t' i' th' n' j')
 >                  = Dim (Add l  l')
@@ -235,7 +237,7 @@ dimensions' exponents.
 Division of dimensions corresponds to subtraction of the base
 dimensions' exponents.
 
-> type family Div a b
+> type family   Div (a::DimK) (b::DimK) :: DimK
 > type instance Div (Dim l  m  t  i  th  n  j)
 >                   (Dim l' m' t' i' th' n' j')
 >                  = Dim (Sub l  l')
@@ -255,7 +257,7 @@ the exponent with a 'NumType'.
 Powers of dimensions corresponds to multiplication of the base
 dimensions' exponents by the exponent.
 
-> type family Pow d x
+> type family   Pow (d::DimK) (x::INT) :: DimK
 > type instance Pow (Dim l m t i th n j) x
 >                  = Dim (N.Mul l  x)
 >                        (N.Mul m  x)
@@ -268,15 +270,15 @@ dimensions' exponents by the exponent.
 Roots of dimensions corresponds to division of the base dimensions'
 exponents by order(?) of the root.
 
-> type family Root d x
+> type family   Root (d::DimK) (x::INT) :: DimK
 > type instance Root (Dim l m t i th n j) x
 >                   = Dim (N.Div l  x)
->                         (N.Div m  x)
->                         (N.Div t  x)
->                         (N.Div i  x)
->                         (N.Div th x)
->                         (N.Div n  x)
->                         (N.Div j  x)
+>                          (N.Div m  x)
+>                          (N.Div t  x)
+>                          (N.Div i  x)
+>                          (N.Div th x)
+>                          (N.Div n  x)
+>                          (N.Div j  x)
 
 
 = Arithmetic on units and quantities =
@@ -295,16 +297,16 @@ Multiplication, division and powers apply to both units and quantities.
 >                       -> Dimensional v (Div d d') a
 > Dimensional x / Dimensional y = Dimensional (x Prelude./ y)
 
-> (^) :: (Fractional a, NumType n) => Dimensional v d a -> n
->                                  -> Dimensional v (Pow d n) a
+> (^) :: (Fractional a, ToNum n) => Dimensional v d a -> INTRep n
+>                                -> Dimensional v (Pow d n) a
 > Dimensional x ^ n = Dimensional (x Prelude.^^ (toNum n :: Integer))
 
 In the unlikely case someone needs to use this library with
 non-fractional numbers we provide the alternative power operator
 '^+' that is restricted to positive exponents.
 
-> (^+) :: (Num a, NumType n) => Dimensional v d a -> n
->                            -> Dimensional v (Pow d n) a
+> (^+) :: (Num a, ToNum n) => Dimensional v d a -> INTRep n
+>                          -> Dimensional v (Pow d n) a
 > Dimensional x ^+ n = Dimensional (x Prelude.^ (toNum n :: Integer))
 
 A special case is that dimensionless quantities are not restricted
@@ -335,8 +337,8 @@ Absolute value.
 Roots of arbitrary (integral) degree. Appears to occasionally be useful
 for units as well as quantities.
 
-> nroot :: (Floating a, NumType n) => n -> Dimensional v d a
->                                  -> Dimensional v (Root d n) a
+> nroot :: (Floating a, ToNum n) => INTRep n -> Dimensional v d a
+>                                -> Dimensional v (Root d n) a
 > nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ toNum n))
 
 We provide short-hands for the square and cubic roots.
@@ -349,8 +351,8 @@ We provide short-hands for the square and cubic roots.
 We also provide an operator alternative to nroot for those that
 prefer such.
 
-> (^/) :: (Floating a, NumType n) => Dimensional v d a -> n
->                                 -> Dimensional v (Root d n) a
+> (^/) :: (Floating a, ToNum n) => Dimensional v d a -> INTRep n
+>                      -> Dimensional v (Root d n) a
 > (^/) = flip nroot
 
 
@@ -374,7 +376,6 @@ The sum of all elements in a list.
 
 > sum :: forall d a . Num a => [Quantity d a] -> Quantity d a
 > sum = foldr (+) (Dimensional 0 :: Quantity d a)
-> -- -}
 
 The length of the list as a 'Dimensionless'. This can be useful for
 purposes of e.g. calculating averages.
@@ -461,39 +462,41 @@ quantities. We neglect units since it is unclear how to represent them
 in a way that distinguishes them from quantities, or whether that is
 even a requirement.
 
-> instance forall d a. (Show d, Show a) => Show (Quantity d a) where
+> instance forall d a. (Show (DimRep d), Show a) => Show (Quantity d a) where
 >   show (Dimensional x) = show x ++ if (null unit) then "" else " " ++ unit
->       where unit = show (undefined :: d)
+>       where unit = show (undefined :: DimRep d)
 
 The above implementation of 'show' relies on the dimension 'd' being an
 instance of 'Show'. The "normalized" unit of the quantity can be inferred
 from its dimension.
 
+> data DimRep :: DimK -> *
 > instance forall l m t i th n j.
->   ( NumType l
->   , NumType m
->   , NumType t
->   , NumType i
->   , NumType th
->   , NumType n
->   , NumType j
->   ) => Show (Dim l m t i th n j) where
+>   ( ToNum l
+>   , ToNum m
+>   , ToNum t
+>   , ToNum i
+>   , ToNum th
+>   , ToNum n
+>   , ToNum j
+>   ) => Show (DimRep (Dim l m t i th n j)) where
 >   show _ = (unwords . catMaybes)
->            [ dimUnit "m"   (undefined :: l)
->            , dimUnit "kg"  (undefined :: m)
->            , dimUnit "s"   (undefined :: t)
->            , dimUnit "A"   (undefined :: i)
->            , dimUnit "K"   (undefined :: th)
->            , dimUnit "mol" (undefined :: n)
->            , dimUnit "cd"  (undefined :: j)
+>            [ dimUnit "m"   (undefined :: INTRep l)
+>            , dimUnit "kg"  (undefined :: INTRep m)
+>            , dimUnit "s"   (undefined :: INTRep t)
+>            , dimUnit "A"   (undefined :: INTRep i)
+>            , dimUnit "K"   (undefined :: INTRep th)
+>            , dimUnit "mol" (undefined :: INTRep n)
+>            , dimUnit "cd"  (undefined :: INTRep j)
 >            ]
+
 
 The helper function 'dimUnit' defined next conditions a 'String' (unit)
 with an exponent, if appropriate. The reason we define 'dimUnit' at the
 top-level rather than in the where-clause is that it may be useful for
 users of the 'Extensible' module.
 
-> dimUnit :: (NumType n) => String -> n -> Maybe String
+> dimUnit :: (ToNum n) => String -> INTRep n -> Maybe String
 > dimUnit u n
 >   | x == 0    = Nothing
 >   | x == 1    = Just u
