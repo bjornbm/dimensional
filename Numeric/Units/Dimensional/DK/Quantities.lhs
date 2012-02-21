@@ -302,7 +302,10 @@ provide some synonyms that we anticipate will be useful.
 > type MassFlow  = Quantity DMassFlow
 
 > type DGravitationalParameter = Dim Pos3 Zero Neg2 Zero Zero Zero Zero
-> type GravitationalParameter = Quantity DGravitationalParameter
+> type GravitationalParameter  = Quantity DGravitationalParameter
+
+> type DKinematicViscosity = Dim Pos2 Zero Neg1 Zero Zero Zero Zero
+> type KinematicViscosity  = Quantity DKinematicViscosity
 
 For these we don't bother defining new type synonyms for dimensionalities.
 Is this rational?

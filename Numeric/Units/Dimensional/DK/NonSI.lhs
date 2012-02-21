@@ -164,6 +164,12 @@ to 1 mmHg.
 > rad = centi gray
 
 
+= Kinematic Viscosity =
+
+> stokes :: (Fractional a) => Unit DKinematicViscosity a
+> stokes = centi meter ^ pos2 / second
+
+
 = References =
 
 [1] http://physics.nist.gov/Pubs/SP811/
