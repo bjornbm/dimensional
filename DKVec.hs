@@ -14,8 +14,9 @@ import Numeric.Units.Dimensional.DK (Dimensional (Dimensional))
 import Numeric.Units.Dimensional.DK.Prelude hiding (Length)
 import qualified Data.HList as H
 import Data.List (intercalate)
+import qualified Prelude as P
 
-import Numeric.NumType.DK
+import Numeric.NumType.DK hiding ((*), (+), (-), (/), Mul)
 
 -- Kind level list.
 
@@ -49,45 +50,70 @@ type instance Map f (a :* b) = (f a :* Map f b)
 -- Data family for Vectors
 -- =======================
 
-class VecImp i a where
-  data VecI :: DimList -> * -> * -> *
-  -- Construction.
-  vSing :: Quantity d a -> VecI (Sing d) i a
-  vCons :: Quantity d a -> VecI ds i a -> VecI (d :* ds) i a
-  -- Deconstruction
-  vHead :: VecI ds i a -> Quantity (Head ds) a
-  vTail :: VecI ds i a -> VecI (Tail ds) i a
-  -- Elements
-  vElemAt :: ToNum (P n) => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
-  -- Map
-  --vMap :: (forall d. Quantity d a -> Quantity (f d) a) -> VecI ds i -> VecI (Map f ds) i
+class VecImp i a
+  where
+    data VecI :: DimList -> * -> * -> *
+
+    -- Construction.
+    vSing :: Quantity d a -> VecI (Sing d) i a
+    vCons :: Quantity d a -> VecI ds i a -> VecI (d :* ds) i a
+
+    -- Deconstruction
+    vHead :: VecI ds i a -> Quantity (Head ds) a
+    vTail :: VecI ds i a -> VecI (Tail ds) i a
+    vElemAt :: ToNum (P n) => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
+
+    -- Map
+    vMap :: (forall d. Quantity d a -> Quantity (f d) a) -> VecI ds i a -> VecI (Map f ds) i a
+
+    -- | Elementwise addition of vectors. The vectors must have the
+    -- same size and element types.
+    elemAdd :: Num a => VecI ds i a -> VecI ds i a -> VecI ds i a
+
+    -- | Elementwise subraction of vectors. The vectors must have the
+    -- same size and element types.
+    elemSub :: Num a => VecI ds i a -> VecI ds i a -> VecI ds i a
+
 
 (.*) :: VecImp i a => Quantity d a -> VecI ds i a -> VecI (d:*ds) i a
 (.*) = vCons
 (.*.) :: VecImp i a => Quantity d0 a -> Quantity d1 a -> VecI (d0:*Sing d1) i a
 x .*. y = vCons x $ vSing y
 
+
+
+
 -- Implementation based on lists
 -- -----------------------------
-instance VecImp [a] a where
-  data VecI (ds::DimList) [a] a = ListVec [a]
-  vSing (Dimensional x) = ListVec [x]
-  vCons (Dimensional x) (ListVec xs) = ListVec (x:xs)
-  vHead (ListVec xs) = Dimensional (head xs)
-  vTail (ListVec xs) = ListVec (tail xs)
-  vElemAt n (ListVec xs) = Dimensional (xs!!toNum n)
+instance VecImp [a] a
+  where
+    data VecI (ds::DimList) [a] a = ListVec [a]
+    vSing (Dimensional x) = ListVec [x]
+    vCons (Dimensional x) (ListVec xs) = ListVec (x:xs)
+
+    vHead (ListVec xs) = Dimensional (head xs)
+    vTail (ListVec xs) = ListVec (tail xs)
+    vElemAt n (ListVec xs) = Dimensional (xs!!toNum n)
+
+    vMap f (ListVec (x:xs)) = ListVec (x' : xs')
+      where
+        Dimensional x' = f (Dimensional x)
+        ListVec xs' = vMap f (ListVec xs)
+
+    elemAdd (ListVec xs) (ListVec ys) = ListVec (zipWith (P.+) xs ys)
+    elemSub (ListVec xs) (ListVec ys) = ListVec (zipWith (P.-) xs ys)
 
 type Vec ds a = VecI ds [a] a  -- Synonym for ListVec.
 
 
 -- Mapping vectors??
 -- =================
-
+{-
 type family   VMap f v :: *
 type instance VMap (Quantity d1 a -> Quantity d2 a) (VecI (Sing d1) i a) = VecI (Sing d2) i a
 type instance VMap (Quantity d a -> Quantity (f d) a) (VecI (d1:*ds) i a) = VecI (f d:*Map f ds) i a
 --type instance VMap f (VecI (Cons d) i) = VecI (Sing (f d)) i
-
+-}
 
 
 -- Conversion to/from tuples
@@ -177,6 +203,9 @@ fromHList' _ l = fromHList l
 -- Showing
 -- -------
 -- We implement a custom @Show@ instance, using ToHList.
+-- This was copied from dimensional-vectors.
+--
+-- TODO: reimplement without HMapOut and remove dependency on HList.
 data ShowElem = ShowElem
 instance Show a => H.Apply ShowElem a String where apply _ = show
 
@@ -186,8 +215,6 @@ instance (VHList ds [a] a, H.HMapOut ShowElem (ToHList ds [a] a) String) => Show
              . H.hMapOut ShowElem
              . toHList
 
--- -}
-
 
 -- Test stuff
 -- ==========
@@ -196,3 +223,48 @@ b = vCons ((3::Double)*~newton) a
 double = undefined :: Double
 doubles = [double]
 vtype = undefined :: Vec ds Double
+
+
+--type family   ZipWith (f::DimK -> DimK -> DimK) (ds1::DimList) (ds2::DimList) :: DimList
+
+type family   AppUn op (d::DimK) :: DimK
+type family   AppBi op (d1::DimK) (d2::DimK) :: DimK
+
+type family   ZipWith op (ds1::DimList) (ds2::DimList) :: DimList
+type instance ZipWith op (Sing d1) (Sing d2) = Sing (AppBi op d1 d2)
+type instance ZipWith op (d1:*ds1) (d2:*ds2) = AppBi op d1 d2:*ZipWith op ds1 ds2
+
+type family   VMap op (ds::DimList) :: DimList
+type instance VMap op (Sing d) = Sing (AppUn op d)
+type instance VMap op (d:*ds)  = AppUn op d:*VMap op ds
+
+type family   Fold op (d::DimK) (ds::DimList) :: DimK
+type instance Fold op d1 (Sing d2) = AppBi op d1 d2
+type instance Fold op d1 (d2:*ds) = Fold op (AppBi op d1 d2) ds
+
+
+
+class AppUnC op a where
+  appUn :: op -> Quantity d a -> Quantity (AppUn op d) a
+
+-- Generic implementations (not specialized for implementations).
+class VMapC ds where
+  vMap' :: (AppUnC op a, VecImp i a) => op -> VecI ds i a -> VecI (VMap op ds) i a
+instance VMapC (Sing d) where
+  vMap' op = vSing . appUn op . vHead
+instance (VMapC ds) => VMapC (d:*ds) where
+  vMap' op v = vCons (appUn op $ vHead v) $ vMap' op $ vTail v
+
+type instance AppUn EMul d = Mul d d
+instance Num a => AppUnC EMul a where appUn _ x = x*x
+{-
+class FoldC ds where
+  vFold :: op -> Quantity d a -> VecI ds i a -> Quantity (Fold op d ds) a
+instance FoldC (Sing d) where
+  vFold f x v = f x (vHead v)
+-- -}
+
+data EMul = EMul
+type instance AppBi EMul d1 d2 = Mul d1 d2
+elemMul :: Num a => Vec ds1 a -> Vec ds2 a -> Vec (ZipWith EMul ds1 ds2) a
+elemMul (ListVec xs) (ListVec ys) = ListVec (zipWith (P.*) xs ys)
