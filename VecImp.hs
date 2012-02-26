@@ -10,6 +10,8 @@
            , UndecidableInstances
   #-}
 
+module VecImp where
+
 import Numeric.Units.Dimensional.DK (Dimensional (Dimensional))
 import Numeric.Units.Dimensional.DK.Prelude hiding (Length)
 import qualified Data.HList as H
@@ -18,7 +20,8 @@ import qualified Prelude as P
 
 import Numeric.NumType.DK hiding ((*), (+), (-), (/), Mul)
 
--- Kind level list.
+
+-- Kind level list of Dimensions.
 
 data DimList = Cons DimK (DimList) | Sing DimK
 type a :*  b = Cons a b
@@ -35,15 +38,32 @@ type family   Length (l::DimList) :: Nat1
 type instance Length (Sing a) = O
 type instance Length (a :* b) = S1 (Length b)
 
--- Zero-based indexing.
+-- Lookup with zero-based indexing.
 type family   ElemAt (n::Nat0) (l::DimList) :: DimK
 type instance ElemAt Z (Sing a) = a
 type instance ElemAt Z (a :* b) = a
 type instance ElemAt (S0 n) (a :* b) = ElemAt n b
 
-type family   Map (f :: DimK -> DimK) (l::DimList) :: DimList
-type instance Map f (Sing a) = Sing (f a)
-type instance Map f (a :* b) = (f a :* Map f b)
+
+-- Higher level functions
+-- ----------------------
+
+-- Apply an unary operator to one dimension or a binary operator to two
+-- dimensions. What a given operator does is captured by a type instance.
+type family   AppUn op (d::DimK) :: DimK
+type family   AppBi op (d1::DimK) (d2::DimK) :: DimK
+
+type family   ZipWith op (ds1::DimList) (ds2::DimList) :: DimList
+type instance ZipWith op (Sing d1) (Sing d2) = Sing (AppBi op d1 d2)
+type instance ZipWith op (d1:*ds1) (d2:*ds2) = AppBi op d1 d2:*ZipWith op ds1 ds2
+
+type family   Map op (ds::DimList) :: DimList
+type instance Map op (Sing d) = Sing (AppUn op d)
+type instance Map op (d:*ds)  = AppUn op d:*Map op ds
+
+type family   Fold op (d::DimK) (ds::DimList) :: DimK
+type instance Fold op d1 (Sing d2) = AppBi op d1 d2
+type instance Fold op d1 (d2:*ds) = Fold op (AppBi op d1 d2) ds
 
 
 
@@ -56,7 +76,7 @@ class VecImp i a
 
     -- Construction.
     vSing :: Quantity d a -> VecI (Sing d) i a
-    vCons :: Quantity d a -> VecI ds i a -> VecI (d :* ds) i a
+    vCons :: Quantity d a -> VecI ds i a -> VecI (d:*ds) i a
 
     -- Deconstruction
     vHead :: VecI ds i a -> Quantity (Head ds) a
@@ -71,10 +91,14 @@ class VecImp i a
     -- same size and element types.
     elemSub :: Num a => VecI ds i a -> VecI ds i a -> VecI ds i a
 
+
 -- Mapping operations to vectors.
 class (VecImp i a) => VecMap op ds i a where
-  vMap :: op -> VecI ds i a -> VecI (VMap op ds) i a
+  vMap :: op -> VecI ds i a -> VecI (Map op ds) i a
 
+
+-- Operators for convenient vector building
+-- ----------------------------------------
 
 (.*) :: VecImp i a => Quantity d a -> VecI ds i a -> VecI (d:*ds) i a
 (.*) = vCons
@@ -82,31 +106,45 @@ class (VecImp i a) => VecMap op ds i a where
 x .*. y = vCons x $ vSing y
 
 
+-- ****************************************************************
+-- * EXPERIMENTAL *************************************************
+-- ****************************************************************
 
 
--- Implementation based on lists
--- -----------------------------
-instance VecImp [a] a
-  where
-    data VecI (ds::DimList) [a] a = ListVec [a]
-    vSing (Dimensional x) = ListVec [x]
-    vCons (Dimensional x) (ListVec xs) = ListVec (x:xs)
 
-    vHead (ListVec xs) = Dimensional (head xs)
-    vTail (ListVec xs) = ListVec (tail xs)
-    vElemAt n (ListVec xs) = Dimensional (xs!!toNum n)
+-- Generic implementations
+class AppUnC op a where
+  appUn :: op -> Quantity d a -> Quantity (AppUn op d) a
 
-    elemAdd (ListVec xs) (ListVec ys) = ListVec (zipWith (P.+) xs ys)
-    elemSub (ListVec xs) (ListVec ys) = ListVec (zipWith (P.-) xs ys)
+-- Generic implementations (not specialized for implementations).
+class GenericVMap ds where
+  genericVMap :: (AppUnC op a, VecImp i a) => op -> VecI ds i a -> VecI (Map op ds) i a
+instance GenericVMap (Sing d) where
+  genericVMap op = vSing . appUn op . vHead
+instance (GenericVMap ds) => GenericVMap (d:*ds) where
+  genericVMap op v = vCons (appUn op $ vHead v) $ genericVMap op $ vTail v
 
-instance (AppUnC op a) => VecMap op ds [a] a where
-  vMap f (ListVec xs) = ListVec $ map (unDim . appUn f . Dimensional) xs
-    where unDim (Dimensional x) = x
 
---instance (GenericVMap ds, AppUnC op a) => VecMap op ds [a] a
-  --where vMap = genericVMap
 
-type Vec ds a = VecI ds [a] a  -- Synonym for ListVec.
+data EMul = EMul
+type instance AppUn EMul d = Mul d d
+type instance AppBi EMul d1 d2 = Mul d1 d2
+
+instance Num a => AppUnC EMul a where appUn _ x = x*x
+
+{-
+class FoldC ds where
+  vFold :: op -> Quantity d a -> VecI ds i a -> Quantity (Fold op d ds) a
+instance FoldC (Sing d) where
+  vFold f x v = f x (vHead v)
+-- -}
+
+
+
+
+-- ****************************************************************
+-- ****************************************************************
+-- ****************************************************************
 
 
 -- Conversion to/from tuples
@@ -138,34 +176,34 @@ fromTuple' _ t = fromTuple t
 -- Conversion to/from HLists
 -- =========================
 
-class VHList ds i a where
+class (VecImp i a) => ToHListC ds i a where
   type ToHList (ds::DimList) i a
-  toHList :: (VecImp i a) => VecI ds i a -> ToHList ds i a
+  toHList :: VecI ds i a -> ToHList ds i a
 
-instance VHList (Sing d) i a where
+instance (VecImp i a) => ToHListC (Sing d) i a where
   type ToHList (Sing d) i a = H.HCons (Quantity (Head (Sing d)) a) H.HNil
   toHList v = H.HCons (vHead v) H.HNil
 
-instance VHList l i a => VHList (d:*l) i a where
+instance (ToHListC l i a) => ToHListC (d:*l) i a where
   type ToHList (d:*l) i a = H.HCons (Quantity (Head (d:*l)) a) (ToHList (Tail (d:*l)) i a)
   toHList v = H.HCons (vHead v) (toHList $ vTail v)
 
 
-class HListV l i a where
+class (VecImp i a) => FromHListC l i a where
   type FromHList l :: DimList
-  fromHList :: (VecImp i a) => l -> VecI (FromHList l) i a
+  fromHList :: l -> VecI (FromHList l) i a
 
-instance HListV (H.HCons (Quantity d a) H.HNil) i a where
+instance (VecImp i a) => FromHListC (H.HCons (Quantity d a) H.HNil) i a where
   type FromHList (H.HCons (Quantity d a) H.HNil) = Sing d
   fromHList (H.HCons x _) = vSing x
 
-instance (HListV (H.HCons e l) i a)
-      => HListV (H.HCons (Quantity d a) (H.HCons e l)) i a where
+instance (FromHListC (H.HCons e l) i a)
+      => FromHListC (H.HCons (Quantity d a) (H.HCons e l)) i a where
   type FromHList (H.HCons (Quantity d a) (H.HCons e l)) = d :* FromHList (H.HCons e l)
   fromHList (H.HCons x l) = vCons x $ fromHList l
 
 -- Convenience, typed by example.
-fromHList' :: (VecImp i a, HListV l i a) => VecI x i a -> l -> VecI (FromHList l) i a
+fromHList' :: (FromHListC l i a) => VecI x i a -> l -> VecI (FromHList l) i a
 fromHList' _ l = fromHList l
 
 
@@ -178,63 +216,9 @@ fromHList' _ l = fromHList l
 data ShowElem = ShowElem
 instance Show a => H.Apply ShowElem a String where apply _ = show
 
-instance (VHList ds [a] a, H.HMapOut ShowElem (ToHList ds [a] a) String) => Show (Vec ds a)
+instance (ToHListC ds i a, H.HMapOut ShowElem (ToHList ds i a) String) => Show (VecI ds i a)
   where show = (\s -> "< " ++ s ++ " >")
              . intercalate ", "
              . H.hMapOut ShowElem
              . toHList
 
-
--- Test stuff
--- ==========
-a = vSing ((1::Double)*~meter) :: Vec ('Sing DLength) Double
-b = vCons ((3::Double)*~newton) a
-double = undefined :: Double
-doubles = [double]
-vtype = undefined :: Vec ds Double
-
-
---type family   ZipWith (f::DimK -> DimK -> DimK) (ds1::DimList) (ds2::DimList) :: DimList
-
-type family   AppUn op (d::DimK) :: DimK
-type family   AppBi op (d1::DimK) (d2::DimK) :: DimK
-
-type family   ZipWith op (ds1::DimList) (ds2::DimList) :: DimList
-type instance ZipWith op (Sing d1) (Sing d2) = Sing (AppBi op d1 d2)
-type instance ZipWith op (d1:*ds1) (d2:*ds2) = AppBi op d1 d2:*ZipWith op ds1 ds2
-
-type family   VMap op (ds::DimList) :: DimList
-type instance VMap op (Sing d) = Sing (AppUn op d)
-type instance VMap op (d:*ds)  = AppUn op d:*VMap op ds
-
-type family   Fold op (d::DimK) (ds::DimList) :: DimK
-type instance Fold op d1 (Sing d2) = AppBi op d1 d2
-type instance Fold op d1 (d2:*ds) = Fold op (AppBi op d1 d2) ds
-
-
-
--- Generic implementations
-class AppUnC op a where
-  appUn :: op -> Quantity d a -> Quantity (AppUn op d) a
-
--- Generic implementations (not specialized for implementations).
-class GenericVMap ds where
-  genericVMap :: (AppUnC op a, VecImp i a) => op -> VecI ds i a -> VecI (VMap op ds) i a
-instance GenericVMap (Sing d) where
-  genericVMap op = vSing . appUn op . vHead
-instance (GenericVMap ds) => GenericVMap (d:*ds) where
-  genericVMap op v = vCons (appUn op $ vHead v) $ genericVMap op $ vTail v
-
-type instance AppUn EMul d = Mul d d
-instance Num a => AppUnC EMul a where appUn _ x = x*x
-{-
-class FoldC ds where
-  vFold :: op -> Quantity d a -> VecI ds i a -> Quantity (Fold op d ds) a
-instance FoldC (Sing d) where
-  vFold f x v = f x (vHead v)
--- -}
-
-data EMul = EMul
-type instance AppBi EMul d1 d2 = Mul d1 d2
-elemMul :: Num a => Vec ds1 a -> Vec ds2 a -> Vec (ZipWith EMul ds1 ds2) a
-elemMul (ListVec xs) (ListVec ys) = ListVec (zipWith (P.*) xs ys)
