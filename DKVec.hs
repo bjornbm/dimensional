@@ -63,12 +63,6 @@ class VecImp i a
     vTail :: VecI ds i a -> VecI (Tail ds) i a
     vElemAt :: ToNum (P n) => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
 
-    -- Map
-    -- vMap :: (forall d. Quantity d a -> Quantity (f d) a) -> VecI ds i a -> VecI (Map f ds) i a
-    --vMap :: op -> VecI ds i a -> VecI (VMap op ds) i a
-    vMap :: (AppUnC op a) => op -> VecI ds i a -> VecI (VMap op ds) i a
-    --vMap = vMap'
-
     -- | Elementwise addition of vectors. The vectors must have the
     -- same size and element types.
     elemAdd :: Num a => VecI ds i a -> VecI ds i a -> VecI ds i a
@@ -76,6 +70,10 @@ class VecImp i a
     -- | Elementwise subraction of vectors. The vectors must have the
     -- same size and element types.
     elemSub :: Num a => VecI ds i a -> VecI ds i a -> VecI ds i a
+
+-- Mapping operations to vectors.
+class (VecImp i a) => VecMap op ds i a where
+  vMap :: op -> VecI ds i a -> VecI (VMap op ds) i a
 
 
 (.*) :: VecImp i a => Quantity d a -> VecI ds i a -> VecI (d:*ds) i a
@@ -98,24 +96,17 @@ instance VecImp [a] a
     vTail (ListVec xs) = ListVec (tail xs)
     vElemAt n (ListVec xs) = Dimensional (xs!!toNum n)
 
-    vMap = vMap'
-    --vMap f (ListVec xs) = ListVec $ map (unDim . appUn f . Dimensional) xs
-      --where unDim (Dimensional x) = x
-
     elemAdd (ListVec xs) (ListVec ys) = ListVec (zipWith (P.+) xs ys)
     elemSub (ListVec xs) (ListVec ys) = ListVec (zipWith (P.-) xs ys)
 
+instance (AppUnC op a) => VecMap op ds [a] a where
+  vMap f (ListVec xs) = ListVec $ map (unDim . appUn f . Dimensional) xs
+    where unDim (Dimensional x) = x
+
+--instance (GenericVMap ds, AppUnC op a) => VecMap op ds [a] a
+  --where vMap = genericVMap
+
 type Vec ds a = VecI ds [a] a  -- Synonym for ListVec.
-
-
--- Mapping vectors??
--- =================
-{-
-type family   VMap f v :: *
-type instance VMap (Quantity d1 a -> Quantity d2 a) (VecI (Sing d1) i a) = VecI (Sing d2) i a
-type instance VMap (Quantity d a -> Quantity (f d) a) (VecI (d1:*ds) i a) = VecI (f d:*Map f ds) i a
---type instance VMap f (VecI (Cons d) i) = VecI (Sing (f d)) i
--}
 
 
 -- Conversion to/from tuples
@@ -126,17 +117,9 @@ class ToTupleC (ds::DimList) where
   type ToTuple ds a
   toTuple :: (VecImp i a) => VecI ds i a -> ToTuple ds a
 
-{-
--- The singleton.
-instance ToTupleC (Sing d) where
-  type ToTupleT (Sing d) a = (Quantity d a)
-  toTupleF v = (vElemAt zero v)
--}
-
 instance ToTupleC (d0:*Sing d1) where
   type ToTuple (d0:*Sing d1) a = (Quantity d0 a, Quantity d1 a)
   toTuple v = (vElemAt zero v, vElemAt pos1 v)
-
 
 -- From tuples.
 class FromTupleC t a where
@@ -147,27 +130,10 @@ instance FromTupleC (Quantity d0 a, Quantity d1 a) a where
   type FromTuple (Quantity d0 a, Quantity d1 a) = (d0:*Sing d1)
   fromTuple (x, y) = vCons x $ vSing y
 
+-- Convenience, typed by example.
 fromTuple' :: (VecImp i a, FromTupleC t a) => VecI x i a -> t -> VecI (FromTuple t) i a
 fromTuple' _ t = fromTuple t
 
-{-
-class (ToTuple ds a ~ t, FromTuple t ~ ds) => VTuple (ds::DimList) a t
-  where
-    type ToTuple (ds::DimList) a :: *
-    type FromTuple t :: DimList
-    toTuple   :: (VecImp i a) => VecI ds i a -> t
-    fromTuple :: (VecImp i a) => t -> VecI ds i a
-
-instance VTuple (d1:*.d2) a (Quantity d1 a, Quantity d2 a)
-  where
-    type ToTuple (d1:*.d2) a = (Quantity d1 a, Quantity d2 a)
-    type FromTuple (Quantity d1 a, Quantity d2 a) = (d1:*.d2)
-    toTuple v = (vElemAt zero v, vElemAt pos1 v)
-    fromTuple (x, y) = x .*. y
-
-fromTuple' :: (VecImp i a, VTuple ds a t) => VecI x i a -> t -> VecI ds i a
-fromTuple' _ t = fromTuple t
--}
 
 -- Conversion to/from HLists
 -- =========================
@@ -198,12 +164,13 @@ instance (HListV (H.HCons e l) i a)
   type FromHList (H.HCons (Quantity d a) (H.HCons e l)) = d :* FromHList (H.HCons e l)
   fromHList (H.HCons x l) = vCons x $ fromHList l
 
+-- Convenience, typed by example.
 fromHList' :: (VecImp i a, HListV l i a) => VecI x i a -> l -> VecI (FromHList l) i a
 fromHList' _ l = fromHList l
 
 
 -- Showing
--- -------
+-- =======
 -- We implement a custom @Show@ instance, using ToHList.
 -- This was copied from dimensional-vectors.
 --
@@ -246,16 +213,17 @@ type instance Fold op d1 (d2:*ds) = Fold op (AppBi op d1 d2) ds
 
 
 
+-- Generic implementations
 class AppUnC op a where
   appUn :: op -> Quantity d a -> Quantity (AppUn op d) a
 
 -- Generic implementations (not specialized for implementations).
-class VMapC ds where
-  vMap' :: (AppUnC op a, VecImp i a) => op -> VecI ds i a -> VecI (VMap op ds) i a
-instance VMapC (Sing d) where
-  vMap' op = vSing . appUn op . vHead
-instance (VMapC ds) => VMapC (d:*ds) where
-  vMap' op v = vCons (appUn op $ vHead v) $ vMap' op $ vTail v
+class GenericVMap ds where
+  genericVMap :: (AppUnC op a, VecImp i a) => op -> VecI ds i a -> VecI (VMap op ds) i a
+instance GenericVMap (Sing d) where
+  genericVMap op = vSing . appUn op . vHead
+instance (GenericVMap ds) => GenericVMap (d:*ds) where
+  genericVMap op v = vCons (appUn op $ vHead v) $ genericVMap op $ vTail v
 
 type instance AppUn EMul d = Mul d d
 instance Num a => AppUnC EMul a where appUn _ x = x*x
