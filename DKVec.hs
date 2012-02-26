@@ -64,7 +64,10 @@ class VecImp i a
     vElemAt :: ToNum (P n) => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
 
     -- Map
-    vMap :: (forall d. Quantity d a -> Quantity (f d) a) -> VecI ds i a -> VecI (Map f ds) i a
+    -- vMap :: (forall d. Quantity d a -> Quantity (f d) a) -> VecI ds i a -> VecI (Map f ds) i a
+    --vMap :: op -> VecI ds i a -> VecI (VMap op ds) i a
+    vMap :: (AppUnC op a) => op -> VecI ds i a -> VecI (VMap op ds) i a
+    --vMap = vMap'
 
     -- | Elementwise addition of vectors. The vectors must have the
     -- same size and element types.
@@ -95,10 +98,9 @@ instance VecImp [a] a
     vTail (ListVec xs) = ListVec (tail xs)
     vElemAt n (ListVec xs) = Dimensional (xs!!toNum n)
 
-    vMap f (ListVec (x:xs)) = ListVec (x' : xs')
-      where
-        Dimensional x' = f (Dimensional x)
-        ListVec xs' = vMap f (ListVec xs)
+    vMap = vMap'
+    --vMap f (ListVec xs) = ListVec $ map (unDim . appUn f . Dimensional) xs
+      --where unDim (Dimensional x) = x
 
     elemAdd (ListVec xs) (ListVec ys) = ListVec (zipWith (P.+) xs ys)
     elemSub (ListVec xs) (ListVec ys) = ListVec (zipWith (P.-) xs ys)
