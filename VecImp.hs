@@ -18,8 +18,10 @@ import qualified Data.HList as H
 import Data.List (intercalate)
 import qualified Prelude as P
 
-import Numeric.NumType.DK hiding ((*), (+), (-), (/), Mul)
+import Numeric.NumType.DK hiding ((*), (+), (-), (/), Mul, Div)
 
+
+infixr 2 :*, :*.
 
 -- Kind level list of Dimensions.
 
@@ -50,7 +52,7 @@ type instance ElemAt (S0 n) (a :* b) = ElemAt n b
 
 -- Apply an unary operator to one dimension or a binary operator to two
 -- dimensions. What a given operator does is captured by a type instance.
-type family   AppUn op (d::DimK) :: DimK
+--type family   AppUn op (d::DimK) :: DimK
 type family   AppBi op (d1::DimK) (d2::DimK) :: DimK
 
 type family   ZipWith op (ds1::DimList) (ds2::DimList) :: DimList
@@ -61,11 +63,26 @@ type family   Map op (ds::DimList) :: DimList
 type instance Map op (Sing d) = Sing (AppUn op d)
 type instance Map op (d:*ds)  = AppUn op d:*Map op ds
 
-type family   Fold op (d::DimK) (ds::DimList) :: DimK
-type instance Fold op d1 (Sing d2) = AppBi op d1 d2
-type instance Fold op d1 (d2:*ds) = Fold op (AppBi op d1 d2) ds
+type family   Foldl op (d::DimK) (ds::DimList) :: DimK
+type instance Foldl op d1 (Sing d2) = AppBi op d1 d2
+type instance Foldl op d1 (d2:*ds)  = Foldl op (AppBi op d1 d2) ds
 
+type family   Foldl1 op (ds::DimList) :: DimK
+type instance Foldl1 op (Sing d) = d
+type instance Foldl1 op (d:*ds)  = Foldl op d ds
 
+-- Homogeneous vectors.
+type family   Homo (ds::DimList) :: DimK
+type instance Homo (Sing d)   = d
+type instance Homo (d:*.d)    = d
+type instance Homo (d:*d:*ds) = Homo (d:*ds)
+
+-- Dot product
+type family   Dot (ds1::DimList) (ds2::DimList) :: DimK
+type instance Dot ds1 ds2 = Homo (ZipWith EMul ds1 ds2)
+
+--type family   Cross (ds1::DimList) (ds2::DimList) :: DimK
+--type instance (Mul b f ~ Mul e c, Mul c d ~ Mul f a, Mul a e ~ Mul d b) => Cross (a:*b:*.c) (d:*e:*.f) = (Mul b f:*Mul c d:*.Mul a e)
 
 -- Data family for Vectors
 -- =======================
@@ -81,21 +98,36 @@ class VecImp i a
     -- Deconstruction
     vHead :: VecI ds i a -> Quantity (Head ds) a
     vTail :: VecI ds i a -> VecI (Tail ds) i a
+
     vElemAt :: ToNum (P n) => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
 
     -- | Elementwise addition of vectors. The vectors must have the
     -- same size and element types.
-    elemAdd :: Num a => VecI ds i a -> VecI ds i a -> VecI ds i a
+    elemAdd :: VecI ds i a -> VecI ds i a -> VecI ds i a
 
     -- | Elementwise subraction of vectors. The vectors must have the
     -- same size and element types.
-    elemSub :: Num a => VecI ds i a -> VecI ds i a -> VecI ds i a
+    elemSub :: VecI ds i a -> VecI ds i a -> VecI ds i a
 
+    -- | Dot product
+    dotProduct :: VecI ds1 i a -> VecI ds2 i a -> Quantity (Dot ds1 ds2) a
+
+    crossProduct :: (Mul b f ~ Mul e c, Mul c d ~ Mul f a1, Mul a1 e ~ Mul d b)
+                 => VecI (a1:*b:*.c) i a -> VecI (d:*e:*.f) i a
+                 -> VecI (Mul b f:*Mul c d:*.Mul a1 e) i a
+
+    vSum :: VecI ds i a -> Quantity (Homo ds) a
+    vNorm :: Floating a => VecI ds i a -> Quantity (Homo ds) a
+    vNorm v = sqrt $ dotProduct v v
+    vNormalize :: VecI ds i a -> Normalize ds i a
+
+    scaleVec :: Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
 
 -- Mapping operations to vectors.
 class (VecImp i a) => VecMap op ds i a where
   vMap :: op -> VecI ds i a -> VecI (Map op ds) i a
 
+type Normalize ds i a = VecI (Map (Scale (Div DOne (Homo ds)) a) ds) i a
 
 -- Operators for convenient vector building
 -- ----------------------------------------
@@ -112,8 +144,11 @@ x .*. y = vCons x $ vSing y
 
 
 
+
+
 -- Generic implementations
 class AppUnC op a where
+  type AppUn op (d::DimK) :: DimK
   appUn :: op -> Quantity d a -> Quantity (AppUn op d) a
 
 -- Generic implementations (not specialized for implementations).
@@ -125,12 +160,16 @@ instance (GenericVMap ds) => GenericVMap (d:*ds) where
   genericVMap op v = vCons (appUn op $ vHead v) $ genericVMap op $ vTail v
 
 
-
 data EMul = EMul
-type instance AppUn EMul d = Mul d d
 type instance AppBi EMul d1 d2 = Mul d1 d2
 
-instance Num a => AppUnC EMul a where appUn _ x = x*x
+data EDiv = EDiv
+type instance AppBi EDiv d1 d2 = Div d1 d2
+
+data Scale (d::DimK) a = Scale (Quantity d a)
+instance Num a => AppUnC (Scale d a) a where
+  type AppUn (Scale d a) d' = Mul d d'
+  appUn (Scale x) y = x*y
 
 {-
 class FoldC ds where
@@ -159,6 +198,10 @@ instance ToTupleC (d0:*Sing d1) where
   type ToTuple (d0:*Sing d1) a = (Quantity d0 a, Quantity d1 a)
   toTuple v = (vElemAt zero v, vElemAt pos1 v)
 
+instance ToTupleC (d0:*d1:*Sing d2) where
+  type ToTuple (d0:*d1:*Sing d2) a = (Quantity d0 a, Quantity d1 a, Quantity d2 a)
+  toTuple v = (vElemAt zero v, vElemAt pos1 v, vElemAt pos2 v)
+
 -- From tuples.
 class FromTupleC t a where
   type FromTuple t :: DimList
@@ -167,6 +210,10 @@ class FromTupleC t a where
 instance FromTupleC (Quantity d0 a, Quantity d1 a) a where
   type FromTuple (Quantity d0 a, Quantity d1 a) = (d0:*Sing d1)
   fromTuple (x, y) = vCons x $ vSing y
+
+instance FromTupleC (Quantity d0 a, Quantity d1 a, Quantity d2 a) a where
+  type FromTuple (Quantity d0 a, Quantity d1 a, Quantity d2 a) = (d0:*d1:*Sing d2)
+  fromTuple (x, y, z) = vCons x $ vCons y $ vSing z
 
 -- Convenience, typed by example.
 fromTuple' :: (VecImp i a, FromTupleC t a) => VecI x i a -> t -> VecI (FromTuple t) i a
