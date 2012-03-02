@@ -1,8 +1,11 @@
 {-# LANGUAGE DataKinds
            , KindSignatures
            , FlexibleInstances
+           , FlexibleContexts
            , MultiParamTypeClasses
            , TypeFamilies
+           , ConstraintKinds
+           , UndecidableInstances
   #-}
 module ListVec where
 
@@ -34,7 +37,7 @@ instance Floating a => VecImp [a] a
     elemAdd (ListVec xs) (ListVec ys) = ListVec (zipWith (P.+) xs ys)
     elemSub (ListVec xs) (ListVec ys) = ListVec (zipWith (P.-) xs ys)
 
-    dotProduct (ListVec xs) (ListVec ys) = Dimensional $ O.sum_product xs ys
+    --dotProduct (ListVec xs) (ListVec ys) = Dimensional $ O.sum_product xs ys
 {-
     crossProduct (ListVec [a,b,c]) (ListVec [d,e,f]) = ListVec
         [ b P.* f P.- e P.* c
@@ -51,10 +54,12 @@ instance Floating a => VecImp [a] a
 
     vSum (ListVec xs) = Dimensional $ P.sum xs
     --vNorm (ListVec xs) = Dimensional $ P.sqrt $ O.sum_product xs xs
-    vNorm v = sqrt $ dotProduct v v
+    --vNorm v = sqrt $ dotProduct v v
     vNormalize v = (_1 / vNorm v) `scaleVec` v
     scaleVec (Dimensional x) (ListVec xs) = ListVec $ P.map (x P.*) xs
     --scaleVec x v = vMap (Scale x) v
+
+instance (CDotProduct ds1 ds2 [a] a) => DotProductC ds1 ds2 [a] a
 
 instance (AppUnC op a, Floating a) => VecMap op ds [a] a where
   vMap f (ListVec xs) = ListVec $ map (unDim . appUn f . Dimensional) xs
@@ -77,10 +82,10 @@ elemDiv (ListVec xs) (ListVec ys) = ListVec (zipWith (P./) xs ys)
 -- ==========
 a1 = vSing ((1::Double)*~meter) :: Vec ('Sing DLength) Double
 a2 = vCons (3*~newton) a1
-a3 = vCons (3*~newton) a2
+a3 = vCons (3*~one) a2
 b1 = vSing ((2::Double)*~newton) :: Vec ('Sing DForce) Double
 b2 = vCons (4.4*~meter) b1
-b3 = vCons (3*~newton) b2
+b3 = vCons (3*~(newton*meter)) b2
 double = undefined :: Double
 doubles = [double]
 vtype = undefined :: Vec ds Double

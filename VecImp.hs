@@ -8,6 +8,7 @@
            , FlexibleContexts
            , RankNTypes
            , UndecidableInstances
+           , ConstraintKinds
   #-}
 
 module VecImp where
@@ -53,33 +54,92 @@ type instance ElemAt (S0 n) (a :* b) = ElemAt n b
 -- Apply an unary operator to one dimension or a binary operator to two
 -- dimensions. What a given operator does is captured by a type instance.
 --type family   AppUn op (d::DimK) :: DimK
-type family   AppBi op (d1::DimK) (d2::DimK) :: DimK
+--type family   AppBi op (d1::DimK) (d2::DimK) :: DimK
 
 type family   ZipWith op (ds1::DimList) (ds2::DimList) :: DimList
 type instance ZipWith op (Sing d1) (Sing d2) = Sing (AppBi op d1 d2)
 type instance ZipWith op (d1:*ds1) (d2:*ds2) = AppBi op d1 d2:*ZipWith op ds1 ds2
 
+class ZipWithC op ds1 ds2 where
+  vZipWith :: (VecImp i a, AppBiC op a)
+           => op -> VecI ds1 i a -> VecI ds2 i a -> VecI (ZipWith op ds1 ds2) i a
+
+instance ZipWithC op (Sing d1) (Sing d2) where
+  vZipWith op v1 v2 = vSing $ appBi op (vHead v1) (vHead v2)
+
+instance (ZipWithC op ds1 ds2) => ZipWithC op (d1:*ds1) (d2:*ds2) where
+  vZipWith op v1 v2 = vCons (appBi op (vHead v1) (vHead v2)) (vZipWith op (vTail v1) (vTail v2))
+
 type family   Map op (ds::DimList) :: DimList
 type instance Map op (Sing d) = Sing (AppUn op d)
 type instance Map op (d:*ds)  = AppUn op d:*Map op ds
+
+-- Left fold with seed element.
 
 type family   Foldl op (d::DimK) (ds::DimList) :: DimK
 type instance Foldl op d1 (Sing d2) = AppBi op d1 d2
 type instance Foldl op d1 (d2:*ds)  = Foldl op (AppBi op d1 d2) ds
 
+class FoldlC op (d::DimK) (ds::DimList)
+  where
+    vFoldl :: (VecImp i a, AppBiC op a)
+           => op -> Quantity d a -> VecI ds i a -> Quantity (Foldl op d ds) a
+
+instance FoldlC op d1 (Sing d2)
+  where
+    vFoldl op x v = appBi op x $ vHead v
+
+instance (FoldlC op (AppBi op d1 d2) ds) => FoldlC op d1 (d2:*ds)
+  where
+    vFoldl op x v = vFoldl op (appBi op x $ vHead v) (vTail v)
+
+-- Left fold without seed element.
+
 type family   Foldl1 op (ds::DimList) :: DimK
 type instance Foldl1 op (Sing d) = d
 type instance Foldl1 op (d:*ds)  = Foldl op d ds
 
--- Homogeneous vectors.
-type family   Homo (ds::DimList) :: DimK
-type instance Homo (Sing d)   = d
-type instance Homo (d:*.d)    = d
-type instance Homo (d:*d:*ds) = Homo (d:*ds)
+class Foldl1C op (ds::DimList)
+  where
+    vFoldl1 :: (VecImp i a, AppBiC op a)
+            => op -> VecI ds i a -> Quantity (Foldl1 op ds) a
 
--- Dot product
-type family   Dot (ds1::DimList) (ds2::DimList) :: DimK
-type instance Dot ds1 ds2 = Homo (ZipWith EMul ds1 ds2)
+instance (FoldlC op d ds) => Foldl1C op (d:*ds)
+  where
+    vFoldl1 op v = vFoldl op (vHead v) (vTail v)
+
+{-
+class Foldl' ds
+  where
+    vFoldl' :: VecImp i a
+        => (Quantity (Homo ds) a -> Quantity (Homo ds) a -> Quantity (Homo ds) a)
+        -> Quantity (Homo ds) a -> VecI ds i a -> Quantity (Homo ds) a
+
+instance Foldl' (Sing d)
+  where
+    vFoldl' f x v = x `f` vHead v
+
+instance (Foldl' ds, Homo (d:*ds) ~ d, Homo ds ~ d) => Foldl' (d:*ds)
+  where
+    vFoldl' f x v = vFoldl' f (f x $ vHead v) (vTail v)
+-}
+
+-- Homogeneous vectors.
+class (Homo ds ~ d) => HomoC (ds::DimList) (d::DimK) where
+  type Homo ds :: DimK
+  vFoldl' :: VecImp i a => (Quantity e a -> Quantity d a -> Quantity e a)
+          -> Quantity e a -> VecI ds i a -> Quantity e a
+  vFoldl1' :: VecImp i a => (Quantity d a -> Quantity d a -> Quantity d a)
+           -> VecI ds i a -> Quantity d a
+
+instance HomoC (Sing d) d where
+  type Homo (Sing d) = d
+  vFoldl' f x v = f x $ vHead v
+  vFoldl1' _ v = vHead v
+instance (HomoC ds d) => HomoC (d:*ds) d where
+  type Homo (d:*ds) = d
+  vFoldl' f x v = vFoldl' f (f x $ vHead v) (vTail v)
+  vFoldl1' f v = vFoldl' f (vHead v) (vTail v)
 
 --type family   Cross (ds1::DimList) (ds2::DimList) :: DimK
 --type instance (Mul b f ~ Mul e c, Mul c d ~ Mul f a, Mul a e ~ Mul d b) => Cross (a:*b:*.c) (d:*e:*.f) = (Mul b f:*Mul c d:*.Mul a e)
@@ -109,19 +169,27 @@ class VecImp i a
     -- same size and element types.
     elemSub :: VecI ds i a -> VecI ds i a -> VecI ds i a
 
-    -- | Dot product
-    dotProduct :: VecI ds1 i a -> VecI ds2 i a -> Quantity (Dot ds1 ds2) a
-
     crossProduct :: (Mul b f ~ Mul e c, Mul c d ~ Mul f a1, Mul a1 e ~ Mul d b)
                  => VecI (a1:*b:*.c) i a -> VecI (d:*e:*.f) i a
                  -> VecI (Mul b f:*Mul c d:*.Mul a1 e) i a
 
-    vSum :: VecI ds i a -> Quantity (Homo ds) a
-    vNorm :: Floating a => VecI ds i a -> Quantity (Homo ds) a
-    vNorm v = sqrt $ dotProduct v v
+    vSum :: (HomoC ds d, Num a) => VecI ds i a -> Quantity d a
+    vSum = vFoldl1' (+)
+    vNorm :: ( Floating a) => VecI ds i a -> Quantity (Homo ds) a
+    --vNorm v = sqrt $ dotProduct v v
     vNormalize :: VecI ds i a -> Normalize ds i a
 
     scaleVec :: Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
+
+class (CDotProduct ds1 ds2 i a) => DotProductC ds1 ds2 i a where
+  dotProduct :: VecI ds1 i a -> VecI ds2 i a -> Quantity (Dot ds1 ds2) a
+  dotProduct v1 v2 = vSum $ vZipWith EMul v1 v2
+
+type Dot ds1 ds2 = Homo (ZipWith EMul ds1 ds2)
+type CDotProduct ds1 ds2 i a = (ZipWithC EMul ds1 ds2, VecImp i a, Num a
+    , HomoC (ZipWith EMul ds1 ds2) (Homo (ZipWith EMul ds1 ds2)) -- inferable?
+    )
+
 
 -- Mapping operations to vectors.
 class (VecImp i a) => VecMap op ds i a where
@@ -151,6 +219,10 @@ class AppUnC op a where
   type AppUn op (d::DimK) :: DimK
   appUn :: op -> Quantity d a -> Quantity (AppUn op d) a
 
+class AppBiC op a where
+  type AppBi op (d1::DimK) (d2::DimK) :: DimK
+  appBi :: op -> Quantity d1 a -> Quantity d2 a -> Quantity (AppBi op d1 d2) a
+
 -- Generic implementations (not specialized for implementations).
 class GenericVMap ds where
   genericVMap :: (AppUnC op a, VecImp i a) => op -> VecI ds i a -> VecI (Map op ds) i a
@@ -161,10 +233,23 @@ instance (GenericVMap ds) => GenericVMap (d:*ds) where
 
 
 data EMul = EMul
-type instance AppBi EMul d1 d2 = Mul d1 d2
+instance Num a => AppBiC EMul a where
+  type AppBi EMul d1 d2 = Mul d1 d2
+  appBi EMul x y = x * y
+--type instance AppBi EMul d1 d2 = Mul d1 d2
 
 data EDiv = EDiv
-type instance AppBi EDiv d1 d2 = Div d1 d2
+--type instance AppBi EDiv d1 d2 = Div d1 d2
+instance Fractional a => AppBiC EDiv a where
+  type AppBi EDiv d1 d2 = Div d1 d2
+  appBi EDiv x y = x / y
+
+{-
+data EAdd = EAdd
+instance (Fractional a) => AppBiC EAdd a where
+  type AppBi EAdd d1 d2 = d1
+  appBi EAdd x y = x + y
+-}
 
 data Scale (d::DimK) a = Scale (Quantity d a)
 instance Num a => AppUnC (Scale d a) a where

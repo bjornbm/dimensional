@@ -52,6 +52,7 @@ these extensions.
 >            , TypeSynonymInstances
 >            , FlexibleInstances
 >            , DataKinds
+>            , MultiParamTypeClasses
 > #-}
 
 > {- |
@@ -248,6 +249,12 @@ dimensions' exponents.
 >                        (Sub n  n')
 >                        (Sub j  j')
 
+> class    (Sub d e ~ f, Sub d f ~ e, Add e f ~ d, Add f e ~ d) => Sum d e f
+> instance (Sub d e ~ f, Sub d f ~ e, Add e f ~ d, Add f e ~ d) => Sum d e f
+
+> class    (Div d e ~ f, Div d f ~ e, Mul e f ~ d, Mul f e ~ d) => DivC d e f
+> instance (Div d e ~ f, Div d f ~ e, Mul e f ~ d, Mul f e ~ d) => DivC d e f
+
 We limit ourselves to integer powers of Dimensionals as fractional
 powers make little physical sense. Since the value of the exponent
 affects the type of the result the value of the exponent must be
@@ -279,6 +286,8 @@ exponents by order(?) of the root.
 >                          (N.Div th x)
 >                          (N.Div n  x)
 >                          (N.Div j  x)
+
+> class (Pow d1 i ~ d2, Root d2 i ~ d1) => RootC d1 i d2
 
 
 = Arithmetic on units and quantities =
