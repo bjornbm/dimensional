@@ -166,7 +166,8 @@ class VecImp i a
     vNorm :: (CNorm ds i a) => VecI ds i a -> Quantity (Homo ds) a
     vNorm v = sqrt $ dotProduct v v
 
-    vNormalize :: VecI ds i a -> Normalize ds i a
+    vNormalize :: (CNorm ds i a) => VecI ds i a -> VecI (Normalize ds a) i a
+    vNormalize v = (_1 / vNorm v) `scaleVec` v
 
     scaleVec :: Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
 
@@ -194,7 +195,7 @@ type CNorm ds i a = (DotProductC ds ds i a, Floating a, Norm ds ~ Homo ds)
 class (VecImp i a) => VecMap op ds i a where
   vMap :: op -> VecI ds i a -> VecI (Map op ds) i a
 
-type Normalize ds i a = VecI (Map (Scale (Div DOne (Homo ds)) a) ds) i a
+type Normalize ds a = Map (Scale (Div DOne (Homo ds)) a) ds
 
 -- Operators for convenient vector building
 -- ----------------------------------------
@@ -243,17 +244,11 @@ instance Fractional a => AppBiC EDiv a where
   type AppBi EDiv d1 d2 = Div d1 d2
   appBi EDiv x y = x / y
 
-{-
-data EAdd = EAdd
-instance (Fractional a) => AppBiC EAdd a where
-  type AppBi EAdd d1 d2 = d1
-  appBi EAdd x y = x + y
--}
 
 data Scale (d::DimK) a = Scale (Quantity d a)
 instance Num a => AppUnC (Scale d a) a where
   type AppUn (Scale d a) d' = Mul d d'
-  appUn (Scale x) y = x*y
+  appUn (Scale x) y = x * y
 
 {-
 class FoldC ds where

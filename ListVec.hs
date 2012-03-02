@@ -60,6 +60,7 @@ instance Floating a => VecImp [a] a
     --scaleVec x v = vMap (Scale x) v
 
 instance (CDotProduct ds1 ds2 [a] a) => DotProductC ds1 ds2 [a] a
+  --where dotProduct (ListVec xs) (ListVec ys) = Dimensional $ O.sum_product xs ys
 
 instance (AppUnC op a, Floating a) => VecMap op ds [a] a where
   vMap f (ListVec xs) = ListVec $ map (unDim . appUn f . Dimensional) xs
