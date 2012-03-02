@@ -146,8 +146,6 @@ class VecImp i a
     vHead :: VecI ds i a -> Quantity (Head ds) a
     vTail :: VecI ds i a -> VecI (Tail ds) i a
 
-    vElemAt :: ToNum (P n) => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
-
     -- | Elementwise addition of vectors. The vectors must have the
     -- same size and element types.
     elemAdd :: VecI ds i a -> VecI ds i a -> VecI ds i a
@@ -186,9 +184,10 @@ instance (GenericElemAt n ds) => GenericElemAt (S0 n) (d:*ds) where
   genericElemAt i = genericElemAt (Decr i) . vTail
 
 class ElemAtC (n::Nat0) (ds::DimList) i a where
-  vElemAtG :: (GenericElemAt n ds, VecImp i a)
+  vElemAt :: (GenericElemAt n ds, VecImp i a)
            => INTRep (P n) -> VecI ds i a -> Quantity (GElemAt n ds) a
-  vElemAtG = genericElemAt
+  vElemAt = genericElemAt
+
 -- Dot product.
 
 class (CDotProduct ds1 ds2 i a) => DotProductC ds1 ds2 i a where
@@ -282,11 +281,11 @@ class ToTupleC (ds::DimList) where
 
 instance ToTupleC (d0:*Sing d1) where
   type ToTuple (d0:*Sing d1) a = (Quantity d0 a, Quantity d1 a)
-  toTuple v = (vElemAt zero v, vElemAt pos1 v)
+  toTuple v = (genericElemAt zero v, genericElemAt pos1 v)
 
 instance ToTupleC (d0:*d1:*Sing d2) where
   type ToTuple (d0:*d1:*Sing d2) a = (Quantity d0 a, Quantity d1 a, Quantity d2 a)
-  toTuple v = (vElemAt zero v, vElemAt pos1 v, vElemAt pos2 v)
+  toTuple v = (genericElemAt zero v, genericElemAt pos1 v, genericElemAt pos2 v)
 
 -- From tuples.
 class FromTupleC t a where

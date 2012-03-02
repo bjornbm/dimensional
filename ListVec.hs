@@ -32,7 +32,7 @@ instance Floating a => VecImp [a] a
     vHead (ListVec xs) = Dimensional (head xs)
     vTail (ListVec xs) = ListVec (tail xs)
 
-    vElemAt n (ListVec xs) = Dimensional (xs!!toNum n)
+    --vElemAt n (ListVec xs) = Dimensional (xs!!toNum n)
 
     elemAdd (ListVec xs) (ListVec ys) = ListVec (zipWith (P.+) xs ys)
     elemSub (ListVec xs) (ListVec ys) = ListVec (zipWith (P.-) xs ys)
@@ -65,6 +65,8 @@ instance (CDotProduct ds1 ds2 [a] a) => DotProductC ds1 ds2 [a] a
 instance (AppUnC op a, Floating a) => VecMap op ds [a] a where
   vMap f (ListVec xs) = ListVec $ map (unDim . appUn f . Dimensional) xs
     where unDim (Dimensional x) = x
+
+instance ElemAtC n ds [a] a
 
 --instance (GenericVMap ds, AppUnC op a) => VecMap op ds [a] a
   --where vMap = genericVMap
