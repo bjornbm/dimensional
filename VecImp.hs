@@ -172,9 +172,23 @@ class VecImp i a
     scaleVec :: Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
 
 -- Elements
---class ElemAt
+class GenericElemAt (n::Nat0) (ds::DimList) where
+  type GElemAt n ds :: DimK
+  genericElemAt :: (VecImp i a)
+                => INTRep (P n) -> VecI ds i a -> Quantity (GElemAt n ds) a
 
+instance GenericElemAt Z ds where
+  type GElemAt Z ds = Head ds
+  genericElemAt _ = vHead
 
+instance (GenericElemAt n ds) => GenericElemAt (S0 n) (d:*ds) where
+  type GElemAt (S0 n) (d:*ds) = GElemAt n ds
+  genericElemAt i = genericElemAt (Decr i) . vTail
+
+class ElemAtC (n::Nat0) (ds::DimList) i a where
+  vElemAtG :: (GenericElemAt n ds, VecImp i a)
+           => INTRep (P n) -> VecI ds i a -> Quantity (GElemAt n ds) a
+  vElemAtG = genericElemAt
 -- Dot product.
 
 class (CDotProduct ds1 ds2 i a) => DotProductC ds1 ds2 i a where
@@ -249,13 +263,6 @@ data Scale (d::DimK) a = Scale (Quantity d a)
 instance Num a => AppUnC (Scale d a) a where
   type AppUn (Scale d a) d' = Mul d d'
   appUn (Scale x) y = x * y
-
-{-
-class FoldC ds where
-  vFold :: op -> Quantity d a -> VecI ds i a -> Quantity (Fold op d ds) a
-instance FoldC (Sing d) where
-  vFold f x v = f x (vHead v)
--- -}
 
 
 
