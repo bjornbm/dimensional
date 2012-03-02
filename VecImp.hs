@@ -172,8 +172,6 @@ class VecImp i a
 class GenericElemAt (n::Nat0) (ds::DimList) where
   genericElemAt :: (VecImp i a)
                 => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
-genericElemAt2 :: (VecImp i a)
-                => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
 
 instance GenericElemAt Z ds where
   genericElemAt _ = vHead
