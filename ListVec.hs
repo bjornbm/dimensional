@@ -55,7 +55,7 @@ instance Floating a => VecImp [a] a
     vSum (ListVec xs) = Dimensional $ P.sum xs
     --vNorm (ListVec xs) = Dimensional $ P.sqrt $ O.sum_product xs xs
     --vNorm v = sqrt $ dotProduct v v
-    vNormalize v = (_1 / vNorm v) `scaleVec` v
+    --vNormalize v = (_1 / vNorm v) `scaleVec` v
     scaleVec (Dimensional x) (ListVec xs) = ListVec $ P.map (x P.*) xs
     --scaleVec x v = vMap (Scale x) v
 

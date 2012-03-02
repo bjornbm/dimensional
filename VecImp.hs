@@ -108,38 +108,25 @@ instance (FoldlC op d ds) => Foldl1C op (d:*ds)
   where
     vFoldl1 op v = vFoldl op (vHead v) (vTail v)
 
-{-
-class Foldl' ds
-  where
-    vFoldl' :: VecImp i a
-        => (Quantity (Homo ds) a -> Quantity (Homo ds) a -> Quantity (Homo ds) a)
-        -> Quantity (Homo ds) a -> VecI ds i a -> Quantity (Homo ds) a
-
-instance Foldl' (Sing d)
-  where
-    vFoldl' f x v = x `f` vHead v
-
-instance (Foldl' ds, Homo (d:*ds) ~ d, Homo ds ~ d) => Foldl' (d:*ds)
-  where
-    vFoldl' f x v = vFoldl' f (f x $ vHead v) (vTail v)
--}
 
 -- Homogeneous vectors.
-class (Homo ds ~ d) => HomoC (ds::DimList) (d::DimK) where
+class HomoC (ds::DimList) where
   type Homo ds :: DimK
-  vFoldl' :: VecImp i a => (Quantity e a -> Quantity d a -> Quantity e a)
+  vFoldl' :: VecImp i a => (Quantity e a -> Quantity (Homo ds) a -> Quantity e a)
           -> Quantity e a -> VecI ds i a -> Quantity e a
-  vFoldl1' :: VecImp i a => (Quantity d a -> Quantity d a -> Quantity d a)
-           -> VecI ds i a -> Quantity d a
+  vFoldl1' :: VecImp i a => (Quantity (Homo ds) a -> Quantity (Homo ds) a -> Quantity (Homo ds) a)
+           -> VecI ds i a -> Quantity (Homo ds) a
 
-instance HomoC (Sing d) d where
+instance HomoC (Sing d) where
   type Homo (Sing d) = d
   vFoldl' f x v = f x $ vHead v
   vFoldl1' _ v = vHead v
-instance (HomoC ds d) => HomoC (d:*ds) d where
-  type Homo (d:*ds) = d
+
+instance (HomoC ds, Homo ds ~ d) => HomoC (d:*ds) where
+  type Homo (d:*ds) = Homo ds
   vFoldl' f x v = vFoldl' f (f x $ vHead v) (vTail v)
   vFoldl1' f v = vFoldl' f (vHead v) (vTail v)
+
 
 --type family   Cross (ds1::DimList) (ds2::DimList) :: DimK
 --type instance (Mul b f ~ Mul e c, Mul c d ~ Mul f a, Mul a e ~ Mul d b) => Cross (a:*b:*.c) (d:*e:*.f) = (Mul b f:*Mul c d:*.Mul a e)
@@ -173,23 +160,35 @@ class VecImp i a
                  => VecI (a1:*b:*.c) i a -> VecI (d:*e:*.f) i a
                  -> VecI (Mul b f:*Mul c d:*.Mul a1 e) i a
 
-    vSum :: (HomoC ds d, Num a) => VecI ds i a -> Quantity d a
+    vSum :: (HomoC ds, Num a) => VecI ds i a -> Quantity (Homo ds) a
     vSum = vFoldl1' (+)
-    vNorm :: ( Floating a) => VecI ds i a -> Quantity (Homo ds) a
-    --vNorm v = sqrt $ dotProduct v v
+
+    vNorm :: (CNorm ds i a) => VecI ds i a -> Quantity (Homo ds) a
+    vNorm v = sqrt $ dotProduct v v
+
     vNormalize :: VecI ds i a -> Normalize ds i a
 
     scaleVec :: Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
 
+-- Elements
+--class ElemAt
+
+
+-- Dot product.
+
 class (CDotProduct ds1 ds2 i a) => DotProductC ds1 ds2 i a where
-  dotProduct :: VecI ds1 i a -> VecI ds2 i a -> Quantity (Dot ds1 ds2) a
+  dotProduct :: VecI ds1 i a -> VecI ds2 i a -> Quantity (DotProduct ds1 ds2) a
   dotProduct v1 v2 = vSum $ vZipWith EMul v1 v2
 
-type Dot ds1 ds2 = Homo (ZipWith EMul ds1 ds2)
+type DotProduct ds1 ds2 = Homo (ZipWith EMul ds1 ds2)
 type CDotProduct ds1 ds2 i a = (ZipWithC EMul ds1 ds2, VecImp i a, Num a
-    , HomoC (ZipWith EMul ds1 ds2) (Homo (ZipWith EMul ds1 ds2)) -- inferable?
+    , HomoC (ZipWith EMul ds1 ds2) -- inferable?
     )
 
+-- VNorm.
+
+type Norm ds = Root (DotProduct ds ds) Pos2
+type CNorm ds i a = (DotProductC ds ds i a, Floating a, Norm ds ~ Homo ds)
 
 -- Mapping operations to vectors.
 class (VecImp i a) => VecMap op ds i a where
