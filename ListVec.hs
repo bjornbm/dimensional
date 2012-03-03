@@ -66,7 +66,7 @@ instance (AppUnC op a, Floating a) => VecMap op ds [a] a where
   vMap f (ListVec xs) = ListVec $ map (unDim . appUn f . Dimensional) xs
     where unDim (Dimensional x) = x
 
-instance ElemAtC n ds [a] a
+instance ElemAtC [a] a
 
 --instance (GenericVMap ds, AppUnC op a) => VecMap op ds [a] a
   --where vMap = genericVMap

@@ -44,7 +44,7 @@ type instance Length (a :* b) = S1 (Length b)
 -- Lookup with zero-based indexing.
 type family   ElemAt (n::Nat0) (l::DimList) :: DimK
 type instance ElemAt Z ds = Head ds
-type instance ElemAt (S0 n) (a :* b) = ElemAt n b
+type instance ElemAt (S0 n) ds = ElemAt n (Tail ds)
 
 
 -- Higher level functions
@@ -169,18 +169,18 @@ class VecImp i a
     scaleVec :: Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
 
 -- Elements
-class GenericElemAt (n::Nat0) (ds::DimList) where
+class GenericElemAt (n::Nat0) where
   genericElemAt :: (VecImp i a)
                 => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
 
-instance GenericElemAt Z ds where
+instance GenericElemAt Z where
   genericElemAt _ = vHead
 
-instance (GenericElemAt n ds) => GenericElemAt (S0 n) (d:*ds) where
+instance (GenericElemAt n) => GenericElemAt (S0 n) where
   genericElemAt i = genericElemAt (Decr i) . vTail
 
-class ElemAtC (n::Nat0) (ds::DimList) i a where
-  vElemAt :: (GenericElemAt n ds, VecImp i a)
+class ElemAtC i a where
+  vElemAt :: (GenericElemAt n, VecImp i a)
            => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
   vElemAt = genericElemAt
 
