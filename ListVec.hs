@@ -55,7 +55,7 @@ instance Floating a => VecImp [a] a
 
 instance ElemAtC [a] a
 
-instance DotProductC [a] a
+--instance DotProductC [a] a
   --where dotProduct (ListVec xs) (ListVec ys) = Dimensional $ O.sum_product xs ys
 
 instance (AppUnC op a, Floating a) => VecMap op ds [a] a where

@@ -153,9 +153,15 @@ class VecImp i a
     -- same size and element types.
     elemSub :: VecI ds i a -> VecI ds i a -> VecI ds i a
 
-    crossProduct :: (Mul b f ~ Mul e c, Mul c d ~ Mul f a1, Mul a1 e ~ Mul d b, Num a)
+    -- | Vector dot product.
+    dotProduct :: (CDotProduct ds1 ds2, VecImp i a, Num a)
+               => VecI ds1 i a -> VecI ds2 i a -> Quantity (DotProduct ds1 ds2) a
+    dotProduct v1 v2 = vSum $ vZipWith EMul v1 v2
+
+    -- | Vector cross product (for 3-vectors).
+    crossProduct :: (CCrossProduct a1 b c d e f, Num a)
                  => VecI (a1:*b:*.c) i a -> VecI (d:*e:*.f) i a
-                 -> VecI (Mul b f:*Mul c d:*.Mul a1 e) i a
+                 -> VecI (CrossProduct a1 b c d e f) i a
     crossProduct v1 v2 = vCons (b * f - e * c)
          $ vCons (c * d - f * a)
          $ vSing (a * e - d * b)
@@ -165,13 +171,26 @@ class VecImp i a
     vSum :: (HomoC ds, Num a) => VecI ds i a -> Quantity (Homo ds) a
     vSum = vFoldl1' (+)
 
-    vNorm :: (CNorm ds i a) => VecI ds i a -> Quantity (Homo ds) a
+    vNorm :: (CNorm ds a) => VecI ds i a -> Quantity (Homo ds) a
     vNorm v = sqrt $ dotProduct v v
 
-    vNormalize :: (CNorm ds i a) => VecI ds i a -> VecI (Normalize ds a) i a
+    vNormalize :: (CNorm ds a) => VecI ds i a -> VecI (Normalize ds a) i a
     vNormalize v = (_1 / vNorm v) `scaleVec` v
 
     scaleVec :: Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
+
+
+-- Constraints and convenience type synonyms.
+
+type CDotProduct ds1 ds2 = (ZipWithC EMul ds1 ds2, HomoC (ZipWith EMul ds1 ds2)) -- inferable?
+type  DotProduct ds1 ds2 = Homo (ZipWith EMul ds1 ds2)
+
+type CCrossProduct a1 b c d e f = (Mul b f ~ Mul e c, Mul c d ~ Mul f a1, Mul a1 e ~ Mul d b)
+type  CrossProduct a1 b c d e f = (Mul b f:*Mul c d:*.Mul a1 e)
+
+type CNorm ds a = (CDotProduct ds ds, Floating a, Norm ds ~ Homo ds)
+type  Norm ds = Root (DotProduct ds ds) Pos2
+
 
 -- Elements
 class GenericElemAt (n::Nat0) where
@@ -189,21 +208,6 @@ class ElemAtC i a where
            => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
   vElemAt = genericElemAt
 
--- Dot product.
-
-class DotProductC i a where
-  dotProduct :: (CDotProduct ds1 ds2, VecImp i a, Num a)
-             => VecI ds1 i a -> VecI ds2 i a -> Quantity (DotProduct ds1 ds2) a
-  dotProduct v1 v2 = vSum $ vZipWith EMul v1 v2
-
-type DotProduct ds1 ds2 = Homo (ZipWith EMul ds1 ds2)
-type CDotProduct ds1 ds2 = (ZipWithC EMul ds1 ds2, HomoC (ZipWith EMul ds1 ds2) -- inferable?
-    )
-
--- VNorm.
-
-type Norm ds = Root (DotProduct ds ds) Pos2
-type CNorm ds i a = (DotProductC i a, CDotProduct ds ds, Floating a, Norm ds ~ Homo ds)
 
 -- Mapping operations to vectors.
 class (VecImp i a) => VecMap op ds i a where
