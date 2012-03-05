@@ -59,14 +59,14 @@ type family   ZipWith op (ds1::DimList) (ds2::DimList) :: DimList
 type instance ZipWith op (Sing d1) (Sing d2) = Sing (AppBi op d1 d2)
 type instance ZipWith op (d1:*ds1) (d2:*ds2) = AppBi op d1 d2:*ZipWith op ds1 ds2
 
-class ZipWithC op ds1 ds2 where
+class ZipWithC ds1 ds2 where
   vZipWith :: (VecImp i a, AppBiC op a)
            => op -> VecI ds1 i a -> VecI ds2 i a -> VecI (ZipWith op ds1 ds2) i a
 
-instance ZipWithC op (Sing d1) (Sing d2) where
+instance ZipWithC (Sing d1) (Sing d2) where
   vZipWith op v1 v2 = vSing $ appBi op (vHead v1) (vHead v2)
 
-instance (ZipWithC op ds1 ds2) => ZipWithC op (d1:*ds1) (d2:*ds2) where
+instance (ZipWithC ds1 ds2) => ZipWithC (d1:*ds1) (d2:*ds2) where
   vZipWith op v1 v2 = vCons (appBi op (vHead v1) (vHead v2)) (vZipWith op (vTail v1) (vTail v2))
 
 type family   Map op (ds::DimList) :: DimList
@@ -188,9 +188,10 @@ class VecImp i a
     vMap :: (CMap op ds a) => op -> VecI ds i a -> VecI (Map op ds) i a
     vMap = genericMap
 
+
 -- Constraints and convenience type synonyms.
 
-type CDotProduct ds1 ds2 = (ZipWithC EMul ds1 ds2, HomoC (ZipWith EMul ds1 ds2)) -- inferable?
+type CDotProduct ds1 ds2 = (ZipWithC ds1 ds2, HomoC (ZipWith EMul ds1 ds2)) -- inferable?
 type  DotProduct ds1 ds2 = Homo (ZipWith EMul ds1 ds2)
 
 type CCrossProduct a1 b c d e f = (Mul b f ~ Mul e c, Mul c d ~ Mul f a1, Mul a1 e ~ Mul d b)
@@ -203,6 +204,7 @@ type CMap op ds a = (AppUnC op a, GenericMap ds)
 
 type CScaleVec ds = (GenericMap ds)
 type  ScaleVec ds d a = Map (Scale d a) ds
+
 
 -- Elements
 class GenericElemAt (n::Nat0) where
