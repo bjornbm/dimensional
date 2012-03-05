@@ -177,11 +177,15 @@ class VecImp i a
     vNormalize :: (CNorm ds a) => VecI ds i a -> VecI (Normalize ds a) i a
     vNormalize v = (_1 / vNorm v) `scaleVec` v
 
-    scaleVec :: Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
+    scaleVec :: (GenericMap ds, Num a) => Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
+    scaleVec x v = vMap (Scale x) v
 
     vElemAt :: (GenericElemAt n, VecImp i a)
             => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
     vElemAt = genericElemAt
+
+    vMap :: (AppUnC op a, GenericMap ds, VecImp i a) => op -> VecI ds i a -> VecI (Map op ds) i a
+    vMap = genericMap
 
 -- Constraints and convenience type synonyms.
 
@@ -191,7 +195,7 @@ type  DotProduct ds1 ds2 = Homo (ZipWith EMul ds1 ds2)
 type CCrossProduct a1 b c d e f = (Mul b f ~ Mul e c, Mul c d ~ Mul f a1, Mul a1 e ~ Mul d b)
 type  CrossProduct a1 b c d e f = (Mul b f:*Mul c d:*.Mul a1 e)
 
-type CNorm ds a = (CDotProduct ds ds, Floating a, Norm ds ~ Homo ds)
+type CNorm ds a = (GenericMap ds, CDotProduct ds ds, Floating a, Norm ds ~ Homo ds)
 type  Norm ds = Root (DotProduct ds ds) Pos2
 
 
@@ -207,10 +211,16 @@ instance (GenericElemAt n) => GenericElemAt (S0 n) where
   genericElemAt i = genericElemAt (Decr i) . vTail
 
 
-
 -- Mapping operations to vectors.
-class (VecImp i a) => VecMap op ds i a where
-  vMap :: op -> VecI ds i a -> VecI (Map op ds) i a
+class GenericMap ds where
+  genericMap :: (AppUnC op a, VecImp i a) => op -> VecI ds i a -> VecI (Map op ds) i a
+
+instance GenericMap (Sing d) where
+  genericMap op = vSing . appUn op . vHead
+
+instance (GenericMap ds) => GenericMap (d:*ds) where
+  genericMap op v = vCons (appUn op $ vHead v) (genericMap op $ vTail v)
+
 
 type Normalize ds a = Map (Scale (Div DOne (Homo ds)) a) ds
 
