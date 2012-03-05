@@ -177,14 +177,15 @@ class VecImp i a
     vNormalize :: (CNorm ds a) => VecI ds i a -> VecI (Normalize ds a) i a
     vNormalize v = (_1 / vNorm v) `scaleVec` v
 
-    scaleVec :: (GenericMap ds, Num a) => Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
+    scaleVec :: (CScaleVec ds, Num a)
+             => Quantity d a -> VecI ds i a -> VecI (ScaleVec ds d a) i a
     scaleVec x v = vMap (Scale x) v
 
     vElemAt :: (GenericElemAt n, VecImp i a)
             => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
     vElemAt = genericElemAt
 
-    vMap :: (AppUnC op a, GenericMap ds, VecImp i a) => op -> VecI ds i a -> VecI (Map op ds) i a
+    vMap :: (CMap op ds a) => op -> VecI ds i a -> VecI (Map op ds) i a
     vMap = genericMap
 
 -- Constraints and convenience type synonyms.
@@ -198,6 +199,10 @@ type  CrossProduct a1 b c d e f = (Mul b f:*Mul c d:*.Mul a1 e)
 type CNorm ds a = (GenericMap ds, CDotProduct ds ds, Floating a, Norm ds ~ Homo ds)
 type  Norm ds = Root (DotProduct ds ds) Pos2
 
+type CMap op ds a = (AppUnC op a, GenericMap ds)
+
+type CScaleVec ds = (GenericMap ds)
+type  ScaleVec ds d a = Map (Scale d a) ds
 
 -- Elements
 class GenericElemAt (n::Nat0) where
