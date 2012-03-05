@@ -32,29 +32,26 @@ instance Floating a => VecImp [a] a
     vHead (ListVec xs) = Dimensional (head xs)
     vTail (ListVec xs) = ListVec (tail xs)
 
-    --vElemAt n (ListVec xs) = Dimensional (xs!!toNum n)
 
     elemAdd (ListVec xs) (ListVec ys) = ListVec (zipWith (P.+) xs ys)
     elemSub (ListVec xs) (ListVec ys) = ListVec (zipWith (P.-) xs ys)
 
-    --dotProduct (ListVec xs) (ListVec ys) = Dimensional $ O.sum_product xs ys
 {-
+    vElemAt n (ListVec xs) = Dimensional (xs!!toNum n)
+    dotProduct (ListVec xs) (ListVec ys) = Dimensional $ O.sum_product xs ys
     crossProduct (ListVec [a,b,c]) (ListVec [d,e,f]) = ListVec
         [ b P.* f P.- e P.* c
         , c P.* d P.- f P.* a
         , a P.* e P.- d P.* b
         ]
+    vNorm (ListVec xs) = Dimensional $ P.sqrt $ O.sum_product xs xs
 -}
 
     vSum (ListVec xs) = Dimensional $ P.sum xs
-    --vNorm (ListVec xs) = Dimensional $ P.sqrt $ O.sum_product xs xs
-    --vNorm v = sqrt $ dotProduct v v
-    --vNormalize v = (_1 / vNorm v) `scaleVec` v
     scaleVec (Dimensional x) (ListVec xs) = ListVec $ P.map (x P.*) xs
     --scaleVec x v = vMap (Scale x) v
 
-instance ElemAtC [a] a
-
+--instance ElemAtC [a] a
 --instance DotProductC [a] a
   --where dotProduct (ListVec xs) (ListVec ys) = Dimensional $ O.sum_product xs ys
 

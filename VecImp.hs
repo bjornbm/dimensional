@@ -179,6 +179,9 @@ class VecImp i a
 
     scaleVec :: Quantity d a -> VecI ds i a -> VecI (Map (Scale d a) ds) i a
 
+    vElemAt :: (GenericElemAt n, VecImp i a)
+            => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
+    vElemAt = genericElemAt
 
 -- Constraints and convenience type synonyms.
 
@@ -203,10 +206,6 @@ instance GenericElemAt Z where
 instance (GenericElemAt n) => GenericElemAt (S0 n) where
   genericElemAt i = genericElemAt (Decr i) . vTail
 
-class ElemAtC i a where
-  vElemAt :: (GenericElemAt n, VecImp i a)
-           => INTRep (P n) -> VecI ds i a -> Quantity (ElemAt n ds) a
-  vElemAt = genericElemAt
 
 
 -- Mapping operations to vectors.
@@ -286,11 +285,11 @@ class ToTupleC (ds::DimList) where
 
 instance ToTupleC (d0:*Sing d1) where
   type ToTuple (d0:*Sing d1) a = (Quantity d0 a, Quantity d1 a)
-  toTuple v = (genericElemAt zero v, genericElemAt pos1 v)
+  toTuple v = (vElemAt zero v, vElemAt pos1 v)
 
 instance ToTupleC (d0:*d1:*Sing d2) where
   type ToTuple (d0:*d1:*Sing d2) a = (Quantity d0 a, Quantity d1 a, Quantity d2 a)
-  toTuple v = (genericElemAt zero v, genericElemAt pos1 v, genericElemAt pos2 v)
+  toTuple v = (vElemAt zero v, vElemAt pos1 v, vElemAt pos2 v)
 
 -- From tuples.
 class FromTupleC t a where
