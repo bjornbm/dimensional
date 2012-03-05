@@ -153,9 +153,14 @@ class VecImp i a
     -- same size and element types.
     elemSub :: VecI ds i a -> VecI ds i a -> VecI ds i a
 
-    crossProduct :: (Mul b f ~ Mul e c, Mul c d ~ Mul f a1, Mul a1 e ~ Mul d b)
+    crossProduct :: (Mul b f ~ Mul e c, Mul c d ~ Mul f a1, Mul a1 e ~ Mul d b, Num a)
                  => VecI (a1:*b:*.c) i a -> VecI (d:*e:*.f) i a
                  -> VecI (Mul b f:*Mul c d:*.Mul a1 e) i a
+    crossProduct v1 v2 = vCons (b * f - e * c)
+         $ vCons (c * d - f * a)
+         $ vSing (a * e - d * b)
+         where (a,b,c) = toTuple v1
+               (d,e,f) = toTuple v2
 
     vSum :: (HomoC ds, Num a) => VecI ds i a -> Quantity (Homo ds) a
     vSum = vFoldl1' (+)
@@ -186,19 +191,19 @@ class ElemAtC i a where
 
 -- Dot product.
 
-class (CDotProduct ds1 ds2 i a) => DotProductC ds1 ds2 i a where
-  dotProduct :: VecI ds1 i a -> VecI ds2 i a -> Quantity (DotProduct ds1 ds2) a
+class DotProductC i a where
+  dotProduct :: (CDotProduct ds1 ds2, VecImp i a, Num a)
+             => VecI ds1 i a -> VecI ds2 i a -> Quantity (DotProduct ds1 ds2) a
   dotProduct v1 v2 = vSum $ vZipWith EMul v1 v2
 
 type DotProduct ds1 ds2 = Homo (ZipWith EMul ds1 ds2)
-type CDotProduct ds1 ds2 i a = (ZipWithC EMul ds1 ds2, VecImp i a, Num a
-    , HomoC (ZipWith EMul ds1 ds2) -- inferable?
+type CDotProduct ds1 ds2 = (ZipWithC EMul ds1 ds2, HomoC (ZipWith EMul ds1 ds2) -- inferable?
     )
 
 -- VNorm.
 
 type Norm ds = Root (DotProduct ds ds) Pos2
-type CNorm ds i a = (DotProductC ds ds i a, Floating a, Norm ds ~ Homo ds)
+type CNorm ds i a = (DotProductC i a, CDotProduct ds ds, Floating a, Norm ds ~ Homo ds)
 
 -- Mapping operations to vectors.
 class (VecImp i a) => VecMap op ds i a where

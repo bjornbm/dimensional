@@ -45,12 +45,6 @@ instance Floating a => VecImp [a] a
         , a P.* e P.- d P.* b
         ]
 -}
-    -- Generic implementation.
-    crossProduct v1 v2 = vCons (b * f - e * c)
-         $ vCons (c * d - f * a)
-         $ vSing (a * e - d * b)
-         where (a,b,c) = toTuple v1
-               (d,e,f) = toTuple v2
 
     vSum (ListVec xs) = Dimensional $ P.sum xs
     --vNorm (ListVec xs) = Dimensional $ P.sqrt $ O.sum_product xs xs
@@ -59,14 +53,15 @@ instance Floating a => VecImp [a] a
     scaleVec (Dimensional x) (ListVec xs) = ListVec $ P.map (x P.*) xs
     --scaleVec x v = vMap (Scale x) v
 
-instance (CDotProduct ds1 ds2 [a] a) => DotProductC ds1 ds2 [a] a
+instance ElemAtC [a] a
+
+instance DotProductC [a] a
   --where dotProduct (ListVec xs) (ListVec ys) = Dimensional $ O.sum_product xs ys
 
 instance (AppUnC op a, Floating a) => VecMap op ds [a] a where
   vMap f (ListVec xs) = ListVec $ map (unDim . appUn f . Dimensional) xs
     where unDim (Dimensional x) = x
 
-instance ElemAtC [a] a
 
 --instance (GenericVMap ds, AppUnC op a) => VecMap op ds [a] a
   --where vMap = genericVMap
