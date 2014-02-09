@@ -1,14 +1,14 @@
 Name:                dimensional-dk
-Version:             0.1
+Version:             0.2
 License:             BSD3
 License-File:        LICENSE
-Copyright:           Bjorn Buckwalter 2006-2012
+Copyright:           Bjorn Buckwalter 2006-2014
 Author:              Bjorn Buckwalter
-Maintainer:          bjorn.buckwalter@gmail.com
+Maintainer:          bjorn@buckwalter.se
 Stability:           experimental
 Homepage:            http://dimensional.googlecode.com/
 Synopsis:            Statically checked physical dimensions, implemented
-                     using type families.
+                     using Type Families and Data Kinds.
 
 Description:
 
@@ -21,10 +21,10 @@ Description:
     far as is practical, enforce/encourage best practices of unit usage.
 
     The dimensional-dk packade differs from the dimensional package in that
-    the dimension tracking is implemented using type families rather than
-    functional dependencies.
+    the dimension tracking is implemented using Type Families and Data Kinds
+    rather than functional dependencies.
 
-    Requires GHC 7.4 or later.
+    Requires GHC 7.8 or later.
 
 Category:            Math, Physics
 Build-Type:          Simple
@@ -35,7 +35,6 @@ Exposed-Modules:     Numeric.Units.Dimensional.DK,
                      Numeric.Units.Dimensional.DK.Quantities,
                      Numeric.Units.Dimensional.DK.SIUnits,
                      Numeric.Units.Dimensional.DK.NonSI,
-                     Numeric.NumType.DK
 Extra-source-files:  README,
                      Test.hs
                      Numeric/Units/Dimensional/DK/Test.hs,
