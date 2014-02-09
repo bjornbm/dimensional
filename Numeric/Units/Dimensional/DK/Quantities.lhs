@@ -1,5 +1,5 @@
 Numeric.Dimensional.Quantities
-Bjorn Buckwalter, bjorn.buckwalter@gmail.com
+Bjorn Buckwalter, bjorn@buckwalter.se
 License: BSD3
 
 
@@ -18,10 +18,10 @@ dimensionality type synonyms are provided for each quantity type.
 > {-# LANGUAGE DataKinds #-}
 
 > {- |
->    Copyright  : Copyright (C) 2006-2012 Bjorn Buckwalter
+>    Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
 >    License    : BSD3
 >
->    Maintainer : bjorn.buckwalter@gmail.com
+>    Maintainer : bjorn@buckwalter.se
 >    Stability  : Stable
 >    Portability: GHC only?
 >
@@ -306,6 +306,15 @@ provide some synonyms that we anticipate will be useful.
 
 > type DKinematicViscosity = Dim Pos2 Zero Neg1 Zero Zero Zero Zero
 > type KinematicViscosity  = Quantity DKinematicViscosity
+
+> type DFirstMassMoment = Dim Pos1 Pos1 Zero Zero Zero Zero Zero
+> type FirstMassMoment = Quantity DFirstMassMoment
+
+> type DMomentOfInertia = Dim Pos2 Pos1 Zero Zero Zero Zero Zero
+> type MomentOfInertia = Quantity DMomentOfInertia
+
+> type DAngularMomentum = Dim Pos2 Pos1 Neg1 Zero Zero Zero Zero
+> type AngularMomentum = Quantity DAngularMomentum
 
 For these we don't bother defining new type synonyms for dimensionalities.
 Is this rational?
