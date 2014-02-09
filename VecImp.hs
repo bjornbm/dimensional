@@ -127,6 +127,16 @@ instance (HomoC ds, Homo ds ~ d) => HomoC (d:*ds) where
   vFoldl1' f v = vFoldl' f (vHead v) (vTail v)
 
 
+{-
+class VZipWithC' ds es where
+  vZipWith' :: (Quantity (Homo ds) a -> Quantity (Homo es) a -> Quantity (Homo fs) a)
+            -> VecI ds i a -> VecI es i a -> VecI fs i a
+
+instance VZipWithC' (Sing d) (Sing e) where
+  vZipWith' f v1 v2 = vSing (vHead v1 `f` vHead v2)
+-- -}
+--vZipWith' f v1 v2 = vCons (vHead v1 `f` vHead v2) $ vZipWith' f (vTail v1) (vTail v2)
+
 --type family   Cross (ds1::DimList) (ds2::DimList) :: DimK
 --type instance (Mul b f ~ Mul e c, Mul c d ~ Mul f a, Mul a e ~ Mul d b) => Cross (a:*b:*.c) (d:*e:*.f) = (Mul b f:*Mul c d:*.Mul a e)
 
@@ -250,7 +260,7 @@ x .*. y = vCons x $ vSing y
 
 -- Generic implementations
 class AppUnC op a where
-  type AppUn op (d::DimK) :: DimK
+  type AppUn op d :: DimK
   appUn :: op -> Quantity d a -> Quantity (AppUn op d) a
 
 class AppBiC op a where
@@ -284,9 +294,48 @@ instance Num a => AppUnC (Scale d a) a where
   type AppUn (Scale d a) d' = Mul d d'
   appUn (Scale x) y = x * y
 
+{-
+instance Num a => AppUnC (Quantity d a -> Quantity e a) a where
+  type AppUn (Quantity d a -> Quantity e a) d = e
+  appUn f = f
+-}
 
+class ApplyC op a where
+  data Apply op a
+  type AT op :: DimK
+  apply :: Apply op a -> Quantity (AT op) a
 
+data Scal (e::DimK) (d::DimK)
 
+instance Num a => ApplyC (Scal e d) a where
+  data Apply (Scal e d) a = ApplyScale (Quantity e a) (Quantity d a)
+  type AT (Scal e d) = Mul e d
+  apply (ApplyScale x y) = x * y
+-- -}
+
+instance ApplyC (Quantity d a -> Quantity e a) a where
+  data Apply (Quantity d a -> Quantity e a) a = ApplyF (Quantity d a -> Quantity e a) (Quantity d a)
+  type AT (Quantity d a -> Quantity e a) = e
+  apply (ApplyF f d) = f d
+-- -}
+
+-- Generic implementations (not specialized for implementations).
+class GenericVMap2 d ds where
+  type Map2 op ds :: DimList
+  genericVMap2 :: (ApplyC op a, VecImp i a)
+               => (Quantity d a -> Apply op a) -> VecI ds i a -> VecI (Map2 op ds) i a
+instance GenericVMap2 d (Sing d) where
+  type Map2 op (Sing d) = Sing (AT op)
+  genericVMap2 op = vSing . apply . op . vHead
+-- {-
+instance (GenericVMap2 d' ds) => GenericVMap2 d (d:*ds) where
+  type Map2 op (d:*ds) = AT op:*Map2 op ds
+  genericVMap2 op v = vCons (apply $ op $ vHead v) $ genericVMap2 op $ vTail v
+
+-- -}
+--type family   Map2 op (ds::DimList) :: DimList
+--type instance Map2 op (Sing d) = Sing (AT (op d))
+--type instance Map2 op (d:*ds)  = AppUn op d:*Map op ds
 -- ****************************************************************
 -- ****************************************************************
 -- ****************************************************************
