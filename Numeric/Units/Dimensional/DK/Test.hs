@@ -21,7 +21,7 @@ testShow = TestLabel "Test 'Show' instance" $ TestList
     , TestCase $ show (2 *~ meter) @?= "2 m"
     , TestCase $ show (2.0 *~ (meter / second)) @?= "2.0 m s^-1"
     , TestCase $ show (2.0 *~ (meter ^ pos2 / second ^ pos2)) @?= "2.0 m^2 s^-2"
-    , TestCase $ show (undefined :: DimRep DVelocity) @?= "m s^-1"
+    --, TestCase $ show (undefined :: DimRep DVelocity) @?= "m s^-1"
     ]
 
 -- Collect the test cases.

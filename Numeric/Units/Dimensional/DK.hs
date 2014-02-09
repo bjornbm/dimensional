@@ -41,32 +41,25 @@ where to fit it in.
 
 = Preliminaries =
 
-This module requires GHC 6.6 or later. We utilize multi-parameter
-type classes, phantom types, functional dependencies and undecidable
-instances (and possibly additional unidentified GHC extensions).
-Clients of the module are generally not required to use these
-extensions.
+This module requires GHC 7.8 or later. We utilize Data Kinde, TypeNats,
+Closed Type Families, etc. Clients of the module are generally not
+required to use these extensions.
+
+Clients probably will want to use the NegativeLiterals extension.
 -}
 
-{-# LANGUAGE UndecidableInstances
-           , ScopedTypeVariables
-           , EmptyDataDecls
-           , MultiParamTypeClasses
-           , FunctionalDependencies
-           , FlexibleInstances
-           , TypeSynonymInstances
-           , FlexibleContexts
-           , GeneralizedNewtypeDeriving
-           , DeriveDataTypeable
-
-           , DataKinds
-           , KindSignatures
-           , TypeOperators
-           , TypeFamilies
-           #-}
+{-# LANGUAGE AutoDeriveTypeable #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 
 {- |
-   Copyright  : Copyright (C) 2006-2013 Bjorn Buckwalter
+   Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
    License    : BSD3
 
    Maintainer : bjorn.buckwalter@gmail.com
@@ -89,7 +82,6 @@ import Prelude
 import qualified Prelude
 import Data.List (genericLength)
 import Data.Maybe (Maybe (Just, Nothing), catMaybes)
-import Data.Typeable (Typeable)
 import Numeric.NumType.DK
   ( NumType (P), (+)(), (-)()
   , NT, NP, Zero, Pos1, Pos2, pos2, Pos3, pos3
@@ -124,7 +116,7 @@ units and quantities it represents have physical dimensions.
 -}
 
 newtype Dimensional (v::Variant) (d::Dimensions) a
-      = Dimensional a deriving (Eq, Ord, Enum, Typeable)
+      = Dimensional a deriving (Eq, Ord, Enum)
 
 {-
 The type variable 'a' is the only non-phantom type variable and
@@ -143,7 +135,7 @@ The phantom type variable v is used to distinguish between units
 and quantities. It should be one of the following:
 -}
 
-data Variant = DUnit | DQuantity deriving Typeable
+data Variant = DUnit | DQuantity
 
 {-
 For convenience we define type synonyms for units and quantities.
@@ -195,7 +187,6 @@ in a data type 'Dim'.
 -}
 
 data Dimensions = Dim NumType NumType NumType NumType NumType NumType NumType
-                deriving Typeable
 
 {-
 where the respective dimensions are represented by type variables
@@ -414,7 +405,7 @@ infixl 7  *~~, /~~
 The sum of all elements in a list.
 -}
 
-sum :: forall d a . Num a => [Quantity d a] -> Quantity d a
+sum :: Num a => [Quantity d a] -> Quantity d a
 sum = foldr (+) _0
 
 {-
@@ -529,15 +520,15 @@ in a way that distinguishes them from quantities, or whether that is
 even a requirement.
 -}
 
-instance forall l m t i th n j a.
-  ( ToInteger (NT l)
-  , ToInteger (NT m)
-  , ToInteger (NT t)
-  , ToInteger (NT i)
-  , ToInteger (NT th)
-  , ToInteger (NT n)
-  , ToInteger (NT j)
-  , Show a) => Show (Quantity (Dim l m t i th n j) a)
+instance ( ToInteger (NT l)
+         , ToInteger (NT m)
+         , ToInteger (NT t)
+         , ToInteger (NT i)
+         , ToInteger (NT th)
+         , ToInteger (NT n)
+         , ToInteger (NT j)
+         , Show a) =>
+  Show (Quantity (Dim l m t i th n j) a)
     where
       show (Dimensional x) = let units = [ dimUnit "m"   (undefined :: NT l)
                                          , dimUnit "kg"  (undefined :: NT m)
