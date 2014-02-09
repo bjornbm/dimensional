@@ -91,9 +91,9 @@ import Data.List (genericLength)
 import Data.Maybe (Maybe (Just, Nothing), catMaybes)
 import Data.Typeable (Typeable)
 import Numeric.NumType.DK
-  ( NumType (P), ToInteger  --, NonZero, PosType,
-  , toNum, (+)(), (-)() --, Sum
+  ( NumType (P), (+)(), (-)()
   , NT, NP, Zero, Pos1, Pos2, pos2, Pos3, pos3
+  , ToInteger, toNum
   )
 import qualified Numeric.NumType.DK as N
 
@@ -123,7 +123,7 @@ We call this data type 'Dimensional' to capture the notion that the
 units and quantities it represents have physical dimensions.
 -}
 
-newtype Dimensional (v::Variant) d a
+newtype Dimensional (v::Variant) (d::Dimensions) a
       = Dimensional a deriving (Eq, Ord, Enum, Typeable)
 
 {-
@@ -194,14 +194,8 @@ using NumTypes. For convenience we collect all seven base dimensions
 in a data type 'Dim'.
 -}
 
-data Dim (l  :: NumType)
-         (m  :: NumType)
-         (t  :: NumType)
-         (i  :: NumType)
-         (th :: NumType)
-         (n  :: NumType)
-         (j  :: NumType)
-         deriving Typeable
+data Dimensions = Dim NumType NumType NumType NumType NumType NumType NumType
+                deriving Typeable
 
 {-
 where the respective dimensions are represented by type variables
@@ -535,17 +529,7 @@ in a way that distinguishes them from quantities, or whether that is
 even a requirement.
 -}
 
-instance forall d a. (Show d, Show a) => Show (Quantity d a) where
-  show (Dimensional x) = show x ++ if (null unit) then "" else " " ++ unit
-      where unit = show (undefined :: d)
-
-{-
-The above implementation of 'show' relies on the dimension 'd' being an
-instance of 'Show'. The "normalized" unit of the quantity can be inferred
-from its dimension.
--}
-
-instance forall l m t i th n j.
+instance forall l m t i th n j a.
   ( ToInteger (NT l)
   , ToInteger (NT m)
   , ToInteger (NT t)
@@ -553,16 +537,24 @@ instance forall l m t i th n j.
   , ToInteger (NT th)
   , ToInteger (NT n)
   , ToInteger (NT j)
-  ) => Show (Dim l m t i th n j) where
-  show _ = (unwords . catMaybes)
-           [ dimUnit "m"   (undefined :: NT l)
-           , dimUnit "kg"  (undefined :: NT m)
-           , dimUnit "s"   (undefined :: NT t)
-           , dimUnit "A"   (undefined :: NT i)
-           , dimUnit "K"   (undefined :: NT th)
-           , dimUnit "mol" (undefined :: NT n)
-           , dimUnit "cd"  (undefined :: NT j)
-           ]
+  , Show a) => Show (Quantity (Dim l m t i th n j) a)
+    where
+      show (Dimensional x) = let units = [ dimUnit "m"   (undefined :: NT l)
+                                         , dimUnit "kg"  (undefined :: NT m)
+                                         , dimUnit "s"   (undefined :: NT t)
+                                         , dimUnit "A"   (undefined :: NT i)
+                                         , dimUnit "K"   (undefined :: NT th)
+                                         , dimUnit "mol" (undefined :: NT n)
+                                         , dimUnit "cd"  (undefined :: NT j)
+                                         ]
+                             in unwords (show x : catMaybes units)
+
+{-
+The above implementation of 'show' relies on the dimension 'd' being an
+instance of 'Show'. The "normalized" unit of the quantity can be inferred
+from its dimension.
+-}
+
 
 {-
 The helper function 'dimUnit' defined next conditions a 'String' (unit)
@@ -572,11 +564,10 @@ users of the 'Extensible' module.
 -}
 
 dimUnit :: ToInteger (NT n) => String -> NT n -> Maybe String
-dimUnit u n
-  | x == 0    = Nothing
-  | x == 1    = Just u
-  | otherwise = Just (u ++ "^" ++ show x)
-  where x = N.toInteger n
+dimUnit u n = case N.toInteger n of
+                0 -> Nothing
+                1 -> Just u
+                n -> Just (u ++ "^" ++ show n)
 
 {-
 
