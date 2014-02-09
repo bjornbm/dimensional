@@ -15,9 +15,10 @@ using the cartesian state vector and using keplerian elements, both at the
 same epoch -- determine the value of 'mu' used to convert between the two.
 {{{
 
+> {-# LANGUAGE NegativeLiterals #-}
 > module GM where
 
-> import Numeric.Units.Dimensional.TF.Prelude
+> import Numeric.Units.Dimensional.DK.Prelude
 > import qualified Prelude
 
 }}}
@@ -25,7 +26,7 @@ The state vector describing the orbit at epoch.
 {{{
 
 > x     =   4383.9449203752        *~ kilo meter
-> y     = (-41940.917505092)       *~ kilo meter
+> y     = -41940.917505092       *~ kilo meter
 > z     =     22.790255916589      *~ kilo meter
 > x_dot =      3.0575666627812     *~ (kilo meter / second)
 > y_dot =      0.32047068607303    *~ (kilo meter / second)
