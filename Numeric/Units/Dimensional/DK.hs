@@ -58,21 +58,26 @@ extensions.
            , FlexibleContexts
            , GeneralizedNewtypeDeriving
            , DeriveDataTypeable
+
+           , DataKinds
+           , KindSignatures
+           , TypeOperators
+           , TypeFamilies
            #-}
 
 {- |
    Copyright  : Copyright (C) 2006-2013 Bjorn Buckwalter
    License    : BSD3
->
+
    Maintainer : bjorn.buckwalter@gmail.com
    Stability  : Stable
    Portability: GHC only?
->
+
 Please refer to the literate Haskell code for documentation of both API
 and implementation.
 -}
 
-module Numeric.Units.Dimensional
+module Numeric.Units.Dimensional.DK
       -- TODO discriminate exports, in particular Variants and Dims.
   where
 
@@ -81,15 +86,16 @@ import Prelude
   , (.), flip, show, (++), undefined, otherwise, (==), String, unwords
   , map, foldr, null, Integer
   )
-import qualified Prelude as P
+import qualified Prelude
 import Data.List (genericLength)
 import Data.Maybe (Maybe (Just, Nothing), catMaybes)
 import Data.Typeable (Typeable)
 import Numeric.NumType.DK
-  ( NumType, NonZero, PosType, Zero, toNum, Sum
-  , Pos1, Pos2, pos2, Pos3, pos3
+  ( NumType (P), ToInteger  --, NonZero, PosType,
+  , toNum, (+)(), (-)() --, Sum
+  , NT, NP, Zero, Pos1, Pos2, pos2, Pos3, pos3
   )
-import qualified Numeric.NumType.DK as N (Mul, Div)
+import qualified Numeric.NumType.DK as N
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -117,7 +123,8 @@ We call this data type 'Dimensional' to capture the notion that the
 units and quantities it represents have physical dimensions.
 -}
 
-newtype Dimensional v d a = Dimensional a deriving (Eq, Ord, Enum, Typeable)
+newtype Dimensional (v::Variant) d a
+      = Dimensional a deriving (Eq, Ord, Enum, Typeable)
 
 {-
 The type variable 'a' is the only non-phantom type variable and
@@ -136,8 +143,7 @@ The phantom type variable v is used to distinguish between units
 and quantities. It should be one of the following:
 -}
 
-data DUnit deriving Typeable
-data DQuantity deriving Typeable
+data Variant = DUnit | DQuantity deriving Typeable
 
 {-
 For convenience we define type synonyms for units and quantities.
@@ -259,35 +265,18 @@ Multiplication of dimensions corresponds to adding of the base
 dimensions' exponents.
 -}
 
-class Mul d d' d'' | d d' -> d'', d d'' -> d', d' d'' -> d
-instance (Sum l  l'  l'',
-          Sum m  m'  m'',
-          Sum t  t'  t'',
-          Sum i  i'  i'',
-          Sum th th' th'',
-          Sum n  n'  n'',
-          Sum j  j'  j'') => Mul (Dim l   m   t   i   th   n   j)
-                                 (Dim l'  m'  t'  i'  th'  n'  j')
-                                 (Dim l'' m'' t'' i'' th'' n'' j'')
+type family a * b where  -- constrain kinds??
+  (Dim l  m  t  i  th  n  j) * (Dim l' m' t' i' th' n' j')
+    = Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
 
 {-
 Division of dimensions corresponds to subtraction of the base
 dimensions' exponents.
 -}
 
-class Div d d' d'' | d d' -> d'', d d'' -> d', d' d'' -> d
-instance Mul d d' d'' => Div d'' d' d
-{-
-instance (Sum l  l'  l'',
-          Sum m  m'  m'',
-          Sum t  t'  t'',
-          Sum i  i'  i'',
-          Sum th th' th'',
-          Sum n  n'  n'',
-          Sum j  j'  j'') => Div (Dim l'' m'' t'' i'' th'' n'' j'')
-                                 (Dim l'  m'  t'  i'  th'  n'  j')
-                                 (Dim l   m   t   i   th   n   j)
--- -}
+type family a / d where
+  (Dim l  m  t  i  th  n  j) / (Dim l' m' t' i' th' n' j')
+    = Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j')
 
 {-
 We could provide the 'Mul' and 'Div' classes with full functional
@@ -306,30 +295,18 @@ Powers of dimensions corresponds to multiplication of the base
 dimensions' exponents by the exponent.
 -}
 
-class (NumType x) => Pow d x d' | d x -> d'
-instance (N.Mul l  x l',
-          N.Mul m  x m',
-          N.Mul t  x t',
-          N.Mul i  x i',
-          N.Mul th x th',
-          N.Mul n  x n',
-          N.Mul j  x j') => Pow (Dim l  m  t  i  th  n  j) x
-                                (Dim l' m' t' i' th' n' j')
+type family d ^ x where
+  (Dim l  m  t  i  th  n  j) ^ x
+    = Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
 
 {-
 Roots of dimensions corresponds to division of the base dimensions'
 exponents by order(?) of the root.
 -}
 
-class (NonZero x) => Root d x d' | d x -> d'
-instance (N.Div l  x l',
-          N.Div m  x m',
-          N.Div t  x t',
-          N.Div i  x i',
-          N.Div th x th',
-          N.Div n  x n',
-          N.Div j  x j') => Root (Dim l  m  t  i  th  n  j) x
-                                 (Dim l' m' t' i' th' n' j')
+type family Root d x where
+  Root (Dim l  m  t  i  th  n  j) x
+    = Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
 
 {-
 
@@ -342,16 +319,16 @@ forward. In particular the type signatures are much simplified.
 Multiplication, division and powers apply to both units and quantities.
 -}
 
-(*) :: (Num a, Mul d d' d'')
-    => Dimensional v d a -> Dimensional v d' a -> Dimensional v d'' a
+(*) :: Num a
+    => Dimensional v d a -> Dimensional v d' a -> Dimensional v (d * d') a
 Dimensional x * Dimensional y = Dimensional (x Prelude.* y)
 
-(/) :: (Fractional a, Div d d' d'')
-    => Dimensional v d a -> Dimensional v d' a -> Dimensional v d'' a
+(/) :: Fractional a
+    => Dimensional v d a -> Dimensional v d' a -> Dimensional v (d / d') a
 Dimensional x / Dimensional y = Dimensional (x Prelude./ y)
 
-(^) :: (Fractional a, Pow d n d')
-    => Dimensional v d a -> n -> Dimensional v d' a
+(^) :: (ToInteger (NT i), Fractional a)
+    => Dimensional v d a -> NT i -> Dimensional v (d ^ i) a
 Dimensional x ^ n = Dimensional (x Prelude.^^ (toNum n :: Integer))
 
 {-
@@ -360,8 +337,8 @@ non-fractional numbers we provide the alternative power operator
 '^+' that is restricted to positive exponents.
 -}
 
-(^+) :: (Num a, PosType n, Pow d n d')
-     => Dimensional v d a -> n -> Dimensional v d' a
+(^+) :: (ToInteger (NP n), Num a)
+     => Dimensional v d a -> NP n -> Dimensional v (d ^ P n) a
 Dimensional x ^+ n = Dimensional (x Prelude.^ (toNum n :: Integer))
 
 {-
@@ -398,16 +375,17 @@ Roots of arbitrary (integral) degree. Appears to occasionally be useful
 for units as well as quantities.
 -}
 
-nroot :: (Floating a, Root d n d') => n -> Dimensional v d a -> Dimensional v d' a
-nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ toNum n))
+nroot :: (Floating a, ToInteger (NT n))
+      => NT n -> Dimensional v d a -> Dimensional v (Root d n) a
+nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ N.toNum n))
 
 {-
 We provide short-hands for the square and cubic roots.
 -}
 
-sqrt :: (Floating a, Root d Pos2 d') => Dimensional v d a -> Dimensional v d' a
+sqrt :: Floating a => Dimensional v d a -> Dimensional v (Root d Pos2) a
 sqrt = nroot pos2
-cbrt :: (Floating a, Root d Pos3 d') => Dimensional v d a -> Dimensional v d' a
+cbrt :: Floating a => Dimensional v d a -> Dimensional v (Root d Pos3) a
 cbrt = nroot pos3
 
 {-
@@ -415,7 +393,8 @@ We also provide an operator alternative to nroot for those that
 prefer such.
 -}
 
-(^/) :: (Floating a, Root d n d') => Dimensional v d a -> n -> Dimensional v d' a
+(^/) :: (ToInteger (NT n), Floating a)
+     => Dimensional v d a -> NT n -> Dimensional v (Root d n) a
 (^/) = flip nroot
 
 {-
@@ -567,22 +546,22 @@ from its dimension.
 -}
 
 instance forall l m t i th n j.
-  ( NumType l
-  , NumType m
-  , NumType t
-  , NumType i
-  , NumType th
-  , NumType n
-  , NumType j
+  ( ToInteger (NT l)
+  , ToInteger (NT m)
+  , ToInteger (NT t)
+  , ToInteger (NT i)
+  , ToInteger (NT th)
+  , ToInteger (NT n)
+  , ToInteger (NT j)
   ) => Show (Dim l m t i th n j) where
   show _ = (unwords . catMaybes)
-           [ dimUnit "m"   (undefined :: l)
-           , dimUnit "kg"  (undefined :: m)
-           , dimUnit "s"   (undefined :: t)
-           , dimUnit "A"   (undefined :: i)
-           , dimUnit "K"   (undefined :: th)
-           , dimUnit "mol" (undefined :: n)
-           , dimUnit "cd"  (undefined :: j)
+           [ dimUnit "m"   (undefined :: NT l)
+           , dimUnit "kg"  (undefined :: NT m)
+           , dimUnit "s"   (undefined :: NT t)
+           , dimUnit "A"   (undefined :: NT i)
+           , dimUnit "K"   (undefined :: NT th)
+           , dimUnit "mol" (undefined :: NT n)
+           , dimUnit "cd"  (undefined :: NT j)
            ]
 
 {-
@@ -592,12 +571,12 @@ top-level rather than in the where-clause is that it may be useful for
 users of the 'Extensible' module.
 -}
 
-dimUnit :: (NumType n) => String -> n -> Maybe String
+dimUnit :: ToInteger (NT n) => String -> NT n -> Maybe String
 dimUnit u n
   | x == 0    = Nothing
   | x == 1    = Just u
   | otherwise = Just (u ++ "^" ++ show x)
-  where x = toNum n :: Integer
+  where x = N.toInteger n
 
 {-
 
