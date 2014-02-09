@@ -1,5 +1,5 @@
 Numeric.Dimensional.NonSI
-Bjorn Buckwalter, bjorn.buckwalter@gmail.com
+Bjorn Buckwalter, bjorn@buckwalter.se
 License: BSD3
 
 
@@ -13,10 +13,10 @@ Any chapters, sections or tables referenced are from [1] unless
 otherwise specified.
 
 > {- |
->    Copyright  : Copyright (C) 2006-2012 Bjorn Buckwalter
+>    Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
 >    License    : BSD3
 >
->    Maintainer : bjorn.buckwalter@gmail.com
+>    Maintainer : bjorn@buckwalter.se
 >    Stability  : Stable
 >    Portability: GHC only?
 >
@@ -69,12 +69,13 @@ gravity). I.e. g_0 = 1 gee.
 
 Some US customary (that is, inch-pound) units.
 
-> inch, foot :: Fractional a => Unit DLength a
+> inch, foot, mil :: Fractional a => Unit DLength a
 > inch = prefix 2.54 (centi meter)
 > foot = prefix 12 inch     -- 0.3048 m
+> mil  = prefix 0.001 inch
 > poundMass, ounce :: Fractional a => Unit DMass a
 > poundMass = prefix 0.45359237 (kilo gram)
-> ounce     = prefix 28.349523 gram
+> ounce     = prefix (1 Prelude./ 16) poundMass
 
 > poundForce :: Fractional a => Unit DForce a
 > poundForce = poundMass * gee  -- 4.4482 N
@@ -168,6 +169,21 @@ to 1 mmHg.
 
 > stokes :: (Fractional a) => Unit DKinematicViscosity a
 > stokes = centi meter ^ pos2 / second
+
+
+= Imperial Volumes =
+
+Per http://en.wikipedia.org/wiki/Imperial_units.
+
+> imperialGallon, imperialQuart, imperialPint, imperialCup,
+>                 imperialGill, imperialFluidOunce
+>                 :: (Fractional a) => Unit DVolume a
+> imperialGallon = prefix 4.54609 liter
+> imperialQuart  = prefix (1 Prelude./ 4) imperialGallon
+> imperialPint   = prefix (1 Prelude./ 8) imperialGallon
+> imperialCup    = prefix 0.5 imperialPint
+> imperialGill   = prefix (1 Prelude./ 4) imperialPint
+> imperialFluidOunce = prefix (1 Prelude./ 20) imperialPint
 
 
 = References =

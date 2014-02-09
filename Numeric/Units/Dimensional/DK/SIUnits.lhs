@@ -1,5 +1,5 @@
 Numeric.Dimensional.SIUnits
-Bjorn Buckwalter, bjorn.buckwalter@gmail.com
+Bjorn Buckwalter, bjorn@buckwalter.se
 License: BSD3
 
 
@@ -11,10 +11,10 @@ accepted for use with the SI. Any chapters, sections or tables
 referenced are from [1] unless otherwise specified.
 
 > {- |
->    Copyright  : Copyright (C) 2006-2012 Bjorn Buckwalter
+>    Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
 >    License    : BSD3
 >
->    Maintainer : bjorn.buckwalter@gmail.com
+>    Maintainer : bjorn@buckwalter.se
 >    Stability  : Stable
 >    Portability: GHC only?
 >
@@ -45,8 +45,8 @@ We define all SI prefixes from Table 5. Multiples first.
 >   :: Num a => Unit d a -> Unit d a
 > deka  = prefix 10 -- International English.
 > deca  = deka      -- American English.
-> hecto = deka . deka
-> kilo  = deka . hecto
+> hecto = prefix 100
+> kilo  = prefix 1000
 > mega  = kilo . kilo
 > giga  = kilo . mega
 > tera  = kilo . giga
@@ -60,15 +60,15 @@ Then the submultiples.
 > deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto
 >   :: Fractional a => Unit d a -> Unit d a
 > deci  = prefix 0.1
-> centi = deci . deci
-> milli = deci . centi
-> micro = milli . milli
-> nano  = milli . micro
-> pico  = milli . nano
-> femto = milli . pico
-> atto  = milli . femto
-> zepto = milli . atto
-> yocto = milli . zepto
+> centi = prefix 0.01
+> milli = prefix 1e-3
+> micro = prefix 1e-6
+> nano  = prefix 1e-9
+> pico  = prefix 1e-12
+> femto = prefix 1e-15
+> atto  = prefix 1e-18
+> zepto = prefix 1e-21
+> yocto = prefix 1e-24
 
 By defining SI prefixes as functions applied to a 'Unit' we satisfy
 section 6.2.6 "Unacceptability of stand-alone prefixes".
@@ -262,9 +262,17 @@ temperature.
 > tonne     = prefix 1000 (kilo gram) -- Name in original SI text.
 > metricTon = tonne                   -- American name.
 
+In 2012 the IAU redefined the astronomical unit as a conventional
+unit of length directly tied to the meter, with a length of exactly
+149,597,870,700 m and the official abbreviation of au[3].
+
+> astronomicalUnit :: Num a => Unit DLength a
+> astronomicalUnit = prefix 149597870700 meter
+
 
 = References =
 
 [1] http://physics.nist.gov/Pubs/SP811/
 [2] http://en.wikipedia.org/wiki/Minute_of_arc
+[3] http://en.wikipedia.org/wiki/Astronomical_unit
 
