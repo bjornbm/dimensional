@@ -28,15 +28,16 @@ Description:
 
 Category:            Math, Physics
 Build-Type:          Simple
-Build-Depends:       base < 5, time < 1.5,
-                     numtype-dk <= 0.2,
+Build-Depends:       base < 5,
+                     time < 1.5,
+                     numtype-dk < 0.3
 Exposed-Modules:     Numeric.Units.Dimensional.DK,
                      Numeric.Units.Dimensional.DK.Prelude,
                      Numeric.Units.Dimensional.DK.Quantities,
                      Numeric.Units.Dimensional.DK.SIUnits,
-                     Numeric.Units.Dimensional.DK.NonSI,
+                     Numeric.Units.Dimensional.DK.NonSI
 Extra-source-files:  README,
-                     Test.hs
+                     Test.hs,
                      Numeric/Units/Dimensional/DK/Test.hs,
                      Numeric/Units/Dimensional/DK/QuantitiesTest.hs,
                      examples/README,
