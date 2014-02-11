@@ -250,7 +250,7 @@ Multiplication of dimensions corresponds to adding of the base
 dimensions' exponents.
 -}
 
-type family a * b where  -- constrain kinds??
+type family (a::Dimensions) * (b::Dimensions) where  -- constrain kinds??
   (Dim l  m  t  i  th  n  j) * (Dim l' m' t' i' th' n' j')
     = Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
 
@@ -259,7 +259,7 @@ Division of dimensions corresponds to subtraction of the base
 dimensions' exponents.
 -}
 
-type family a / d where
+type family (a::Dimensions) / (d::Dimensions) where
   (Dim l  m  t  i  th  n  j) / (Dim l' m' t' i' th' n' j')
     = Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j')
 
@@ -280,7 +280,7 @@ Powers of dimensions corresponds to multiplication of the base
 dimensions' exponents by the exponent.
 -}
 
-type family d ^ x where
+type family (d::Dimensions) ^ (x::NumType) where
   (Dim l  m  t  i  th  n  j) ^ x
     = Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
 
@@ -289,7 +289,7 @@ Roots of dimensions corresponds to division of the base dimensions'
 exponents by order(?) of the root.
 -}
 
-type family Root d x where
+type family Root (d::Dimensions) (x::NumType) where
   Root (Dim l  m  t  i  th  n  j) x
     = Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
 
