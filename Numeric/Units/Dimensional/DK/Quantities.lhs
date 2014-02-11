@@ -316,12 +316,17 @@ provide some synonyms that we anticipate will be useful.
 > type DAngularMomentum = Dim Pos2 Pos1 Neg1 Zero Zero Zero Zero
 > type AngularMomentum = Quantity DAngularMomentum
 
-For these we don't bother defining new type synonyms for dimensionalities.
-Is this rational?
+> type Angle = PlaneAngle -- Abbreviation
+> type DAngle = DPlaneAngle -- Abbreviation
 
-> type Angle             = PlaneAngle -- Abbreviation
-> type Thrust            = Force
+> type Thrust = Force
+> type DThrust = DForce
+
+> type Torque = MomentOfForce
+> type DTorque = DMomentOfForce
+
 > type EnergyPerUnitMass = SpecificEnergy
+> type DEnergyPerUnitMass = DSpecificEnergy
 
 
 = References =
