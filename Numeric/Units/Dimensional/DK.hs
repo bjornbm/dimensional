@@ -115,7 +115,7 @@ We call this data type 'Dimensional' to capture the notion that the
 units and quantities it represents have physical dimensions.
 -}
 
-newtype Dimensional (v::Variant) (d::Dimensions) a
+newtype Dimensional (v::Variant) (d::Dimension) a
       = Dimensional a deriving (Eq, Ord, Enum)
 
 {-
@@ -186,7 +186,7 @@ using NumTypes. For convenience we collect all seven base dimensions
 in a data type 'Dim'.
 -}
 
-data Dimensions = Dim NumType NumType NumType NumType NumType NumType NumType
+data Dimension = Dim NumType NumType NumType NumType NumType NumType NumType
 
 {-
 where the respective dimensions are represented by type variables
@@ -250,7 +250,7 @@ Multiplication of dimensions corresponds to adding of the base
 dimensions' exponents.
 -}
 
-type family (a::Dimensions) * (b::Dimensions) where  -- constrain kinds??
+type family (a::Dimension) * (b::Dimension) where  -- constrain kinds??
   (Dim l  m  t  i  th  n  j) * (Dim l' m' t' i' th' n' j')
     = Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
 
@@ -259,7 +259,7 @@ Division of dimensions corresponds to subtraction of the base
 dimensions' exponents.
 -}
 
-type family (a::Dimensions) / (d::Dimensions) where
+type family (a::Dimension) / (d::Dimension) where
   (Dim l  m  t  i  th  n  j) / (Dim l' m' t' i' th' n' j')
     = Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j')
 
@@ -280,7 +280,7 @@ Powers of dimensions corresponds to multiplication of the base
 dimensions' exponents by the exponent.
 -}
 
-type family (d::Dimensions) ^ (x::NumType) where
+type family (d::Dimension) ^ (x::NumType) where
   (Dim l  m  t  i  th  n  j) ^ x
     = Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
 
@@ -289,7 +289,7 @@ Roots of dimensions corresponds to division of the base dimensions'
 exponents by order(?) of the root.
 -}
 
-type family Root (d::Dimensions) (x::NumType) where
+type family Root (d::Dimension) (x::NumType) where
   Root (Dim l  m  t  i  th  n  j) x
     = Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
 

@@ -32,7 +32,7 @@ dimensionality type synonyms are provided for each quantity type.
 > module Numeric.Units.Dimensional.DK.Quantities where
 
 > import Numeric.Units.Dimensional.DK
->   ( Dimensions (Dim), Quantity, Dimensionless
+>   ( Dimension (Dim), Quantity, Dimensionless
 >   , DOne, DLuminousIntensity, DThermodynamicTemperature
 >   , Unit, DLength, (^+) -- Used only for 'square' and 'cubic'.
 >   )
