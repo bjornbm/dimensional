@@ -92,6 +92,7 @@ Pounds of force per square inch.
 > yard = prefix 3 foot
 > mile = prefix 1760 yard
 > nauticalMile = prefix 1852 meter
+> knot = nauticalMile / hour
 > revolution :: (Floating a) => Unit DOne a
 > revolution = prefix (2 Prelude.* Prelude.pi) radian
 > solid :: (Floating a) => Unit DOne a
