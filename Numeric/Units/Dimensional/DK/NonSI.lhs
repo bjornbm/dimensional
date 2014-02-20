@@ -80,6 +80,11 @@ Some US customary (that is, inch-pound) units.
 > poundForce :: Fractional a => Unit DForce a
 > poundForce = poundMass * gee  -- 4.4482 N
 
+The slug is an alternative unit of mass defined in terms of the pound-force.
+
+> slug :: Fractional a => Unit DMass a
+> slug = poundForce * (second^pos2) / foot
+
 Pounds of force per square inch.
 
 > psi :: Fractional a => Unit DPressure a
