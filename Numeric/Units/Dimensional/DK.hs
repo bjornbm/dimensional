@@ -416,9 +416,7 @@ The arithmetic mean of all elements in a list.
 mean :: forall a d f.(Fractional a, Foldable f) => f (Quantity d a) -> Quantity d a
 mean = div . foldr f (_0 :: Quantity d a, 0 :: Int)
      where
-       f :: Quantity d a -> (Quantity d a, Int) -> (Quantity d a, Int)
        f val (accum, count) = (accum + val, count Prelude.+ 1)
-       div :: (Quantity d a, Int) -> Quantity d a
        div (Dimensional accum, count) = Dimensional (accum Prelude./ (Prelude.fromIntegral count))
 
 {-
