@@ -573,10 +573,11 @@ instance ( ToInteger (NT l)
          , Show a) =>
   Show (Quantity (Dim l m t i th n j) a)
     where
-      show (Dimensional x) = let dims = asList $ toSIBasis (Proxy :: Proxy (Dim l m t i th n j))
+      show (Dimensional x) = let powers = asList $ toSIBasis (Proxy :: Proxy (Dim l m t i th n j))
                                  units = ["m", "kg", "s", "A", "K", "mol", "cd"]
-                                 powers = zipWith dimUnit units dims
-                             in unwords (show x : catMaybes powers)
+                                 dims = zipWith dimUnit units powers
+                                 unit = unwords $ ("" : catMaybes dims)
+                             in (show x) ++ unit
 
 {-
 The above implementation of 'show' relies on the dimension 'd' being an
