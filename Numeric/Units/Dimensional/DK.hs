@@ -77,7 +77,7 @@ module Numeric.Units.Dimensional.DK
 import Prelude
   ( Show, Eq, Ord, Enum, Num, Fractional, Floating, RealFloat, Functor, fmap
   , (.), flip, show, (++), undefined, otherwise, (==), String, unwords
-  , map, null, Integer
+  , map, null, Integer, Int
   )
 import qualified Prelude
 import Data.List (genericLength)
@@ -408,6 +408,18 @@ The sum of all elements in a list.
 
 sum :: (Num a, Foldable f) => f (Quantity d a) -> Quantity d a
 sum = foldr (+) _0
+
+{-
+The arithmetic mean of all elements in a list.
+-}
+
+mean :: forall a d f.(Fractional a, Foldable f) => f (Quantity d a) -> Quantity d a
+mean = div . foldr f (_0 :: Quantity d a, 0 :: Int)
+     where
+       f :: Quantity d a -> (Quantity d a, Int) -> (Quantity d a, Int)
+       f val (accum, count) = (accum + val, count Prelude.+ 1)
+       div :: (Quantity d a, Int) -> Quantity d a
+       div (Dimensional accum, count) = Dimensional (accum Prelude./ (Prelude.fromIntegral count))
 
 {-
 The length of the list as a 'Dimensionless'. This can be useful for
