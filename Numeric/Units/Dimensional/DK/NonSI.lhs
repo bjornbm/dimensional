@@ -80,6 +80,11 @@ Some US customary (that is, inch-pound) units.
 > poundForce :: Fractional a => Unit DForce a
 > poundForce = poundMass * gee  -- 4.4482 N
 
+The slug is an alternative unit of mass defined in terms of the pound-force.
+
+> slug :: Fractional a => Unit DMass a
+> slug = poundForce * (second^pos2) / foot
+
 Pounds of force per square inch.
 
 > psi :: Fractional a => Unit DPressure a
@@ -92,6 +97,8 @@ Pounds of force per square inch.
 > yard = prefix 3 foot
 > mile = prefix 1760 yard
 > nauticalMile = prefix 1852 meter
+> knot :: (Fractional a) => Unit DVelocity a
+> knot = nauticalMile / hour
 > revolution :: (Floating a) => Unit DOne a
 > revolution = prefix (2 Prelude.* Prelude.pi) radian
 > solid :: (Floating a) => Unit DOne a

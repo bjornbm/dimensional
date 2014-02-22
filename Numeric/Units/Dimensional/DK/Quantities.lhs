@@ -316,6 +316,9 @@ provide some synonyms that we anticipate will be useful.
 > type DAngularMomentum = Dim Pos2 Pos1 Neg1 Zero Zero Zero Zero
 > type AngularMomentum = Quantity DAngularMomentum
 
+> type DJerk = Dim Pos1 Zero Neg3 Zero Zero Zero Zero
+> type Jerk = Quantity DJerk
+
 > type Angle = PlaneAngle -- Abbreviation
 > type DAngle = DPlaneAngle -- Abbreviation
 
