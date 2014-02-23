@@ -253,6 +253,8 @@ dimensions' exponents.
 -}
 
 type family (a::Dimension) * (b::Dimension) where  -- constrain kinds??
+  DOne * d = d
+  d * DOne = d
   (Dim l  m  t  i  th  n  j) * (Dim l' m' t' i' th' n' j')
     = Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
 
@@ -284,6 +286,9 @@ dimensions' exponents by the exponent.
 -}
 
 type family (d::Dimension) ^ (x::NumType) where
+  DOne ^ x = DOne
+  d ^ Zero = DOne
+  d ^ Pos1 = d
   (Dim l  m  t  i  th  n  j) ^ x
     = Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
 
@@ -293,6 +298,8 @@ exponents by order(?) of the root.
 -}
 
 type family Root (d::Dimension) (x::NumType) where
+  Root DOne x = DOne
+  Root d Pos1 = d
   Root (Dim l  m  t  i  th  n  j) x
     = Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
 
