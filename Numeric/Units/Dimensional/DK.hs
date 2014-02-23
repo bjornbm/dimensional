@@ -324,7 +324,7 @@ Dimensional x / Dimensional y = Dimensional (x Prelude./ y)
 
 (^) :: (ToInteger (NT i), Fractional a)
     => Dimensional v d a -> NT i -> Dimensional v (d ^ i) a
-Dimensional x ^ n = Dimensional (x Prelude.^^ (toNum n :: Integer))
+Dimensional x ^ n = Dimensional (x Prelude.^^ toNum n)
 
 {-
 In the unlikely case someone needs to use this library with
@@ -334,7 +334,7 @@ non-fractional numbers we provide the alternative power operator
 
 (^+) :: (ToInteger (NP n), Num a)
      => Dimensional v d a -> NP n -> Dimensional v (d ^ P n) a
-Dimensional x ^+ n = Dimensional (x Prelude.^ (toNum n :: Integer))
+Dimensional x ^+ n = Dimensional (x Prelude.^ toNum n)
 
 {-
 A special case is that dimensionless quantities are not restricted
@@ -349,20 +349,20 @@ Of these, negation, addition and subtraction are particularly simple
 as they are done in a single physical dimension.
 -}
 
-negate :: (Num a) => Quantity d a -> Quantity d a
+negate :: Num a => Quantity d a -> Quantity d a
 negate (Dimensional x) = Dimensional (Prelude.negate x)
 
-(+) :: (Num a) => Quantity d a -> Quantity d a -> Quantity d a
+(+) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
 Dimensional x + Dimensional y = Dimensional (x Prelude.+ y)
 
-(-) :: (Num a) => Quantity d a -> Quantity d a -> Quantity d a
+(-) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
 x - y = x + negate y
 
 {-
 Absolute value.
 -}
 
-abs :: (Num a) => Quantity d a -> Quantity d a
+abs :: Num a => Quantity d a -> Quantity d a
 abs (Dimensional x) = Dimensional (Prelude.abs x)
 
 {-
@@ -453,7 +453,7 @@ that may be obviously useful.
 -}
 
 exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh
-  :: (Floating a) => Dimensionless a -> Dimensionless a
+  :: Floating a => Dimensionless a -> Dimensionless a
 exp   = fmap Prelude.exp
 log   = fmap Prelude.log
 sin   = fmap Prelude.sin
@@ -469,8 +469,7 @@ asinh = fmap Prelude.asinh
 acosh = fmap Prelude.acosh
 atanh = fmap Prelude.atanh
 
-(**) :: (Floating a)
-     => Dimensionless a -> Dimensionless a -> Dimensionless a
+(**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
 Dimensional x ** Dimensional y = Dimensional (x Prelude.** y)
 
 {-
@@ -478,8 +477,7 @@ For 'atan2' the operands need not be dimensionless but they must be
 of the same type. The result will of course always be dimensionless.
 -}
 
-atan2 :: (RealFloat a)
-      => Quantity d a -> Quantity d a -> Dimensionless a
+atan2 :: RealFloat a => Quantity d a -> Quantity d a -> Dimensionless a
 atan2 (Dimensional y) (Dimensional x) = Dimensional (Prelude.atan2 y x)
 
 {-
@@ -506,7 +504,7 @@ it to express zero Length or Capacitance or Velocity etc, in addition
 to the dimensionless value zero.
 -}
 
-_0 :: (Num a) => Quantity d a
+_0 :: Num a => Quantity d a
 _0 = Dimensional 0
 
 _1, _2, _3, _4, _5, _6, _7, _8, _9 :: (Num a) => Dimensionless a
@@ -525,7 +523,7 @@ For background on 'tau' see http://tauday.com/tau-manifesto (but also
 feel free to review http://www.thepimanifesto.com).
 -}
 
-pi, tau :: (Floating a) => Dimensionless a
+pi, tau :: Floating a => Dimensionless a
 pi = Prelude.pi *~ one
 tau = _2 * pi
 
@@ -541,18 +539,17 @@ At the term level, Dimension' encodes a dimension as 7 integers, representing a 
 
 -}
 
-data Dimension' = Dim' Int Int Int Int Int Int Int
-  deriving (Show,Eq,Ord)
+data Dimension' = Dim' Int Int Int Int Int Int Int deriving (Show,Eq,Ord)
 
 toSIBasis :: forall l m t i th n j.
-             (ToInteger (NT l),
-              ToInteger (NT m),
-              ToInteger (NT t),
-              ToInteger (NT i),
-              ToInteger (NT th),
-              ToInteger (NT n),
-              ToInteger (NT j))
-          => Proxy (Dim l m t i th n j) -> Dimension'
+           ( ToInteger (NT l)
+           , ToInteger (NT m)
+           , ToInteger (NT t)
+           , ToInteger (NT i)
+           , ToInteger (NT th)
+           , ToInteger (NT n)
+           , ToInteger (NT j)
+           ) => Proxy (Dim l m t i th n j) -> Dimension'
 toSIBasis _ = Dim'
                 (toNum (undefined :: NT l))
                 (toNum (undefined :: NT m))
@@ -563,15 +560,15 @@ toSIBasis _ = Dim'
                 (toNum (undefined :: NT j))
 
 getSIBasis :: forall v a l m t i th n j d.
-             (ToInteger (NT l),
-              ToInteger (NT m),
-              ToInteger (NT t),
-              ToInteger (NT i),
-              ToInteger (NT th),
-              ToInteger (NT n),
-              ToInteger (NT j),
-              d ~ Dim l m t i th n j)
-           => Dimensional v d a -> Dimension'
+            ( ToInteger (NT l)
+            , ToInteger (NT m)
+            , ToInteger (NT t)
+            , ToInteger (NT i)
+            , ToInteger (NT th)
+            , ToInteger (NT n)
+            , ToInteger (NT j)
+            , d ~ Dim l m t i th n j
+            ) => Dimensional v d a -> Dimension'
 getSIBasis _ = toSIBasis (Proxy :: Proxy d)
 
 {-
@@ -636,7 +633,7 @@ a unit. The 'prefix' function will be used by other modules to
 define the SI prefixes and non-SI units.
 -}
 
-prefix :: (Num a) => a -> Unit d a -> Unit d a
+prefix :: Num a => a -> Unit d a -> Unit d a
 prefix x (Dimensional y) = Dimensional (x Prelude.* y)
 
 {-
