@@ -526,23 +526,15 @@ At the term level, Dimension' encodes a dimension as 7 integers, representing a 
 data Dimension' = Dim' Int Int Int Int Int Int Int
   deriving (Show,Eq,Ord)
 
-toSIBasis :: forall (d :: Dimension)
-                    (l :: NumType)
-                    (m :: NumType)
-                    (t :: NumType)
-                    (i :: NumType)
-                    (th :: NumType)
-                    (n :: NumType)
-                    (j :: NumType).
-             (d ~ Dim l m t i th n j,
-              ToInteger (NT l),
+toSIBasis :: forall l m t i th n j.
+             (ToInteger (NT l),
               ToInteger (NT m),
               ToInteger (NT t),
               ToInteger (NT i),
               ToInteger (NT th),
               ToInteger (NT n),
               ToInteger (NT j))
-             => Proxy d -> Dimension'
+          => Proxy (Dim l m t i th n j) -> Dimension'
 toSIBasis _ = Dim'
                 (toNum (undefined :: NT l))
                 (toNum (undefined :: NT m))
