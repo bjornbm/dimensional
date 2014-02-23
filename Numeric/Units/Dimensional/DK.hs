@@ -523,7 +523,7 @@ At the term level, Dimension' encodes a dimension as 7 integers, representing a 
 
 -}
 
-data Dimension' = Dimension' Int Int Int Int Int Int Int
+data Dimension' = Dim' Int Int Int Int Int Int Int
   deriving (Show,Eq,Ord)
 
 toSIBasis :: forall (d :: Dimension)
@@ -543,7 +543,7 @@ toSIBasis :: forall (d :: Dimension)
               ToInteger (NT n),
               ToInteger (NT j))
              => Proxy d -> Dimension'
-toSIBasis _ = Dimension'
+toSIBasis _ = Dim'
                 (toNum (undefined :: NT l))
                 (toNum (undefined :: NT m))
                 (toNum (undefined :: NT t))
@@ -604,7 +604,7 @@ The helper function asList converts a Dimension' value to a list of integers whi
 -}
 
 asList :: Dimension' -> [Int]
-asList (Dimension' l m t i th n j) = [l, m, t, i, th, n, j]
+asList (Dim' l m t i th n j) = [l, m, t, i, th, n, j]
 
 {-
 
