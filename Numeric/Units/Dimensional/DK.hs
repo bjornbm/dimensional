@@ -544,6 +544,17 @@ toSIBasis _ = Dim'
                 (toNum (undefined :: NT n))
                 (toNum (undefined :: NT j))
 
+getSIBasis :: forall v a l m t i th n j d.
+             (ToInteger (NT l),
+              ToInteger (NT m),
+              ToInteger (NT t),
+              ToInteger (NT i),
+              ToInteger (NT th),
+              ToInteger (NT n),
+              ToInteger (NT j),
+              d ~ Dim l m t i th n j)
+           => Dimensional v d a -> Dimension'
+getSIBasis _ = toSIBasis (Proxy :: Proxy d)
 
 {-
 
@@ -565,11 +576,11 @@ instance ( ToInteger (NT l)
          , Show a) =>
   Show (Quantity (Dim l m t i th n j) a)
     where
-      show (Dimensional x) = let powers = asList $ toSIBasis (Proxy :: Proxy (Dim l m t i th n j))
-                                 units = ["m", "kg", "s", "A", "K", "mol", "cd"]
-                                 dims = zipWith dimUnit units powers
-                                 unit = unwords $ ("" : catMaybes dims)
-                             in (show x) ++ unit
+      show q@(Dimensional x) = let powers = asList $ getSIBasis q
+                                   units = ["m", "kg", "s", "A", "K", "mol", "cd"]
+                                   dims = zipWith dimUnit units powers
+                                   unit = unwords $ ("" : catMaybes dims)
+                               in show x ++ unit
 
 {-
 The above implementation of 'show' relies on the dimension 'd' being an
