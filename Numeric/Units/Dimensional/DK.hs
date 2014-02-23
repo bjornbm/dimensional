@@ -77,7 +77,7 @@ module Numeric.Units.Dimensional.DK
 import Prelude
   ( Show, Eq, Ord, Enum, Num, Fractional, Floating, RealFloat, Functor, fmap
   , (.), flip, show, (++), undefined, otherwise, (==), String, unwords
-  , map, foldr, null, Integer
+  , map, foldr, null, Integer, Int, ($), zipWith
   )
 import qualified Prelude
 import Data.List (genericLength)
@@ -88,6 +88,7 @@ import Numeric.NumType.DK
   , ToInteger, toNum
   )
 import qualified Numeric.NumType.DK as N
+import Data.Proxy (Proxy(..))
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -512,6 +513,48 @@ tau = _2 * pi
 
 {-
 
+= Term Level Representation of Dimensions =
+
+To facilitate parsing and pretty-printing functions that may wish to operate on term-level representations of dimension,
+we provide a means for converting from type-level dimensions to term-level dimensions.
+
+At the term level, Dimension' encodes a dimension as 7 integers, representing a factorization of the dimension into the
+7 SI base dimensions.
+
+-}
+
+data Dimension' = Dimension' Int Int Int Int Int Int Int
+  deriving (Show,Eq,Ord)
+
+toSIBasis :: forall (d :: Dimension)
+                    (l :: NumType)
+                    (m :: NumType)
+                    (t :: NumType)
+                    (i :: NumType)
+                    (th :: NumType)
+                    (n :: NumType)
+                    (j :: NumType).
+             (d ~ Dim l m t i th n j,
+              ToInteger (NT l),
+              ToInteger (NT m),
+              ToInteger (NT t),
+              ToInteger (NT i),
+              ToInteger (NT th),
+              ToInteger (NT n),
+              ToInteger (NT j))
+             => Proxy d -> Dimension'
+toSIBasis _ = Dimension'
+                (toNum (undefined :: NT l))
+                (toNum (undefined :: NT m))
+                (toNum (undefined :: NT t))
+                (toNum (undefined :: NT i))
+                (toNum (undefined :: NT th))
+                (toNum (undefined :: NT n))
+                (toNum (undefined :: NT j))
+
+
+{-
+
 = Instances of 'Show' =
 
 We will conclude by providing a reasonable 'Show' instance for
@@ -530,15 +573,11 @@ instance ( ToInteger (NT l)
          , Show a) =>
   Show (Quantity (Dim l m t i th n j) a)
     where
-      show (Dimensional x) = let units = [ dimUnit "m"   (undefined :: NT l)
-                                         , dimUnit "kg"  (undefined :: NT m)
-                                         , dimUnit "s"   (undefined :: NT t)
-                                         , dimUnit "A"   (undefined :: NT i)
-                                         , dimUnit "K"   (undefined :: NT th)
-                                         , dimUnit "mol" (undefined :: NT n)
-                                         , dimUnit "cd"  (undefined :: NT j)
-                                         ]
-                             in unwords (show x : catMaybes units)
+      show (Dimensional x) = let powers = asList $ toSIBasis (Proxy :: Proxy (Dim l m t i th n j))
+                                 units = ["m", "kg", "s", "A", "K", "mol", "cd"]
+                                 dims = zipWith dimUnit units powers
+                                 unit = unwords $ ("" : catMaybes dims)
+                             in (show x) ++ unit
 
 {-
 The above implementation of 'show' relies on the dimension 'd' being an
@@ -554,11 +593,18 @@ top-level rather than in the where-clause is that it may be useful for
 users of the 'Extensible' module.
 -}
 
-dimUnit :: ToInteger (NT n) => String -> NT n -> Maybe String
-dimUnit u n = case N.toInteger n of
+dimUnit :: String -> Int -> Maybe String
+dimUnit u n = case n of
                 0 -> Nothing
                 1 -> Just u
                 n -> Just (u ++ "^" ++ show n)
+
+{-
+The helper function asList converts a Dimension' value to a list of integers which may be easier to manipulate.
+-}
+
+asList :: Dimension' -> [Int]
+asList (Dimension' l m t i th n j) = [l, m, t, i, th, n, j]
 
 {-
 
