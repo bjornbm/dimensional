@@ -90,6 +90,7 @@ import Numeric.NumType.DK
 import qualified Numeric.NumType.DK as N
 import Data.Proxy (Proxy(..))
 import Data.Foldable (Foldable(foldr, foldl'))
+import Data.Monoid (Monoid(..))
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -391,6 +392,14 @@ prefer such.
 (^/) :: (ToInteger (NT n), Floating a)
      => Dimensional v d a -> NT n -> Dimensional v (Root d n) a
 (^/) = flip nroot
+
+{-
+Since quantities form a monoid under addition, but not under multiplication unless they are dimensionless,
+we will define a monoid instance that adds.
+-}
+instance (Num a) => Monoid (Quantity d a) where
+  mempty = _0
+  mappend = (+)
 
 {-
 
