@@ -89,7 +89,7 @@ import Numeric.NumType.DK
   )
 import qualified Numeric.NumType.DK as N
 import Data.Proxy (Proxy(..))
-import Data.Foldable (Foldable(foldr))
+import Data.Foldable (Foldable(foldr, foldl'))
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -567,7 +567,10 @@ getSIBasis _ = toSIBasis (Proxy :: Proxy d)
 = Instances of 'Show' =
 
 We will conclude by providing a reasonable 'Show' instance for
-quantities. We neglect units since it is unclear how to represent them
+quantities. The “normalized” unit of the quantity is inferred
+from its dimension.
+
+We neglect units since it is unclear how to represent them
 in a way that distinguishes them from quantities, or whether that is
 even a requirement.
 -}
@@ -576,15 +579,7 @@ instance (ToSIBasis d, Show a) => Show (Quantity d a) where
       show q@(Dimensional x) = let powers = asList $ getSIBasis q
                                    units = ["m", "kg", "s", "A", "K", "mol", "cd"]
                                    dims = zipWith dimUnit units powers
-                                   unit = unwords $ ("" : catMaybes dims)
-                               in show x ++ unit
-
-{-
-The above implementation of 'show' relies on the dimension 'd' being an
-instance of 'Show'. The "normalized" unit of the quantity can be inferred
-from its dimension.
--}
-
+                               in foldl' (++) (show x) dims
 
 {-
 The helper function 'dimUnit' defined next conditions a 'String' (unit)
@@ -593,11 +588,11 @@ top-level rather than in the where-clause is that it may be useful for
 users of the 'Extensible' module.
 -}
 
-dimUnit :: String -> Int -> Maybe String
+dimUnit :: String -> Int -> String
 dimUnit u n = case n of
-                0 -> Nothing
-                1 -> Just u
-                n -> Just (u ++ "^" ++ show n)
+                0 -> ""
+                1 -> " " ++ u
+                n -> " " ++ u ++ "^" ++ show n
 
 {-
 The helper function asList converts a Dimension' value to a list of integers which may be easier to manipulate.
