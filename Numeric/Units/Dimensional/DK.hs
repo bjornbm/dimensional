@@ -541,16 +541,16 @@ At the term level, Dimension' encodes a dimension as 7 integers, representing a 
 
 data Dimension' = Dim' Int Int Int Int Int Int Int deriving (Show,Eq,Ord)
 
-toSIBasis :: forall l m t i th n j.
-           ( ToInteger (NT l)
-           , ToInteger (NT m)
-           , ToInteger (NT t)
-           , ToInteger (NT i)
-           , ToInteger (NT th)
-           , ToInteger (NT n)
-           , ToInteger (NT j)
-           ) => Proxy (Dim l m t i th n j) -> Dimension'
-toSIBasis _ = Dim'
+class ToSIBasis (d::Dimension) where toSIBasis :: Proxy d -> Dimension'
+instance ( ToInteger (NT l)
+         , ToInteger (NT m)
+         , ToInteger (NT t)
+         , ToInteger (NT i)
+         , ToInteger (NT th)
+         , ToInteger (NT n)
+         , ToInteger (NT j)
+         ) => ToSIBasis (Dim l m t i th n j)
+  where toSIBasis _ = Dim'
                 (toNum (undefined :: NT l))
                 (toNum (undefined :: NT m))
                 (toNum (undefined :: NT t))
@@ -559,16 +559,7 @@ toSIBasis _ = Dim'
                 (toNum (undefined :: NT n))
                 (toNum (undefined :: NT j))
 
-getSIBasis :: forall v a l m t i th n j d.
-            ( ToInteger (NT l)
-            , ToInteger (NT m)
-            , ToInteger (NT t)
-            , ToInteger (NT i)
-            , ToInteger (NT th)
-            , ToInteger (NT n)
-            , ToInteger (NT j)
-            , d ~ Dim l m t i th n j
-            ) => Dimensional v d a -> Dimension'
+getSIBasis :: forall v d a. ToSIBasis d => Dimensional v d a -> Dimension'
 getSIBasis _ = toSIBasis (Proxy :: Proxy d)
 
 {-
@@ -581,16 +572,7 @@ in a way that distinguishes them from quantities, or whether that is
 even a requirement.
 -}
 
-instance ( ToInteger (NT l)
-         , ToInteger (NT m)
-         , ToInteger (NT t)
-         , ToInteger (NT i)
-         , ToInteger (NT th)
-         , ToInteger (NT n)
-         , ToInteger (NT j)
-         , Show a) =>
-  Show (Quantity (Dim l m t i th n j) a)
-    where
+instance (ToSIBasis d, Show a) => Show (Quantity d a) where
       show q@(Dimensional x) = let powers = asList $ getSIBasis q
                                    units = ["m", "kg", "s", "A", "K", "mol", "cd"]
                                    dims = zipWith dimUnit units powers
