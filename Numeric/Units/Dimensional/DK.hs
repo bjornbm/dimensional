@@ -71,7 +71,6 @@ and implementation.
 -}
 
 module Numeric.Units.Dimensional.DK
-      -- TODO discriminate exports, in particular Variants and Dims.
   ( (^), (^+), (^/), (**), (*), (/), (+), (-), (*~), (/~),
     Dimensional(..), -- constructor to be hidden in future refactoring?
     Variant(..), Unit, Quantity, Dimension(..),
