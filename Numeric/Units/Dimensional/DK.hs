@@ -550,7 +550,7 @@ At the term level, Dimension' encodes a dimension as 7 integers, representing a 
 
 data Dimension' = Dim' Int Int Int Int Int Int Int deriving (Show,Eq,Ord)
 
-class ToSIBasis (d::Dimension) where toSIBasis :: Proxy d -> Dimension'
+class KnownDimension (d::Dimension) where toSIBasis :: Proxy d -> Dimension'
 instance ( ToInteger (NT l)
          , ToInteger (NT m)
          , ToInteger (NT t)
@@ -558,7 +558,7 @@ instance ( ToInteger (NT l)
          , ToInteger (NT th)
          , ToInteger (NT n)
          , ToInteger (NT j)
-         ) => ToSIBasis (Dim l m t i th n j)
+         ) => KnownDimension (Dim l m t i th n j)
   where toSIBasis _ = Dim'
                 (toNum (undefined :: NT l))
                 (toNum (undefined :: NT m))
@@ -568,7 +568,7 @@ instance ( ToInteger (NT l)
                 (toNum (undefined :: NT n))
                 (toNum (undefined :: NT j))
 
-getSIBasis :: forall v d a. ToSIBasis d => Dimensional v d a -> Dimension'
+getSIBasis :: forall v d a. KnownDimension d => Dimensional v d a -> Dimension'
 getSIBasis _ = toSIBasis (Proxy :: Proxy d)
 
 {-
@@ -584,7 +584,7 @@ in a way that distinguishes them from quantities, or whether that is
 even a requirement.
 -}
 
-instance (ToSIBasis d, Show a) => Show (Quantity d a) where
+instance (KnownDimension d, Show a) => Show (Quantity d a) where
       show q@(Dimensional x) = let powers = asList $ getSIBasis q
                                    units = ["m", "kg", "s", "A", "K", "mol", "cd"]
                                    dims = zipWith dimUnit units powers
