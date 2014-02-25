@@ -254,6 +254,9 @@ temperature.
 > secondOfArc = arcsecond
 > minuteOfArc = arcminute
 
+> hectare :: Fractional a => Unit DArea a
+> hectare = square (hecto meter)
+
 > litre, liter :: Fractional a => Unit DVolume a
 > litre = deci meter ^ pos3 -- International English.
 > liter = litre             -- American English.

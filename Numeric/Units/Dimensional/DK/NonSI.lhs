@@ -105,6 +105,8 @@ Pounds of force per square inch.
 > solid = prefix (4 Prelude.* Prelude.pi) steradian
 > teaspoon :: (Fractional a) => Unit DVolume a
 > teaspoon = prefix 5 (milli liter)
+> acre :: (Fractional a) => Unit DArea a
+> acre = prefix 43560 (square foot)
 
 The IAU recommends[2] that:
 
