@@ -182,7 +182,7 @@ to 1 mmHg.
 
 = Imperial Volumes =
 
-Per http://en.wikipedia.org/wiki/Imperial_units.
+Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki/Cup_(unit)#Imperial_cup.
 
 > imperialGallon, imperialQuart, imperialPint, imperialCup,
 >                 imperialGill, imperialFluidOunce
