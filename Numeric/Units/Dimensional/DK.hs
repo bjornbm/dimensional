@@ -71,7 +71,19 @@ and implementation.
 -}
 
 module Numeric.Units.Dimensional.DK
-      -- TODO discriminate exports, in particular Variants and Dims.
+  ( (^), (^+), (^/), (**), (*), (/), (+), (-), (*~), (/~),
+    Dimensional(..), -- constructor to be hidden in future refactoring?
+    Variant(..), Unit, Quantity, Dimension(..),
+    DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
+    Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity,
+    type (*), type (/), type (^), Root,
+    negate, abs, nroot, sqrt, cbrt,
+    (*~~), (/~~), sum, mean, dimensionlessLength,
+    exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
+    one, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
+    Dimension'(..), KnownDimension, toSIBasis, getSIBasis, 
+    prefix,
+  )
   where
 
 import Prelude
