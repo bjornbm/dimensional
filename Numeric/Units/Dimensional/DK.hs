@@ -72,8 +72,8 @@ and implementation.
 
 module Numeric.Units.Dimensional.DK
   ( (^), (^+), (^/), (**), (*), (/), (+), (-), (*~), (/~),
-    Dimensional(..), -- constructor to be hidden in future refactoring?
-    Variant(..), Unit, Quantity, Dimension(..),
+    Dimensional (Dimensional),
+    Unit, Quantity, Dimension (Dim),
     DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
     Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity,
     type (*), type (/), type (^), Root,
@@ -81,7 +81,7 @@ module Numeric.Units.Dimensional.DK
     (*~~), (/~~), sum, mean, dimensionlessLength,
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
     one, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
-    Dimension'(..), KnownDimension, toSIBasis, getSIBasis, 
+    Dimension' (Dim'), KnownDimension, toSIBasis, getSIBasis, 
     prefix,
   )
   where
