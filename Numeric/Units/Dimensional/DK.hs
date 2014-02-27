@@ -88,7 +88,7 @@ module Numeric.Units.Dimensional.DK
   where
 
 import Prelude
-  ( Show, Eq, Ord, Enum, Num, Fractional, Floating, RealFloat, Functor, fmap
+  ( Show, Eq, Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
   , (.), flip, show, (++), undefined, otherwise, (==), String, unwords
   , map, null, Integer, Int, ($), zipWith, uncurry, realToFrac
   )
