@@ -83,6 +83,7 @@ module Numeric.Units.Dimensional.DK
     one, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     Dimension' (Dim'), KnownDimension, toSIBasis, getSIBasis, 
     prefix,
+    convert, convertWith
   )
   where
 
@@ -466,7 +467,7 @@ We provide this freedom by making 'Dimensionless' an instance of
 -}
 
 instance Functor Dimensionless where
-  fmap f (Dimensional x) = Dimensional (f x)
+  fmap = convertWith
 
 {-
 We continue by defining elementary functions on 'Dimensionless'
@@ -547,6 +548,21 @@ feel free to review http://www.thepimanifesto.com).
 pi, tau :: Floating a => Dimensionless a
 pi = Prelude.pi *~ one
 tau = _2 * pi
+
+{-
+
+= Conversion Between Number Representations =
+
+We provide a convenience function for converting numerical types while retaining dimensional information.
+Another flavor works with a user-supplied conversion function.
+
+-}
+
+convertWith :: (a -> b) -> Dimensional v d a -> Dimensional v d b
+convertWith f (Dimensional x) = Dimensional (f x)
+
+convert :: (Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
+convert = convertWith (fromRational . toRational)
 
 {-
 
