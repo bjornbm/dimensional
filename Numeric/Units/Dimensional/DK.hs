@@ -90,7 +90,7 @@ module Numeric.Units.Dimensional.DK
 import Prelude
   ( Show, Eq, Ord, Enum, Num, Fractional, Floating, RealFloat, Functor, fmap
   , (.), flip, show, (++), undefined, otherwise, (==), String, unwords
-  , map, null, Integer, Int, ($), zipWith, uncurry
+  , map, null, Integer, Int, ($), zipWith, uncurry, realToFrac
   )
 import qualified Prelude
 import Data.List (genericLength)
@@ -562,7 +562,7 @@ convertWith :: (a -> b) -> Dimensional v d a -> Dimensional v d b
 convertWith f (Dimensional x) = Dimensional (f x)
 
 convert :: (Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
-convert = convertWith (fromRational . toRational)
+convert = convertWith realToFrac
 
 {-
 
