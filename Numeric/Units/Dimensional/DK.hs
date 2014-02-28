@@ -560,7 +560,7 @@ At the term level, Dimension' encodes a dimension as 7 integers, representing a 
 
 -}
 
-data Dimension' = Dim' Int Int Int Int Int Int Int deriving (Show,Eq,Ord)
+data Dimension' = Dim' !Int !Int !Int !Int !Int !Int !Int deriving (Show,Eq,Ord)
 
 class KnownDimension (d::Dimension) where toSIBasis :: Proxy d -> Dimension'
 instance ( ToInteger (NT l)
