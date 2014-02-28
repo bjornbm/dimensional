@@ -52,7 +52,6 @@ Clients probably will want to use the NegativeLiterals extension.
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -87,7 +86,7 @@ module Numeric.Units.Dimensional.DK
   where
 
 import Prelude
-  ( Show, Eq, Ord, Enum, Num, Fractional, Floating, RealFloat, Functor, fmap
+  ( Show, Eq, Ord, Num, Fractional, Floating, RealFloat, Functor, fmap
   , (.), flip, show, (++), undefined, otherwise, (==), String, unwords
   , map, null, Integer, Int, ($), zipWith, uncurry
   )
@@ -131,7 +130,7 @@ units and quantities it represents have physical dimensions.
 -}
 
 newtype Dimensional (v::Variant) (d::Dimension) a
-      = Dimensional a deriving (Eq, Ord, Enum)
+      = Dimensional a deriving (Eq, Ord)
 
 {-
 The type variable 'a' is the only non-phantom type variable and
