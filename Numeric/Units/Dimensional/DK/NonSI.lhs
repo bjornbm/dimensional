@@ -194,6 +194,18 @@ Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki
 > imperialGill   = prefix (1 Prelude./ 4) imperialPint
 > imperialFluidOunce = prefix (1 Prelude./ 20) imperialPint
 
+= US Customary Volumes =
+
+Per http://www.nist.gov/pml/wmd/pubs/upload/2012-hb44-final.pdf page 452 and http://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume
+Note that there exist rarely-used "dry" variants of units with overlapping names.
+
+> usGallon, usQuart, usPint, usCup, usGill, usFluidOunce :: (Fractional a) => Unit DVolume a
+> usGallon = prefix 231 (cubic inch)
+> usQuart = prefix (1 Prelude./ 4) usGallon
+> usPint = prefix (1 Prelude./ 8) usGallon
+> usCup = prefix (1 Prelude./ 2) usPint
+> usGill = prefix (1 Prelude./ 4) usPint
+> usFluidOunce = prefix (1 Prelude./ 16) usPint -- sic, does not match factor used in imperial system
 
 = References =
 
