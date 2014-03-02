@@ -89,7 +89,7 @@ module Numeric.Units.Dimensional.DK
 import Prelude
   ( Show, Eq, Ord, Enum, Num, Fractional, Floating, RealFloat, Functor, fmap
   , (.), flip, show, (++), undefined, otherwise, (==), String, unwords
-  , map, null, Integer, Int, ($), zipWith, uncurry
+  , map, null, Integer, Int, ($), zipWith, uncurry, concat
   )
 import qualified Prelude
 import Data.List (genericLength)
@@ -602,8 +602,8 @@ even a requirement.
 instance (KnownDimension d, Show a) => Show (Quantity d a) where
       show q@(Dimensional x) = let powers = asList $ getSIBasis q
                                    units = ["m", "kg", "s", "A", "K", "mol", "cd"]
-                                   dims = zipWith dimUnit units powers
-                               in foldl' (++) (show x) dims
+                                   dims = concat $ zipWith dimUnit units powers
+                               in show x ++ dims
 
 {-
 The helper function 'dimUnit' defined next conditions a 'String' (unit)
