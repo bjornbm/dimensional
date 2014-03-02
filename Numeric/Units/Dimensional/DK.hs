@@ -95,9 +95,9 @@ import qualified Prelude
 import Data.List (genericLength)
 import Data.Maybe (Maybe (Just, Nothing), catMaybes)
 import Numeric.NumType.DK
-  ( NumType (P), (+)(), (-)()
-  , NT, NP, Zero, Pos1, Pos2, pos2, Pos3, pos3
-  , ToInteger, toNum
+  ( NumType (Zero, Pos1Plus), (+)(), (-)()
+  , Pos1, Pos2, pos2, Pos3, pos3
+  , KnownNumType, toNum
   )
 import qualified Numeric.NumType.DK as N
 import Data.Proxy (Proxy(..))
@@ -338,8 +338,8 @@ Dimensional x * Dimensional y = Dimensional (x Prelude.* y)
     => Dimensional v d a -> Dimensional v d' a -> Dimensional v (d / d') a
 Dimensional x / Dimensional y = Dimensional (x Prelude./ y)
 
-(^) :: (ToInteger (NT i), Fractional a)
-    => Dimensional v d a -> NT i -> Dimensional v (d ^ i) a
+(^) :: (KnownNumType i, Fractional a)
+    => Dimensional v d a -> Proxy i -> Dimensional v (d ^ i) a
 Dimensional x ^ n = Dimensional (x Prelude.^^ toNum n)
 
 {-
@@ -348,8 +348,8 @@ non-fractional numbers we provide the alternative power operator
 '^+' that is restricted to positive exponents.
 -}
 
-(^+) :: (ToInteger (NP n), Num a)
-     => Dimensional v d a -> NP n -> Dimensional v (d ^ P n) a
+(^+) :: (KnownNumType (Pos1Plus n), Num a)
+     => Dimensional v d a -> Proxy (Pos1Plus n) -> Dimensional v (d ^ Pos1Plus n) a
 Dimensional x ^+ n = Dimensional (x Prelude.^ toNum n)
 
 {-
@@ -386,8 +386,8 @@ Roots of arbitrary (integral) degree. Appears to occasionally be useful
 for units as well as quantities.
 -}
 
-nroot :: (Floating a, ToInteger (NT n))
-      => NT n -> Dimensional v d a -> Dimensional v (Root d n) a
+nroot :: (Floating a, KnownNumType n)
+      => Proxy n -> Dimensional v d a -> Dimensional v (Root d n) a
 nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ N.toNum n))
 
 {-
@@ -404,8 +404,8 @@ We also provide an operator alternative to nroot for those that
 prefer such.
 -}
 
-(^/) :: (ToInteger (NT n), Floating a)
-     => Dimensional v d a -> NT n -> Dimensional v (Root d n) a
+(^/) :: (KnownNumType n, Floating a)
+     => Dimensional v d a -> Proxy n -> Dimensional v (Root d n) a
 (^/) = flip nroot
 
 {-
@@ -566,22 +566,22 @@ At the term level, Dimension' encodes a dimension as 7 integers, representing a 
 data Dimension' = Dim' !Int !Int !Int !Int !Int !Int !Int deriving (Show,Eq,Ord)
 
 class KnownDimension (d::Dimension) where toSIBasis :: Proxy d -> Dimension'
-instance ( ToInteger (NT l)
-         , ToInteger (NT m)
-         , ToInteger (NT t)
-         , ToInteger (NT i)
-         , ToInteger (NT th)
-         , ToInteger (NT n)
-         , ToInteger (NT j)
+instance ( KnownNumType l
+         , KnownNumType m
+         , KnownNumType t
+         , KnownNumType i
+         , KnownNumType th
+         , KnownNumType n
+         , KnownNumType j
          ) => KnownDimension (Dim l m t i th n j)
   where toSIBasis _ = Dim'
-                (toNum (undefined :: NT l))
-                (toNum (undefined :: NT m))
-                (toNum (undefined :: NT t))
-                (toNum (undefined :: NT i))
-                (toNum (undefined :: NT th))
-                (toNum (undefined :: NT n))
-                (toNum (undefined :: NT j))
+                (toNum (undefined :: Proxy l))
+                (toNum (undefined :: Proxy m))
+                (toNum (undefined :: Proxy t))
+                (toNum (undefined :: Proxy i))
+                (toNum (undefined :: Proxy th))
+                (toNum (undefined :: Proxy n))
+                (toNum (undefined :: Proxy j))
 
 getSIBasis :: forall v d a. KnownDimension d => Dimensional v d a -> Dimension'
 getSIBasis _ = toSIBasis (Proxy :: Proxy d)
