@@ -72,7 +72,7 @@ and implementation.
 
 module Numeric.Units.Dimensional.DK
   ( (^), (^+), (^/), (**), (*), (/), (+), (-), (*~), (/~),
-    Dimensional (Dimensional),
+    Dimensional,
     Unit, Quantity, Dimension (Dim),
     DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
     Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity,
@@ -80,7 +80,7 @@ module Numeric.Units.Dimensional.DK
     negate, abs, nroot, sqrt, cbrt,
     (*~~), (/~~), sum, mean, dimensionlessLength,
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
-    one, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
+    siUnit, one, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     Dimension' (Dim'), KnownDimension, toSIBasis, getSIBasis, 
     prefix,
   )
@@ -505,6 +505,16 @@ atan2 :: RealFloat a => Quantity d a -> Quantity d a -> Dimensionless a
 atan2 (Dimensional y) (Dimensional x) = Dimensional (Prelude.atan2 y x)
 
 {-
+We add a polymorphic @siUnit@ which can be used in place a concrete
+SI unit (combination of SI base units). This allows polymorphic
+quantity creation and destruction without exposing the `Dimensional`
+constructor.
+-}
+
+siUnit :: Num a => Unit d a
+siUnit = Dimensional 1
+
+{-
 The only unit we will define in this module is 'one'. The unit one
 has dimension one and is the base unit of dimensionless values. As
 detailed in 7.10 "Values of quantities expressed simply as numbers:
@@ -515,7 +525,7 @@ values.
 -}
 
 one :: Num a => Unit DOne a
-one = Dimensional 1
+one = siUnit
 
 {-
 For convenience we define some constants for small integer values
@@ -529,7 +539,7 @@ to the dimensionless value zero.
 -}
 
 _0 :: Num a => Quantity d a
-_0 = Dimensional 0
+_0 = 0 *~ siUnit
 
 _1, _2, _3, _4, _5, _6, _7, _8, _9 :: (Num a) => Dimensionless a
 _1 = 1 *~ one
