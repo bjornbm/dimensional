@@ -316,8 +316,12 @@ provide some synonyms that we anticipate will be useful.
 > type DAngularMomentum = Dim Pos2 Pos1 Neg1 Zero Zero Zero Zero
 > type AngularMomentum = Quantity DAngularMomentum
 
+The reciprocal of thermal conductivity.
+
 > type DThermalResistivity = Dim Neg1 Neg1 Pos3 Zero Pos1 Zero Zero
 > type ThermalResistivity = Quantity DThermalResistivity
+
+Thermal conductance and resistance quantities after http://en.wikipedia.org/wiki/Thermal_conductivity#Definitions.
 
 > type DThermalConductance = Dim Pos2 Pos1 Neg3 Zero Neg1 Zero Zero
 > type ThermalConductance = Quantity DThermalConductance
