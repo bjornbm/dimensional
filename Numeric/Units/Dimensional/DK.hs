@@ -76,7 +76,7 @@ module Numeric.Units.Dimensional.DK
     Unit, Quantity, Dimension (Dim),
     DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
     Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity,
-    type (*), type (/), type (^), Root, Inverse,
+    type (*), type (/), type (^), Root, Recip,
     negate, abs, nroot, sqrt, cbrt,
     (*~~), (/~~), sum, mean, dimensionlessLength,
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
@@ -283,7 +283,7 @@ type family (a::Dimension) / (d::Dimension) where
   (Dim l  m  t  i  th  n  j) / (Dim l' m' t' i' th' n' j')
     = Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j')
 
-type Inverse (d :: Dimension) = DOne / d
+type Recip (d :: Dimension) = DOne / d
 
 {-
 We could provide the 'Mul' and 'Div' classes with full functional
