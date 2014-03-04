@@ -1,5 +1,5 @@
 Name:                dimensional-dk
-Version:             0.6
+Version:             0.7
 License:             BSD3
 License-File:        LICENSE
 Copyright:           Bjorn Buckwalter 2006-2014
@@ -29,7 +29,6 @@ Description:
 Category:            Math, Physics
 Build-Type:          Simple
 Build-Depends:       base < 5,
-                     time < 1.5,
                      numtype-dk >= 0.3 && < 1.1
 Exposed-Modules:     Numeric.Units.Dimensional.DK,
                      Numeric.Units.Dimensional.DK.Prelude,
