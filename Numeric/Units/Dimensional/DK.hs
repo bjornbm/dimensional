@@ -83,7 +83,7 @@ module Numeric.Units.Dimensional.DK
     siUnit, one, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     Dimension' (Dim'), KnownDimension, toSIBasis, getSIBasis, 
     prefix,
-    convert, convertWith
+    dmap, changeRep
   )
   where
 
@@ -470,7 +470,7 @@ We provide this freedom by making 'Dimensionless' an instance of
 -}
 
 instance Functor Dimensionless where
-  fmap = convertWith
+  fmap = dmap
 
 {-
 We continue by defining elementary functions on 'Dimensionless'
@@ -571,11 +571,11 @@ Another flavor works with a user-supplied conversion function.
 
 -}
 
-convertWith :: (a -> b) -> Dimensional v d a -> Dimensional v d b
-convertWith f (Dimensional x) = Dimensional (f x)
+dmap :: (a -> b) -> Dimensional v d a -> Dimensional v d b
+dmap f (Dimensional x) = Dimensional (f x)
 
-convert :: (Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
-convert = convertWith realToFrac
+changeRep :: (Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
+changeRep = dmap realToFrac
 
 {-
 
