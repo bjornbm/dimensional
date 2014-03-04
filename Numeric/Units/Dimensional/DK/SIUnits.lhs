@@ -85,7 +85,7 @@ singular form, as allowed by section 9.7 "Other spelling conventions".
 We define the SI base units in the order of table 1.
 
 > metre, meter :: Num a => Unit DLength a
-> metre = Dimensional 1 -- International English.
+> metre = siUnit -- International English.
 > meter = metre         -- American English.
 
 For mass the SI base unit is kilogram. For sensible prefixes we
@@ -93,17 +93,17 @@ define gram here (see section 6.2.7 "Prefixes and the kilogram").
 The drawback is that we are forced to use 'Fractional'.
 
 > gram    :: Fractional a => Unit DMass a
-> gram    = Dimensional 1e-3
+> gram    = milli siUnit
 > second  :: Num a => Unit DTime a
-> second  = Dimensional 1
+> second  = siUnit
 > ampere  :: Num a => Unit DElectricCurrent a
-> ampere  = Dimensional 1
+> ampere  = siUnit
 > kelvin  :: Num a => Unit DThermodynamicTemperature a
-> kelvin  = Dimensional 1
+> kelvin  = siUnit
 > mole    :: Num a => Unit DAmountOfSubstance a
-> mole    = Dimensional 1
+> mole    = siUnit
 > candela :: Num a => Unit DLuminousIntensity a
-> candela = Dimensional 1
+> candela = siUnit
 
 
 = DiffTime conversion =

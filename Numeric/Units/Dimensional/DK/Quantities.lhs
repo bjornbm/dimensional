@@ -37,7 +37,7 @@ dimensionality type synonyms are provided for each quantity type.
 >   , Unit, DLength, (^+) -- Used only for 'square' and 'cubic'.
 >   )
 > import Numeric.NumType.DK
->   ( Neg3, Neg2, Neg1, Zero, Pos1, Pos2, Pos3, Pos4
+>   ( NumType (Zero), Neg3, Neg2, Neg1, Pos1, Pos2, Pos3, Pos4
 >   , pos2, pos3 -- Used only for 'square' and 'cubic'.
 >   )
 
