@@ -21,8 +21,6 @@ import Numeric.NumType.DK
 
 import Prelude hiding
     ( (+), (-), (*), (/), (^), (**)
-    , abs, negate, pi, exp, log, sqrt
-    , sin, cos, tan, asin, acos, atan, atan2
-    , sinh, cosh, tanh, asinh, acosh, atanh
+    , abs, negate, pi, sqrt, atan2
     , sum
     )  -- Hide definitions overridden by 'Numeric.Dimensional'.
