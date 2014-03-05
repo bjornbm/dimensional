@@ -71,7 +71,7 @@ and implementation.
 -}
 
 module Numeric.Units.Dimensional.DK
-  ( (^), (^+), (^/), (**), (*), (/), (+), (-), (*~), (/~),
+  ( (^), (^/), (**), (*), (/), (+), (-), (*~), (/~),
     Dimensional,
     Unit, Quantity, Dimension (Dim),
     DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
@@ -111,7 +111,7 @@ To prevent unpleasant surprises we give operators the same fixity
 as the Prelude.
 -}
 
-infixr 8  ^, ^+, ^/, **
+infixr 8  ^, ^/, **
 infixl 7  *, /
 infixl 6  +, -
 
@@ -342,16 +342,6 @@ Dimensional x / Dimensional y = Dimensional (x Prelude./ y)
 (^) :: (KnownNumType i, Fractional a)
     => Dimensional v d a -> Proxy i -> Dimensional v (d ^ i) a
 Dimensional x ^ n = Dimensional (x Prelude.^^ toNum n)
-
-{-
-In the unlikely case someone needs to use this library with
-non-fractional numbers we provide the alternative power operator
-'^+' that is restricted to positive exponents.
--}
-
-(^+) :: (KnownNumType (Pos1Plus n), Num a)
-     => Dimensional v d a -> Proxy (Pos1Plus n) -> Dimensional v (d ^ Pos1Plus n) a
-Dimensional x ^+ n = Dimensional (x Prelude.^ toNum n)
 
 {-
 A special case is that dimensionless quantities are not restricted

@@ -34,13 +34,13 @@ dimensionality type synonyms are provided for each quantity type.
 > import Numeric.Units.Dimensional.DK
 >   ( Dimension (Dim), Quantity, Dimensionless
 >   , DOne, DLuminousIntensity, DThermodynamicTemperature
->   , Unit, DLength, (^+) -- Used only for 'square' and 'cubic'.
+>   , Unit, DLength, (^)  -- Used only for 'square' and 'cubic'.
 >   )
 > import Numeric.NumType.DK
 >   ( NumType (Zero), Neg3, Neg2, Neg1, Pos1, Pos2, Pos3, Pos4
->   , pos2, pos3 -- Used only for 'square' and 'cubic'.
+>   , pos2, pos3  -- Used only for 'square' and 'cubic'.
 >   )
-
+> import Prelude (Fractional)
 
 = Quantities from [1] =
 
@@ -98,10 +98,10 @@ It is permissible to express powers of length units by prefixing
 'square' and 'cubic' (see section 9.6 "Spelling unit names raised
 to powers" of [1]).
 
-> square :: (Num a) => Unit DLength a -> Unit DArea a
-> square x = x ^+ pos2
-> cubic  :: (Num a) => Unit DLength a -> Unit DVolume a
-> cubic  x = x ^+ pos3
+> square :: Fractional a => Unit DLength a -> Unit DArea a
+> square x = x ^ pos2
+> cubic  :: Fractional a => Unit DLength a -> Unit DVolume a
+> cubic  x = x ^ pos3
 
 These definitions may seem slightly out of place but these is no
 obvious place where they should be. Here they are at least close
