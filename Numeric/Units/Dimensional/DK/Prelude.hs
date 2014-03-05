@@ -21,12 +21,12 @@ import Numeric.NumType.DK
     )  -- Used in exponents.
 
 import Data.Foldable
-    ( minimum, maximum )
+    ( product, minimum, maximum )
 
 import Prelude hiding
     ( (+), (-), (*), (/), (^), (**)
     , abs, negate, pi, exp, log, sqrt
     , sin, cos, tan, asin, acos, atan, atan2
     , sinh, cosh, tanh, asinh, acosh, atanh
-    , sum, minimum, maximum
+    , sum, product, minimum, maximum
     )  -- Hide definitions overridden by 'Numeric.Dimensional'.
