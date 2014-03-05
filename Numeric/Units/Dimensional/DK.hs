@@ -96,8 +96,8 @@ import qualified Prelude
 import Data.List (genericLength)
 import Data.Maybe (Maybe (Just, Nothing), catMaybes)
 import Numeric.NumType.DK
-  ( NumType (Zero, Pos1Plus), (+)(), (-)()
-  , Pos1, Pos2, pos2, Pos3, pos3
+  ( NumType (Zero, Pos1, Pos2, Pos3), (+)(), (-)()
+  , pos2, pos3
   , KnownNumType, toNum
   )
 import qualified Numeric.NumType.DK as N
