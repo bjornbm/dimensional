@@ -57,6 +57,7 @@ Clients probably will want to use the NegativeLiterals extension.
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 {- |
    Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
@@ -650,6 +651,21 @@ The helper function asList converts a Dimension' value to a list of integers whi
 
 asList :: Dimension' -> [Int]
 asList (Dim' l m t i th n j) = [l, m, t, i, th, n, j]
+
+{-
+
+We define instances of the standard numeric classes for Dimensionless.
+The aim is to allow dimensionless quantities to be used with existing code
+that abstracts over the standard numeric classes.
+
+-}
+
+deriving instance Num a => Num (Dimensionless a)
+deriving instance Fractional a => Fractional (Dimensionless a)
+deriving instance Real a => Real (Dimensionless a)
+deriving instance Prelude.RealFrac a => Prelude.RealFrac (Dimensionless a)
+deriving instance Floating a => Floating (Dimensionless a)
+deriving instance RealFloat a => RealFloat (Dimensionless a)
 
 {-
 
