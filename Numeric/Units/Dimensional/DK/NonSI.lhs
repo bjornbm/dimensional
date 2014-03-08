@@ -185,6 +185,8 @@ to 1 mmHg.
 > degreeFahrenheit :: (Fractional a) => Unit DThermodynamicTemperature a
 > degreeFahrenheit = prefix (5 Prelude./ 9) degreeCelsius
 
+> degreeRankine :: (Fractional a) => Unit DThermodynamicTemperature a
+> degreeRankine = degreeFahrenheit
 
 = Imperial Volumes =
 
