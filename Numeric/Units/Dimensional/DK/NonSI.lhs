@@ -180,6 +180,12 @@ to 1 mmHg.
 > stokes = centi meter ^ pos2 / second
 
 
+= Temperature =
+
+> degreeFahrenheit :: (Fractional a) => Unit DThermodynamicTemperature a
+> degreeFahrenheit = prefix (5 Prelude./ 9) degreeCelsius
+
+
 = Imperial Volumes =
 
 Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki/Cup_(unit)#Imperial_cup.
