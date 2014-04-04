@@ -104,6 +104,7 @@ import qualified Numeric.NumType.DK as N
 import Data.Proxy (Proxy(..))
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Monoid (Monoid(..))
+import Data.Typeable
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -132,7 +133,7 @@ units and quantities it represents have physical dimensions.
 -}
 
 newtype Dimensional (v::Variant) (d::Dimension) a
-      = Dimensional a deriving (Eq, Ord, Enum)
+      = Dimensional a deriving (Eq, Ord, Enum, Typeable)
 
 {-
 The type variable 'a' is the only non-phantom type variable and
