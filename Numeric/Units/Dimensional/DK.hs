@@ -71,7 +71,7 @@ and implementation.
 -}
 
 module Numeric.Units.Dimensional.DK
-  ( (^), (^/), (**), (*), (/), (+), (-), (*~), (~/), (/~),
+  ( (^), (^/), (**), (*), (/), (+), (-), (*~), (/~), (~*), (~/),
     Dimensional,
     Unit, Quantity, Dimension (Dim),
     DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
@@ -172,9 +172,6 @@ way to declare quantities as such a product.
 (*~) :: Num a => a -> Dimensional v d a -> Quantity d a
 x *~ Dimensional y = Dimensional (x Prelude.* y)
 
-(~/) :: Fractional a => Dimensional v d a -> a -> Quantity d a
-(~/) = flip $ (*~) . Prelude.recip
-
 {-
 Conversely, the numerical value of a 'Quantity' is obtained by
 dividing the 'Quantity' by its 'Unit' (any unit with the same
@@ -182,8 +179,20 @@ physical dimension). The '(/~)' operator provides a convenient way
 of obtaining the numerical value of a quantity.
 -}
 
-(/~) :: Fractional a => Quantity d a -> Unit d a -> a
+(/~) :: Fractional a => Quantity d a -> Dimensional v d a -> a
 Dimensional x /~ Dimensional y = x Prelude./ y
+
+{-
+'(~*)' and '(~/)' can be used to scale quantities or units. '(~/)'
+cannot be used to create a 'Quantity' from a 'Unit', for that use
+e.g. @0.5 *~ meter@ rather than @meter ~/ 2@.
+-}
+
+(~*) :: Num a => Dimensional v d a -> a -> Dimensional v d a
+Dimensional x ~* y = Dimensional (x Prelude.* y)
+
+(~/) :: Fractional a => Dimensional v d a -> a -> Dimensional v d a
+Dimensional x ~/ y = Dimensional (x Prelude./ y)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
@@ -191,7 +200,7 @@ Note that this necessitates the use of parenthesis when composing
 units using '*' and '/', e.g. "1 *~ (meter / second)".
 -}
 
-infixl 7  *~, /~, ~/
+infixl 7  *~, /~, ~*, ~/
 
 {-
 
