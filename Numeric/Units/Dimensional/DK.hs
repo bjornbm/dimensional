@@ -71,7 +71,7 @@ and implementation.
 -}
 
 module Numeric.Units.Dimensional.DK
-  ( (^), (^/), (**), (*), (/), (+), (-), (*~), (/~),
+  ( (^), (^/), (**), (*), (/), (+), (-), (*~), (~/), (/~),
     Dimensional,
     Unit, Quantity, Dimension (Dim),
     DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
@@ -169,8 +169,11 @@ number and a 'Unit'. We define the '(*~)' operator as a convenient
 way to declare quantities as such a product.
 -}
 
-(*~) :: Num a => a -> Unit d a -> Quantity d a
+(*~) :: Num a => a -> Dimensional v d a -> Quantity d a
 x *~ Dimensional y = Dimensional (x Prelude.* y)
+
+(~/) :: Fractional a => Dimensional v d a -> a -> Quantity d a
+(~/) = flip $ (*~) . Prelude.recip
 
 {-
 Conversely, the numerical value of a 'Quantity' is obtained by
@@ -188,7 +191,7 @@ Note that this necessitates the use of parenthesis when composing
 units using '*' and '/', e.g. "1 *~ (meter / second)".
 -}
 
-infixl 7  *~, /~
+infixl 7  *~, /~, ~/
 
 {-
 
