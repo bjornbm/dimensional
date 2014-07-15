@@ -57,6 +57,7 @@ Clients probably will want to use the NegativeLiterals extension.
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 {- |
    Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
@@ -79,7 +80,7 @@ module Numeric.Units.Dimensional.DK
     type (*), type (/), type (^), Root, Recip,
     negate, abs, nroot, sqrt, cbrt,
     (*~~), (/~~), sum, mean, dimensionlessLength,
-    exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
+    atan2,
     siUnit, one, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     Dimension' (Dim'), KnownDimension, toSIBasis, getSIBasis, 
     prefix,
@@ -475,28 +476,6 @@ We provide this freedom by making 'Dimensionless' an instance of
 instance Functor Dimensionless where
   fmap = dmap
 
-{-
-We continue by defining elementary functions on 'Dimensionless'
-that may be obviously useful.
--}
-
-exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh
-  :: Floating a => Dimensionless a -> Dimensionless a
-exp   = fmap Prelude.exp
-log   = fmap Prelude.log
-sin   = fmap Prelude.sin
-cos   = fmap Prelude.cos
-tan   = fmap Prelude.tan
-asin  = fmap Prelude.asin
-acos  = fmap Prelude.acos
-atan  = fmap Prelude.atan
-sinh  = fmap Prelude.sinh
-cosh  = fmap Prelude.cosh
-tanh  = fmap Prelude.tanh
-asinh = fmap Prelude.asinh
-acosh = fmap Prelude.acosh
-atanh = fmap Prelude.atanh
-
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
 Dimensional x ** Dimensional y = Dimensional (x Prelude.** y)
 
@@ -653,6 +632,21 @@ The helper function asList converts a Dimension' value to a list of integers whi
 
 asList :: Dimension' -> [Int]
 asList (Dim' l m t i th n j) = [l, m, t, i, th, n, j]
+
+{-
+
+We define instances of the standard numeric classes for Dimensionless.
+The aim is to allow dimensionless quantities to be used with existing code
+that abstracts over the standard numeric classes.
+
+-}
+
+deriving instance Num a => Num (Dimensionless a)
+deriving instance Fractional a => Fractional (Dimensionless a)
+deriving instance Real a => Real (Dimensionless a)
+deriving instance Prelude.RealFrac a => Prelude.RealFrac (Dimensionless a)
+deriving instance Floating a => Floating (Dimensionless a)
+deriving instance RealFloat a => RealFloat (Dimensionless a)
 
 {-
 

@@ -25,8 +25,6 @@ import Data.Foldable
 
 import Prelude hiding
     ( (+), (-), (*), (/), (^), (**)
-    , abs, negate, pi, exp, log, sqrt
-    , sin, cos, tan, asin, acos, atan, atan2
-    , sinh, cosh, tanh, asinh, acosh, atanh
+    , abs, negate, pi, sqrt, atan2
     , sum, product, minimum, maximum
     )  -- Hide definitions overridden by 'Numeric.Dimensional'.
