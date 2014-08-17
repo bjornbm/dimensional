@@ -161,6 +161,14 @@ at 0 deg. Under most conditions, 1 mmHg is approximately equal to 1 torr.
 > mmHg :: (Fractional a) => Unit DPressure a
 > mmHg = prefix 13.5951 gram * centi meter ^ neg3 * milli meter * gee
 
+Column inches of mercury are also used to measure pressure, especially in
+meteorological or aeronautical contexts in the United States.
+
+This is the conventional value from Appendix B.8 of [1].
+
+> inHg :: (Fractional a) => Unit DPressure a
+> inHg = prefix 3386.389 pascal
+
 One torr (symbol: Torr) is defined as 1/760 atm, which is approximately equal
 to 1 mmHg.
 
