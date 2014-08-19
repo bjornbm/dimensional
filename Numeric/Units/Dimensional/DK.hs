@@ -154,7 +154,6 @@ and quantities. It should be one of the following:
 -}
 
 data Variant = DUnit | DQuantity
-  deriving (Typeable)
 
 {-
 For convenience we define type synonyms for units and quantities.
