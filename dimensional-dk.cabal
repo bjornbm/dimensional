@@ -1,8 +1,8 @@
 Name:                dimensional-dk
-Version:             0.8
+Version:             0.8.0.1
 License:             BSD3
 License-File:        LICENSE
-Copyright:           Bjorn Buckwalter 2006-2014
+Copyright:           Bjorn Buckwalter 2006-2015
 Author:              Bjorn Buckwalter
 Maintainer:          bjorn@buckwalter.se
 Stability:           experimental
