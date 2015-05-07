@@ -662,6 +662,13 @@ asList (Dim' l m t i th n j) = [l, m, t, i, th, n, j]
 We will define a 'prefix' function which applies a scale factor to
 a unit. The 'prefix' function will be used by other modules to
 define the SI prefixes and non-SI units.
+
+Note that supplying zero as a scale factor is invalid, as the library relies
+upon units forming a group under multiplication. We do not raise an `error` because
+doing so would require an additional `Eq` context.
+
+Supplying negative scale factors is allowed and handled gracefully, but is discouraged
+on the grounds that it may be unexpected by other readers.
 -}
 
 prefix :: Num a => a -> Unit d a -> Unit d a
