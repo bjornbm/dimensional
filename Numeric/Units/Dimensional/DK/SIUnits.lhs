@@ -11,7 +11,7 @@ accepted for use with the SI. Any chapters, sections or tables
 referenced are from [1] unless otherwise specified.
 
 > {- |
->    Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
+>    Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
 >    License    : BSD3
 >
 >    Maintainer : bjorn@buckwalter.se
@@ -169,7 +169,7 @@ We defer the definition of Celcius temperature to the end (would
 appear here if we stricly followed table 3a).
 
 > lumen :: Fractional a => Unit DLuminousFlux a
-> lumen = candela / steradian
+> lumen = candela * steradian
 > lux :: Fractional a => Unit DIlluminance a
 > lux = lumen / meter ^ pos2
 
