@@ -1,10 +1,16 @@
-{-
-Numeric.Dimensional.Quantities
-Bjorn Buckwalter, bjorn@buckwalter.se
-License: BSD3
+{-# OPTIONS_HADDOCK show-extensions #-}
 
+{-# LANGUAGE DataKinds #-}
 
-= Summary =
+{- |
+   Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
+   License    : BSD3
+
+   Maintainer : bjorn@buckwalter.se
+   Stability  : Stable
+   Portability: GHC only
+
+= Summary
 
 This module defines type synonyms for common dimensionalities and
 the associated quantity types. Additional dimensionalities and
@@ -16,23 +22,53 @@ exponents. Then a type synonym for the corresponding quantity type
 is defined. If there are several quantity types with the same
 dimensionality type synonyms are provided for each quantity type.
 
+= References
+
+1. #note1# http://physics.nist.gov/Pubs/SP811/
+
 -}
 
-{-# LANGUAGE DataKinds #-}
-
-{- |
-   Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
-   License    : BSD3
-
-   Maintainer : bjorn@buckwalter.se
-   Stability  : Stable
-   Portability: GHC only?
-
-Please refer to the literate Haskell code for documentation of both API
-and implementation.
--}
-
-module Numeric.Units.Dimensional.DK.Quantities where
+module Numeric.Units.Dimensional.DK.Quantities 
+(
+  -- * Quantities from the NIST Guide
+  -- $nist-guide
+  Area, Volume, Velocity, Acceleration, WaveNumber, MassDensity, Density, SpecificVolume, CurrentDensity,
+  MagneticFieldStrength, AmountOfSubstanceConcentration, Concentration, Luminance,
+  PlaneAngle, SolidAngle, Frequency, Force, Pressure, Stress, Energy, Work, QuantityOfHeat, Power, RadiantFlux,
+  ElectricCharge, QuantityOfElectricity, ElectricPotential, PotentialDifference, ElectromotiveForce,
+  Capacitance, ElectricResistance, ElectricConductance, MagneticFlux, MagneticFluxDensity,
+  Inductance, LuminousFlux, Illuminance, CelsiusTemperature,
+  Activity, AbsorbedDose, SpecificEnergy, Kerma, DoseEquivalent, AmbientDoseEquivalent, DirectionalDoseEquivalent, PersonalDoseEquivalent, EquivalentDose,
+  AngularVelocity, AngularAcceleration, DynamicViscosity, MomentOfForce, SurfaceTension, HeatFluxDensity,
+  Irradiance, RadiantIntensity, Radiance, HeatCapacity, Entropy, SpecificHeatCapacity, SpecificEntropy,
+  ThermalConductivity, EnergyDensity, ElectricFieldStrength, ElectricChargeDensity, ElectricFluxDensity, Permittivity, Permeability,
+  MolarEnergy, MolarEntropy, MolarHeatCapacity, Exposure, AbsorbedDoseRate,
+  -- * Quantities not from the NIST Guide
+  -- $not-nist-guide
+  Impulse, MassFlow, GravitationalParameter, KinematicViscosity, FirstMassMoment, MomentOfInertia, AngularMomentum,
+  ThermalResistivity, ThermalConductance, ThermalResistance, HeatTransferCoefficient, ThermalAdmittance, ThermalInsulance,
+  Jerk, Angle, Thrust, Torque, EnergyPerUnitMass,
+  -- * Powers of Unit Lengths
+  -- $powers-of-unit-lengths
+  square, cubic,
+  -- * Dimension Aliases
+  -- $dimension-aliases
+  DArea, DVolume, DVelocity, DAcceleration, DWaveNumber, DMassDensity, DDensity, DSpecificVolume, DCurrentDensity,
+  DMagneticFieldStrength, DAmountOfSubstanceConcentration, DConcentration, DLuminance,
+  DPlaneAngle, DSolidAngle, DFrequency, DForce, DPressure, DStress, DEnergy, DWork, DQuantityOfHeat, DPower, DRadiantFlux,
+  DElectricCharge, DQuantityOfElectricity, DElectricPotential, DPotentialDifference, DElectromotiveForce,
+  DCapacitance, DElectricResistance, DElectricConductance, DMagneticFlux, DMagneticFluxDensity,
+  DInductance, DLuminousFlux, DIlluminance, DCelsiusTemperature,
+  DActivity, DAbsorbedDose, DSpecificEnergy, DKerma, DDoseEquivalent, DAmbientDoseEquivalent, DDirectionalDoseEquivalent, DPersonalDoseEquivalent, DEquivalentDose,
+  DAngularVelocity, DAngularAcceleration, DDynamicViscosity, DMomentOfForce, DSurfaceTension, DHeatFluxDensity,
+  DIrradiance, DRadiantIntensity, DRadiance, DHeatCapacity, DEntropy, DSpecificHeatCapacity, DSpecificEntropy,
+  DThermalConductivity, DEnergyDensity, DElectricFieldStrength, DElectricChargeDensity, DElectricFluxDensity, DPermittivity, DPermeability,
+  DMolarEnergy, DMolarEntropy, DMolarHeatCapacity, DExposure, DAbsorbedDoseRate,
+  DImpulse, DMassFlow, DGravitationalParameter, DKinematicViscosity, DFirstMassMoment, DMomentOfInertia, DAngularMomentum,
+  DThermalResistivity, DThermalConductance, DThermalResistance, DHeatTransferCoefficient, DThermalAdmittance, DThermalInsulance,
+  DJerk, DAngle, DThrust, DTorque, DEnergyPerUnitMass
+)
+where
 
 import Numeric.Units.Dimensional.DK
   ( Dimension (Dim), Quantity, Dimensionless
@@ -45,23 +81,25 @@ import Numeric.NumType.DK
   )
 import Prelude (Fractional)
 
-{-
-
-= Quantities from [1] =
-
+{- $nist-guide
 The following quantities are all from the NIST publication "Guide
-for the Use of the International System of Units (SI)" [1]. Any
-chapters, sections or tables referenced are from [1] unless otherwise
+for the Use of the International System of Units (SI)" <#note1 [1]>. Any
+chapters, sections or tables referenced are from <#note1 [1]> unless otherwise
 specified.
 
 For lack of better organization we provide definitions grouped by
-table in [1].
+table in <#note1 [1]>.
 
-
-== Table 2 ==
+== Table 2
 
 "Examples of SI derived units expressed in terms of SI base units."
 
+-}
+
+{- $dimension-aliases
+For each 'Quantity' alias supplied above, we also supply a corresponding 'Dimension' alias.
+
+These dimension aliases may be convenient for supplying type signatures for 'Unit's or for other type-level dimensional programming.
 -}
 
 type DArea = Dim Pos2 Zero Zero Zero Zero Zero Zero
@@ -80,6 +118,7 @@ type DWaveNumber = Dim Neg1 Zero Zero Zero Zero Zero Zero
 type WaveNumber  = Quantity DWaveNumber
 
 type DMassDensity = Dim Neg3 Pos1 Zero Zero Zero Zero Zero
+type DDensity     = DMassDensity
 type MassDensity  = Quantity DMassDensity
 type Density      = MassDensity -- Short name.
 
@@ -93,34 +132,17 @@ type DMagneticFieldStrength = Dim Neg1 Zero Zero Pos1 Zero Zero Zero
 type MagneticFieldStrength  = Quantity DMagneticFieldStrength
 
 type DAmountOfSubstanceConcentration = Dim Neg3 Zero Zero Zero Zero Pos1 Zero
+type DConcentration                  = DAmountOfSubstanceConcentration
 type AmountOfSubstanceConcentration  = Quantity DAmountOfSubstanceConcentration
 type Concentration                   = AmountOfSubstanceConcentration -- Short name.
 
 type DLuminance = Dim Neg2 Zero Zero Zero Zero Zero Pos1
 type Luminance  = Quantity DLuminance
 
-{-
-
-=== Powers of length units ===
-
-It is permissible to express powers of length units by prefixing
-'square' and 'cubic' (see section 9.6 "Spelling unit names raised
-to powers" of [1]).
-
--}
-
-square :: Fractional a => Unit DLength a -> Unit DArea a
-square x = x ^ pos2
-cubic  :: Fractional a => Unit DLength a -> Unit DVolume a
-cubic  x = x ^ pos3
 
 {-
 
-These definitions may seem slightly out of place but these is no
-obvious place where they should be. Here they are at least close
-to the definitions of 'DLength' and 'DVolume'.
-
-== Table 3a ==
+== Table 3a
 
 "SI derived units with special names and symbols, including the
 radian and steradian."
@@ -197,7 +219,7 @@ type CelsiusTemperature  = Quantity DCelsiusTemperature
 
 {-
 
-== Table 3b ==
+== Table 3b
 
 "SI derived units with special names and symbols admitted for reasons
 of safeguarding human health"
@@ -227,7 +249,7 @@ type EquivalentDose             = DoseEquivalent
 
 {-
 
-== Table 4 ==
+== Table 4
 
 "Examples of SI derived units expressed with the aid of SI derived
 units having special names and symbols."
@@ -313,13 +335,9 @@ type Exposure  = Quantity DExposure -- Exposure to x and gamma rays.
 type DAbsorbedDoseRate = Dim Pos2 Zero Neg3 Zero Zero Zero Zero
 type AbsorbedDoseRate  = Quantity DAbsorbedDoseRate
 
-{-
-
-= Quantities not defined in [1] =
-
+{- $not-nist-guide
 Here we define additional quantities on an as-needed basis. We also
 provide some synonyms that we anticipate will be useful.
-
 -}
 
 type DImpulse = Dim Pos1 Pos1 Neg1 Zero Zero Zero Zero
@@ -388,10 +406,20 @@ type DTorque = DMomentOfForce
 type EnergyPerUnitMass = SpecificEnergy
 type DEnergyPerUnitMass = DSpecificEnergy
 
-{-
+{- $powers-of-length-units
+It is permissible to express powers of length units by prefixing
+'square' and 'cubic' (see section 9.6 "Spelling unit names raised
+to powers" of <#note1 [1]>).
 
-= References =
-
-[1] http://physics.nist.gov/Pubs/SP811/
-
+These definitions may seem slightly out of place but these is no
+obvious place where they should be. Here they are at least close
+to the definitions of 'DLength' and 'DVolume'.
 -}
+
+-- | Constructs a unit of area from a unit of length, taking the area of a square whose sides are that length.
+square :: Fractional a => Unit DLength a -> Unit DArea a
+square x = x ^ pos2
+
+-- | Constructs a unit of volume from a unit of length, taking the volume of a cube whose sides are that length.
+cubic  :: Fractional a => Unit DLength a -> Unit DVolume a
+cubic  x = x ^ pos3
