@@ -474,7 +474,7 @@ Dimensional x / Dimensional y = Dimensional (x Prelude./ y)
 
 (^) :: (KnownNumType i, Fractional a)
     => Dimensional v d a -> Proxy i -> Dimensional v (d ^ i) a
-Dimensional x ^ n = Dimensional (x Prelude.^^ toNum n)
+Dimensional x ^ n = Dimensional (x Prelude.^^ (toNum n :: Int))
 
 {-
 A special case is that dimensionless quantities are not restricted
