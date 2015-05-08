@@ -20,7 +20,7 @@ Description:
     multiplication and division with units. The library is designed to, as
     far as is practical, enforce/encourage best practices of unit usage.
 
-    The dimensional-dk packade differs from the dimensional package in that
+    The dimensional-dk package differs from the dimensional package in that
     the dimension tracking is implemented using Type Families and Data Kinds
     rather than functional dependencies.
 
