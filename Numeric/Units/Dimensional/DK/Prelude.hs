@@ -1,3 +1,19 @@
+{- |
+   Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
+   License    : BSD3
+
+   Maintainer : bjorn@buckwalter.se
+   Stability  : Stable
+   Portability: GHC only
+
+= Summary
+
+This module supplies a convenient set of imports for working with the dimensional-dk package, including aliases for common 'Quantity's and 'Dimension's,
+and a comprehensive set of SI units and units accepted for use with the SI.
+
+It re-exports the "Prelude", hiding arithmetic functions whose names collide with the dimensionally-typed versions supplied by this package.
+
+-}
 module Numeric.Units.Dimensional.DK.Prelude
     ( module Numeric.Units.Dimensional.DK
     , module Numeric.Units.Dimensional.DK.Quantities
