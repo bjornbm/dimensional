@@ -756,7 +756,7 @@ dimUnit :: String -> Int -> String
 dimUnit u n = case n of
                 0 -> ""
                 1 -> " " ++ u
-                n -> " " ++ u ++ "^" ++ show n
+                n' -> " " ++ u ++ "^" ++ show n'
 
 {-
 The helper function asList converts a Dimension' value to a list of integers which may be easier to manipulate.
