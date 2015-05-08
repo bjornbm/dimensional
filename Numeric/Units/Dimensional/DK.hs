@@ -227,20 +227,18 @@ module Numeric.Units.Dimensional.DK
 
 import Prelude
   ( Show, Eq, Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
-  , (.), flip, show, (++), undefined, otherwise, (==), String, unwords
-  , map, null, Integer, Int, ($), zipWith, uncurry, concat, realToFrac
+  , (.), flip, show, (++), String
+  , Int, ($), zipWith, uncurry, concat, realToFrac
   )
 import qualified Prelude
 import Data.List (genericLength)
-import Data.Maybe (Maybe (Just, Nothing), catMaybes)
 import Numeric.NumType.DK
   ( NumType (Zero, Pos1, Pos2, Pos3), (+)(), (-)()
   , pos2, pos3
   , KnownNumType, toNum
   )
 import qualified Numeric.NumType.DK as N
-import Data.Proxy (Proxy(..))
-import Data.Foldable (Foldable(foldr, foldl'))
+import Data.Foldable (Foldable(foldr))
 import Data.Monoid (Monoid(..))
 import Data.Typeable
 
