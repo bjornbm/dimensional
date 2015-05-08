@@ -298,10 +298,10 @@ and quantities. It must be one of the following:
 data Variant = DUnit | DQuantity
 
 -- | A unit of measurement.
-type Unit     = Dimensional DUnit
+type Unit     = Dimensional 'DUnit
 
 -- | A dimensional quantity.
-type Quantity = Dimensional DQuantity
+type Quantity = Dimensional 'DQuantity
 
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
@@ -372,14 +372,14 @@ We start with the base dimensions, others can be found in "Numeric.Units.Dimensi
 
 -}
 
-type DOne         = Dim Zero Zero Zero Zero Zero Zero Zero
-type DLength      = Dim Pos1 Zero Zero Zero Zero Zero Zero
-type DMass        = Dim Zero Pos1 Zero Zero Zero Zero Zero
-type DTime        = Dim Zero Zero Pos1 Zero Zero Zero Zero
-type DElectricCurrent          = Dim Zero Zero Zero Pos1 Zero Zero Zero
-type DThermodynamicTemperature = Dim Zero Zero Zero Zero Pos1 Zero Zero
-type DAmountOfSubstance        = Dim Zero Zero Zero Zero Zero Pos1 Zero
-type DLuminousIntensity        = Dim Zero Zero Zero Zero Zero Zero Pos1
+type DOne                      = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DLength                   = 'Dim 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DMass                     = 'Dim 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DTime                     = 'Dim 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero
+type DElectricCurrent          = 'Dim 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero
+type DThermodynamicTemperature = 'Dim 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero
+type DAmountOfSubstance        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero
+type DLuminousIntensity        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1
 
 {- $quantity-synonyms
 Using the above type synonyms we can define type synonyms for
@@ -418,16 +418,16 @@ the 'Extensible' module.)
 type family (a::Dimension) * (b::Dimension) where
   DOne * d = d
   d * DOne = d
-  (Dim l  m  t  i  th  n  j) * (Dim l' m' t' i' th' n' j')
-    = Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
+  ('Dim l  m  t  i  th  n  j) * ('Dim l' m' t' i' th' n' j')
+    = 'Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
 
 -- | Division of dimensions corresponds to subtraction of the base
 -- dimensions' exponents.
 type family (a::Dimension) / (d::Dimension) where
   d / DOne = d
   d / d = DOne
-  (Dim l  m  t  i  th  n  j) / (Dim l' m' t' i' th' n' j')
-    = Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j')
+  ('Dim l  m  t  i  th  n  j) / ('Dim l' m' t' i' th' n' j')
+    = 'Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j')
 
 -- | The reciprocal of a dimension is defined as the result of dividing 'DOne' by it,
 -- or of negating each of the base dimensions' exponents.
@@ -440,10 +440,10 @@ type Recip (d :: Dimension) = DOne / d
 -- powers make little physical sense.
 type family (d::Dimension) ^ (x::NumType) where
   DOne ^ x = DOne
-  d ^ Zero = DOne
-  d ^ Pos1 = d
-  (Dim l  m  t  i  th  n  j) ^ x
-    = Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
+  d ^ 'Zero = DOne
+  d ^ 'Pos1 = d
+  ('Dim l  m  t  i  th  n  j) ^ x
+    = 'Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
 
 -- | Roots of dimensions corresponds to division of the base dimensions'
 -- exponents by the order(?) of the root.
@@ -451,9 +451,9 @@ type family (d::Dimension) ^ (x::NumType) where
 -- See 'sqrt', 'cbrt', and 'nroot' for the corresponding term-level operations.
 type family Root (d::Dimension) (x::NumType) where
   Root DOne x = DOne
-  Root d Pos1 = d
-  Root (Dim l  m  t  i  th  n  j) x
-    = Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
+  Root d 'Pos1 = d
+  Root ('Dim l  m  t  i  th  n  j) x
+    = 'Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
 
 {-
 
@@ -520,9 +520,9 @@ nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ N.toNum n))
 We provide short-hands for the square and cubic roots.
 -}
 
-sqrt :: Floating a => Dimensional v d a -> Dimensional v (Root d Pos2) a
+sqrt :: Floating a => Dimensional v d a -> Dimensional v (Root d 'Pos2) a
 sqrt = nroot pos2
-cbrt :: Floating a => Dimensional v d a -> Dimensional v (Root d Pos3) a
+cbrt :: Floating a => Dimensional v d a -> Dimensional v (Root d 'Pos3) a
 cbrt = nroot pos3
 
 {-
@@ -718,7 +718,7 @@ instance ( KnownNumType l
          , KnownNumType th
          , KnownNumType n
          , KnownNumType j
-         ) => KnownDimension (Dim l m t i th n j)
+         ) => KnownDimension ('Dim l m t i th n j)
   where 
     toSIBasis _ = Dim'
                 (toNum (Proxy :: Proxy l))
