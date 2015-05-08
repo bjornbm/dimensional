@@ -229,9 +229,9 @@ import Prelude
   ( Show, Eq, Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
   , (.), flip, show, (++), undefined, otherwise, (==), String, unwords
   , map, null, Integer, Int, ($), zipWith, uncurry, concat, realToFrac
+  , length, fromInteger, toInteger
   )
 import qualified Prelude
-import Data.List (genericLength)
 import Data.Maybe (Maybe (Just, Nothing), catMaybes)
 import Numeric.NumType.DK
   ( NumType (Zero, Pos1, Pos2, Pos3), (+)(), (-)()
@@ -570,10 +570,10 @@ mean = uncurry (/) . foldr accumulate (_0, _0)
   where
     accumulate val (accum, count) = (accum + val, count + _1)
 
--- | The length of the list as a 'Dimensionless'. This can be useful for
--- purposes of e.g. calculating averages.
-dimensionlessLength :: Num a => [Dimensional v d a] -> Dimensionless a
-dimensionlessLength = Dimensional . genericLength
+-- | The length of the foldable data structure as a 'Dimensionless'.
+-- This can be useful for purposes of e.g. calculating averages.
+dimensionlessLength :: (Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a
+dimensionlessLength = Dimensional . fromInteger . toInteger . length
 
 {-
 
