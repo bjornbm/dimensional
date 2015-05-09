@@ -11,7 +11,7 @@ module Numeric.Units.Dimensional.DK.Dimensions.TermLevel
 where
 
 import Data.Monoid (Monoid(..))
-import Prelude hiding ((*), (/), (^), recip)
+import Prelude (id, (+), (-), Int, Show, Eq, Ord)
 import qualified Prelude as P
 
 -- | A physical dimension, encoded as 7 integers, representing a factorization of the dimension into the
