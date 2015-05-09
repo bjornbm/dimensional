@@ -10,6 +10,13 @@
 {-# LANGUAGE TypeOperators #-}
 
 module Numeric.Units.Dimensional.DK.Dimensions.TypeLevel
+(
+  type Dimension(..),
+  DOne,
+  DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
+  type (*), type (/), type (^), type Recip, type Root,
+  type KnownDimension
+)
 where
 
 import Data.Proxy
