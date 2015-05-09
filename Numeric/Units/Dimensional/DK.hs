@@ -29,7 +29,7 @@ time. The boxing and unboxing of numerical values as quantities is
 done by multiplication and division of units, of which an incomplete
 set is provided.
 
-We limit ourselves to "Newtonian" physics. We do not attempt to
+We limit ourselves to \"Newtonian\" physics. We do not attempt to
 accommodate relativistic physics in which e.g. addition of length
 and time would be valid.
 
