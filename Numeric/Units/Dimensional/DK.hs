@@ -630,8 +630,9 @@ siUnit = Dimensional 1
 The only unit we will define in this module is 'one'.
 -}
 
--- | The unit 'one' has dimension 'DOne' and is the base unit of
--- dimensionless values. As detailed in 7.10 "Values of quantities expressed simply as numbers:
+-- | The unit 'one' has dimension 'DOne' and is the base unit of dimensionless values. 
+--
+-- As detailed in 7.10 "Values of quantities expressed simply as numbers:
 -- the unit one, symbol 1" of <#note1 [1]> the unit one generally does not
 -- appear in expressions. However, for us it is necessary to use 'one'
 -- as we would any other unit to perform the "boxing" of dimensionless values.
