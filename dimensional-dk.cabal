@@ -35,7 +35,7 @@ Exposed-Modules:     Numeric.Units.Dimensional.DK,
                      Numeric.Units.Dimensional.DK.Quantities,
                      Numeric.Units.Dimensional.DK.SIUnits,
                      Numeric.Units.Dimensional.DK.NonSI
-Extra-source-files:  README,
+Extra-source-files:  README.md,
                      Test.hs,
                      Numeric/Units/Dimensional/DK/Test.hs,
                      Numeric/Units/Dimensional/DK/QuantitiesTest.hs,
