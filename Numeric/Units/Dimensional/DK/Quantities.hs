@@ -34,11 +34,13 @@ module Numeric.Units.Dimensional.DK.Quantities
   -- $nist-guide
   Area, Volume, Velocity, Acceleration, WaveNumber, MassDensity, Density, SpecificVolume, CurrentDensity,
   MagneticFieldStrength, AmountOfSubstanceConcentration, Concentration, Luminance,
+  -- $table3
   PlaneAngle, SolidAngle, Frequency, Force, Pressure, Stress, Energy, Work, QuantityOfHeat, Power, RadiantFlux,
   ElectricCharge, QuantityOfElectricity, ElectricPotential, PotentialDifference, ElectromotiveForce,
   Capacitance, ElectricResistance, ElectricConductance, MagneticFlux, MagneticFluxDensity,
   Inductance, LuminousFlux, Illuminance, CelsiusTemperature,
   Activity, AbsorbedDose, SpecificEnergy, Kerma, DoseEquivalent, AmbientDoseEquivalent, DirectionalDoseEquivalent, PersonalDoseEquivalent, EquivalentDose, CatalyticActivity,
+  -- $table4
   AngularVelocity, AngularAcceleration, DynamicViscosity, MomentOfForce, SurfaceTension, HeatFluxDensity,
   Irradiance, RadiantIntensity, Radiance, HeatCapacity, Entropy, SpecificHeatCapacity, SpecificEntropy,
   ThermalConductivity, EnergyDensity, ElectricFieldStrength, ElectricChargeDensity, ElectricFluxDensity, Permittivity, Permeability,
@@ -49,7 +51,7 @@ module Numeric.Units.Dimensional.DK.Quantities
   ThermalResistivity, ThermalConductance, ThermalResistance, HeatTransferCoefficient, ThermalAdmittance, ThermalInsulance,
   Jerk, Angle, Thrust, Torque, EnergyPerUnitMass,
   -- * Powers of Unit Lengths
-  -- $powers-of-unit-lengths
+  -- $powers-of-length-units
   square, cubic,
   -- * Dimension Aliases
   -- $dimension-aliases
@@ -140,8 +142,7 @@ type DLuminance = Dim Neg2 Zero Zero Zero Zero Zero Pos1
 type Luminance  = Quantity DLuminance
 
 
-{-
-
+{- $table3
 == Table 3
 
 SI coherent derived units with special names and symbols.
@@ -240,8 +241,7 @@ type EquivalentDose             = DoseEquivalent
 type DCatalyticActivity = Dim Zero Zero Neg1 Zero Zero Pos1 Zero
 type CatalyticActivity  = Quantity DCatalyticActivity
 
-{-
-
+{- $table4
 == Table 4
 
 "Examples of SI coherent derived units expressed with the aid of SI derived
