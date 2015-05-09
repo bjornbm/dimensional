@@ -1,6 +1,7 @@
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 {-# LANGUAGE AutoDeriveTypeable #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -198,7 +199,7 @@ module Numeric.Units.Dimensional.DK
     type (*), type (/), type (^), Root, Recip,
     -- ** Term Level Representation of Dimensions
     -- $dimension-terms
-    Dimension' (Dim'), KnownDimension, toSIBasis, getSIBasis,
+    Dimension' (Dim'), HasDimension(..), KnownDimension,
     -- * Dimensional Arithmetic
     (*~), (/~),
     (^), (^/), (**), (*), (/), (+), (-), (~*), (~/),
@@ -697,12 +698,14 @@ we provide a means for converting from type-level dimensions to term-level dimen
 -- 7 SI base dimensions. By convention they are stored in the same order as in the 'Dimension' data kind.
 data Dimension' = Dim' !Int !Int !Int !Int !Int !Int !Int deriving (Show,Eq,Ord)
 
--- | Provides context for converting type-level 'Dimension's into term-level 'Dimension''s.
--- 
--- All validly constructed types of kind 'Dimension' are instances of 'KnownDimension'.
-class KnownDimension (d::Dimension) where 
-  -- | Obtains a term-level representation of a type-level 'Dimension'.
-  toSIBasis :: Proxy d -> Dimension'
+-- | Dimensional values inhabit this class, which allows access to a term-level representation of their dimension.
+class HasDimension a where 
+  -- | Obtains a term-level representation of a value's dimension.
+  dimension :: a -> Dimension'
+
+-- | A KnownDimension is one for which we can construct a term-level representation.
+-- Each validly constructed type of kind 'Dimension' has a 'KnownDimension' instance.
+type KnownDimension (d :: Dimension) = HasDimension (Proxy d)
 
 instance ( KnownNumType l
          , KnownNumType m
@@ -711,9 +714,9 @@ instance ( KnownNumType l
          , KnownNumType th
          , KnownNumType n
          , KnownNumType j
-         ) => KnownDimension ('Dim l m t i th n j)
+         ) => HasDimension (Proxy ('Dim l m t i th n j))
   where 
-    toSIBasis _ = Dim'
+    dimension _ = Dim'
                 (toNum (Proxy :: Proxy l))
                 (toNum (Proxy :: Proxy m))
                 (toNum (Proxy :: Proxy t))
@@ -722,9 +725,11 @@ instance ( KnownNumType l
                 (toNum (Proxy :: Proxy n))
                 (toNum (Proxy :: Proxy j))
 
--- | Obtains a term-level representation of the 'Dimension' of a 'Quantity' or 'Unit'.
-getSIBasis :: forall v d a. KnownDimension d => Dimensional v d a -> Dimension'
-getSIBasis _ = toSIBasis (Proxy :: Proxy d)
+instance (KnownDimension d) => HasDimension (Dimensional v d a) where
+  dimension _ = dimension (Proxy :: Proxy d)
+
+instance (KnownDimension d, Functor f) => HasDimension (f (Dimensional v d a)) where
+  dimension _ = dimension (Proxy :: Proxy d)
 
 {-
 We will conclude by providing a reasonable 'Show' instance for
@@ -736,7 +741,7 @@ in a way that distinguishes them from quantities, or whether that is
 even a requirement.
 -}
 instance (KnownDimension d, Show a) => Show (Quantity d a) where
-      show q@(Dimensional x) = let powers = asList $ getSIBasis q
+      show q@(Dimensional x) = let powers = asList $ dimension q
                                    units = ["m", "kg", "s", "A", "K", "mol", "cd"]
                                    dims = concat $ zipWith dimUnit units powers
                                in show x ++ dims
