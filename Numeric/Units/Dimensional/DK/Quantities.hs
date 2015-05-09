@@ -38,7 +38,7 @@ module Numeric.Units.Dimensional.DK.Quantities
   ElectricCharge, QuantityOfElectricity, ElectricPotential, PotentialDifference, ElectromotiveForce,
   Capacitance, ElectricResistance, ElectricConductance, MagneticFlux, MagneticFluxDensity,
   Inductance, LuminousFlux, Illuminance, CelsiusTemperature,
-  Activity, AbsorbedDose, SpecificEnergy, Kerma, DoseEquivalent, AmbientDoseEquivalent, DirectionalDoseEquivalent, PersonalDoseEquivalent, EquivalentDose,
+  Activity, AbsorbedDose, SpecificEnergy, Kerma, DoseEquivalent, AmbientDoseEquivalent, DirectionalDoseEquivalent, PersonalDoseEquivalent, EquivalentDose, CatalyticActivity,
   AngularVelocity, AngularAcceleration, DynamicViscosity, MomentOfForce, SurfaceTension, HeatFluxDensity,
   Irradiance, RadiantIntensity, Radiance, HeatCapacity, Entropy, SpecificHeatCapacity, SpecificEntropy,
   ThermalConductivity, EnergyDensity, ElectricFieldStrength, ElectricChargeDensity, ElectricFluxDensity, Permittivity, Permeability,
@@ -59,7 +59,7 @@ module Numeric.Units.Dimensional.DK.Quantities
   DElectricCharge, DQuantityOfElectricity, DElectricPotential, DPotentialDifference, DElectromotiveForce,
   DCapacitance, DElectricResistance, DElectricConductance, DMagneticFlux, DMagneticFluxDensity,
   DInductance, DLuminousFlux, DIlluminance, DCelsiusTemperature,
-  DActivity, DAbsorbedDose, DSpecificEnergy, DKerma, DDoseEquivalent, DAmbientDoseEquivalent, DDirectionalDoseEquivalent, DPersonalDoseEquivalent, DEquivalentDose,
+  DActivity, DAbsorbedDose, DSpecificEnergy, DKerma, DDoseEquivalent, DAmbientDoseEquivalent, DDirectionalDoseEquivalent, DPersonalDoseEquivalent, DEquivalentDose, DCatalyticActivity,
   DAngularVelocity, DAngularAcceleration, DDynamicViscosity, DMomentOfForce, DSurfaceTension, DHeatFluxDensity,
   DIrradiance, DRadiantIntensity, DRadiance, DHeatCapacity, DEntropy, DSpecificHeatCapacity, DSpecificEntropy,
   DThermalConductivity, DEnergyDensity, DElectricFieldStrength, DElectricChargeDensity, DElectricFluxDensity, DPermittivity, DPermeability,
@@ -142,10 +142,9 @@ type Luminance  = Quantity DLuminance
 
 {-
 
-== Table 3a
+== Table 3
 
-"SI derived units with special names and symbols, including the
-radian and steradian."
+SI coherent derived units with special names and symbols.
 
 -}
 
@@ -217,15 +216,6 @@ type Illuminance  = Quantity DIlluminance
 type DCelsiusTemperature = DThermodynamicTemperature
 type CelsiusTemperature  = Quantity DCelsiusTemperature
 
-{-
-
-== Table 3b
-
-"SI derived units with special names and symbols admitted for reasons
-of safeguarding human health"
-
--}
-
 type DActivity = DFrequency -- Activity of a radionuclide.
 type Activity  = Quantity DActivity
 
@@ -247,11 +237,14 @@ type DirectionalDoseEquivalent  = DoseEquivalent
 type PersonalDoseEquivalent     = DoseEquivalent
 type EquivalentDose             = DoseEquivalent
 
+type DCatalyticActivity = Dim Zero Zero Neg1 Zero Zero Pos1 Zero
+type CatalyticActivity  = Quantity DCatalyticActivity
+
 {-
 
 == Table 4
 
-"Examples of SI derived units expressed with the aid of SI derived
+"Examples of SI coherent derived units expressed with the aid of SI derived
 units having special names and symbols."
 
 We use the same grouping as for table 2.
@@ -296,7 +289,7 @@ type SpecificEntropy       = Quantity DSpecificEntropy
 
 {-
 
-Specific energy was already defined in table 3b.
+Specific energy was already defined in table 3.
 
 -}
 

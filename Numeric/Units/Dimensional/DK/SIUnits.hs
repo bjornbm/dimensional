@@ -222,6 +222,8 @@ gray :: Fractional a => Unit DAbsorbedDose a
 gray = joule / kilo gram
 sievert :: Fractional a => Unit DDoseEquivalent a
 sievert = joule / kilo gram
+katal :: Fractional a => Unit DCatalyticActivity a
+katal = mole / second
 
 {- $accepted-units
 There are several units that are not strictly part of the SI but
