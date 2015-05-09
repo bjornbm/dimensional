@@ -9,7 +9,7 @@
 = Summary
 
 This module defines units that are not part of the SI, with the
-exception of those defined in the 'SIUnits' module (units outside
+exception of those defined in the "Numeric.Units.Dimensional.DK.SIUnits" module (units outside
 of the SI accepted for use with the SI).
 
 Any chapters, sections or tables referenced are from <#note1 [1]> unless
