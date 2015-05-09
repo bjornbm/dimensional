@@ -35,7 +35,7 @@ module Numeric.Units.Dimensional.DK.NonSI
 (
   -- * Units Defined By Experiment
   -- $values-obtained-experimentally
-  electronVolt, unifiedAtomicMassUnit,
+  electronVolt, unifiedAtomicMassUnit, dalton,
   -- * Standard Gravity
   -- $standard-gravity
   gee,
@@ -83,6 +83,8 @@ electronVolt :: Fractional a => Unit DEnergy a
 electronVolt = prefix 1.60217733e-19 joule
 unifiedAtomicMassUnit :: Fractional a => Unit DMass a
 unifiedAtomicMassUnit = prefix 1.6605402e-27 (kilo gram)
+dalton :: Fractional a => Unit DMass a
+dalton = unifiedAtomicMassUnit
 
 {- $standard-gravity
 In order to relate e.g. pounds mass to pounds force we define the unit
