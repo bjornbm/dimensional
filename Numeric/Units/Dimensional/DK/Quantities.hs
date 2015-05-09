@@ -47,7 +47,7 @@ module Numeric.Units.Dimensional.DK.Quantities
   MolarEnergy, MolarEntropy, MolarHeatCapacity, Exposure, AbsorbedDoseRate,
   -- * Quantities not from the NIST Guide
   -- $not-nist-guide
-  Impulse, MassFlow, GravitationalParameter, KinematicViscosity, FirstMassMoment, MomentOfInertia, AngularMomentum,
+  Impulse, MassFlow, VolumeFlow, GravitationalParameter, KinematicViscosity, FirstMassMoment, MomentOfInertia, AngularMomentum,
   ThermalResistivity, ThermalConductance, ThermalResistance, HeatTransferCoefficient, ThermalAdmittance, ThermalInsulance,
   Jerk, Angle, Thrust, Torque, EnergyPerUnitMass,
   -- * Powers of Unit Lengths
@@ -66,7 +66,7 @@ module Numeric.Units.Dimensional.DK.Quantities
   DIrradiance, DRadiantIntensity, DRadiance, DHeatCapacity, DEntropy, DSpecificHeatCapacity, DSpecificEntropy,
   DThermalConductivity, DEnergyDensity, DElectricFieldStrength, DElectricChargeDensity, DElectricFluxDensity, DPermittivity, DPermeability,
   DMolarEnergy, DMolarEntropy, DMolarHeatCapacity, DExposure, DAbsorbedDoseRate,
-  DImpulse, DMassFlow, DGravitationalParameter, DKinematicViscosity, DFirstMassMoment, DMomentOfInertia, DAngularMomentum,
+  DImpulse, DMassFlow, DVolumeFlow, DGravitationalParameter, DKinematicViscosity, DFirstMassMoment, DMomentOfInertia, DAngularMomentum,
   DThermalResistivity, DThermalConductance, DThermalResistance, DHeatTransferCoefficient, DThermalAdmittance, DThermalInsulance,
   DJerk, DAngle, DThrust, DTorque, DEnergyPerUnitMass
 )
@@ -338,6 +338,9 @@ type Impulse  = Quantity DImpulse
 
 type DMassFlow = 'Dim 'Zero 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero
 type MassFlow  = Quantity DMassFlow
+
+type DVolumeFlow = 'Dim 'Pos3 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero
+type VolumeFlow = Quantity DVolumeFlow
 
 type DGravitationalParameter = 'Dim 'Pos3 'Zero 'Neg2 'Zero 'Zero 'Zero 'Zero
 type GravitationalParameter  = Quantity DGravitationalParameter
