@@ -227,7 +227,7 @@ module Numeric.Units.Dimensional.DK
 
 import Prelude
   ( Show, Eq, Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
-  , (.), flip, show, (++), String, fromIntegral
+  , (.), flip, show, (++), String
   , Int, ($), zipWith, uncurry, concat, realToFrac
   )
 import qualified Prelude
@@ -570,7 +570,7 @@ mean = uncurry (/) . foldr accumulate (_0, _0)
 -- | The length of the foldable data structure as a 'Dimensionless'.
 -- This can be useful for purposes of e.g. calculating averages.
 dimensionlessLength :: (Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a
-dimensionlessLength = Dimensional . fromIntegral . length
+dimensionlessLength = Dimensional . length
   where length = foldl' (\c _ -> c Prelude.+ 1) 0 
     -- As in base-4.8 Data.Foldable for GHC 7.8 (base-4.6) compatibility.
 
