@@ -34,7 +34,7 @@ module Numeric.Units.Dimensional.DK.SIUnits
   degreeCelsius, fromDegreeCelsiusAbsolute, toDegreeCelsiusAbsolute,
   -- ** Units Admitted for Reasons of Safeguarding Human Health
   -- $health
-  becquerel, gray, sievert,
+  becquerel, gray, sievert, katal,
   -- * Units Accepted for Use with the SI
   -- $accepted-units
   minute, hour, day, 
@@ -222,6 +222,8 @@ gray :: Fractional a => Unit DAbsorbedDose a
 gray = joule / kilo gram
 sievert :: Fractional a => Unit DDoseEquivalent a
 sievert = joule / kilo gram
+katal :: Fractional a => Unit DCatalyticActivity a
+katal = mole / second
 
 {- $accepted-units
 There are several units that are not strictly part of the SI but
