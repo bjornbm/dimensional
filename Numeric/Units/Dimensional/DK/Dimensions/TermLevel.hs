@@ -10,6 +10,7 @@ module Numeric.Units.Dimensional.DK.Dimensions.TermLevel
 )
 where
 
+import Data.Monoid (Monoid(..))
 import Prelude hiding ((*), (/), (^), recip)
 import qualified Prelude as P
 
