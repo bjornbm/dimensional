@@ -2,6 +2,7 @@
 
 {-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -9,7 +10,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE DeriveDataTypeable #-}
 
 {- |
    Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
@@ -29,7 +29,7 @@ time. The boxing and unboxing of numerical values as quantities is
 done by multiplication and division of units, of which an incomplete
 set is provided.
 
-We limit ourselves to "Newtonian" physics. We do not attempt to
+We limit ourselves to \"Newtonian\" physics. We do not attempt to
 accommodate relativistic physics in which e.g. addition of length
 and time would be valid.
 
@@ -227,20 +227,17 @@ module Numeric.Units.Dimensional.DK
 
 import Prelude
   ( Show, Eq, Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
-  , (.), flip, show, (++), undefined, otherwise, (==), String, unwords
-  , map, null, Integer, Int, ($), zipWith, uncurry, concat, realToFrac
-  , length, fromInteger, toInteger
+  , (.), flip, show, (++), String, length, fromIntegral
+  , Int, ($), zipWith, uncurry, concat, realToFrac
   )
 import qualified Prelude
-import Data.Maybe (Maybe (Just, Nothing), catMaybes)
 import Numeric.NumType.DK
   ( NumType (Zero, Pos1, Pos2, Pos3), (+)(), (-)()
   , pos2, pos3
   , KnownNumType, toNum
   )
 import qualified Numeric.NumType.DK as N
-import Data.Proxy (Proxy(..))
-import Data.Foldable (Foldable(foldr, foldl'))
+import Data.Foldable (Foldable(foldr))
 import Data.Monoid (Monoid(..))
 import Data.Typeable
 
@@ -298,10 +295,10 @@ and quantities. It must be one of the following:
 data Variant = DUnit | DQuantity
 
 -- | A unit of measurement.
-type Unit     = Dimensional DUnit
+type Unit     = Dimensional 'DUnit
 
 -- | A dimensional quantity.
-type Quantity = Dimensional DQuantity
+type Quantity = Dimensional 'DQuantity
 
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
@@ -372,14 +369,14 @@ We start with the base dimensions, others can be found in "Numeric.Units.Dimensi
 
 -}
 
-type DOne         = Dim Zero Zero Zero Zero Zero Zero Zero
-type DLength      = Dim Pos1 Zero Zero Zero Zero Zero Zero
-type DMass        = Dim Zero Pos1 Zero Zero Zero Zero Zero
-type DTime        = Dim Zero Zero Pos1 Zero Zero Zero Zero
-type DElectricCurrent          = Dim Zero Zero Zero Pos1 Zero Zero Zero
-type DThermodynamicTemperature = Dim Zero Zero Zero Zero Pos1 Zero Zero
-type DAmountOfSubstance        = Dim Zero Zero Zero Zero Zero Pos1 Zero
-type DLuminousIntensity        = Dim Zero Zero Zero Zero Zero Zero Pos1
+type DOne                      = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DLength                   = 'Dim 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DMass                     = 'Dim 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DTime                     = 'Dim 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero
+type DElectricCurrent          = 'Dim 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero
+type DThermodynamicTemperature = 'Dim 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero
+type DAmountOfSubstance        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero
+type DLuminousIntensity        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1
 
 {- $quantity-synonyms
 Using the above type synonyms we can define type synonyms for
@@ -418,16 +415,16 @@ the 'Extensible' module.)
 type family (a::Dimension) * (b::Dimension) where
   DOne * d = d
   d * DOne = d
-  (Dim l  m  t  i  th  n  j) * (Dim l' m' t' i' th' n' j')
-    = Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
+  ('Dim l  m  t  i  th  n  j) * ('Dim l' m' t' i' th' n' j')
+    = 'Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
 
 -- | Division of dimensions corresponds to subtraction of the base
 -- dimensions' exponents.
 type family (a::Dimension) / (d::Dimension) where
   d / DOne = d
   d / d = DOne
-  (Dim l  m  t  i  th  n  j) / (Dim l' m' t' i' th' n' j')
-    = Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j')
+  ('Dim l  m  t  i  th  n  j) / ('Dim l' m' t' i' th' n' j')
+    = 'Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j')
 
 -- | The reciprocal of a dimension is defined as the result of dividing 'DOne' by it,
 -- or of negating each of the base dimensions' exponents.
@@ -440,10 +437,10 @@ type Recip (d :: Dimension) = DOne / d
 -- powers make little physical sense.
 type family (d::Dimension) ^ (x::NumType) where
   DOne ^ x = DOne
-  d ^ Zero = DOne
-  d ^ Pos1 = d
-  (Dim l  m  t  i  th  n  j) ^ x
-    = Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
+  d ^ 'Zero = DOne
+  d ^ 'Pos1 = d
+  ('Dim l  m  t  i  th  n  j) ^ x
+    = 'Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
 
 -- | Roots of dimensions corresponds to division of the base dimensions'
 -- exponents by the order(?) of the root.
@@ -451,9 +448,9 @@ type family (d::Dimension) ^ (x::NumType) where
 -- See 'sqrt', 'cbrt', and 'nroot' for the corresponding term-level operations.
 type family Root (d::Dimension) (x::NumType) where
   Root DOne x = DOne
-  Root d Pos1 = d
-  Root (Dim l  m  t  i  th  n  j) x
-    = Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
+  Root d 'Pos1 = d
+  Root ('Dim l  m  t  i  th  n  j) x
+    = 'Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
 
 {-
 
@@ -476,7 +473,7 @@ Dimensional x / Dimensional y = Dimensional (x Prelude./ y)
 
 (^) :: (KnownNumType i, Fractional a)
     => Dimensional v d a -> Proxy i -> Dimensional v (d ^ i) a
-Dimensional x ^ n = Dimensional (x Prelude.^^ toNum n)
+Dimensional x ^ n = Dimensional (x Prelude.^^ (toNum n :: Int))
 
 {-
 A special case is that dimensionless quantities are not restricted
@@ -520,9 +517,9 @@ nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ N.toNum n))
 We provide short-hands for the square and cubic roots.
 -}
 
-sqrt :: Floating a => Dimensional v d a -> Dimensional v (Root d Pos2) a
+sqrt :: Floating a => Dimensional v d a -> Dimensional v (Root d 'Pos2) a
 sqrt = nroot pos2
-cbrt :: Floating a => Dimensional v d a -> Dimensional v (Root d Pos3) a
+cbrt :: Floating a => Dimensional v d a -> Dimensional v (Root d 'Pos3) a
 cbrt = nroot pos3
 
 {-
@@ -573,7 +570,7 @@ mean = uncurry (/) . foldr accumulate (_0, _0)
 -- | The length of the foldable data structure as a 'Dimensionless'.
 -- This can be useful for purposes of e.g. calculating averages.
 dimensionlessLength :: (Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a
-dimensionlessLength = Dimensional . fromInteger . toInteger . length
+dimensionlessLength = Dimensional . fromIntegral . length
 
 {-
 
@@ -620,26 +617,22 @@ of the same type. The result will of course always be dimensionless.
 atan2 :: RealFloat a => Quantity d a -> Quantity d a -> Dimensionless a
 atan2 (Dimensional y) (Dimensional x) = Dimensional (Prelude.atan2 y x)
 
-{-
-We add a polymorphic @siUnit@ which can be used in place a concrete
-SI unit (combination of SI base units). This allows polymorphic
-quantity creation and destruction without exposing the `Dimensional`
-constructor.
--}
-
+-- | A polymorphic 'Unit' which can be used in place of the coherent
+-- SI base unit of any dimension. This allows polymorphic quantity
+-- creation and destruction without exposing the 'Dimensional' constructor.
 siUnit :: Num a => Unit d a
 siUnit = Dimensional 1
 
 {-
-The only unit we will define in this module is 'one'. The unit one
-has dimension one and is the base unit of dimensionless values. As
-detailed in 7.10 "Values of quantities expressed simply as numbers:
-the unit one, symbol 1" of <#note1 [1]> the unit one generally does not
-appear in expressions. However, for us it is necessary to use 'one'
-as we would any other unit to perform the "boxing" of dimensionless
-values.
+The only unit we will define in this module is 'one'.
 -}
 
+-- | The unit 'one' has dimension 'DOne' and is the base unit of dimensionless values. 
+--
+-- As detailed in 7.10 "Values of quantities expressed simply as numbers:
+-- the unit one, symbol 1" of <#note1 [1]> the unit one generally does not
+-- appear in expressions. However, for us it is necessary to use 'one'
+-- as we would any other unit to perform the "boxing" of dimensionless values.
 one :: Num a => Unit DOne a
 one = siUnit
 
@@ -718,7 +711,7 @@ instance ( KnownNumType l
          , KnownNumType th
          , KnownNumType n
          , KnownNumType j
-         ) => KnownDimension (Dim l m t i th n j)
+         ) => KnownDimension ('Dim l m t i th n j)
   where 
     toSIBasis _ = Dim'
                 (toNum (Proxy :: Proxy l))
@@ -756,7 +749,7 @@ dimUnit :: String -> Int -> String
 dimUnit u n = case n of
                 0 -> ""
                 1 -> " " ++ u
-                n -> " " ++ u ++ "^" ++ show n
+                n' -> " " ++ u ++ "^" ++ show n'
 
 {-
 The helper function asList converts a Dimension' value to a list of integers which may be easier to manipulate.
