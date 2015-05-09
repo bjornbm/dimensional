@@ -34,7 +34,7 @@ module Numeric.Units.Dimensional.DK.SIUnits
   degreeCelsius, fromDegreeCelsiusAbsolute, toDegreeCelsiusAbsolute,
   -- ** Units Admitted for Reasons of Safeguarding Human Health
   -- $health
-  becquerel, gray, sievert,
+  becquerel, gray, sievert, katal,
   -- * Units Accepted for Use with the SI
   -- $accepted-units
   minute, hour, day, 

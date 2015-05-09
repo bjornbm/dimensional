@@ -238,7 +238,7 @@ type DirectionalDoseEquivalent  = DoseEquivalent
 type PersonalDoseEquivalent     = DoseEquivalent
 type EquivalentDose             = DoseEquivalent
 
-type DCatalyticActivity = Dim Zero Zero Neg1 Zero Zero Pos1 Zero
+type DCatalyticActivity = 'Dim 'Zero 'Zero 'Neg1 'Zero 'Zero 'Pos1 'Zero
 type CatalyticActivity  = Quantity DCatalyticActivity
 
 {- $table4
