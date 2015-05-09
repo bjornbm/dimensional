@@ -9,12 +9,29 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
+{- |
+   Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
+   License    : BSD3
+
+   Maintainer : bjorn@buckwalter.se
+   Stability  : Stable
+   Portability: GHC only
+
+This module defines type-level physical dimensions expressed in terms of
+the SI base dimensions using 'Numeric.NumType.DK.NumType' for type-level integers.
+
+Type-level arithmetic, synonyms for the base dimensions, and conversion to the term-level are included.
+-}
 module Numeric.Units.Dimensional.DK.Dimensions.TypeLevel
 (
+  -- * Kind of Type-Level Dimensions
   type Dimension(..),
+  -- * Dimension Arithmetic
+  type (*), type (/), type (^), type Recip, type Root,
+  -- * Synonyms for Base Dimensions
   DOne,
   DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
-  type (*), type (/), type (^), type Recip, type Root,
+  -- * Conversion to Term Level
   type KnownDimension
 )
 where
@@ -42,6 +59,7 @@ import Numeric.Units.Dimensional.DK.Dimensions.TermLevel
 -- For the equivalent term-level representation, see 'Dimension''
 data Dimension = Dim NumType NumType NumType NumType NumType NumType NumType
 
+-- | The type-level dimensions of dimensionless values.
 type DOne                      = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type DLength                   = 'Dim 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type DMass                     = 'Dim 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
@@ -95,6 +113,9 @@ type family Root (d::Dimension) (x::NumType) where
 
 -- | A KnownDimension is one for which we can construct a term-level representation.
 -- Each validly constructed type of kind 'Dimension' has a 'KnownDimension' instance.
+--
+-- While 'KnownDimension' is a constraint synonym, the presence of @'KnownDimension' d@ in
+--  a context allows use of @'dimension' :: 'Proxy' d -> 'Dimension''@.
 type KnownDimension (d :: Dimension) = HasDimension (Proxy d)
 
 instance ( KnownNumType l

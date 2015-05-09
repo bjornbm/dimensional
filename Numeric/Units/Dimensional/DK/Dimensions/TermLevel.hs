@@ -1,11 +1,29 @@
 {-# OPTIONS_HADDOCK not-home, show-extensions #-}
+
+{- |
+   Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
+   License    : BSD3
+
+   Maintainer : bjorn@buckwalter.se
+   Stability  : Stable
+   Portability: GHC only
+
+This module defines physical dimensions expressed in terms of
+the SI base dimensions, including arithmetic.
+
+-}
 module Numeric.Units.Dimensional.DK.Dimensions.TermLevel
 (
+  -- * Type
   Dimension'(..),
+  -- * Access to Dimension of Dimensional Values
   HasDimension(..),
+  -- * Dimension Arithmetic
+  (*), (/), (^), recip,
+  -- * Synonyms for Base Dimensions
   dOne,
   dLength, dMass, dTime, dElectricCurrent, dThermodynamicTemperature, dAmountOfSubstance, dLuminousIntensity,
-  (*), (/), (^), recip,
+  -- * Deconstruction
   asList
 )
 where
