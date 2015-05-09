@@ -7,6 +7,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -281,6 +282,7 @@ way to declare quantities as such a product.
 --
 -- Since 'a' is the only non-phantom type we were able to define
 -- 'Dimensional' as a newtype, avoiding boxing at runtime.
+type role Dimensional nominal phantom representational
 newtype Dimensional (v::Variant) (d::Dimension) a
       = Dimensional a deriving (Eq, Ord, Enum, Typeable)
 
