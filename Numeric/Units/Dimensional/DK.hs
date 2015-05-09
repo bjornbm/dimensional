@@ -228,7 +228,7 @@ module Numeric.Units.Dimensional.DK
 
 import Prelude
   ( Show, Eq, Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
-  , (.), flip, show, (++), String, length, fromIntegral
+  , (.), flip, show, (++), String, fromIntegral
   , Int, ($), zipWith, uncurry, concat, realToFrac
   )
 import qualified Prelude
@@ -238,7 +238,7 @@ import Numeric.NumType.DK
   , KnownNumType, toNum
   )
 import qualified Numeric.NumType.DK as N
-import Data.Foldable (Foldable(foldr))
+import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Monoid (Monoid(..))
 import Data.Typeable
 
@@ -572,6 +572,12 @@ mean = uncurry (/) . foldr accumulate (_0, _0)
 -- This can be useful for purposes of e.g. calculating averages.
 dimensionlessLength :: (Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a
 dimensionlessLength = Dimensional . fromIntegral . length
+  where
+    -- As in base-4.8 Data.Foldable for GHC 7.8 (base-4.6) compatibility.
+    -- Once base-4.6. compatibility is abandoned this where clause can
+    -- be deleted (and imports adjusted).
+    length :: Foldable t => t a -> Int
+    length = foldl' (\c _ -> c Prelude.+ 1) 0 
 
 {-
 
