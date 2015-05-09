@@ -571,8 +571,12 @@ mean = uncurry (/) . foldr accumulate (_0, _0)
 -- This can be useful for purposes of e.g. calculating averages.
 dimensionlessLength :: (Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a
 dimensionlessLength = Dimensional . fromIntegral . length
-  where length = foldl' (\c _ -> c Prelude.+ 1) 0 
+  where
     -- As in base-4.8 Data.Foldable for GHC 7.8 (base-4.6) compatibility.
+    -- Once base-4.6. compatibility is abandoned this where clause can
+    -- be deleted (and imports adjusted).
+    length :: Foldable t => t a -> Int
+    length = foldl' (\c _ -> c Prelude.+ 1) 0 
 
 {-
 
