@@ -24,8 +24,7 @@ module Numeric.Units.Dimensional.DK.Prelude
     ) where
 
 import Numeric.Units.Dimensional.DK hiding
-    ( Dimensional (Dimensional),
-      dmap
+    ( dmap
     )
 
 import Numeric.Units.Dimensional.DK.Quantities
