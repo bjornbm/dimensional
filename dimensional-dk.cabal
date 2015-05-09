@@ -1,16 +1,19 @@
-Name:                dimensional-dk
-Version:             0.8.0.1
-License:             BSD3
-License-File:        LICENSE
-Copyright:           Bjorn Buckwalter 2006-2015
-Author:              Bjorn Buckwalter
-Maintainer:          bjorn@buckwalter.se
-Stability:           experimental
-Homepage:            http://dimensional.googlecode.com/
-Synopsis:            Statically checked physical dimensions, implemented
+name:                dimensional-dk
+version:             0.8.0.1
+license:             BSD3
+license-file:        LICENSE
+copyright:           Bjorn Buckwalter 2006-2015
+author:              Bjorn Buckwalter
+maintainer:          bjorn@buckwalter.se
+stability:           experimental
+homepage:            http://dimensional.googlecode.com/
+category:            Math, Physics
+synopsis:            Statically checked physical dimensions, implemented
                      using Type Families and Data Kinds.
+cabal-version:       >= 1.2
+build-type:          Simple
 
-Description:
+description:
 
     Dimensional is a library providing data types for performing arithmetic
     with physical quantities and units. Information about the physical
@@ -26,18 +29,19 @@ Description:
 
     Requires GHC 7.8 or later.
 
-Category:            Math, Physics
-Build-Type:          Simple
-Build-Depends:       base < 5,
-                     numtype-dk >= 0.5 && < 1.1
-Exposed-Modules:     Numeric.Units.Dimensional.DK,
-                     Numeric.Units.Dimensional.DK.Prelude,
-                     Numeric.Units.Dimensional.DK.Quantities,
-                     Numeric.Units.Dimensional.DK.SIUnits,
-                     Numeric.Units.Dimensional.DK.NonSI
-Extra-source-files:  README.md,
+extra-source-files:  README.md,
                      Test.hs,
                      Numeric/Units/Dimensional/DK/Test.hs,
                      Numeric/Units/Dimensional/DK/QuantitiesTest.hs,
                      examples/README,
                      examples/GM.lhs
+
+library
+  build-depends:       base >= 4.7 && < 5,
+                       numtype-dk >= 0.5 && < 1.1
+  ghc-options:         -Wall
+  exposed-modules:     Numeric.Units.Dimensional.DK,
+                       Numeric.Units.Dimensional.DK.Prelude,
+                       Numeric.Units.Dimensional.DK.Quantities,
+                       Numeric.Units.Dimensional.DK.SIUnits,
+                       Numeric.Units.Dimensional.DK.NonSI
