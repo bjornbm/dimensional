@@ -1,7 +1,6 @@
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 {-# LANGUAGE AutoDeriveTypeable #-}
-{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -9,7 +8,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
 {- |
@@ -233,14 +231,14 @@ import Prelude
   )
 import qualified Prelude
 import Numeric.NumType.DK
-  ( NumType (Zero, Pos1, Pos2, Pos3), (+)(), (-)()
+  ( NumType (Pos2, Pos3)
   , pos2, pos3
   , KnownNumType, toNum
   )
-import qualified Numeric.NumType.DK as N
 import Data.Foldable (Foldable(foldr))
 import Data.Monoid (Monoid(..))
 import Data.Typeable
+import Numeric.Units.Dimensional.DK.Dimensions
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -349,35 +347,11 @@ behind convenient type classes as will be seen later.
 
 -}
 
--- | Represents a physical dimension in the basis of the 7 SI base dimensions, 
--- where the respective dimensions are represented by type variables
--- using the following convention.
---
---  * l: Length
---  * m: Mass
---  * t: Time
---  * i: Electric current
---  * th: Thermodynamic temperature
---  * n: Amount of substance
---  * j: Luminous intensity
---
--- For the equivalent term-level representation, see 'Dimension''
-data Dimension = Dim NumType NumType NumType NumType NumType NumType NumType
-
 {- $dimension-synonyms
 Using our 'Dimension' data kind we define some type synonyms for convenience.
 We start with the base dimensions, others can be found in "Numeric.Units.Dimensional.DK.Quantities".
 
 -}
-
-type DOne                      = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
-type DLength                   = 'Dim 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
-type DMass                     = 'Dim 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
-type DTime                     = 'Dim 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero
-type DElectricCurrent          = 'Dim 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero
-type DThermodynamicTemperature = 'Dim 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero
-type DAmountOfSubstance        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero
-type DLuminousIntensity        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1
 
 {- $quantity-synonyms
 Using the above type synonyms we can define type synonyms for
@@ -411,50 +385,7 @@ the 'Extensible' module.)
 
 -}
 
--- | Multiplication of dimensions corresponds to adding of the base
--- dimensions' exponents.
-type family (a::Dimension) * (b::Dimension) where
-  DOne * d = d
-  d * DOne = d
-  ('Dim l  m  t  i  th  n  j) * ('Dim l' m' t' i' th' n' j')
-    = 'Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
-
--- | Division of dimensions corresponds to subtraction of the base
--- dimensions' exponents.
-type family (a::Dimension) / (d::Dimension) where
-  d / DOne = d
-  d / d = DOne
-  ('Dim l  m  t  i  th  n  j) / ('Dim l' m' t' i' th' n' j')
-    = 'Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j')
-
--- | The reciprocal of a dimension is defined as the result of dividing 'DOne' by it,
--- or of negating each of the base dimensions' exponents.
-type Recip (d :: Dimension) = DOne / d
-
--- | Powers of dimensions corresponds to multiplication of the base
--- dimensions' exponents by the exponent.
--- 
--- We limit ourselves to integer powers of Dimensionals as fractional
--- powers make little physical sense.
-type family (d::Dimension) ^ (x::NumType) where
-  DOne ^ x = DOne
-  d ^ 'Zero = DOne
-  d ^ 'Pos1 = d
-  ('Dim l  m  t  i  th  n  j) ^ x
-    = 'Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
-
--- | Roots of dimensions corresponds to division of the base dimensions'
--- exponents by the order(?) of the root.
--- 
--- See 'sqrt', 'cbrt', and 'nroot' for the corresponding term-level operations.
-type family Root (d::Dimension) (x::NumType) where
-  Root DOne x = DOne
-  Root d 'Pos1 = d
-  Root ('Dim l  m  t  i  th  n  j) x
-    = 'Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
-
 {-
-
 = Arithmetic on units and quantities =
 
 Thanks to the arithmetic on physical dimensions having been sorted
@@ -512,7 +443,7 @@ for units as well as quantities.
 
 nroot :: (Floating a, KnownNumType n)
       => Proxy n -> Dimensional v d a -> Dimensional v (Root d n) a
-nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ N.toNum n))
+nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ toNum n))
 
 {-
 We provide short-hands for the square and cubic roots.
@@ -694,37 +625,6 @@ we provide a means for converting from type-level dimensions to term-level dimen
 
 -}
 
--- | A physical dimension, encoded as 7 integers, representing a factorization of the dimension into the
--- 7 SI base dimensions. By convention they are stored in the same order as in the 'Dimension' data kind.
-data Dimension' = Dim' !Int !Int !Int !Int !Int !Int !Int deriving (Show,Eq,Ord)
-
--- | Dimensional values inhabit this class, which allows access to a term-level representation of their dimension.
-class HasDimension a where 
-  -- | Obtains a term-level representation of a value's dimension.
-  dimension :: a -> Dimension'
-
--- | A KnownDimension is one for which we can construct a term-level representation.
--- Each validly constructed type of kind 'Dimension' has a 'KnownDimension' instance.
-type KnownDimension (d :: Dimension) = HasDimension (Proxy d)
-
-instance ( KnownNumType l
-         , KnownNumType m
-         , KnownNumType t
-         , KnownNumType i
-         , KnownNumType th
-         , KnownNumType n
-         , KnownNumType j
-         ) => HasDimension (Proxy ('Dim l m t i th n j))
-  where 
-    dimension _ = Dim'
-                (toNum (Proxy :: Proxy l))
-                (toNum (Proxy :: Proxy m))
-                (toNum (Proxy :: Proxy t))
-                (toNum (Proxy :: Proxy i))
-                (toNum (Proxy :: Proxy th))
-                (toNum (Proxy :: Proxy n))
-                (toNum (Proxy :: Proxy j))
-
 instance (KnownDimension d) => HasDimension (Dimensional v d a) where
   dimension _ = dimension (Proxy :: Proxy d)
 
@@ -755,12 +655,6 @@ dimUnit u n = case n of
                 0 -> ""
                 1 -> " " ++ u
                 n' -> " " ++ u ++ "^" ++ show n'
-
-{-
-The helper function asList converts a Dimension' value to a list of integers which may be easier to manipulate.
--}
-asList :: Dimension' -> [Int]
-asList (Dim' l m t i th n j) = [l, m, t, i, th, n, j]
 
 -- | Applies a scale factor to a 'Unit'.
 -- The 'prefix' function will be used by other modules to
