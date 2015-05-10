@@ -237,10 +237,10 @@ import Prelude
   , Int, ($), zip, uncurry, realToFrac, otherwise, String
   )
 import qualified Prelude
-import Numeric.NumType.DK
-  ( NumType (Pos2, Pos3)
+import Numeric.NumType.DK.Integers
+  ( TypeInt (Pos2, Pos3)
   , pos2, pos3
-  , KnownNumType, toNum
+  , KnownTypeInt, toNum
   )
 import Data.Dynamic
 import Data.Foldable (Foldable(foldr, foldl'))
@@ -462,7 +462,7 @@ Multiplication, division and powers apply to both units and quantities.
 --
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
-(^) :: (Fractional a, KnownNumType i, KnownVariant v, KnownVariant (Weaken v))
+(^) :: (Fractional a, KnownTypeInt i, KnownVariant v, KnownVariant (Weaken v))
     => Dimensional v d1 a -> Proxy i -> Dimensional (Weaken v) (d1 ^ i) a
 x ^ n = let n' = (toNum n) :: Int
          in liftUntyped (Prelude.^^ n') (Name.power' n') x
@@ -503,7 +503,7 @@ for units as well as quantities.
 
 -- | Computes the nth root of a quantity using 'Prelude.**'.
 -- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
-nroot :: (KnownNumType n, Floating a)
+nroot :: (KnownTypeInt n, Floating a)
       => Proxy n -> Quantity d a -> Quantity (Root d n) a
 nroot n = let n' = 1 Prelude./ toNum n
            in liftUntypedQ (Prelude.** n')
@@ -531,12 +531,11 @@ We also provide an operator alternative to nroot for those that
 prefer such.
 -}
 
-
 -- | Computes the nth root of a quantity using 'Prelude.**'.
 -- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
 --
 -- prop> x ^/ y == nroot y x
-(^/) :: (KnownNumType n, Floating a)
+(^/) :: (KnownTypeInt n, Floating a)
      => Quantity d a -> Proxy n -> Quantity (Root d n) a
 (^/) = flip nroot
 

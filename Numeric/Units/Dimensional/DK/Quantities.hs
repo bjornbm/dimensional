@@ -78,8 +78,8 @@ import Numeric.Units.Dimensional.DK
   , Unit, DLength, (^)  -- Used only for 'square' and 'cubic'.
   , Metricality(..)
   )
-import Numeric.NumType.DK
-  ( NumType (Neg3, Neg2, Neg1, Zero, Pos1, Pos2, Pos3, Pos4)
+import Numeric.NumType.DK.Integers
+  ( TypeInt (Neg3, Neg2, Neg1, Zero, Pos1, Pos2, Pos3, Pos4)
   , pos2, pos3  -- Used only for 'square' and 'cubic'.
   )
 import Prelude (Fractional)
