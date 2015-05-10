@@ -37,11 +37,11 @@ module Numeric.Units.Dimensional.DK.Dimensions.TypeLevel
 where
 
 import Data.Proxy
-import Numeric.NumType.DK
-  ( NumType (Zero, Pos1), (+)(), (-)()
-  , KnownNumType, toNum
+import Numeric.NumType.DK.Integers
+  ( TypeInt (Zero, Pos1), (+)(), (-)()
+  , KnownTypeInt, toNum
   )
-import qualified Numeric.NumType.DK as N
+import qualified Numeric.NumType.DK.Integers as N
 import Numeric.Units.Dimensional.DK.Dimensions.TermLevel
 
 -- | Represents a physical dimension in the basis of the 7 SI base dimensions, 
@@ -57,7 +57,7 @@ import Numeric.Units.Dimensional.DK.Dimensions.TermLevel
 --  * j: Luminous intensity
 --
 -- For the equivalent term-level representation, see 'Dimension''
-data Dimension = Dim NumType NumType NumType NumType NumType NumType NumType
+data Dimension = Dim TypeInt TypeInt TypeInt TypeInt TypeInt TypeInt TypeInt
 
 -- | The type-level dimensions of dimensionless values.
 type DOne                      = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
@@ -103,7 +103,7 @@ type Recip (d :: Dimension) = DOne / d
 -- 
 -- We limit ourselves to integer powers of Dimensionals as fractional
 -- powers make little physical sense.
-type family (d::Dimension) ^ (x::NumType) where
+type family (d::Dimension) ^ (x::TypeInt) where
   DOne ^ x = DOne
   d ^ 'Zero = DOne
   d ^ 'Pos1 = d
@@ -114,7 +114,7 @@ type family (d::Dimension) ^ (x::NumType) where
 -- exponents by the order(?) of the root.
 -- 
 -- See 'sqrt', 'cbrt', and 'nroot' for the corresponding term-level operations.
-type family Root (d::Dimension) (x::NumType) where
+type family Root (d::Dimension) (x::TypeInt) where
   Root DOne x = DOne
   Root d 'Pos1 = d
   Root ('Dim l  m  t  i  th  n  j) x
@@ -127,13 +127,13 @@ type family Root (d::Dimension) (x::NumType) where
 --  a context allows use of @'dimension' :: 'Proxy' d -> 'Dimension''@.
 type KnownDimension (d :: Dimension) = HasDimension (Proxy d)
 
-instance ( KnownNumType l
-         , KnownNumType m
-         , KnownNumType t
-         , KnownNumType i
-         , KnownNumType th
-         , KnownNumType n
-         , KnownNumType j
+instance ( KnownTypeInt l
+         , KnownTypeInt m
+         , KnownTypeInt t
+         , KnownTypeInt i
+         , KnownTypeInt th
+         , KnownTypeInt n
+         , KnownTypeInt j
          ) => HasDimension (Proxy ('Dim l m t i th n j))
   where 
     dimension _ = Dim'

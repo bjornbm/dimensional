@@ -60,7 +60,7 @@ where
 
 import Numeric.Units.Dimensional.DK
 import Numeric.Units.Dimensional.DK.Quantities
-import Numeric.NumType.DK ( neg1, neg2, pos2, pos3 )
+import Numeric.NumType.DK.Integers ( neg1, neg2, pos2, pos3 )
 import Prelude ( (.), Num, Real, realToFrac, Fractional, Floating, recip )
 import qualified Prelude
 
