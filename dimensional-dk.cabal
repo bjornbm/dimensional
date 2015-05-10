@@ -44,4 +44,7 @@ library
                        Numeric.Units.Dimensional.DK.Prelude,
                        Numeric.Units.Dimensional.DK.Quantities,
                        Numeric.Units.Dimensional.DK.SIUnits,
-                       Numeric.Units.Dimensional.DK.NonSI
+                       Numeric.Units.Dimensional.DK.NonSI,
+                       Numeric.Units.Dimensional.DK.Dimensions,
+                       Numeric.Units.Dimensional.DK.Dimensions.TermLevel,
+                       Numeric.Units.Dimensional.DK.Dimensions.TypeLevel
