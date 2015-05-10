@@ -21,5 +21,5 @@ module Numeric.Units.Dimensional.DK.Dimensions
 )
 where
 
-import Numeric.Units.Dimensional.DK.Dimensions.TermLevel hiding ((*), (/), (^), recip, dOne, dLength, dMass, dTime, dElectricCurrent, dThermodynamicTemperature, dAmountOfSubstance, dLuminousIntensity)
+import Numeric.Units.Dimensional.DK.Dimensions.TermLevel hiding ((*), (/), (^), recip, dLength, dMass, dTime, dElectricCurrent, dThermodynamicTemperature, dAmountOfSubstance, dLuminousIntensity)
 import Numeric.Units.Dimensional.DK.Dimensions.TypeLevel

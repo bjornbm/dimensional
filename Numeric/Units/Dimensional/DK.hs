@@ -7,8 +7,11 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
 {- |
@@ -189,7 +192,8 @@ module Numeric.Units.Dimensional.DK
     -- * Types
     -- $types
     Dimensional,
-    Unit, Quantity, 
+    Unit, Quantity,
+    Metricality(..),
     -- * Physical Dimensions
     -- $dimensions
     Dimension (Dim),
@@ -201,7 +205,7 @@ module Numeric.Units.Dimensional.DK
     Dimension' (Dim'), HasDimension(..), KnownDimension,
     -- * Dimensional Arithmetic
     (*~), (/~),
-    (^), (^/), (**), (*), (/), (+), (-), (~*), (~/),
+    (^), (^/), (**), (*), (/), (+), (-),
     negate, abs, nroot, sqrt, cbrt,
     -- ** Transcendental Functions
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
@@ -218,17 +222,19 @@ module Numeric.Units.Dimensional.DK
     -- $constants
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     -- * Constructing Units
-    prefix, siUnit, one,
+    siUnit, one, composite, name, prefix,
+    -- * Pretty Printing
+    showIn,
     -- * On 'Functor', and Conversion Between Number Representations
     -- $functor
-    dmap, changeRep
+    dmap, changeRep,
   )
   where
 
 import Prelude
-  ( Show, Eq, Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
-  , (.), flip, show, (++), String, fromIntegral
-  , Int, ($), zipWith, uncurry, concat, realToFrac
+  ( Show, Eq(..), Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
+  , (.), flip, show, (++), fromIntegral
+  , Int, ($), zip, uncurry, realToFrac, otherwise, String
   )
 import qualified Prelude
 import Numeric.NumType.DK
@@ -236,10 +242,15 @@ import Numeric.NumType.DK
   , pos2, pos3
   , KnownNumType, toNum
   )
+import Data.Dynamic
 import Data.Foldable (Foldable(foldr, foldl'))
+import Data.Maybe
 import Data.Monoid (Monoid(..))
-import Data.Typeable
 import Numeric.Units.Dimensional.DK.Dimensions
+import Numeric.Units.Dimensional.DK.UnitNames hiding ((*), (/), (^))
+import qualified Numeric.Units.Dimensional.DK.UnitNames.Internal as Name
+import Numeric.Units.Dimensional.DK.Variants hiding (type (*))
+import qualified Numeric.Units.Dimensional.DK.Variants as V
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -282,46 +293,82 @@ way to declare quantities as such a product.
 --
 -- Since 'a' is the only non-phantom type we were able to define
 -- 'Dimensional' as a newtype, avoiding boxing at runtime.
-type role Dimensional nominal phantom representational
-newtype Dimensional (v::Variant) (d::Dimension) a
-      = Dimensional a deriving (Eq, Ord, Enum, Typeable)
+class KnownVariant (v :: Variant) where
+  -- | A dimensional value, either a 'Quantity' or a 'Unit', parameterized by its 'Dimension' and representation.
+  data Dimensional v :: Dimension -> * -> *
+  extractValue :: Dimensional v d a -> a
+  extractName :: Dimensional v d a -> Maybe AnyUnitName
+  injectValue :: (Maybe AnyUnitName) -> a -> Dimensional v d a
+  -- | Maps over the underlying representation of a dimensional value.
+  -- The caller is responsible for ensuring that the supplied function respects the dimensional abstraction.
+  -- This means that the function must preserve numerical values, or linearly scale them while preserving the origin.
+  dmap :: (a1 -> a2) -> Dimensional v d a1 -> Dimensional v d a2
 
-{-
-The variety 'v' of 'Dimensional'
+deriving instance Typeable Dimensional
 
-The phantom type variable v is used to distinguish between units
-and quantities. It must be one of the following:
--}
+instance KnownVariant 'DQuantity where
+  newtype Dimensional 'DQuantity d a = Quantity' a
+    deriving (Eq, Ord, Enum)
+  extractValue (Quantity' x) = x
+  extractName _ = Nothing
+  injectValue _ x = Quantity' x
+  dmap f (Quantity' x) = Quantity' (f x)
 
-data Variant = DUnit | DQuantity
+instance (Typeable m) => KnownVariant ('DUnit m) where
+  data Dimensional ('DUnit m) d a = Unit' (UnitName m) a
+  extractValue (Unit' _ x) = x
+  extractName (Unit' n _) = Just $ AnyUnitName n
+  injectValue (Just (AnyUnitName n)) x = let n' = fromDynamic $ toDyn n
+                                         in case n' of
+                                            Just n'' -> Unit' n'' x
+                                            _        -> Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
+  injectValue _        _ = Prelude.error "Shouldn't be reachable. Needed to name a quantity."
+  dmap f (Unit' n x) = Unit' n (f x)
 
 -- | A unit of measurement.
-type Unit     = Dimensional 'DUnit
+type Unit (m :: Metricality) = Dimensional ('DUnit m)
 
 -- | A dimensional quantity.
 type Quantity = Dimensional 'DQuantity
 
+name :: Unit m d a -> UnitName m
+name (Unit' n _) = n
+
+-- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
+liftUntyped :: (KnownVariant v, KnownVariant (Weaken v)) => (a -> a) -> UnitNameTransformer -> (Dimensional v d1 a) -> (Dimensional (Weaken v) d2 a)
+liftUntyped f nt x = let x' = extractValue x
+                         n = extractName x
+                         n' = nt n
+                      in injectValue n' (f x')
+
+-- Operates on a dimensional value using a unary operation on values, yielding a Quantity.
+liftUntypedQ :: (KnownVariant v) => (a -> a) -> Dimensional v d1 a -> Quantity d2 a
+liftUntypedQ f x = let x' = extractValue x
+                    in Quantity' (f x')
+
+-- Combines two dimensional values using a binary operation on values, possibly yielding a Unit.
+liftUntyped2 :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2)) => (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) d3 a
+liftUntyped2 f nt x1 x2 = let x1' = extractValue x1
+                              x2' = extractValue x2
+                              n1 = extractName x1
+                              n2 = extractName x2
+                              n' = nt n1 n2
+                        in injectValue n' (f x1' x2') 
+
+-- Combines two dimensional values using a binary operation on values, yielding a Quantity.
+liftUntyped2Q :: (KnownVariant v1, KnownVariant v2) => (a -> a -> a) -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Quantity d3 a
+liftUntyped2Q f x1 x2 = let x1' = extractValue x1
+                            x2' = extractValue x2
+                         in Quantity' (f x1' x2') 
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
-(*~) :: Num a => a -> Dimensional v d a -> Quantity d a
-x *~ Dimensional y = Dimensional (x Prelude.* y)
+(*~) :: Num a => a -> Unit m d a -> Quantity d a
+x *~ (Unit' _ y) = Quantity' (x Prelude.* y)
 
 -- | Divides a 'Quantity' by a 'Unit' of the same physical dimension, obtaining the
 -- numerical value of the quantity expressed in that unit.
-(/~) :: Fractional a => Quantity d a -> Dimensional v d a -> a
-Dimensional x /~ Dimensional y = x Prelude./ y
-
-{-
-'(~*)' and '(~/)' can be used to scale quantities or units. '(~/)'
-cannot be used to create a 'Quantity' from a 'Unit', for that use
-e.g. @0.5 *~ meter@ rather than @meter ~/ 2@.
--}
-
-(~*) :: Num a => Dimensional v d a -> a -> Dimensional v d a
-Dimensional x ~* y = Dimensional (x Prelude.* y)
-
-(~/) :: Fractional a => Dimensional v d a -> a -> Dimensional v d a
-Dimensional x ~/ y = Dimensional (x Prelude./ y)
+(/~) :: Fractional a => Quantity d a -> Unit m d a -> a
+(Quantity' x) /~ (Unit' _ y) = (x Prelude./ y)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
@@ -329,7 +376,7 @@ Note that this necessitates the use of parenthesis when composing
 units using '*' and '/', e.g. "1 *~ (meter / second)".
 -}
 
-infixl 7  *~, /~, ~*, ~/
+infixl 7  *~, /~
 
 {- $dimensions
 The phantom type variable d encompasses the physical dimension of
@@ -397,17 +444,28 @@ forward. In particular the type signatures are much simplified.
 Multiplication, division and powers apply to both units and quantities.
 -}
 
-(*) :: Num a
-    => Dimensional v d a -> Dimensional v d' a -> Dimensional v (d * d') a
-Dimensional x * Dimensional y = Dimensional (x Prelude.* y)
+-- | Multiplies two 'Quantity's or two 'Unit's.
+--
+-- The intimidating type signature captures the similarity between these operations
+-- and ensures that composite 'Unit's are 'NonMetric'.
+(*) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Num a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 * d2) a
+(*) = liftUntyped2 (Prelude.*) (Name.product')
 
-(/) :: Fractional a
-    => Dimensional v d a -> Dimensional v d' a -> Dimensional v (d / d') a
-Dimensional x / Dimensional y = Dimensional (x Prelude./ y)
+-- | Divides one 'Quantity' by another or one 'Unit' by another.
+--
+-- The intimidating type signature captures the similarity between these operations
+-- and ensures that composite 'Unit's are 'NotPrefixable'.
+(/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
+(/) = liftUntyped2 (Prelude./) (Name.quotient')
 
-(^) :: (KnownNumType i, Fractional a)
-    => Dimensional v d a -> Proxy i -> Dimensional v (d ^ i) a
-Dimensional x ^ n = Dimensional (x Prelude.^^ (toNum n :: Int))
+-- | Raises a 'Quantity' or 'Unit' to an integer power.
+--
+-- The intimidating type signature captures the similarity between these operations
+-- and ensures that composite 'Unit's are 'NotPrefixable'.
+(^) :: (Fractional a, KnownNumType i, KnownVariant v, KnownVariant (Weaken v))
+    => Dimensional v d1 a -> Proxy i -> Dimensional (Weaken v) (d1 ^ i) a
+x ^ n = let n' = (toNum n) :: Int
+         in liftUntyped (Prelude.^^ n') (Name.power' n') x
 
 {-
 A special case is that dimensionless quantities are not restricted
@@ -422,38 +480,50 @@ Of these, negation, addition and subtraction are particularly simple
 as they are done in a single physical dimension.
 -}
 
+-- | Negates a quantity using 'Prelude.negate'.
 negate :: Num a => Quantity d a -> Quantity d a
-negate (Dimensional x) = Dimensional (Prelude.negate x)
+negate = liftUntypedQ Prelude.negate
 
+-- | Adds two quantities using 'Prelude.+'. 
 (+) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
-Dimensional x + Dimensional y = Dimensional (x Prelude.+ y)
+(+) = liftUntyped2Q (Prelude.+)
 
+-- | Subtracts one quantity from another using 'Prelude.-'.
 (-) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
 x - y = x + negate y
 
-{-
-Absolute value.
--}
-
+-- | Computes the absolute value of a quantity using 'Prelude.abs'.
 abs :: Num a => Quantity d a -> Quantity d a
-abs (Dimensional x) = Dimensional (Prelude.abs x)
+abs = liftUntypedQ Prelude.abs
 
 {-
 Roots of arbitrary (integral) degree. Appears to occasionally be useful
 for units as well as quantities.
 -}
 
-nroot :: (Floating a, KnownNumType n)
-      => Proxy n -> Dimensional v d a -> Dimensional v (Root d n) a
-nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ toNum n))
+-- | Computes the nth root of a quantity using 'Prelude.**'.
+-- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
+nroot :: (KnownNumType n, Floating a)
+      => Proxy n -> Quantity d a -> Quantity (Root d n) a
+nroot n = let n' = 1 Prelude./ toNum n
+           in liftUntypedQ (Prelude.** n')
 
 {-
 We provide short-hands for the square and cubic roots.
 -}
 
-sqrt :: Floating a => Dimensional v d a -> Dimensional v (Root d 'Pos2) a
+-- | Computes the square root of a quantity using 'Prelude.**'.
+-- The 'Root' type family will prevent application where the supplied quantity does not have a square dimension.
+--
+-- prop> sqrt x == nroot pos2 x
+sqrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
 sqrt = nroot pos2
-cbrt :: Floating a => Dimensional v d a -> Dimensional v (Root d 'Pos3) a
+
+-- | Computes the cube root of a quantity using 'Prelude.**'.
+-- The 'Root' type family will prevent application where the supplied quantity does not have a cubic dimension.
+--
+-- prop> cbrt x == nroot pos3 x
+cbrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos3) a
 cbrt = nroot pos3
 
 {-
@@ -461,8 +531,13 @@ We also provide an operator alternative to nroot for those that
 prefer such.
 -}
 
+
+-- | Computes the nth root of a quantity using 'Prelude.**'.
+-- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
+--
+-- prop> x ^/ y == nroot y x
 (^/) :: (KnownNumType n, Floating a)
-     => Dimensional v d a -> Proxy n -> Dimensional v (Root d n) a
+     => Quantity d a -> Proxy n -> Quantity (Root d n) a
 (^/) = flip nroot
 
 {-
@@ -482,11 +557,11 @@ elements of a functor (e.g. a list).
 -}
 
 -- | Applies '(*~)' to all values in a functor.
-(*~~) :: (Functor f, Num a) => f a -> Unit d a -> f (Quantity d a)
+(*~~) :: (Functor f, Num a) => f a -> Unit m d a -> f (Quantity d a)
 xs *~~ u = fmap (*~ u) xs
 
 -- | Applies '(/~)' to all values in a functor.
-(/~~) :: (Functor f, Fractional a) => f (Quantity d a) -> Unit d a -> f a
+(/~~) :: (Functor f, Fractional a) => f (Quantity d a) -> Unit m d a -> f a
 xs /~~ u = fmap (/~ u) xs
 
 infixl 7  *~~, /~~
@@ -504,7 +579,7 @@ mean = uncurry (/) . foldr accumulate (_0, _0)
 -- | The length of the foldable data structure as a 'Dimensionless'.
 -- This can be useful for purposes of e.g. calculating averages.
 dimensionlessLength :: (Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a
-dimensionlessLength = Dimensional . fromIntegral . length
+dimensionlessLength x = (fromIntegral $ length x) *~ one
   where
     -- As in base-4.8 Data.Foldable for GHC 7.8 (base-4.6) compatibility.
     -- Once base-4.6. compatibility is abandoned this where clause can
@@ -546,22 +621,20 @@ asinh = fmap Prelude.asinh
 acosh = fmap Prelude.acosh
 atanh = fmap Prelude.atanh
 
+-- | Raises a dimensionless quantity to a floating power using 'Prelude.**'.
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
-Dimensional x ** Dimensional y = Dimensional (x Prelude.** y)
+(**) = liftUntyped2Q (Prelude.**)
 
-{-
-For 'atan2' the operands need not be dimensionless but they must be
-of the same type. The result will of course always be dimensionless.
--}
-
-atan2 :: RealFloat a => Quantity d a -> Quantity d a -> Dimensionless a
-atan2 (Dimensional y) (Dimensional x) = Dimensional (Prelude.atan2 y x)
+-- | The standard two argument arctangent function.
+-- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
+atan2 :: (RealFloat a) => Quantity d a -> Quantity d a -> Dimensionless a
+atan2 = liftUntyped2Q Prelude.atan2
 
 -- | A polymorphic 'Unit' which can be used in place of the coherent
 -- SI base unit of any dimension. This allows polymorphic quantity
 -- creation and destruction without exposing the 'Dimensional' constructor.
-siUnit :: Num a => Unit d a
-siUnit = Dimensional 1
+siUnit :: forall d a.(KnownDimension d, Num a) => Unit 'NonMetric d a
+siUnit = Unit' (siBaseName (Proxy :: Proxy d)) 1
 
 {-
 The only unit we will define in this module is 'one'.
@@ -573,8 +646,8 @@ The only unit we will define in this module is 'one'.
 -- the unit one, symbol 1" of <#note1 [1]> the unit one generally does not
 -- appear in expressions. However, for us it is necessary to use 'one'
 -- as we would any other unit to perform the "boxing" of dimensionless values.
-one :: Num a => Unit DOne a
-one = siUnit
+one :: Num a => Unit 'NonMetric DOne a
+one = Unit' nOne 1
 
 {- $constants
 For convenience we define some constants for small integer values
@@ -587,7 +660,7 @@ good measure.
 -- it to express zero Length or Capacitance or Velocity etc, in addition
 -- to the dimensionless value zero.
 _0 :: Num a => Quantity d a
-_0 = 0 *~ siUnit
+_0 = Quantity' 0
 
 _1, _2, _3, _4, _5, _6, _7, _8, _9 :: (Num a) => Dimensionless a
 _1 = 1 *~ one
@@ -616,15 +689,8 @@ abstraction of physical dimensions.
 
 -}
 
--- | Maps over 'Unit's or 'Quantity's.
---
--- The caller is responsible for ensuring that the supplied function respects the dimensional abstraction.
--- This means that the function must preserve numerical values, or linearly scale them while preserving the origin.
-dmap :: (a -> b) -> Dimensional v d a -> Dimensional v d b
-dmap f (Dimensional x) = Dimensional (f x)
-
 -- | Convenient conversion between numerical types while retaining dimensional information.
-changeRep :: (Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
+changeRep :: (KnownVariant v, Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
 changeRep = dmap realToFrac
 
 {- $dimension-terms
@@ -636,9 +702,6 @@ we provide a means for converting from type-level dimensions to term-level dimen
 instance (KnownDimension d) => HasDimension (Dimensional v d a) where
   dimension _ = dimension (Proxy :: Proxy d)
 
-instance (KnownDimension d, Functor f) => HasDimension (f (Dimensional v d a)) where
-  dimension _ = dimension (Proxy :: Proxy d)
-
 {-
 We will conclude by providing a reasonable 'Show' instance for
 quantities. The “normalized” unit of the quantity is inferred
@@ -648,21 +711,16 @@ We neglect units since it is unclear how to represent them
 in a way that distinguishes them from quantities, or whether that is
 even a requirement.
 -}
-instance (KnownDimension d, Show a) => Show (Quantity d a) where
-      show q@(Dimensional x) = let powers = asList $ dimension q
-                                   units = ["m", "kg", "s", "A", "K", "mol", "cd"]
-                                   dims = concat $ zipWith dimUnit units powers
-                               in show x ++ dims
+instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
+      show = showIn siUnit
 
-{-
-The helper function 'dimUnit' defined next conditions a 'String' (unit)
-with an exponent, if appropriate.
--}
-dimUnit :: String -> Int -> String
-dimUnit u n = case n of
-                0 -> ""
-                1 -> " " ++ u
-                n' -> " " ++ u ++ "^" ++ show n'
+showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
+showIn (Unit' n y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)
+                                   | otherwise           = (show (x Prelude./ y)) ++ " " ++ (show n)
+
+siBaseName :: HasDimension d => d -> UnitName 'NonMetric
+siBaseName d = let powers = asList $ dimension d
+                in reduce . nAryProductOfPowers $ zip baseUnitNames powers
 
 -- | Applies a scale factor to a 'Unit'.
 -- The 'prefix' function will be used by other modules to
@@ -674,5 +732,9 @@ dimUnit u n = case n of
 -- 
 -- Supplying negative scale factors is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
-prefix :: Num a => a -> Unit d a -> Unit d a
-prefix x (Dimensional y) = Dimensional (x Prelude.* y)
+composite :: Num a => UnitName m -> Quantity d a -> Unit m d a
+composite n (Quantity' x) = Unit' n x
+
+{-# DEPRECATED prefix "This doesn't supply the correct name, so use composite instead." #-}
+prefix :: forall d a.(KnownDimension d, Num a) => Quantity d a -> Unit 'NonMetric d a
+prefix = composite (name (siUnit :: Unit 'NonMetric d a))
