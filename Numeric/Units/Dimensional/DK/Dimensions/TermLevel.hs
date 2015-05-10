@@ -64,6 +64,15 @@ dThermodynamicTemperature = Dim' 0 0 0 0 1 0 0
 dAmountOfSubstance        = Dim' 0 0 0 0 0 1 0
 dLuminousIntensity        = Dim' 0 0 0 0 0 0 1
 
+{-
+We will reuse the operators and function names from the Prelude.
+To prevent unpleasant surprises we give operators the same fixity
+as the Prelude.
+-}
+
+infixr 8  ^
+infixl 7  *, /
+
 -- | Forms the product of two dimensions.
 (*) :: Dimension' -> Dimension' -> Dimension'
 (Dim' l m t i th n j) * (Dim' l' m' t' i' th' n' j') = Dim' (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
