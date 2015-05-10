@@ -69,6 +69,15 @@ type DThermodynamicTemperature = 'Dim 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero
 type DAmountOfSubstance        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero
 type DLuminousIntensity        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1
 
+{-
+We will reuse the operators and function names from the Prelude.
+To prevent unpleasant surprises we give operators the same fixity
+as the Prelude.
+-}
+
+infixr 8  ^
+infixl 7  *, /
+
 -- | Multiplication of dimensions corresponds to adding of the base
 -- dimensions' exponents.
 type family (a::Dimension) * (b::Dimension) where
