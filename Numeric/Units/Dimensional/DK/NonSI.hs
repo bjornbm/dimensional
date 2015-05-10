@@ -146,13 +146,13 @@ nauticalMile = composite (ucum "[nmi_i]" "NM" "nautical mile") $ 1852 *~ meter
 knot :: (Fractional a) => Unit 'NonMetric DVelocity a
 knot = nauticalMile / hour
 revolution :: (Floating a) => Unit 'NonMetric DOne a
-revolution = prefix $ (2 Prelude.* Prelude.pi) *~ radian
+revolution = composite (dimensionalAtom "rev" "rev" "revolution") $ (2 Prelude.* Prelude.pi) *~ radian
 solid :: (Floating a) => Unit 'NonMetric DOne a
-solid = prefix $ (4 Prelude.* Prelude.pi) *~ steradian
+solid = composite (dimensionalAtom "solid" "solid" "solid") $ (4 Prelude.* Prelude.pi) *~ steradian
 teaspoon :: (Fractional a) => Unit 'NonMetric DVolume a
-teaspoon = prefix $ 5 *~ (milli liter)
+teaspoon = composite (ucum "[tsp_us]" "tsp" "teaspoon") $ 5 *~ (milli liter)
 acre :: (Fractional a) => Unit 'NonMetric DArea a
-acre = prefix $ 43560 *~ (square foot)
+acre = composite (ucum "[acr_us]" "ac" "acre") $ 43560 *~ (square foot)
 
 {- $year
 
@@ -169,8 +169,8 @@ constraint, and also provide a Julian century.
 -}
 
 year, century :: Num a => Unit 'NonMetric DTime a
-year    = prefix $ 31557600 *~ second
-century = prefix $ 100 *~ year
+year    = composite (ucum "a_j" "a" "mean Julian year") $ 31557600 *~ second
+century = composite (dimensionalAtom "c_j" "cen" "mean Julian century") $ 100 *~ year
 
 {- $pressure-units
 It seems that nearly every area of application has its own customary unit for measuring pressure.
@@ -193,7 +193,7 @@ bar = composite (ucumMetric "bar" "bar" "bar") $ 1.0e5 *~ pascal
 --  approximately equal to typical air pressure at earth mean sea
 --  level.
 atmosphere :: (Fractional a) => Unit 'NonMetric DPressure a
-atmosphere = prefix $ 101325 *~ pascal
+atmosphere = composite (ucum "atm" "atm" "standard atmosphere") $ 101325 *~ pascal
 
 -- | The "technical atmosphere"
 --
@@ -202,7 +202,7 @@ atmosphere = prefix $ 101325 *~ pascal
 --  A technical atmosphere (symbol: at) is a non-SI unit of pressure equal
 --  to one kilogram-force per square centimeter.
 technicalAtmosphere :: (Fractional a) => Unit 'NonMetric DPressure a
-technicalAtmosphere = prefix $ 1 *~ (kilo gram * gee * centi meter ^ neg2)
+technicalAtmosphere = composite (ucum "att" "at" "technical atmosphere") $ 1 *~ (kilo gram * gee * centi meter ^ neg2)
 
 -- | The conventional value for the pressure exerted by a 1 mm high column of mercury.
 --
@@ -215,17 +215,19 @@ technicalAtmosphere = prefix $ 1 *~ (kilo gram * gee * centi meter ^ neg2)
 -- The chosen fluid density approximately corresponds to that of mercury
 -- at 0 deg. Under most conditions, 1 mmHg is approximately equal to 1 'torr'.
 mmHg :: (Fractional a) => Unit 'NonMetric DPressure a
-mmHg = prefix $ 13.5951 *~ (gram * centi meter ^ neg3 * milli meter * gee)
+mmHg = milli mHg
 
+mHg :: (Fractional a) => Unit 'Metric DPressure a
+mHg = composite (ucumMetric "m[Hg]" "m Hg" "meter of mercury") $ 133.3220 *~ kilo pascal
 
 -- | The conventional value for the pressure exerted by a 1 inch high column of mercury.
 --
 -- Column inches of mercury are also used to measure pressure, especially in
 -- meteorological or aeronautical contexts in the United States.
 --
--- This is the conventional value from Appendix B.8 of <#note1 [1]>.
+-- This is the value defined by UCUM.
 inHg :: (Fractional a) => Unit 'NonMetric DPressure a
-inHg = prefix $ 3386.389 *~ pascal
+inHg = composite (ucum "[in_i'Hg]" "in Hg" "inch of mercury") $ 1 *~ (mHg * inch / meter)
 
 -- | One torr (symbol: Torr) is defined as 1/760 atm, which is approximately equal to 1 'mmHg'.
 torr :: (Fractional a) => Unit 'NonMetric DPressure a
@@ -243,10 +245,10 @@ stokes = composite (ucumMetric "St" "St" "Stokes") $ 1 *~ (centi meter ^ pos2 / 
 These units of temperature are relative. For absolute temperatures, see 'Numeric.Units.Dimensional.DK.SIUnits.fromDegreeCelsiusAbsolute'.
 -}
 degreeFahrenheit :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
-degreeFahrenheit = prefix $ (5 Prelude./ 9) *~ degreeCelsius
+degreeFahrenheit = composite (ucum "[degF]" "°F" "degree Fahrenheit") $ (5 Prelude./ 9) *~ degreeCelsius
 
 degreeRankine :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
-degreeRankine = prefix $ 1 *~ degreeFahrenheit
+degreeRankine = composite (ucum "[degR]" "°R" "degree Rankine") $ 1 *~ degreeFahrenheit
 
 {- $imperial-volumes
 Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki/Cup_(unit)#Imperial_cup.
