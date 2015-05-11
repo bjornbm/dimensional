@@ -1,6 +1,7 @@
 {-# OPTIONS_HADDOCK not-home, show-extensions #-}
 
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
