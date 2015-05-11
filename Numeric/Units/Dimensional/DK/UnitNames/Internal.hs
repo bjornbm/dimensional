@@ -210,12 +210,33 @@ grouped = Grouped
 data NameAtom (m :: NameAtomType)
   = NameAtom 
   { 
-    interchangeNameAuthority :: InterchangeNameAuthority, -- ^ The authortity which issued the interchange name for the unit.
+    _interchangeNameAuthority :: InterchangeNameAuthority, -- ^ The authortity which issued the interchange name for the unit.
     interchangeName :: String, -- ^ The interchange name of the unit.
     abbreviation_en :: String, -- ^ The abbreviated name of the unit in international English
     name_en :: String -- ^ The full name of the unit in international English
   }
   deriving (Eq, Ord, Typeable)
+
+-- | Determines the authority which issued the interchange name of a unit or unit name.
+-- For composite units, this is the least-authoritative interchange name of any constituent name.
+--
+-- Note that the least-authoritative authority is the one sorted as greatest by the 'Ord' instance of 'InterchangeNameAuthority'.
+class HasInterchangeName a where
+  interchangeNameAuthority :: a -> InterchangeNameAuthority
+
+instance HasInterchangeName (NameAtom m) where
+  interchangeNameAuthority = _interchangeNameAuthority
+
+instance HasInterchangeName (UnitName m) where
+  interchangeNameAuthority One = UCUM
+  interchangeNameAuthority (MetricAtomic a) = interchangeNameAuthority a
+  interchangeNameAuthority (Atomic a) = interchangeNameAuthority a
+  interchangeNameAuthority (Prefixed p n) = max (interchangeNameAuthority p) (interchangeNameAuthority n)
+  interchangeNameAuthority (Product n1 n2) = max (interchangeNameAuthority n1) (interchangeNameAuthority n2)
+  interchangeNameAuthority (Quotient n1 n2) = max (interchangeNameAuthority n1) (interchangeNameAuthority n2)
+  interchangeNameAuthority (Power n _) = interchangeNameAuthority n
+  interchangeNameAuthority (Grouped n) = interchangeNameAuthority n
+  interchangeNameAuthority (Weaken n) = interchangeNameAuthority n
 
 prefix :: String -> String -> String -> PrefixName
 prefix i a f = NameAtom UCUM i a f
@@ -240,7 +261,7 @@ atom i a f = Atomic $ NameAtom Custom i a f
 data InterchangeNameAuthority = UCUM -- ^ The interchange name originated with the Unified Code for Units of Measure.
                               | DimensionalLibrary -- ^ The interchange name originated with the dimensional-dk library.
                               | Custom -- ^ The interchange name originated with a user of the dimensional-dk library.
-  deriving (Eq, Ord, Typeable)
+  deriving (Eq, Ord, Show, Typeable)
 
 -- | The type of a unit name transformation that may be associated with an operation that takes a single unit as input.
 type UnitNameTransformer = Maybe AnyUnitName -> Maybe AnyUnitName

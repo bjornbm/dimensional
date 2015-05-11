@@ -331,6 +331,9 @@ type Unit (m :: Metricality) = Dimensional ('DUnit m)
 -- | A dimensional quantity.
 type Quantity = Dimensional 'DQuantity
 
+instance HasInterchangeName (Unit m d a) where
+  interchangeNameAuthority (Unit' n _) = interchangeNameAuthority n
+
 name :: Unit m d a -> UnitName m
 name (Unit' n _) = n
 
