@@ -8,9 +8,9 @@ maintainer:          bjorn@buckwalter.se
 stability:           experimental
 homepage:            http://dimensional.googlecode.com/
 category:            Math, Physics
-synopsis:            Statically checked physical dimensions, implemented
+synopsis:            Statically checked physical dimensions,
                      using Type Families and Data Kinds.
-cabal-version:       >= 1.2
+cabal-version:       >= 1.6
 build-type:          Simple
 
 description:
@@ -35,6 +35,10 @@ extra-source-files:  README.md,
                      Numeric/Units/Dimensional/DK/QuantitiesTest.hs,
                      examples/README,
                      examples/GM.lhs
+
+source-repository head
+  type:     git
+  location: https://github.com/bjornbm/dimensional-dk/
 
 library
   build-depends:       base >= 4.7 && < 5,
