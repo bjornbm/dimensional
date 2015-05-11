@@ -131,7 +131,7 @@ Pounds of force per square inch.
 -}
 
 psi :: Fractional a => Unit 'NonMetric DPressure a
-psi = poundForce / inch ^ pos2
+psi = composite (ucum "[psi]" "psi" "pound per square inch") $ 1 *~ (poundForce / inch ^ pos2)
 
 {-
 
@@ -144,7 +144,7 @@ yard = composite (ucum "[yd_i]" "yd" "yard") $ 3 *~ foot
 mile = composite (ucum "[mi_i]" "mi" "mile") $ 5280 *~ foot
 nauticalMile = composite (ucum "[nmi_i]" "NM" "nautical mile") $ 1852 *~ meter
 knot :: (Fractional a) => Unit 'NonMetric DVelocity a
-knot = nauticalMile / hour
+knot = composite (ucum "[kt_i]" "kt" "knot") $ 1 *~ (nauticalMile / hour)
 revolution :: (Floating a) => Unit 'NonMetric DOne a
 revolution = composite (dimensionalAtom "rev" "rev" "revolution") $ (2 Prelude.* Prelude.pi) *~ radian
 solid :: (Floating a) => Unit 'NonMetric DOne a
