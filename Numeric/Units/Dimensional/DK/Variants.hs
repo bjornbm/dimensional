@@ -1,5 +1,6 @@
 {-# OPTIONS_HADDOCK not-home, show-extensions #-}
 
+{-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE KindSignatures #-}
