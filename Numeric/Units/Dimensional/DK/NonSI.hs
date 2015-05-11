@@ -231,7 +231,7 @@ inHg = composite (ucum "[in_i'Hg]" "in Hg" "inch of mercury") $ 1 *~ (mHg * inch
 
 -- | One torr (symbol: Torr) is defined as 1/760 atm, which is approximately equal to 1 'mmHg'.
 torr :: (Fractional a) => Unit 'NonMetric DPressure a
-torr = prefix $ (1 Prelude./ 760) *~ atmosphere
+torr = composite (dimensionalAtom "Torr" "Torr" "Torr") $ (1 Prelude./ 760) *~ atmosphere
 
 {- Radiation -}
 rad :: (Fractional a) => Unit 'Metric DAbsorbedDose a
@@ -257,12 +257,12 @@ Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki
 imperialGallon, imperialQuart, imperialPint, imperialCup,
                 imperialGill, imperialFluidOunce
                 :: (Fractional a) => Unit 'NonMetric DVolume a
-imperialGallon = prefix $ 4.54609 *~ liter
-imperialQuart  = prefix $ (1 Prelude./ 4) *~ imperialGallon
-imperialPint   = prefix $ (1 Prelude./ 8) *~ imperialGallon
-imperialCup    = prefix $ 0.5 *~ imperialPint
-imperialGill   = prefix $ (1 Prelude./ 4) *~ imperialPint
-imperialFluidOunce = prefix $ (1 Prelude./ 20) *~ imperialPint
+imperialGallon     = composite (ucum "[gal_br]" "gal" "gallon")         $ 4.54609 *~ liter
+imperialQuart      = composite (ucum "[qt_br]" "qt" "quart")            $ (1 Prelude./ 4) *~ imperialGallon
+imperialPint       = composite (ucum "[pt_br]" "pt" "pint")             $ (1 Prelude./ 8) *~ imperialGallon
+imperialCup        = composite (dimensionalAtom "[cup_br]" "cup" "cup") $ 0.5 *~ imperialPint
+imperialGill       = composite (ucum "[gil_br]" "gill" "gill")          $ (1 Prelude./ 4) *~ imperialPint
+imperialFluidOunce = composite (ucum "[foz_br]" "fl oz" "fluid ounce")  $ (1 Prelude./ 20) *~ imperialPint
 
 {- $us-customary-volumes
 Per http://www.nist.gov/pml/wmd/pubs/upload/2012-hb44-final.pdf page 452 and http://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume
@@ -270,9 +270,9 @@ Note that there exist rarely-used "dry" variants of units with overlapping names
 -}
 
 usGallon, usQuart, usPint, usCup, usGill, usFluidOunce :: (Fractional a) => Unit 'NonMetric DVolume a
-usGallon = prefix $ 231 *~ (cubic inch)
-usQuart = prefix $ (1 Prelude./ 4) *~ usGallon
-usPint = prefix $ (1 Prelude./ 8) *~ usGallon
-usCup = prefix $ (1 Prelude./ 2) *~ usPint
-usGill = prefix $ (1 Prelude./ 4) *~ usPint
-usFluidOunce = prefix $ (1 Prelude./ 16) *~ usPint -- sic, does not match factor used in imperial system
+usGallon     = composite (ucum "[gal_us]" "gal" "gallon")        $ 231 *~ (cubic inch)
+usQuart      = composite (ucum "[qt_us]" "qt" "quart")           $ (1 Prelude./ 4) *~ usGallon
+usPint       = composite (ucum "[pt_us]" "pt" "pint")            $ (1 Prelude./ 8) *~ usGallon
+usCup        = composite (ucum "[cup_us]" "cup" "cup")           $ (1 Prelude./ 2) *~ usPint
+usGill       = composite (ucum "[gil_us]" "gill" "gill")         $ (1 Prelude./ 4) *~ usPint
+usFluidOunce = composite (ucum "[foz_us]" "fl oz" "fluid ounce") $ (1 Prelude./ 16) *~ usPint -- sic, does not match factor used in imperial system
