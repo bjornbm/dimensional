@@ -113,7 +113,7 @@ poundMass = composite (ucum "[lb_av]" "lb" "pound") $ 0.45359237 *~ (kilo gram)
 ounce     = composite (ucum "[oz_av]" "oz" "ounce") $ (1 Prelude./ 16) *~ poundMass
 
 poundForce :: Fractional a => Unit 'NonMetric DForce a
-poundForce = poundMass * gee  -- 4.4482 N
+poundForce = composite (ucum "[lbf_av]" "lbf" "pound force") $ 1 *~ (poundMass * gee)  -- 4.4482 N
 
 {-
 
