@@ -1,5 +1,6 @@
 {-# OPTIONS_HADDOCK not-home #-}
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
@@ -11,7 +12,11 @@ where
 
 import Control.Applicative
 import Data.Dynamic
+#if MIN_VERSION_base(4, 8, 0)
 import Data.Foldable (toList)
+#else
+import Data.Foldable (Foldable, toList)
+#endif
 import Numeric.Units.Dimensional.DK.Variants (Metricality(..))
 import Prelude hiding ((*), (/), (^), product)
 import qualified Prelude as P
