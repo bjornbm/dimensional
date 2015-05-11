@@ -231,10 +231,10 @@ import Prelude
   , Int, ($), zipWith, uncurry, concat, realToFrac
   )
 import qualified Prelude
-import Numeric.NumType.DK
-  ( NumType (Pos2, Pos3)
+import Numeric.NumType.DK.Integers
+  ( TypeInt (Pos2, Pos3)
   , pos2, pos3
-  , KnownNumType, toNum
+  , KnownTypeInt, toNum
   )
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Monoid (Monoid(..))
@@ -405,7 +405,7 @@ Dimensional x * Dimensional y = Dimensional (x Prelude.* y)
     => Dimensional v d a -> Dimensional v d' a -> Dimensional v (d / d') a
 Dimensional x / Dimensional y = Dimensional (x Prelude./ y)
 
-(^) :: (KnownNumType i, Fractional a)
+(^) :: (KnownTypeInt i, Fractional a)
     => Dimensional v d a -> Proxy i -> Dimensional v (d ^ i) a
 Dimensional x ^ n = Dimensional (x Prelude.^^ (toNum n :: Int))
 
@@ -443,7 +443,7 @@ Roots of arbitrary (integral) degree. Appears to occasionally be useful
 for units as well as quantities.
 -}
 
-nroot :: (Floating a, KnownNumType n)
+nroot :: (Floating a, KnownTypeInt n)
       => Proxy n -> Dimensional v d a -> Dimensional v (Root d n) a
 nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ toNum n))
 
@@ -461,7 +461,7 @@ We also provide an operator alternative to nroot for those that
 prefer such.
 -}
 
-(^/) :: (KnownNumType n, Floating a)
+(^/) :: (KnownTypeInt n, Floating a)
      => Dimensional v d a -> Proxy n -> Dimensional v (Root d n) a
 (^/) = flip nroot
 
