@@ -7,11 +7,13 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Numeric.Units.Dimensional.DK.UnitNames.Internal
 where
 
 import Control.Applicative
+import Control.Monad (join)
 import Data.Dynamic
 #if MIN_VERSION_base(4, 8, 0)
 import Data.Foldable (toList)
@@ -107,9 +109,6 @@ reduceOuterGroupsOnly :: UnitName m -> UnitName m
 reduceOuterGroupsOnly (Grouped n) = reduceOuterGroupsOnly (Weaken n)
 reduceOuterGroupsOnly n = n
 
-data AnyUnitName where
-  AnyUnitName :: (Typeable (UnitName m)) => UnitName m -> AnyUnitName
-
 data NameAtomType = UnitAtom Metricality
                   | PrefixAtom
   deriving (Eq, Ord, Typeable)                  
@@ -143,8 +142,8 @@ nMole = ucumMetric "mol" "mol" "mole"
 nCandela :: UnitName 'Metric
 nCandela = ucumMetric "cd" "cd" "candela"
 
-baseUnitNames :: [AnyUnitName]
-baseUnitNames = [AnyUnitName nMeter, AnyUnitName nKilogram, AnyUnitName nSecond, AnyUnitName nAmpere, AnyUnitName nKelvin, AnyUnitName nMole, AnyUnitName nCandela]
+baseUnitNames :: [UnitName 'NonMetric]
+baseUnitNames = [weaken nMeter, nKilogram, weaken nSecond, weaken nAmpere, weaken nKelvin, weaken nMole, weaken nCandela]
 
 deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta :: PrefixName
 deka  = prefix "da" "da" "deka"
@@ -202,6 +201,23 @@ weaken n@(Quotient _ _) = n
 weaken n@(Power _ _) = n
 weaken n@(Grouped _) = n
 weaken n@(Weaken _) = n
+
+strengthen :: UnitName a -> Maybe (UnitName 'Metric)
+strengthen n@(MetricAtomic _) = Just n
+strengthen (Weaken n) = strengthen n
+strengthen _ = Nothing
+
+strengthenIfNeeded :: forall m1 m2.(Typeable m1, Typeable m2) => UnitName m1 -> Maybe (UnitName m2)
+strengthenIfNeeded n = go (typeRep (Proxy :: Proxy m1)) (typeRep (Proxy :: Proxy m2)) n
+  where
+    metric = typeRep (Proxy :: Proxy 'Metric)
+    nonMetric = typeRep (Proxy :: Proxy 'NonMetric)
+    go :: TypeRep -> TypeRep -> UnitName m1 -> Maybe (UnitName m2)
+    go p1 p2 | p1 == p2 = cast
+             | (p1 == nonMetric) && (p2 == metric) = join . fmap gcast . strengthen
+             | (p1 == metric) && (p2 == nonMetric) = cast . weaken
+             | otherwise = error "Should be unreachable. TypeRep of an unexpected Metricality encountered."
+
 
 grouped :: UnitName a -> UnitName 'NonMetric
 grouped = Grouped
@@ -264,47 +280,32 @@ data InterchangeNameAuthority = UCUM -- ^ The interchange name originated with t
   deriving (Eq, Ord, Show, Typeable)
 
 -- | The type of a unit name transformation that may be associated with an operation that takes a single unit as input.
-type UnitNameTransformer = Maybe AnyUnitName -> Maybe AnyUnitName
+type UnitNameTransformer = (forall m.Maybe (UnitName m) -> Maybe (UnitName 'NonMetric))
 
 -- | The type of a unit name transformation that may be associated with an operation that takes two units as input.
-type UnitNameTransformer2 = Maybe AnyUnitName -> Maybe AnyUnitName -> Maybe AnyUnitName
+type UnitNameTransformer2 = (forall m1 m2.Maybe (UnitName m1) -> Maybe (UnitName m2) -> Maybe (UnitName 'NonMetric))
 
-liftTransformer2 :: (forall m1 m2.UnitName m1 -> UnitName m2 -> UnitName 'NonMetric) -> AnyUnitName -> AnyUnitName -> UnitName 'NonMetric
-liftTransformer2 f (AnyUnitName n1) (AnyUnitName n2) = f n1 n2
+product :: UnitNameTransformer2
+product = liftA2 (*)
 
-liftTransformer :: (forall m1.UnitName m1 -> UnitName 'NonMetric) -> AnyUnitName -> UnitName 'NonMetric
-liftTransformer f (AnyUnitName n) = f n
+quotient :: UnitNameTransformer2
+quotient = liftA2 (/)
 
-product :: AnyUnitName -> AnyUnitName -> UnitName 'NonMetric
-product = liftTransformer2 (*)
+power :: Int -> UnitNameTransformer
+power n = liftA (^ n)
 
-quotient :: AnyUnitName -> AnyUnitName -> UnitName 'NonMetric
-quotient = liftTransformer2 (/)
-
-power :: Int -> AnyUnitName -> UnitName 'NonMetric
-power n = liftTransformer (^ n)
-
-powerExcept0 :: Int -> AnyUnitName -> Maybe (UnitName 'NonMetric)
+powerExcept0 :: Int -> UnitNameTransformer
 powerExcept0 0 _ = Nothing
-powerExcept0 n x = Just $ power n x
+powerExcept0 n x = power n x
 
-product' :: UnitNameTransformer2
-product' = liftA2 $ (AnyUnitName .) . product
-
-quotient' :: UnitNameTransformer2
-quotient' = liftA2 $ (AnyUnitName .) . quotient
-
-power' :: Int -> UnitNameTransformer
-power' n = liftA $ AnyUnitName . power n
-
-nAryProduct :: Foldable f => f AnyUnitName -> UnitName 'NonMetric
+nAryProduct :: Foldable f => f (UnitName 'NonMetric) -> UnitName 'NonMetric
 nAryProduct = go . toList
   where
-    go :: [AnyUnitName] -> UnitName 'NonMetric
+    go :: [UnitName 'NonMetric] -> UnitName 'NonMetric
     go [] = nOne
-    go [AnyUnitName n1] = Weaken n1
-    go (n1 : n2 : []) = product n1 n2
-    go (n : ns) = product n (AnyUnitName . go $ ns)
+    go [n1] = n1
+    go (n1 : n2 : []) = n1 * n2
+    go (n : ns) = n * go ns
 
-nAryProductOfPowers :: (Functor f, Foldable f) => f (AnyUnitName, Int) -> UnitName 'NonMetric
-nAryProductOfPowers xs = nAryProduct $ fmap (AnyUnitName . uncurry (flip power)) xs
+nAryProductOfPowers :: (Functor f, Foldable f) => f (UnitName 'NonMetric, Int) -> UnitName 'NonMetric
+nAryProductOfPowers xs = nAryProduct $ fmap (uncurry (^)) xs

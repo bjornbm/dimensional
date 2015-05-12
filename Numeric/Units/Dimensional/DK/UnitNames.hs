@@ -1,7 +1,7 @@
 {-# LANGUAGE PatternSynonyms #-}
 module Numeric.Units.Dimensional.DK.UnitNames
 (
-  UnitName, NameAtom, pattern NameAtom, PrefixName, AnyUnitName(..),
+  UnitName, NameAtom, pattern NameAtom, PrefixName,
   InterchangeNameAuthority(..), HasInterchangeName(..),
   atom, applyPrefix, (*), (/), (^), grouped,
   nOne, nMeter, nGram, nKilogram, nSecond, nAmpere, nKelvin, nMole, nCandela,
@@ -11,7 +11,7 @@ module Numeric.Units.Dimensional.DK.UnitNames
   UnitNameTransformer, UnitNameTransformer2,
   product, quotient, power,
   powerExcept0, nAryProduct, nAryProductOfPowers, reduce,
-  product', quotient', power'
+  weaken, strengthen, strengthenIfNeeded
 )
 where
 

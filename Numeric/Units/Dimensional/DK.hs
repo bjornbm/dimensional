@@ -297,8 +297,8 @@ class KnownVariant (v :: Variant) where
   -- | A dimensional value, either a 'Quantity' or a 'Unit', parameterized by its 'Dimension' and representation.
   data Dimensional v :: Dimension -> * -> *
   extractValue :: Dimensional v d a -> a
-  extractName :: Dimensional v d a -> Maybe AnyUnitName
-  injectValue :: (Maybe AnyUnitName) -> a -> Dimensional v d a
+  extractName :: Dimensional v d a -> Maybe (UnitName 'NonMetric)
+  injectValue :: (Maybe (UnitName 'NonMetric)) -> a -> Dimensional v d a
   -- | Maps over the underlying representation of a dimensional value.
   -- The caller is responsible for ensuring that the supplied function respects the dimensional abstraction.
   -- This means that the function must preserve numerical values, or linearly scale them while preserving the origin.
@@ -317,11 +317,11 @@ instance KnownVariant 'DQuantity where
 instance (Typeable m) => KnownVariant ('DUnit m) where
   data Dimensional ('DUnit m) d a = Unit' (UnitName m) a
   extractValue (Unit' _ x) = x
-  extractName (Unit' n _) = Just $ AnyUnitName n
-  injectValue (Just (AnyUnitName n)) x = let n' = fromDynamic $ toDyn n
-                                         in case n' of
-                                            Just n'' -> Unit' n'' x
-                                            _        -> Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
+  extractName (Unit' n _) = Just . weaken $ n
+  injectValue (Just n) x = let n' = strengthenIfNeeded n
+                            in case n' of
+                               Just n'' -> Unit' n'' x
+                               _        -> Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
   injectValue _        _ = Prelude.error "Shouldn't be reachable. Needed to name a quantity."
   dmap f (Unit' n x) = Unit' n (f x)
 
@@ -452,14 +452,14 @@ Multiplication, division and powers apply to both units and quantities.
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NonMetric'.
 (*) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Num a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 * d2) a
-(*) = liftUntyped2 (Prelude.*) (Name.product')
+(*) = liftUntyped2 (Prelude.*) (Name.product)
 
 -- | Divides one 'Quantity' by another or one 'Unit' by another.
 --
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
 (/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
-(/) = liftUntyped2 (Prelude./) (Name.quotient')
+(/) = liftUntyped2 (Prelude./) (Name.quotient)
 
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
@@ -468,7 +468,7 @@ Multiplication, division and powers apply to both units and quantities.
 (^) :: (Fractional a, KnownTypeInt i, KnownVariant v, KnownVariant (Weaken v))
     => Dimensional v d1 a -> Proxy i -> Dimensional (Weaken v) (d1 ^ i) a
 x ^ n = let n' = (toNum n) :: Int
-         in liftUntyped (Prelude.^^ n') (Name.power' n') x
+         in liftUntyped (Prelude.^^ n') (Name.power n') x
 
 {-
 A special case is that dimensionless quantities are not restricted
