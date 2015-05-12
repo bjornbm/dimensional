@@ -614,6 +614,8 @@ tau = _2 * pi
 We intentionally decline to provide a 'Functor' instance for 'Dimensional' because its use breaks the
 abstraction of physical dimensions.
 
+If you feel your work requires this instance, it is provided as an orphan in "Numeric.Units.Dimensional.DK.Functor".
+
 -}
 
 -- | Maps over 'Unit's or 'Quantity's.
