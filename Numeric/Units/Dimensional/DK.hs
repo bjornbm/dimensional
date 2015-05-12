@@ -227,7 +227,7 @@ module Numeric.Units.Dimensional.DK
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
     -- $functor
-    dmap, changeRep,
+    KnownVariant(dmap), changeRep,
   )
   where
 
