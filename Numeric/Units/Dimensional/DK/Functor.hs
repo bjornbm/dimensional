@@ -5,6 +5,7 @@
 -- OverlappingInstances was deprecated by GHC 7.10 in favor of OVERLAPPING pragmas.
 #else
 {-# LANGUAGE OverlappingInstances #-}
+{-# OPTIONS_GHC -fno-warn-unrecognised-pragmas #-}
 #endif
 
 -- | Provides a 'Functor' instance for 'Dimensional'.
