@@ -333,6 +333,7 @@ type Unit (m :: Metricality) = Dimensional ('DUnit m)
 type Quantity = Dimensional 'DQuantity
 
 instance HasInterchangeName (Unit m d a) where
+  interchangeName (Unit' n _) = interchangeName n
   interchangeNameAuthority (Unit' n _) = interchangeNameAuthority n
 
 name :: Unit m d a -> UnitName m

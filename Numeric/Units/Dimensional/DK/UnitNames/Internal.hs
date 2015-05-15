@@ -222,7 +222,7 @@ data NameAtom (m :: NameAtomType)
   = NameAtom 
   { 
     _interchangeNameAuthority :: InterchangeNameAuthority, -- ^ The authortity which issued the interchange name for the unit.
-    interchangeName :: String, -- ^ The interchange name of the unit.
+    _interchangeName :: String, -- ^ The interchange name of the unit.
     abbreviation_en :: String, -- ^ The abbreviated name of the unit in international English
     name_en :: String -- ^ The full name of the unit in international English
   }
@@ -233,12 +233,23 @@ data NameAtom (m :: NameAtomType)
 --
 -- Note that the least-authoritative authority is the one sorted as greatest by the 'Ord' instance of 'InterchangeNameAuthority'.
 class HasInterchangeName a where
+  interchangeName :: a -> String
   interchangeNameAuthority :: a -> InterchangeNameAuthority
 
 instance HasInterchangeName (NameAtom m) where
+  interchangeName = _interchangeName
   interchangeNameAuthority = _interchangeNameAuthority
 
 instance HasInterchangeName (UnitName m) where
+  interchangeName One = "1"
+  interchangeName (MetricAtomic a) = interchangeName a
+  interchangeName (Atomic a) = interchangeName a
+  interchangeName (Prefixed p n) = (interchangeName p) ++ (interchangeName n)
+  interchangeName (Product n1 n2) = (interchangeName n1) ++ "." ++ (interchangeName n2)
+  interchangeName (Quotient n1 n2) = (interchangeName n1) ++ "/" ++ (interchangeName n2)
+  interchangeName (Power n x) = (interchangeName n) ++ (show x)
+  interchangeName (Grouped n) = "(" ++ (interchangeName n) ++ ")"
+  interchangeName (Weaken n) = interchangeName n
   interchangeNameAuthority One = UCUM
   interchangeNameAuthority (MetricAtomic a) = interchangeNameAuthority a
   interchangeNameAuthority (Atomic a) = interchangeNameAuthority a
