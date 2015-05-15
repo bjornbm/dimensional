@@ -659,8 +659,8 @@ good measure.
 -}
 
 -- | The constant for zero is polymorphic, allowing
--- it to express zero Length or Capacitance or Velocity etc, in addition
--- to the dimensionless value zero.
+-- it to express zero 'Length' or 'Capacitance' or 'Velocity' etc, in addition
+-- to the 'Dimensionless' value zero.
 _0 :: Num a => Quantity d a
 _0 = Quantity' 0
 
