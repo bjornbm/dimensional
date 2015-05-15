@@ -242,6 +242,7 @@ import Numeric.NumType.DK.Integers
   , pos2, pos3
   , KnownTypeInt, toNum
   )
+import Control.Applicative
 import Data.Dynamic
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Maybe
@@ -341,7 +342,7 @@ name (Unit' n _) = n
 liftUntyped :: (KnownVariant v, KnownVariant (Weaken v)) => (a -> a) -> UnitNameTransformer -> (Dimensional v d1 a) -> (Dimensional (Weaken v) d2 a)
 liftUntyped f nt x = let x' = extractValue x
                          n = extractName x
-                         n' = nt n
+                         n' = (liftA nt) n
                       in injectValue n' (f x')
 
 -- Operates on a dimensional value using a unary operation on values, yielding a Quantity.
@@ -355,7 +356,7 @@ liftUntyped2 f nt x1 x2 = let x1' = extractValue x1
                               x2' = extractValue x2
                               n1 = extractName x1
                               n2 = extractName x2
-                              n' = nt n1 n2
+                              n' = (liftA2 nt) n1 n2
                         in injectValue n' (f x1' x2') 
 
 -- Combines two dimensional values using a binary operation on values, yielding a Quantity.
@@ -452,14 +453,14 @@ Multiplication, division and powers apply to both units and quantities.
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NonMetric'.
 (*) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Num a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 * d2) a
-(*) = liftUntyped2 (Prelude.*) (Name.product)
+(*) = liftUntyped2 (Prelude.*) (Name.*)
 
 -- | Divides one 'Quantity' by another or one 'Unit' by another.
 --
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
 (/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
-(/) = liftUntyped2 (Prelude./) (Name.quotient)
+(/) = liftUntyped2 (Prelude./) (Name./)
 
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
@@ -468,7 +469,7 @@ Multiplication, division and powers apply to both units and quantities.
 (^) :: (Fractional a, KnownTypeInt i, KnownVariant v, KnownVariant (Weaken v))
     => Dimensional v d1 a -> Proxy i -> Dimensional (Weaken v) (d1 ^ i) a
 x ^ n = let n' = (toNum n) :: Int
-         in liftUntyped (Prelude.^^ n') (Name.power n') x
+         in liftUntyped (Prelude.^^ n') (Name.^ n') x
 
 {-
 A special case is that dimensionless quantities are not restricted
@@ -724,7 +725,7 @@ showIn (Unit' n y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)
 
 siBaseName :: HasDimension d => d -> UnitName 'NonMetric
 siBaseName d = let powers = asList $ dimension d
-                in reduce . nAryProduct $ zipWith (Name.^) baseUnitNames powers
+                in reduce . product $ zipWith (Name.^) baseUnitNames powers
 
 -- | Applies a scale factor to a 'Unit'.
 -- The 'prefix' function will be used by other modules to

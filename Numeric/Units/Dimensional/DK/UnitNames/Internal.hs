@@ -12,7 +12,6 @@
 module Numeric.Units.Dimensional.DK.UnitNames.Internal
 where
 
-import Control.Applicative
 import Control.Monad (join)
 import Data.Dynamic
 #if MIN_VERSION_base(4, 8, 0)
@@ -276,22 +275,13 @@ data InterchangeNameAuthority = UCUM -- ^ The interchange name originated with t
   deriving (Eq, Ord, Show, Typeable)
 
 -- | The type of a unit name transformation that may be associated with an operation that takes a single unit as input.
-type UnitNameTransformer = (forall m.Maybe (UnitName m) -> Maybe (UnitName 'NonMetric))
+type UnitNameTransformer = (forall m.UnitName m -> UnitName 'NonMetric)
 
 -- | The type of a unit name transformation that may be associated with an operation that takes two units as input.
-type UnitNameTransformer2 = (forall m1 m2.Maybe (UnitName m1) -> Maybe (UnitName m2) -> Maybe (UnitName 'NonMetric))
+type UnitNameTransformer2 = (forall m1 m2.UnitName m1 -> UnitName m2 -> UnitName 'NonMetric)
 
-product :: UnitNameTransformer2
-product = liftA2 (*)
-
-quotient :: UnitNameTransformer2
-quotient = liftA2 (/)
-
-power :: Int -> UnitNameTransformer
-power n = liftA (^ n)
-
-nAryProduct :: Foldable f => f (UnitName 'NonMetric) -> UnitName 'NonMetric
-nAryProduct = go . toList
+product :: Foldable f => f (UnitName 'NonMetric) -> UnitName 'NonMetric
+product = go . toList
   where
     -- This is not defined using a simple fold so that it does not complicate the product with
     -- valid but meaningless occurences of nOne.
