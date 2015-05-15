@@ -234,7 +234,7 @@ module Numeric.Units.Dimensional.DK
 import Prelude
   ( Show, Eq(..), Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
   , (.), flip, show, (++), fromIntegral
-  , Int, ($), zip, uncurry, realToFrac, otherwise, String
+  , Int, ($), zipWith, uncurry, realToFrac, otherwise, String
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
@@ -724,7 +724,7 @@ showIn (Unit' n y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)
 
 siBaseName :: HasDimension d => d -> UnitName 'NonMetric
 siBaseName d = let powers = asList $ dimension d
-                in reduce . nAryProductOfPowers $ zip baseUnitNames powers
+                in reduce . nAryProduct $ zipWith (Name.^) baseUnitNames powers
 
 -- | Applies a scale factor to a 'Unit'.
 -- The 'prefix' function will be used by other modules to

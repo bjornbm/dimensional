@@ -290,18 +290,13 @@ quotient = liftA2 (/)
 power :: Int -> UnitNameTransformer
 power n = liftA (^ n)
 
-powerExcept0 :: Int -> UnitNameTransformer
-powerExcept0 0 _ = Nothing
-powerExcept0 n x = power n x
-
 nAryProduct :: Foldable f => f (UnitName 'NonMetric) -> UnitName 'NonMetric
 nAryProduct = go . toList
   where
+    -- This is not defined using a simple fold so that it does not complicate the product with
+    -- valid but meaningless occurences of nOne.
     go :: [UnitName 'NonMetric] -> UnitName 'NonMetric
     go [] = nOne
     go [n1] = n1
     go (n1 : n2 : []) = n1 * n2
     go (n : ns) = n * go ns
-
-nAryProductOfPowers :: (Functor f, Foldable f) => f (UnitName 'NonMetric, Int) -> UnitName 'NonMetric
-nAryProductOfPowers xs = nAryProduct $ fmap (uncurry (^)) xs

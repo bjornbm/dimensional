@@ -10,7 +10,7 @@ module Numeric.Units.Dimensional.DK.UnitNames
   baseUnitNames,
   UnitNameTransformer, UnitNameTransformer2,
   product, quotient, power,
-  powerExcept0, nAryProduct, nAryProductOfPowers, reduce,
+  nAryProduct, reduce,
   weaken, strengthen, strengthenIfNeeded
 )
 where
