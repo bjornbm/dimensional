@@ -222,7 +222,7 @@ module Numeric.Units.Dimensional.DK
     -- $constants
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     -- * Constructing Units
-    siUnit, one, composite, name, prefix,
+    siUnit, one, composite, name,
     -- * Pretty Printing
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
@@ -738,7 +738,3 @@ siBaseName d = let powers = asList $ dimension d
 -- on the grounds that it may be unexpected by other readers.
 composite :: Num a => UnitName m -> Quantity d a -> Unit m d a
 composite n (Quantity' x) = Unit' n x
-
-{-# DEPRECATED prefix "This doesn't supply the correct name, so use composite instead." #-}
-prefix :: forall d a.(KnownDimension d, Num a) => Quantity d a -> Unit 'NonMetric d a
-prefix = composite (name (siUnit :: Unit 'NonMetric d a))
