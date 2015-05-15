@@ -105,10 +105,6 @@ reduce' (Weaken (Grouped n)) = reduce' $ weaken n
 reduce' (Weaken n@(Weaken _)) = reduce' n
 reduce' n = n
 
-reduceOuterGroupsOnly :: UnitName m -> UnitName m
-reduceOuterGroupsOnly (Grouped n) = reduceOuterGroupsOnly (Weaken n)
-reduceOuterGroupsOnly n = n
-
 data NameAtomType = UnitAtom Metricality
                   | PrefixAtom
   deriving (Eq, Ord, Typeable)                  
