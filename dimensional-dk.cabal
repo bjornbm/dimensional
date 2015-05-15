@@ -30,9 +30,6 @@ description:
     Requires GHC 7.8 or later.
 
 extra-source-files:  README.md,
-                     Test.hs,
-                     Numeric/Units/Dimensional/DK/Test.hs,
-                     Numeric/Units/Dimensional/DK/QuantitiesTest.hs,
                      examples/README,
                      examples/GM.lhs
 
