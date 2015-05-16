@@ -57,6 +57,8 @@ test-suite tests
   type:                exitcode-stdio-1.0
   main-is:             Test.hs
   hs-source-dirs:      tests
+  other-modules:       Numeric.Units.Dimensional.DK.QuantitiesTest,
+                       Numeric.Units.Dimensional.DK.Test
   default-language:    Haskell98
   ghc-options:         -Wall
   build-depends:       dimensional-dk,
