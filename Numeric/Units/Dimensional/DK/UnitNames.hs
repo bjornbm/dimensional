@@ -2,7 +2,6 @@
 module Numeric.Units.Dimensional.DK.UnitNames
 (
   UnitName, NameAtom, PrefixName,
-  InterchangeNameAuthority(..), HasInterchangeName(..),
   atom, applyPrefix, (*), (/), (^), product, reduce, grouped,
   nOne, nMeter, nGram, nKilogram, nSecond, nAmpere, nKelvin, nMole, nCandela,
   deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta,

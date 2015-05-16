@@ -19,6 +19,7 @@ import Data.Foldable (toList)
 #else
 import Data.Foldable (Foldable, toList)
 #endif
+import Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames
 import Numeric.Units.Dimensional.DK.Variants (Metricality(..))
 import Prelude hiding ((*), (/), (^), product)
 import qualified Prelude as P
@@ -220,70 +221,53 @@ grouped = Grouped
 -- | Represents the name of an atomic unit or prefix.
 data NameAtom (m :: NameAtomType)
   = NameAtom 
-  { 
-    _interchangeNameAuthority :: InterchangeNameAuthority, -- ^ The authortity which issued the interchange name for the unit.
-    _interchangeName :: String, -- ^ The interchange name of the unit.
+  {
+    _interchangeName :: InterchangeName, -- ^ The interchange name of the unit.
     abbreviation_en :: String, -- ^ The abbreviated name of the unit in international English
     name_en :: String -- ^ The full name of the unit in international English
   }
   deriving (Eq, Ord, Typeable)
 
--- | Determines the authority which issued the interchange name of a unit or unit name.
--- For composite units, this is the least-authoritative interchange name of any constituent name.
---
--- Note that the least-authoritative authority is the one sorted as greatest by the 'Ord' instance of 'InterchangeNameAuthority'.
-class HasInterchangeName a where
-  interchangeName :: a -> String
-  interchangeNameAuthority :: a -> InterchangeNameAuthority
-
 instance HasInterchangeName (NameAtom m) where
   interchangeName = _interchangeName
-  interchangeNameAuthority = _interchangeNameAuthority
 
 instance HasInterchangeName (UnitName m) where
-  interchangeName One = "1"
+  interchangeName One = InterchangeName { name = "1", authority = UCUM }
   interchangeName (MetricAtomic a) = interchangeName a
   interchangeName (Atomic a) = interchangeName a
-  interchangeName (Prefixed p n) = (interchangeName p) ++ (interchangeName n)
-  interchangeName (Product n1 n2) = (interchangeName n1) ++ "." ++ (interchangeName n2)
-  interchangeName (Quotient n1 n2) = (interchangeName n1) ++ "/" ++ (interchangeName n2)
-  interchangeName (Power n x) = (interchangeName n) ++ (show x)
-  interchangeName (Grouped n) = "(" ++ (interchangeName n) ++ ")"
+  interchangeName (Prefixed p n) = let n' = (name . interchangeName $ p) ++ (name . interchangeName $ n)
+                                       a' = max (authority . interchangeName $ p) (authority . interchangeName $ n)
+                                    in InterchangeName { name = n', authority = a' }
+  interchangeName (Product n1 n2) = let n' = (name . interchangeName $ n1) ++ "." ++ (name . interchangeName $ n2)
+                                        a' = max (authority . interchangeName $ n1) (authority . interchangeName $ n2)
+                                     in InterchangeName { name = n', authority = a' }
+  interchangeName (Quotient n1 n2) = let n' = (name . interchangeName $ n1) ++ "/" ++ (name . interchangeName $ n2)
+                                         a' = max (authority . interchangeName $ n1) (authority . interchangeName $ n2)
+                                      in InterchangeName { name = n', authority = a' }
+  interchangeName (Power n x) = let n' = (name . interchangeName $ n) ++ (show x)
+                                 in InterchangeName { name = n', authority = authority . interchangeName $ n }
+  interchangeName (Grouped n) = let n' = "(" ++ (name . interchangeName $ n) ++ ")"
+                                 in InterchangeName { name = n', authority = authority . interchangeName $ n }
   interchangeName (Weaken n) = interchangeName n
-  interchangeNameAuthority One = UCUM
-  interchangeNameAuthority (MetricAtomic a) = interchangeNameAuthority a
-  interchangeNameAuthority (Atomic a) = interchangeNameAuthority a
-  interchangeNameAuthority (Prefixed p n) = max (interchangeNameAuthority p) (interchangeNameAuthority n)
-  interchangeNameAuthority (Product n1 n2) = max (interchangeNameAuthority n1) (interchangeNameAuthority n2)
-  interchangeNameAuthority (Quotient n1 n2) = max (interchangeNameAuthority n1) (interchangeNameAuthority n2)
-  interchangeNameAuthority (Power n _) = interchangeNameAuthority n
-  interchangeNameAuthority (Grouped n) = interchangeNameAuthority n
-  interchangeNameAuthority (Weaken n) = interchangeNameAuthority n
 
 prefix :: String -> String -> String -> PrefixName
-prefix i a f = NameAtom UCUM i a f
+prefix i a f = NameAtom (InterchangeName i UCUM) a f
 
 ucumMetric :: String -> String -> String -> UnitName 'Metric
-ucumMetric i a f = MetricAtomic $ NameAtom UCUM i a f
+ucumMetric i a f = MetricAtomic $ NameAtom (InterchangeName i UCUM) a f
 
 ucum :: String -> String -> String -> UnitName 'NonMetric
-ucum i a f = Atomic $ NameAtom UCUM i a f
+ucum i a f = Atomic $ NameAtom (InterchangeName i UCUM) a f
 
 dimensionalAtom :: String -> String -> String -> UnitName 'NonMetric
-dimensionalAtom i a f = Atomic $ NameAtom DimensionalLibrary i a f
+dimensionalAtom i a f = Atomic $ NameAtom (InterchangeName i DimensionalLibrary) a f
 
 -- | Constructs an atomic name for a custom unit.
 atom :: String -- ^ Interchange name
      -> String -- ^ Abbreviated name in international English
      -> String -- ^ Full name in international English
      -> UnitName 'NonMetric
-atom i a f = Atomic $ NameAtom Custom i a f
-
--- | Represents the authority which issued an interchange name for a unit.
-data InterchangeNameAuthority = UCUM -- ^ The interchange name originated with the Unified Code for Units of Measure.
-                              | DimensionalLibrary -- ^ The interchange name originated with the dimensional-dk library.
-                              | Custom -- ^ The interchange name originated with a user of the dimensional-dk library.
-  deriving (Eq, Ord, Show, Typeable)
+atom i a f = Atomic $ NameAtom (InterchangeName i Custom) a f
 
 -- | The type of a unit name transformation that may be associated with an operation that takes a single unit as input.
 type UnitNameTransformer = (forall m.UnitName m -> UnitName 'NonMetric)

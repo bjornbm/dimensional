@@ -250,6 +250,7 @@ import Data.Monoid (Monoid(..))
 import Numeric.Units.Dimensional.DK.Dimensions
 import Numeric.Units.Dimensional.DK.UnitNames hiding ((*), (/), (^))
 import qualified Numeric.Units.Dimensional.DK.UnitNames.Internal as Name
+import Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames (HasInterchangeName(..))
 import Numeric.Units.Dimensional.DK.Variants hiding (type (*))
 import qualified Numeric.Units.Dimensional.DK.Variants as V
 
@@ -334,7 +335,6 @@ type Quantity = Dimensional 'DQuantity
 
 instance HasInterchangeName (Unit m d a) where
   interchangeName (Unit' n _) = interchangeName n
-  interchangeNameAuthority (Unit' n _) = interchangeNameAuthority n
 
 name :: Unit m d a -> UnitName m
 name (Unit' n _) = n
