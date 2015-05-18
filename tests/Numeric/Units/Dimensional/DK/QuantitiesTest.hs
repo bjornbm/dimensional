@@ -84,4 +84,5 @@ mu :: GravitationalParameter Double
 mu = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
 
 -- Dummy main function.
+main :: IO ()
 main = Prelude.putStrLn "If I compiled I'm OK!"
