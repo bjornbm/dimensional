@@ -1,6 +1,7 @@
 import qualified Numeric.Units.Dimensional.DK.Test
 import qualified Numeric.Units.Dimensional.DK.QuantitiesTest
 
+main :: IO ()
 main = do
-  Numeric.Units.Dimensional.DK.Test.main
+  _ <- Numeric.Units.Dimensional.DK.Test.main
   Numeric.Units.Dimensional.DK.QuantitiesTest.main

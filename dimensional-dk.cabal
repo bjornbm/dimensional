@@ -10,7 +10,7 @@ homepage:            http://dimensional.googlecode.com/
 category:            Math, Physics
 synopsis:            Statically checked physical dimensions,
                      using Type Families and Data Kinds.
-cabal-version:       >= 1.6
+cabal-version:       >= 1.10
 build-type:          Simple
 
 description:
@@ -30,9 +30,6 @@ description:
     Requires GHC 7.8 or later.
 
 extra-source-files:  README.md,
-                     Test.hs,
-                     Numeric/Units/Dimensional/DK/Test.hs,
-                     Numeric/Units/Dimensional/DK/QuantitiesTest.hs,
                      examples/README,
                      examples/GM.lhs
 
@@ -43,6 +40,8 @@ source-repository head
 library
   build-depends:       base >= 4.7 && < 5,
                        numtype-dk >= 0.5 && < 1.1
+  hs-source-dirs:      src
+  default-language:    Haskell98
   ghc-options:         -Wall
   exposed-modules:     Numeric.Units.Dimensional.DK,
                        Numeric.Units.Dimensional.DK.Prelude,
@@ -57,3 +56,15 @@ library
                        Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames
   other-modules:       Numeric.Units.Dimensional.DK.UnitNames.Internal,
                        Numeric.Units.Dimensional.DK.Variants
+
+test-suite tests
+  type:                exitcode-stdio-1.0
+  main-is:             Test.hs
+  hs-source-dirs:      tests
+  other-modules:       Numeric.Units.Dimensional.DK.QuantitiesTest,
+                       Numeric.Units.Dimensional.DK.Test
+  default-language:    Haskell98
+  ghc-options:         -Wall
+  build-depends:       dimensional-dk,
+                       HUnit,
+                       base
