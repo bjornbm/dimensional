@@ -226,7 +226,7 @@ module Numeric.Units.Dimensional.DK
   where
 
 import Prelude
-  ( Show, Eq, Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
+  ( Show, Eq, Ord, Bounded, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
   , (.), flip, show, (++), String, fromIntegral
   , Int, ($), zipWith, uncurry, concat, realToFrac
   )
@@ -284,7 +284,7 @@ way to declare quantities as such a product.
 -- 'Dimensional' as a newtype, avoiding boxing at runtime.
 type role Dimensional nominal phantom representational
 newtype Dimensional (v::Variant) (d::Dimension) a
-      = Dimensional a deriving (Eq, Ord, Enum, Typeable)
+      = Dimensional a deriving (Eq, Ord, Bounded, Enum, Typeable)
 
 {-
 The variety 'v' of 'Dimensional'
