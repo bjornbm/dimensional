@@ -207,7 +207,7 @@ module Numeric.Units.Dimensional.DK
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
     -- ** Operations on Collections
     -- $collections
-    (*~~), (/~~), sum, mean, dimensionlessLength,
+    (*~~), (/~~), sum, mean, dimensionlessLength, nFromTo,
     -- * Dimension Synonyms
     -- $dimension-synonyms
     DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
@@ -226,9 +226,9 @@ module Numeric.Units.Dimensional.DK
   where
 
 import Prelude
-  ( Show, Eq, Ord, Bounded, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
+  ( Show, Eq, Ord(..), Bounded, Num, Fractional, Floating, Real, RealFloat, Integral, Functor, fmap
   , (.), flip, show, (++), String, fromIntegral
-  , Int, ($), zipWith, uncurry, concat, realToFrac
+  , Int, ($), zipWith, uncurry, concat, realToFrac, otherwise, fromRational
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
@@ -238,6 +238,7 @@ import Numeric.NumType.DK.Integers
   )
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Monoid (Monoid(..))
+import Data.Ratio ((%))
 import Data.Typeable
 import Numeric.Units.Dimensional.DK.Dimensions
 
@@ -284,7 +285,7 @@ way to declare quantities as such a product.
 -- 'Dimensional' as a newtype, avoiding boxing at runtime.
 type role Dimensional nominal phantom representational
 newtype Dimensional (v::Variant) (d::Dimension) a
-      = Dimensional a deriving (Eq, Ord, Bounded, Enum, Typeable)
+      = Dimensional a deriving (Eq, Ord, Bounded, Typeable)
 
 {-
 The variety 'v' of 'Dimensional'
@@ -511,6 +512,18 @@ dimensionlessLength = Dimensional . fromIntegral . length
     -- be deleted (and imports adjusted).
     length :: Foldable t => t a -> Int
     length = foldl' (\c _ -> c Prelude.+ 1) 0 
+
+-- | Returns a list of quantities between given bounds.
+nFromTo :: (Fractional a, Integral b) => Quantity d a -- ^ The initial value.
+                                      -> Quantity d a -- ^ The final value.
+                                      -> b -- ^ The number of intermediate values. If less than zero, no intermediate values will result.
+                                      -> [Quantity d a]
+nFromTo xi xf n | n <= 0    = [xi, xf]
+                | otherwise = let delta = xf - xi
+                                  scale s x = ((fromRational s) *~ one) * x
+                                  n' = fromIntegral n
+                                  nSteps = n' Prelude.+ 1
+                               in xi : [xi + scale (i % nSteps) delta | i <- [1..n']] ++ [xf]
 
 {-
 

@@ -35,6 +35,18 @@ testOrdering = TestLabel "Test 'Ord' instance" $ TestList
     , TestCase $ compare ((0 :: Double) *~ second) (_0) @?= EQ 
     ]
 
+testNFromTo :: Test
+testNFromTo = TestLabel "Test enumeration function 'nFromTo'" $ TestList
+    [ TestCase $ nFromTo' _1 _6 0    @?= [_1, _6]
+    , TestCase $ nFromTo' _1 _6 (-1) @?= [_1, _6]
+    , TestCase $ nFromTo' _1 _3 1    @?= [_1, _2, _3]
+    , TestCase $ nFromTo' _1 _6 4    @?= [_1, _2, _3, _4, _5, _6]
+    , TestCase $ nFromTo' _5 _2 2    @?= [_5, _4, _3, _2]
+    ]
+  where
+    nFromTo' :: Dimensionless Double -> Dimensionless Double -> Int -> [Dimensionless Double]
+    nFromTo' = nFromTo
+
 -- Collect the test cases.
 tests :: Test
 tests = TestList
@@ -42,8 +54,8 @@ tests = TestList
     , testDimensionless
     , testShow
     , testOrdering
+    , testNFromTo
     ]
 
 main :: IO ()
 main = void $ runTestTT tests
-
