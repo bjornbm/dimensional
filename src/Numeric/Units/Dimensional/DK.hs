@@ -232,7 +232,7 @@ module Numeric.Units.Dimensional.DK
   where
 
 import Prelude
-  ( Show, Eq(..), Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
+  ( Show, Eq(..), Ord, Bounded(..), Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
   , (.), flip, show, (++), fromIntegral, fromInteger, fromRational, error
   , Int, Integer, ($), zipWith, uncurry, realToFrac, otherwise, String
   )
@@ -334,6 +334,11 @@ type Unit (m :: Metricality) = Dimensional ('DUnit m)
 
 -- | A dimensional quantity.
 type Quantity = Dimensional 'DQuantity
+
+-- GHC is somewhat unclear about why, but it won't derive this instance, so we give it explicitly.
+instance (Bounded a) => Bounded (Quantity d a) where
+  minBound = Quantity' minBound
+  maxBound = Quantity' maxBound
 
 instance HasInterchangeName (Unit m d a) where
   interchangeName (Unit' n _ _) = interchangeName n
