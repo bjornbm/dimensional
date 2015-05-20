@@ -222,7 +222,7 @@ module Numeric.Units.Dimensional.DK
     -- $constants
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     -- * Constructing Units
-    siUnit, one, composite, name,
+    siUnit, one, composite, compositeFrac, compositeNum, compositeFrac', compositeNum', name,
     -- * Pretty Printing
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
@@ -233,8 +233,8 @@ module Numeric.Units.Dimensional.DK
 
 import Prelude
   ( Show, Eq(..), Ord, Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
-  , (.), flip, show, (++), fromIntegral
-  , Int, ($), zipWith, uncurry, realToFrac, otherwise, String
+  , (.), flip, show, (++), fromIntegral, fromInteger, fromRational, error
+  , Int, Integer, ($), zipWith, uncurry, realToFrac, otherwise, String
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
@@ -244,9 +244,11 @@ import Numeric.NumType.DK.Integers
   )
 import Control.Applicative
 import Data.Dynamic
+import Data.ExactPi
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Maybe
 import Data.Monoid (Monoid(..))
+import Data.Ratio
 import Numeric.Units.Dimensional.DK.Dimensions
 import Numeric.Units.Dimensional.DK.UnitNames hiding ((*), (/), (^))
 import qualified Numeric.Units.Dimensional.DK.UnitNames.Internal as Name
@@ -298,9 +300,9 @@ way to declare quantities as such a product.
 class KnownVariant (v :: Variant) where
   -- | A dimensional value, either a 'Quantity' or a 'Unit', parameterized by its 'Dimension' and representation.
   data Dimensional v :: Dimension -> * -> *
-  extractValue :: Dimensional v d a -> a
+  extractValue :: Dimensional v d a -> (a, Maybe ExactPi)
   extractName :: Dimensional v d a -> Maybe (UnitName 'NonMetric)
-  injectValue :: (Maybe (UnitName 'NonMetric)) -> a -> Dimensional v d a
+  injectValue :: (Maybe (UnitName 'NonMetric)) -> (a, Maybe ExactPi) -> Dimensional v d a
   -- | Maps over the underlying representation of a dimensional value.
   -- The caller is responsible for ensuring that the supplied function respects the dimensional abstraction.
   -- This means that the function must preserve numerical values, or linearly scale them while preserving the origin.
@@ -311,21 +313,21 @@ deriving instance Typeable Dimensional
 instance KnownVariant 'DQuantity where
   newtype Dimensional 'DQuantity d a = Quantity' a
     deriving (Eq, Ord, Enum)
-  extractValue (Quantity' x) = x
+  extractValue (Quantity' x) = (x, Nothing)
   extractName _ = Nothing
-  injectValue _ x = Quantity' x
+  injectValue _ (x, _) = Quantity' x
   dmap f (Quantity' x) = Quantity' (f x)
 
 instance (Typeable m) => KnownVariant ('DUnit m) where
-  data Dimensional ('DUnit m) d a = Unit' (UnitName m) a
-  extractValue (Unit' _ x) = x
-  extractName (Unit' n _) = Just . weaken $ n
-  injectValue (Just n) x = let n' = strengthenIfNeeded n
-                            in case n' of
-                               Just n'' -> Unit' n'' x
-                               _        -> Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
+  data Dimensional ('DUnit m) d a = Unit' (UnitName m) ExactPi a
+  extractValue (Unit' _ e x) = (x, Just e)
+  extractName (Unit' n _ _) = Just . weaken $ n
+  injectValue (Just n) (x, Just e) = let n' = strengthenIfNeeded n
+                                      in case n' of
+                                         Just n'' -> Unit' n'' e x
+                                         _        -> Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
   injectValue _        _ = Prelude.error "Shouldn't be reachable. Needed to name a quantity."
-  dmap f (Unit' n x) = Unit' n (f x)
+  dmap f (Unit' n e x) = Unit' n e (f x)
 
 -- | A unit of measurement.
 type Unit (m :: Metricality) = Dimensional ('DUnit m)
@@ -334,46 +336,46 @@ type Unit (m :: Metricality) = Dimensional ('DUnit m)
 type Quantity = Dimensional 'DQuantity
 
 instance HasInterchangeName (Unit m d a) where
-  interchangeName (Unit' n _) = interchangeName n
+  interchangeName (Unit' n _ _) = interchangeName n
 
 name :: Unit m d a -> UnitName m
-name (Unit' n _) = n
+name (Unit' n _ _) = n
 
 -- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
-liftUntyped :: (KnownVariant v, KnownVariant (Weaken v)) => (a -> a) -> UnitNameTransformer -> (Dimensional v d1 a) -> (Dimensional (Weaken v) d2 a)
-liftUntyped f nt x = let x' = extractValue x
-                         n = extractName x
-                         n' = (liftA nt) n
-                      in injectValue n' (f x')
+liftUntyped :: (KnownVariant v, KnownVariant (Weaken v)) => (ExactPi -> ExactPi) -> (a -> a) -> UnitNameTransformer -> (Dimensional v d1 a) -> (Dimensional (Weaken v) d2 a)
+liftUntyped fe f nt x = let (x', e') = extractValue x
+                            n = extractName x
+                            n' = (liftA nt) n
+                         in injectValue n' (f x', fmap fe e')
 
 -- Operates on a dimensional value using a unary operation on values, yielding a Quantity.
 liftUntypedQ :: (KnownVariant v) => (a -> a) -> Dimensional v d1 a -> Quantity d2 a
-liftUntypedQ f x = let x' = extractValue x
+liftUntypedQ f x = let (x', _) = extractValue x
                     in Quantity' (f x')
 
 -- Combines two dimensional values using a binary operation on values, possibly yielding a Unit.
-liftUntyped2 :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2)) => (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) d3 a
-liftUntyped2 f nt x1 x2 = let x1' = extractValue x1
-                              x2' = extractValue x2
-                              n1 = extractName x1
-                              n2 = extractName x2
-                              n' = (liftA2 nt) n1 n2
-                        in injectValue n' (f x1' x2') 
+liftUntyped2 :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2)) => (ExactPi -> ExactPi -> ExactPi) -> (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) d3 a
+liftUntyped2 fe f nt x1 x2 = let (x1', e1') = extractValue x1
+                                 (x2', e2') = extractValue x2
+                                 n1 = extractName x1
+                                 n2 = extractName x2
+                                 n' = (liftA2 nt) n1 n2
+                              in injectValue n' (f x1' x2', fe <$> e1' <*> e2') 
 
 -- Combines two dimensional values using a binary operation on values, yielding a Quantity.
 liftUntyped2Q :: (KnownVariant v1, KnownVariant v2) => (a -> a -> a) -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Quantity d3 a
-liftUntyped2Q f x1 x2 = let x1' = extractValue x1
-                            x2' = extractValue x2
+liftUntyped2Q f x1 x2 = let (x1', _) = extractValue x1
+                            (x2', _) = extractValue x2
                          in Quantity' (f x1' x2') 
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
 (*~) :: Num a => a -> Unit m d a -> Quantity d a
-x *~ (Unit' _ y) = Quantity' (x Prelude.* y)
+x *~ (Unit' _ _ y) = Quantity' (x Prelude.* y)
 
 -- | Divides a 'Quantity' by a 'Unit' of the same physical dimension, obtaining the
 -- numerical value of the quantity expressed in that unit.
 (/~) :: Fractional a => Quantity d a -> Unit m d a -> a
-(Quantity' x) /~ (Unit' _ y) = (x Prelude./ y)
+(Quantity' x) /~ (Unit' _ _ y) = (x Prelude./ y)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
@@ -454,14 +456,14 @@ Multiplication, division and powers apply to both units and quantities.
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NonMetric'.
 (*) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Num a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 * d2) a
-(*) = liftUntyped2 (Prelude.*) (Name.*)
+(*) = liftUntyped2 (Prelude.*) (Prelude.*) (Name.*)
 
 -- | Divides one 'Quantity' by another or one 'Unit' by another.
 --
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
 (/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
-(/) = liftUntyped2 (Prelude./) (Name./)
+(/) = liftUntyped2 (Prelude./) (Prelude./) (Name./)
 
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
@@ -470,7 +472,7 @@ Multiplication, division and powers apply to both units and quantities.
 (^) :: (Fractional a, KnownTypeInt i, KnownVariant v, KnownVariant (Weaken v))
     => Dimensional v d1 a -> Proxy i -> Dimensional (Weaken v) (d1 ^ i) a
 x ^ n = let n' = (toNum n) :: Int
-         in liftUntyped (Prelude.^^ n') (Name.^ n') x
+         in liftUntyped (Prelude.^^ n') (Prelude.^^ n') (Name.^ n') x
 
 {-
 A special case is that dimensionless quantities are not restricted
@@ -638,7 +640,7 @@ atan2 = liftUntyped2Q Prelude.atan2
 -- SI base unit of any dimension. This allows polymorphic quantity
 -- creation and destruction without exposing the 'Dimensional' constructor.
 siUnit :: forall d a.(KnownDimension d, Num a) => Unit 'NonMetric d a
-siUnit = Unit' (siBaseName (Proxy :: Proxy d)) 1
+siUnit = Unit' (siBaseName (Proxy :: Proxy d)) 1 1
 
 {-
 The only unit we will define in this module is 'one'.
@@ -651,7 +653,7 @@ The only unit we will define in this module is 'one'.
 -- appear in expressions. However, for us it is necessary to use 'one'
 -- as we would any other unit to perform the "boxing" of dimensionless values.
 one :: Num a => Unit 'NonMetric DOne a
-one = Unit' nOne 1
+one = Unit' nOne 1 1
 
 {- $constants
 For convenience we define some constants for small integer values
@@ -721,8 +723,8 @@ instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
       show = showIn siUnit
 
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
-showIn (Unit' n y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)
-                                   | otherwise           = (show (x Prelude./ y)) ++ " " ++ (show n)
+showIn (Unit' n _ y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)
+                                     | otherwise           = (show (x Prelude./ y)) ++ " " ++ (show n)
 
 siBaseName :: HasDimension d => d -> UnitName 'NonMetric
 siBaseName d = let powers = asList $ dimension d
@@ -738,5 +740,19 @@ siBaseName d = let powers = asList $ dimension d
 -- 
 -- Supplying negative defining quantities is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
-composite :: Num a => UnitName m -> Quantity d a -> Unit m d a
-composite n (Quantity' x) = Unit' n x
+composite :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
+composite n s' (Unit' _ s x) = Unit' n (s' Prelude.* s) (approximateValue s' Prelude.* x)
+
+compositeFrac :: Fractional a => UnitName m -> Rational -> Unit m1 d ExactPi -> Unit m d a
+compositeFrac n s' (Unit' _ s@(Exact 0 q) _) = Unit' n ((fromRational s') Prelude.* s) (fromRational $ s' Prelude.* fromRational q)
+compositeFrac _ _  _                         = error "The underlying unit does not have an exact rational conversion factor."
+
+compositeFrac' :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
+compositeFrac' n s' (Unit' _ s x) = Unit' n ((fromRational s') Prelude.* s) (fromRational s' Prelude.* x)
+
+compositeNum :: Num a => UnitName m -> Integer -> Unit m1 d ExactPi -> Unit m d a
+compositeNum n s' (Unit' _ s@(Exact 0 q) _) | denominator q == 1 = Unit' n ((fromInteger s') Prelude.* s) (fromInteger $ s' Prelude.* numerator q)
+compositeNum _ _  _                                              = error "The underlying unit does not have an exact integer conversion factor."
+
+compositeNum' :: Num a => UnitName m -> Integer -> Unit m1 d a -> Unit m d a
+compositeNum' n s' (Unit' _ s x) = Unit' n ((fromInteger s') Prelude.* s) (fromInteger s' Prelude.* x)

@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE NumDecimals #-}
+{-# LANGUAGE RankNTypes #-}
 
 {- |
    Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
@@ -67,7 +68,7 @@ import Numeric.Units.Dimensional.DK.UnitNames (PrefixName, applyPrefix, nMeter, 
 import qualified Numeric.Units.Dimensional.DK.UnitNames as N
 import Numeric.Units.Dimensional.DK.UnitNames.Internal (ucum, ucumMetric)
 import Numeric.NumType.DK.Integers ( neg1, neg2, pos2, pos3 )
-import Prelude ( (.), ($), Num, Real, realToFrac, Fractional, Floating, recip)
+import Prelude ( (.), ($), Real, realToFrac, Num, Fractional, Floating, Integer, Rational, recip)
 import qualified Prelude
 
 {- $multiples
@@ -82,8 +83,8 @@ section 6.2.6 "Unacceptability of stand-alone prefixes".
 We define all SI prefixes from Table 5. Multiples first.
 -}
 
-applyMultiple :: (Num a) => PrefixName -> a -> Unit 'Metric d a -> Unit 'NonMetric d a
-applyMultiple p x u = composite (applyPrefix p (name u)) (x *~ u)
+applyMultiple :: (Num a) => PrefixName -> Integer -> Unit 'Metric d a -> Unit 'NonMetric d a
+applyMultiple p x u = compositeNum' (applyPrefix p (name u)) x u
 
 deka, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta
   :: Num a => Unit 'Metric d a -> Unit 'NonMetric d a
@@ -103,8 +104,8 @@ yotta = applyMultiple N.yotta 1e24
 Then the submultiples.
 -}
 
-applySubmultiple :: (Fractional a) => PrefixName -> a -> Unit 'Metric d a -> Unit 'NonMetric d a
-applySubmultiple p x u = composite (applyPrefix p (name u)) (x *~ u)
+applySubmultiple :: (Fractional a) => PrefixName -> Rational -> Unit 'Metric d a -> Unit 'NonMetric d a
+applySubmultiple p x u = compositeFrac' (applyPrefix p (name u)) x u
 
 deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto
   :: Fractional a => Unit 'Metric d a -> Unit 'NonMetric d a
@@ -130,7 +131,7 @@ We define the SI base units in the order of table 1.
 -}
 
 metre, meter :: Num a => Unit 'Metric DLength a
-metre = composite nMeter $ 1 *~ siUnit -- International English.
+metre = compositeNum nMeter 1 siUnit -- International English.
 meter = metre         -- American English.
 
 {-
@@ -142,63 +143,63 @@ The drawback is that we are forced to use 'Fractional'.
 -}
 
 gram    :: Fractional a => Unit 'Metric DMass a
-gram    = composite nGram $ 1e-3 *~ siUnit
+gram    = compositeFrac nGram 1e-3 siUnit
 second  :: Num a => Unit 'Metric DTime a
-second  = composite nSecond $ 1 *~ siUnit
+second  = compositeNum nSecond 1 siUnit
 ampere  :: Num a => Unit 'Metric DElectricCurrent a
-ampere  = composite nAmpere $ 1 *~ siUnit
+ampere  = compositeNum nAmpere 1 siUnit
 kelvin  :: Num a => Unit 'Metric DThermodynamicTemperature a
-kelvin  = composite nKelvin $ 1 *~ siUnit
+kelvin  = compositeNum nKelvin 1 siUnit
 mole    :: Num a => Unit 'Metric DAmountOfSubstance a
-mole    = composite nMole $ 1 *~ siUnit
+mole    = compositeNum nMole 1 siUnit
 candela :: Num a => Unit 'Metric DLuminousIntensity a
-candela = composite nCandela $ 1 *~ siUnit
+candela = compositeNum nCandela 1 siUnit
 
 {- $derived-units
 From Table 3, SI derived units with special names and symbols, including the
 radian and steradian.
 -}
 
-radian :: Fractional a => Unit 'Metric DPlaneAngle a
-radian = composite (ucumMetric "rad" "rad" "radian") _1 -- meter * meter ^ neg1
-steradian :: Fractional a => Unit 'Metric DSolidAngle a
-steradian = composite (ucumMetric "sr" "sr" "steradian") _1 -- meter ^ pos2 * meter ^ neg2
-hertz :: Fractional a => Unit 'Metric DFrequency a
-hertz = composite (ucumMetric "Hz" "Hz" "Hertz") $ 1 *~ second ^ neg1
-newton :: Fractional a => Unit 'Metric DForce a
-newton = composite (ucumMetric "N" "N" "Newton") $ 1 *~ (kilo gram * meter * second ^ neg2)
-pascal :: Fractional a => Unit 'Metric DPressure a
-pascal = composite (ucumMetric "Pa" "Pa" "Pascal") $ 1 *~ (newton / meter ^ pos2)
-joule :: Fractional a => Unit 'Metric DEnergy a
-joule = composite (ucumMetric "J" "J" "Joule") $ 1 *~ (newton * meter)
-watt :: Fractional a => Unit 'Metric DPower a
-watt = composite (ucumMetric "W" "W" "Watt") $ 1 *~ (joule / second)
-coulomb :: Fractional a => Unit 'Metric DElectricCharge a
-coulomb = composite (ucumMetric "C" "C" "Coulomb") $ 1 *~ (second * ampere)
-volt :: Fractional a => Unit 'Metric DElectricPotential a
-volt = composite (ucumMetric "V" "V" "Volt") $ 1 *~ (watt / ampere)
-farad :: Fractional a => Unit 'Metric DCapacitance a
-farad = composite (ucumMetric "F" "F" "Farad") $ 1 *~ (coulomb / volt)
-ohm :: Fractional a => Unit 'Metric DElectricResistance a
-ohm = composite (ucumMetric "Ohm" "Ω" "Ohm") $ 1 *~ (volt / ampere)
-siemens :: Fractional a => Unit 'Metric DElectricConductance a
-siemens = composite (ucumMetric "S" "S" "Siemens") $ 1 *~ (ampere / volt)
-weber :: Fractional a => Unit 'Metric DMagneticFlux a
-weber = composite (ucumMetric "Wb" "Wb" "Weber") $ 1 *~ (volt * second)
-tesla :: Fractional a => Unit 'Metric DMagneticFluxDensity a
-tesla = composite (ucumMetric "T" "T" "Tesla") $ 1 *~ (weber / meter ^ pos2)
-henry :: Fractional a => Unit 'Metric DInductance a
-henry = composite (ucumMetric "H" "H" "Henry") $ 1 *~ (weber / ampere)
+radian :: Num a => Unit 'Metric DPlaneAngle a
+radian = compositeNum (ucumMetric "rad" "rad" "radian") 1 siUnit -- meter * meter ^ neg1
+steradian :: Num a => Unit 'Metric DSolidAngle a
+steradian = compositeNum (ucumMetric "sr" "sr" "steradian") 1 siUnit -- meter ^ pos2 * meter ^ neg2
+hertz :: Num a => Unit 'Metric DFrequency a
+hertz = compositeNum (ucumMetric "Hz" "Hz" "Hertz") 1 $ second ^ neg1
+newton :: Num a => Unit 'Metric DForce a
+newton = compositeNum (ucumMetric "N" "N" "Newton") 1 $ kilo gram * meter * second ^ neg2
+pascal :: Num a => Unit 'Metric DPressure a
+pascal = compositeNum (ucumMetric "Pa" "Pa" "Pascal") 1 $ newton / meter ^ pos2
+joule :: Num a => Unit 'Metric DEnergy a
+joule = compositeNum (ucumMetric "J" "J" "Joule") 1 $ newton * meter
+watt :: Num a => Unit 'Metric DPower a
+watt = compositeNum (ucumMetric "W" "W" "Watt") 1 $ joule / second
+coulomb :: Num a => Unit 'Metric DElectricCharge a
+coulomb = compositeNum (ucumMetric "C" "C" "Coulomb") 1 $ second * ampere
+volt :: Num a => Unit 'Metric DElectricPotential a
+volt = compositeNum (ucumMetric "V" "V" "Volt") 1 $ watt / ampere
+farad :: Num a => Unit 'Metric DCapacitance a
+farad = compositeNum (ucumMetric "F" "F" "Farad") 1 $ coulomb / volt
+ohm :: Num a => Unit 'Metric DElectricResistance a
+ohm = compositeNum (ucumMetric "Ohm" "Ω" "Ohm") 1 $ volt / ampere
+siemens :: Num a => Unit 'Metric DElectricConductance a
+siemens = compositeNum (ucumMetric "S" "S" "Siemens") 1 $ ampere / volt
+weber :: Num a => Unit 'Metric DMagneticFlux a
+weber = compositeNum (ucumMetric "Wb" "Wb" "Weber") 1 $ volt * second
+tesla :: Num a => Unit 'Metric DMagneticFluxDensity a
+tesla = compositeNum (ucumMetric "T" "T" "Tesla") 1 $ weber / meter ^ pos2
+henry :: Num a => Unit 'Metric DInductance a
+henry = compositeNum (ucumMetric "H" "H" "Henry") 1 $ weber / ampere
 
 {-
 We defer the definition of Celcius temperature to another section (would
 appear here if we stricly followed table 3).
 -}
 
-lumen :: Fractional a => Unit 'Metric DLuminousFlux a
-lumen = composite (ucumMetric "lm" "lm" "lumen") $ 1 *~ (candela * steradian)
-lux :: Fractional a => Unit 'Metric DIlluminance a
-lux = composite (ucumMetric "lx" "lx" "lux") $ 1 *~ (lumen / meter ^ pos2)
+lumen :: Num a => Unit 'Metric DLuminousFlux a
+lumen = compositeNum (ucumMetric "lm" "lm" "lumen") 1 $ candela * steradian
+lux :: Num a => Unit 'Metric DIlluminance a
+lux = compositeNum (ucumMetric "lx" "lx" "lux") 1 $ lumen / meter ^ pos2
 
 {- $celsius
 A problematic area is units which increase proportionally to the
@@ -217,9 +218,9 @@ when working with absolute temperatures.
 degreeCelsius :: Num a => Unit 'Metric DCelsiusTemperature a
 degreeCelsius = kelvin
 
-fromDegreeCelsiusAbsolute :: Fractional a => a -> ThermodynamicTemperature a
+fromDegreeCelsiusAbsolute :: Floating a => a -> ThermodynamicTemperature a
 fromDegreeCelsiusAbsolute x = x *~ degreeCelsius + 273.15 *~ degreeCelsius
-toDegreeCelsiusAbsolute :: Fractional a => ThermodynamicTemperature a -> a
+toDegreeCelsiusAbsolute :: Floating a => ThermodynamicTemperature a -> a
 toDegreeCelsiusAbsolute x = (x - 273.15 *~ degreeCelsius) /~ degreeCelsius
 
 {- $health
@@ -228,14 +229,14 @@ The last units from Table 3 are SI derived units with special names and symbols 
 of safeguarding human health.
 -}
 
-becquerel :: Fractional a => Unit 'Metric DActivity a
-becquerel = composite (ucumMetric "Bq" "Bq" "Becquerel") $ 1 *~ (second ^ neg1)
-gray :: Fractional a => Unit 'Metric DAbsorbedDose a
-gray = composite (ucumMetric "Gy" "Gy" "Gray") $ 1 *~ (joule / kilo gram)
-sievert :: Fractional a => Unit 'Metric DDoseEquivalent a
-sievert = composite (ucumMetric "Sv" "Sv" "Sievert") $ 1  *~ (joule / kilo gram)
-katal :: Fractional a => Unit 'Metric DCatalyticActivity a
-katal = composite (ucumMetric "kat" "kat" "katal") $ 1 *~ (mole / second)
+becquerel :: Num a => Unit 'Metric DActivity a
+becquerel = compositeNum (ucumMetric "Bq" "Bq" "Becquerel") 1 $ second ^ neg1
+gray :: Num a => Unit 'Metric DAbsorbedDose a
+gray = compositeNum (ucumMetric "Gy" "Gy" "Gray") 1 $ joule / kilo gram
+sievert :: Num a => Unit 'Metric DDoseEquivalent a
+sievert = compositeNum (ucumMetric "Sv" "Sv" "Sievert") 1 $ joule / kilo gram
+katal :: Num a => Unit 'Metric DCatalyticActivity a
+katal = compositeNum (ucumMetric "kat" "kat" "katal") 1 $ mole / second
 
 {- $accepted-units
 There are several units that are not strictly part of the SI but
@@ -248,9 +249,9 @@ We start with time which we grant exclusive rights to 'minute' and
 'second'.
 -}
 minute, hour, day :: Num a => Unit 'NonMetric DTime a
-minute = composite (ucum "min" "min" "minute") $ 60 *~ second
-hour   = composite (ucum "h" "h" "hour") $ 60 *~ minute
-day    = composite (ucum "d" "d" "day") $ 24 *~ hour -- Mean solar day.
+minute = compositeNum (ucum "min" "min" "minute") 60 $ second
+hour   = compositeNum (ucum "h" "h" "hour")       60 $ minute
+day    = compositeNum (ucum "d" "d" "day")        24 $ hour -- Mean solar day.
 
 {- $arc-units
 
@@ -259,9 +260,9 @@ Since 'minute' and 'second' are already in use for time we use
 -}
 
 degree, arcminute, arcsecond :: Floating a => Unit 'NonMetric DPlaneAngle a
-degree = composite (ucum "deg" "°" "degree") $ (Prelude.pi Prelude./ 180) *~ radian
-arcminute = composite (ucum "'" "'" "arcminute") $ (recip 60) *~ degreeOfArc
-arcsecond = composite (ucum "''" "''" "arcsecond") $ (recip 60) *~ minuteOfArc
+degree = composite (ucum "deg" "°" "degree")       (Prelude.pi Prelude./ 180) $ radian
+arcminute = composite (ucum "'" "'" "arcminute")   (recip 60)                 $ degreeOfArc
+arcsecond = composite (ucum "''" "''" "arcsecond") (recip 60)                 $ minuteOfArc
 
 {- $arc-units-alternate
 Alternate (longer) forms of the above. In particular 'degreeOfArc'
@@ -278,11 +279,11 @@ hectare :: Fractional a => Unit 'NonMetric DArea a
 hectare = square (hecto meter)
 
 litre, liter :: Fractional a => Unit 'Metric DVolume a
-litre = composite (ucumMetric "L" "L" "litre") $ 1 *~ (deci meter ^ pos3) -- International English.
+litre = compositeFrac (ucumMetric "L" "L" "litre") 1 $ deci meter ^ pos3 -- International English.
 liter = litre             -- American English.
 
-tonne, metricTon :: Fractional a => Unit 'Metric DMass a
-tonne     = composite (ucumMetric "t" "t" "tonne") $ 1000 *~ (kilo gram) -- Name in original SI text.
+tonne, metricTon :: Num a => Unit 'Metric DMass a
+tonne     = compositeNum (ucumMetric "t" "t" "tonne") 1000 $ kilo gram -- Name in original SI text.
 metricTon = tonne                   -- American name.
 
 {- $values-obtained-experimentally
@@ -295,8 +296,8 @@ unit of length directly tied to the meter, with a length of exactly
 149,597,870,700 m and the official abbreviation of au <#note3 [3]>. We therefore include it here.
 -}
 
-astronomicalUnit :: Num a => Unit 'NonMetric DLength a
-astronomicalUnit = composite (ucum "AU" "AU" "astronomical unit") $ 149597870700 *~ meter
+astronomicalUnit :: Floating a => Unit 'NonMetric DLength a
+astronomicalUnit = composite (ucum "AU" "AU" "astronomical unit") 149597870700 $ meter
 
 {- $difftime
 It is not within the scope of this library to handle the complex
