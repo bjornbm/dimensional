@@ -518,7 +518,7 @@ nFromTo :: (Fractional a, Integral b) => Quantity d a -- ^ The initial value.
                                       -> Quantity d a -- ^ The final value.
                                       -> b -- ^ The number of intermediate values. If less than one, no intermediate values will result.
                                       -> [Quantity d a]
-nFromTo xi xf n = fmap f [0..succ n]
+nFromTo xi xf n = fmap f [0..n] ++ [xf]
   where
     f i = xi + realToFrac (i % succ n) *~ one * (xf - xi)
 
