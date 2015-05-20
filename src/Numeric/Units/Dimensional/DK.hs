@@ -516,7 +516,7 @@ dimensionlessLength = Dimensional . fromIntegral . length
 -- | Returns a list of quantities between given bounds.
 nFromTo :: (Fractional a, Integral b) => Quantity d a -- ^ The initial value.
                                       -> Quantity d a -- ^ The final value.
-                                      -> b -- ^ The number of intermediate values. If less than zero, no intermediate values will result.
+                                      -> b -- ^ The number of intermediate values. If less than one, no intermediate values will result.
                                       -> [Quantity d a]
 nFromTo xi xf n | n <= 0    = [xi, xf]
                 | otherwise = let delta = xf - xi
