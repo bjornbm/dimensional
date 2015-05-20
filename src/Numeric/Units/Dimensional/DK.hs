@@ -228,7 +228,7 @@ module Numeric.Units.Dimensional.DK
 import Prelude
   ( Show, Eq, Ord(..), Bounded, Num, Fractional, Floating, Real, RealFloat, Integral, Functor, fmap
   , (.), flip, show, (++), String, fromIntegral
-  , Int, ($), zipWith, uncurry, concat, realToFrac, otherwise, fromRational
+  , Int, ($), zipWith, uncurry, concat, realToFrac, succ
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
@@ -518,12 +518,9 @@ nFromTo :: (Fractional a, Integral b) => Quantity d a -- ^ The initial value.
                                       -> Quantity d a -- ^ The final value.
                                       -> b -- ^ The number of intermediate values. If less than one, no intermediate values will result.
                                       -> [Quantity d a]
-nFromTo xi xf n | n <= 0    = [xi, xf]
-                | otherwise = let delta = xf - xi
-                                  scale s x = ((fromRational s) *~ one) * x
-                                  n' = fromIntegral n
-                                  nSteps = n' Prelude.+ 1
-                               in xi : [xi + scale (i % nSteps) delta | i <- [1..n']] ++ [xf]
+nFromTo xi xf n = fmap f [0..succ n]
+  where
+    f i = xi + realToFrac (i % succ n) *~ one * (xf - xi)
 
 {-
 
