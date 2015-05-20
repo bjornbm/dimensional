@@ -5,7 +5,6 @@ module Numeric.Units.Dimensional.DK.Test where
 import Numeric.Units.Dimensional.DK.Prelude
 import qualified Prelude
 import Test.HUnit
-import Control.Monad (void)
 
 testPower :: Test
 testPower = TestLabel "Power test" $ TestList
@@ -59,5 +58,7 @@ tests = TestList
     , testNFromTo
     ]
 
-main :: IO ()
-main = void $ runTestTT tests
+main :: IO Bool -- True means everything passed
+main = do
+         res <- runTestTT tests
+         return $ (errors res == 0) && (failures res == 0)
