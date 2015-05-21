@@ -211,7 +211,7 @@ module Numeric.Units.Dimensional.DK
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
     -- ** Operations on Collections
     -- $collections
-    (*~~), (/~~), sum, mean, dimensionlessLength,
+    (*~~), (/~~), sum, mean, dimensionlessLength, nFromTo,
     -- * Dimension Synonyms
     -- $dimension-synonyms
     DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
@@ -232,9 +232,9 @@ module Numeric.Units.Dimensional.DK
   where
 
 import Prelude
-  ( Show, Eq(..), Ord, Bounded(..), Enum, Num, Fractional, Floating, Real, RealFloat, Functor, fmap
-  , (.), flip, show, (++), fromIntegral, fromInteger, fromRational, error
-  , Int, Integer, ($), zipWith, uncurry, realToFrac, otherwise, String
+  ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Floating, Real, RealFloat, Functor, fmap
+  , (.), flip, show, (++), fromIntegral, fromInteger, fromRational, error, max, succ
+  , Int, Integer, Integral, ($), zipWith, uncurry, realToFrac, otherwise, String
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
@@ -312,7 +312,7 @@ deriving instance Typeable Dimensional
 
 instance KnownVariant 'DQuantity where
   newtype Dimensional 'DQuantity d a = Quantity' a
-    deriving (Eq, Ord, Enum)
+    deriving (Eq, Ord)
   extractValue (Quantity' x) = (x, Nothing)
   extractName _ = Nothing
   injectValue _ (x, _) = Quantity' x
@@ -597,6 +597,16 @@ dimensionlessLength x = (fromIntegral $ length x) *~ one
     -- be deleted (and imports adjusted).
     length :: Foldable t => t a -> Int
     length = foldl' (\c _ -> c Prelude.+ 1) 0 
+
+-- | Returns a list of quantities between given bounds.
+nFromTo :: (Fractional a, Integral b) => Quantity d a -- ^ The initial value.
+                                      -> Quantity d a -- ^ The final value.
+                                      -> b -- ^ The number of intermediate values. If less than one, no intermediate values will result.
+                                      -> [Quantity d a]
+nFromTo xi xf n = fmap f [0..n'] ++ [xf]
+  where
+    n' = max 0 n
+    f i = xi + realToFrac (i % succ n') *~ one * (xf - xi)
 
 {-
 
