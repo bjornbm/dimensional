@@ -203,8 +203,11 @@ strengthen n@(MetricAtomic _) = Just n
 strengthen (Weaken n) = strengthen n
 strengthen _ = Nothing
 
-strengthenIfNeeded :: forall m1 m2.(Typeable m1, Typeable m2) => UnitName m1 -> Maybe (UnitName m2)
-strengthenIfNeeded n = go (typeRep (Proxy :: Proxy m1)) (typeRep (Proxy :: Proxy m2)) n
+-- | Convert a 'UnitName' of one 'Metricality' into a name of the other metricality by
+-- strengthening or weakening if neccessary. Because it may not be possible to strengthen,
+-- the result is returned in a 'Maybe' wrapper.
+relax :: forall m1 m2.(Typeable m1, Typeable m2) => UnitName m1 -> Maybe (UnitName m2)
+relax n = go (typeRep (Proxy :: Proxy m1)) (typeRep (Proxy :: Proxy m2)) n
   where
     metric = typeRep (Proxy :: Proxy 'Metric)
     nonMetric = typeRep (Proxy :: Proxy 'NonMetric)

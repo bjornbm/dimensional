@@ -8,7 +8,7 @@ module Numeric.Units.Dimensional.DK.UnitNames
   deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto,
   baseUnitNames,
   UnitNameTransformer, UnitNameTransformer2,
-  weaken, strengthen, strengthenIfNeeded
+  weaken, strengthen, relax
 )
 where
 

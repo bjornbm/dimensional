@@ -322,7 +322,7 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
   data Dimensional ('DUnit m) d a = Unit' (UnitName m) ExactPi a
   extractValue (Unit' _ e x) = (x, Just e)
   extractName (Unit' n _ _) = Just . weaken $ n
-  injectValue (Just n) (x, Just e) = let n' = strengthenIfNeeded n
+  injectValue (Just n) (x, Just e) = let n' = relax n
                                       in case n' of
                                          Just n'' -> Unit' n'' e x
                                          _        -> Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
