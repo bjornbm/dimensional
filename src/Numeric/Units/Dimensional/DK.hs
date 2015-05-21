@@ -3,6 +3,7 @@
 {-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -250,7 +251,7 @@ import Data.Maybe
 import Data.Monoid (Monoid(..))
 import Data.Ratio
 import Numeric.Units.Dimensional.DK.Dimensions
-import Numeric.Units.Dimensional.DK.UnitNames hiding ((*), (/), (^))
+import Numeric.Units.Dimensional.DK.UnitNames hiding ((*), (/), (^), weaken)
 import qualified Numeric.Units.Dimensional.DK.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames (HasInterchangeName(..))
 import Numeric.Units.Dimensional.DK.Variants hiding (type (*))
@@ -319,15 +320,15 @@ instance KnownVariant 'DQuantity where
   dmap f (Quantity' x) = Quantity' (f x)
 
 instance (Typeable m) => KnownVariant ('DUnit m) where
-  data Dimensional ('DUnit m) d a = Unit' (UnitName m) ExactPi a
-  extractValue (Unit' _ e x) = (x, Just e)
-  extractName (Unit' n _ _) = Just . weaken $ n
+  data Dimensional ('DUnit m) d a = Unit' (UnitName m) ExactPi (Maybe (Unit 'NonMetric d ExactPi)) a
+  extractValue (Unit' _ e _ x) = (x, Just e)
+  extractName (Unit' n _ _ _) = Just . Name.weaken $ n
   injectValue (Just n) (x, Just e) = let n' = relax n
                                       in case n' of
-                                         Just n'' -> Unit' n'' e x
+                                         Just n'' -> Unit' n'' e Nothing x
                                          _        -> Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
   injectValue _        _ = Prelude.error "Shouldn't be reachable. Needed to name a quantity."
-  dmap f (Unit' n e x) = Unit' n e (f x)
+  dmap f (Unit' n e _ x) = Unit' n e Nothing (f x)
 
 -- | A unit of measurement.
 type Unit (m :: Metricality) = Dimensional ('DUnit m)
@@ -341,10 +342,13 @@ instance (Bounded a) => Bounded (Quantity d a) where
   maxBound = Quantity' maxBound
 
 instance HasInterchangeName (Unit m d a) where
-  interchangeName (Unit' n _ _) = interchangeName n
+  interchangeName (Unit' n _ _ _) = interchangeName n
 
 name :: Unit m d a -> UnitName m
-name (Unit' n _ _) = n
+name (Unit' n _ _ _) = n
+
+weaken :: Unit m d a -> Unit 'NonMetric d ExactPi
+weaken (Unit' n e d _) = Unit' (Name.weaken n) e d e
 
 -- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
 liftUntyped :: (KnownVariant v, KnownVariant (Weaken v)) => (ExactPi -> ExactPi) -> (a -> a) -> UnitNameTransformer -> (Dimensional v d1 a) -> (Dimensional (Weaken v) d2 a)
@@ -375,12 +379,12 @@ liftUntyped2Q f x1 x2 = let (x1', _) = extractValue x1
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
 (*~) :: Num a => a -> Unit m d a -> Quantity d a
-x *~ (Unit' _ _ y) = Quantity' (x Prelude.* y)
+x *~ (Unit' _ _ _ y) = Quantity' (x Prelude.* y)
 
 -- | Divides a 'Quantity' by a 'Unit' of the same physical dimension, obtaining the
 -- numerical value of the quantity expressed in that unit.
 (/~) :: Fractional a => Quantity d a -> Unit m d a -> a
-(Quantity' x) /~ (Unit' _ _ y) = (x Prelude./ y)
+(Quantity' x) /~ (Unit' _ _ _ y) = (x Prelude./ y)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
@@ -655,7 +659,7 @@ atan2 = liftUntyped2Q Prelude.atan2
 -- SI base unit of any dimension. This allows polymorphic quantity
 -- creation and destruction without exposing the 'Dimensional' constructor.
 siUnit :: forall d a.(KnownDimension d, Num a) => Unit 'NonMetric d a
-siUnit = Unit' (siBaseName (Proxy :: Proxy d)) 1 1
+siUnit = Unit' (siBaseName (Proxy :: Proxy d)) 1 Nothing 1
 
 {-
 The only unit we will define in this module is 'one'.
@@ -668,7 +672,7 @@ The only unit we will define in this module is 'one'.
 -- appear in expressions. However, for us it is necessary to use 'one'
 -- as we would any other unit to perform the "boxing" of dimensionless values.
 one :: Num a => Unit 'NonMetric DOne a
-one = Unit' nOne 1 1
+one = Unit' nOne 1 Nothing 1
 
 {- $constants
 For convenience we define some constants for small integer values
@@ -738,8 +742,14 @@ instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
   show = showIn siUnit
 
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
-showIn (Unit' n _ y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)
-                                     | otherwise           = (show (x Prelude./ y)) ++ " " ++ (show n)
+showIn (Unit' n _ _ y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)
+                                       | otherwise           = (show (x Prelude./ y)) ++ " " ++ (show n)
+
+instance (KnownDimension d, Show a) => Show (Unit m d a) where
+  show (Unit' n e d x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")" ++ definingClause d
+    where
+      definingClause Nothing = ""
+      definingClause (Just (Unit' n' e' _ _)) = ", defined to be " ++ show (e Prelude./ e') ++ " * " ++ show n'
 
 siBaseName :: HasDimension d => d -> UnitName 'NonMetric
 siBaseName d = let powers = asList $ dimension d
@@ -756,18 +766,18 @@ siBaseName d = let powers = asList $ dimension d
 -- Supplying negative defining quantities is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
 composite :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
-composite n s' (Unit' _ s x) = Unit' n (s' Prelude.* s) (approximateValue s' Prelude.* x)
+composite n s' u@(Unit' _ s _ x) = Unit' n (s' Prelude.* s) (Just . weaken $ u) (approximateValue s' Prelude.* x)
 
 compositeFrac :: Fractional a => UnitName m -> Rational -> Unit m1 d ExactPi -> Unit m d a
-compositeFrac n s' (Unit' _ s@(Exact 0 q) _) = Unit' n ((fromRational s') Prelude.* s) (fromRational $ s' Prelude.* fromRational q)
-compositeFrac _ _  _                         = error "The underlying unit does not have an exact rational conversion factor."
+compositeFrac n s' u@(Unit' _ s@(Exact 0 q) _ _) = Unit' n ((fromRational s') Prelude.* s) (Just . weaken $ u) (fromRational $ s' Prelude.* fromRational q)
+compositeFrac _ _  _                             = error "The underlying unit does not have an exact rational conversion factor."
 
 compositeFrac' :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
-compositeFrac' n s' (Unit' _ s x) = Unit' n ((fromRational s') Prelude.* s) (fromRational s' Prelude.* x)
+compositeFrac' n s' u@(Unit' _ s _ x) = Unit' n ((fromRational s') Prelude.* s) (Just . weaken $ u) (fromRational s' Prelude.* x)
 
 compositeNum :: Num a => UnitName m -> Integer -> Unit m1 d ExactPi -> Unit m d a
-compositeNum n s' (Unit' _ s@(Exact 0 q) _) | denominator q == 1 = Unit' n ((fromInteger s') Prelude.* s) (fromInteger $ s' Prelude.* numerator q)
-compositeNum _ _  _                                              = error "The underlying unit does not have an exact integer conversion factor."
+compositeNum n s' u@(Unit' _ s@(Exact 0 q) _ _) | denominator q == 1 = Unit' n ((fromInteger s') Prelude.* s) (Just . weaken $ u) (fromInteger $ s' Prelude.* numerator q)
+compositeNum _ _  _                                                  = error "The underlying unit does not have an exact integer conversion factor."
 
 compositeNum' :: Num a => UnitName m -> Integer -> Unit m1 d a -> Unit m d a
-compositeNum' n s' (Unit' _ s x) = Unit' n ((fromInteger s') Prelude.* s) (fromInteger s' Prelude.* x)
+compositeNum' n s' u@(Unit' _ s _ x) = Unit' n ((fromInteger s') Prelude.* s) (Just . weaken $ u) (fromInteger s' Prelude.* x)
