@@ -735,7 +735,7 @@ in a way that distinguishes them from quantities, or whether that is
 even a requirement.
 -}
 instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
-      show = showIn siUnit
+  show = showIn siUnit
 
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
 showIn (Unit' n _ y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)

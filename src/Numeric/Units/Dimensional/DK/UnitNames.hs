@@ -1,4 +1,5 @@
 {-# LANGUAGE PatternSynonyms #-}
+
 module Numeric.Units.Dimensional.DK.UnitNames
 (
   UnitName, NameAtom, PrefixName,
