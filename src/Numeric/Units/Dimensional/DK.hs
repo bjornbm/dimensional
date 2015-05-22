@@ -763,16 +763,13 @@ instance (KnownDimension d) => HasDimension (Dimensional v d a) where
 
 {-
 We will conclude by providing a reasonable 'Show' instance for
-quantities. The “normalized” unit of the quantity is inferred
+quantities. The SI unit of the quantity is inferred
 from its dimension.
-
-We neglect units since it is unclear how to represent them
-in a way that distinguishes them from quantities, or whether that is
-even a requirement.
 -}
 instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
   show = showIn siUnit
 
+-- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
 showIn (Unit' n _ _ y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)
                                        | otherwise           = (show (x Prelude./ y)) ++ " " ++ (show n)
