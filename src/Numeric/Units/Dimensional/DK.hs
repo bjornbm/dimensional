@@ -398,14 +398,22 @@ forward. In particular the type signatures are much simplified.
 Multiplication, division and powers apply to both units and quantities.
 -}
 
+-- | Forms the product of two 'Quantity's or of two 'Unit's.
 (*) :: Num a
     => Dimensional v d a -> Dimensional v d' a -> Dimensional v (d * d') a
 Dimensional x * Dimensional y = Dimensional (x Prelude.* y)
 
+-- | Forms the quotient of one 'Quantity' with another or of one 'Unit' with another.
 (/) :: Fractional a
     => Dimensional v d a -> Dimensional v d' a -> Dimensional v (d / d') a
 Dimensional x / Dimensional y = Dimensional (x Prelude./ y)
 
+-- | Raises a 'Quantity' or 'Unit' to an integer power.
+--
+-- Because the power chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
+-- of the exponent in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
+-- also reexported by "Numeric.Units.Dimensional.DK.Prelude".
 (^) :: (KnownTypeInt i, Fractional a)
     => Dimensional v d a -> Proxy i -> Dimensional v (d ^ i) a
 Dimensional x ^ n = Dimensional (x Prelude.^^ (toNum n :: Int))
@@ -423,12 +431,15 @@ Of these, negation, addition and subtraction are particularly simple
 as they are done in a single physical dimension.
 -}
 
+-- | Negates the value of a 'Quantity'.
 negate :: Num a => Quantity d a -> Quantity d a
 negate (Dimensional x) = Dimensional (Prelude.negate x)
 
+-- | Adds two 'Quantity's.
 (+) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
 Dimensional x + Dimensional y = Dimensional (x Prelude.+ y)
 
+-- | Subtracts one 'Quantity' from another.
 (-) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
 x - y = x + negate y
 
@@ -436,6 +447,7 @@ x - y = x + negate y
 Absolute value.
 -}
 
+-- | Takes the absolute value of a 'Quantity'.
 abs :: Num a => Quantity d a -> Quantity d a
 abs (Dimensional x) = Dimensional (Prelude.abs x)
 
@@ -444,6 +456,14 @@ Roots of arbitrary (integral) degree. Appears to occasionally be useful
 for units as well as quantities.
 -}
 
+-- | Takes the nth root of a 'Quantity' or 'Unit'.
+-- 
+-- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
+-- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
+-- also reexported by "Numeric.Units.Dimensional.DK.Prelude".
+--
+-- Also available in operator form, see '^/'.
 nroot :: (Floating a, KnownTypeInt n)
       => Proxy n -> Dimensional v d a -> Dimensional v (Root d n) a
 nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ toNum n))
@@ -452,16 +472,22 @@ nroot n (Dimensional x) = Dimensional (x Prelude.** (1 Prelude./ toNum n))
 We provide short-hands for the square and cubic roots.
 -}
 
+-- | Takes the square root of a 'Quantity' or 'Unit'.
 sqrt :: Floating a => Dimensional v d a -> Dimensional v (Root d 'Pos2) a
 sqrt = nroot pos2
+
+-- | Takes the cube root of a 'Quantity' or 'Unit'.
 cbrt :: Floating a => Dimensional v d a -> Dimensional v (Root d 'Pos3) a
 cbrt = nroot pos3
 
-{-
-We also provide an operator alternative to nroot for those that
-prefer such.
--}
-
+-- | Takes the nth root of a 'Quantity' or 'Unit'.
+-- 
+-- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
+-- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
+-- also reexported by "Numeric.Units.Dimensional.DK.Prelude".
+--
+-- Also available in prefix form, see 'nroot'.
 (^/) :: (KnownTypeInt n, Floating a)
      => Dimensional v d a -> Proxy n -> Dimensional v (Root d n) a
 (^/) = flip nroot
@@ -470,6 +496,8 @@ prefer such.
 Since quantities form a monoid under addition, but not under multiplication unless they are dimensionless,
 we will define a monoid instance that adds.
 -}
+
+-- | 'Quantity's of a given 'Dimension' form a 'Monoid' under addition.
 instance (Num a) => Monoid (Quantity d a) where
   mempty = _0
   mappend = (+)
