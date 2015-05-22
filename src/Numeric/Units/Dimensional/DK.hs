@@ -485,6 +485,11 @@ Multiplication, division and powers apply to both units and quantities.
 
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
+-- Because the power chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
+-- of the exponent in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
+-- also reexported by "Numeric.Units.Dimensional.DK.Prelude".
+--
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
 (^) :: (Fractional a, KnownTypeInt i, KnownVariant v, KnownVariant (Weaken v))
@@ -505,19 +510,19 @@ Of these, negation, addition and subtraction are particularly simple
 as they are done in a single physical dimension.
 -}
 
--- | Negates a quantity using 'Prelude.negate'.
+-- | Negates the value of a 'Quantity'.
 negate :: Num a => Quantity d a -> Quantity d a
 negate = liftUntypedQ Prelude.negate
 
--- | Adds two quantities using 'Prelude.+'. 
+-- | Adds two 'Quantity's.
 (+) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
 (+) = liftUntyped2Q (Prelude.+)
 
--- | Subtracts one quantity from another using 'Prelude.-'.
+-- | Subtracts one 'Quantity' from another.
 (-) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
 x - y = x + negate y
 
--- | Computes the absolute value of a quantity using 'Prelude.abs'.
+-- | Takes the absolute value of a 'Quantity'.
 abs :: Num a => Quantity d a -> Quantity d a
 abs = liftUntypedQ Prelude.abs
 
@@ -526,8 +531,16 @@ Roots of arbitrary (integral) degree. Appears to occasionally be useful
 for units as well as quantities.
 -}
 
--- | Computes the nth root of a quantity using 'Prelude.**'.
+-- | Computes the nth root of a 'Quantity' using 'Prelude.**'.
+-- 
 -- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
+--
+-- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
+-- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
+-- also reexported by "Numeric.Units.Dimensional.DK.Prelude".
+--
+-- Also available in operator form, see '^/'.
 nroot :: (KnownTypeInt n, Floating a)
       => Proxy n -> Quantity d a -> Quantity (Root d n) a
 nroot n = let n' = 1 Prelude./ toNum n
@@ -537,14 +550,16 @@ nroot n = let n' = 1 Prelude./ toNum n
 We provide short-hands for the square and cubic roots.
 -}
 
--- | Computes the square root of a quantity using 'Prelude.**'.
+-- | Computes the square root of a 'Quantity' using 'Prelude.**'.
+--
 -- The 'Root' type family will prevent application where the supplied quantity does not have a square dimension.
 --
 -- prop> sqrt x == nroot pos2 x
 sqrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
 sqrt = nroot pos2
 
--- | Computes the cube root of a quantity using 'Prelude.**'.
+-- | Computes the cube root of a 'Quantity' using 'Prelude.**'.
+--
 -- The 'Root' type family will prevent application where the supplied quantity does not have a cubic dimension.
 --
 -- prop> cbrt x == nroot pos3 x
@@ -556,10 +571,16 @@ We also provide an operator alternative to nroot for those that
 prefer such.
 -}
 
--- | Computes the nth root of a quantity using 'Prelude.**'.
+-- | Computes the nth root of a 'Quantity' using 'Prelude.**'.
+-- 
 -- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
 --
--- prop> x ^/ y == nroot y x
+-- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
+-- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
+-- also reexported by "Numeric.Units.Dimensional.DK.Prelude".
+--
+-- Also available in prefix form, see 'nroot'.
 (^/) :: (KnownTypeInt n, Floating a)
      => Quantity d a -> Proxy n -> Quantity (Root d n) a
 (^/) = flip nroot
@@ -568,6 +589,8 @@ prefer such.
 Since quantities form a monoid under addition, but not under multiplication unless they are dimensionless,
 we will define a monoid instance that adds.
 -}
+
+-- | 'Quantity's of a given 'Dimension' form a 'Monoid' under addition.
 instance (Num a) => Monoid (Quantity d a) where
   mempty = _0
   mappend = (+)
