@@ -222,7 +222,9 @@ module Numeric.Units.Dimensional.DK
     -- $constants
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     -- * Constructing Units
-    siUnit, one, composite, compositeFrac, compositeNum, compositeFrac', compositeNum', name,
+    siUnit, one, composite, compositeFrac, compositeNum, compositeFrac', compositeNum', 
+    -- * Unit Metadata
+    name, exactValue, weaken,
     -- * Pretty Printing
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
@@ -343,9 +345,17 @@ instance (Bounded a) => Bounded (Quantity d a) where
 instance HasInterchangeName (Unit m d a) where
   interchangeName (Unit' n _ _ _) = interchangeName n
 
+-- | Extracts the 'UnitName' of a 'Unit'.
 name :: Unit m d a -> UnitName m
 name (Unit' n _ _ _) = n
 
+-- | Extracts the exact value of a 'Unit', expressed in terms of the SI coherent derived unit (see 'siUnit') of the same 'Dimension'.
+--
+-- Note that the actual value may in some cases be approximate, for example if the unit is defined by experiment.
+exactValue :: Unit m d a -> ExactPi
+exactValue (Unit' _ e _ _) = e
+
+-- | Discards potentially unwanted type level information about a 'Unit'.
 weaken :: Unit m d a -> Unit 'NonMetric d ExactPi
 weaken (Unit' n e d _) = Unit' (Name.weaken n) e d e
 
