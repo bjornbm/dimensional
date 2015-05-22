@@ -784,29 +784,31 @@ siBaseName :: HasDimension d => d -> UnitName 'NonMetric
 siBaseName d = let powers = asList $ dimension d
                 in reduce . product $ zipWith (Name.^) baseUnitNames powers
 
--- | Applies a scale factor to a 'Unit'.
--- The 'prefix' function will be used by other modules to
--- define the SI prefixes and non-SI units.
+-- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 -- 
 -- Note that supplying zero as a definining quantity is invalid, as the library relies
--- upon units forming a group under multiplication. We do not raise an 'error' because
--- doing so would require an additional 'Eq' context.
+-- upon units forming a group under multiplication.
 -- 
 -- Supplying negative defining quantities is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
 composite :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
-composite n s' u@(Unit' _ s _ x) = Unit' n (s' Prelude.* s) (Just . weaken $ u) (approximateValue s' Prelude.* x)
+composite n s' u@(Unit' _ s _ x) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
+                                 | otherwise     = Unit' n (s' Prelude.* s) (Just . weaken $ u) (approximateValue s' Prelude.* x)
 
 compositeFrac :: Fractional a => UnitName m -> Rational -> Unit m1 d ExactPi -> Unit m d a
-compositeFrac n s' u@(Unit' _ s@(Exact 0 q) _ _) = Unit' n ((fromRational s') Prelude.* s) (Just . weaken $ u) (fromRational $ s' Prelude.* fromRational q)
+compositeFrac n s' u@(Unit' _ s@(Exact 0 q) _ _) | s' == 0   = error "Supplying zero as a conversion factor is not valid."
+                                                 | otherwise = Unit' n ((fromRational s') Prelude.* s) (Just . weaken $ u) (fromRational $ s' Prelude.* fromRational q)
 compositeFrac _ _  _                             = error "The underlying unit does not have an exact rational conversion factor."
 
 compositeFrac' :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
-compositeFrac' n s' u@(Unit' _ s _ x) = Unit' n ((fromRational s') Prelude.* s) (Just . weaken $ u) (fromRational s' Prelude.* x)
+compositeFrac' n s' u@(Unit' _ s _ x) | s' == 0   = error "Supplying zero as a conversion factor is not valid."
+                                      | otherwise = Unit' n ((fromRational s') Prelude.* s) (Just . weaken $ u) (fromRational s' Prelude.* x)
 
 compositeNum :: Num a => UnitName m -> Integer -> Unit m1 d ExactPi -> Unit m d a
-compositeNum n s' u@(Unit' _ s@(Exact 0 q) _ _) | denominator q == 1 = Unit' n ((fromInteger s') Prelude.* s) (Just . weaken $ u) (fromInteger $ s' Prelude.* numerator q)
+compositeNum n s' u@(Unit' _ s@(Exact 0 q) _ _) | s' == 0            = error "Supplying zero as a conversion factor is not valid."
+                                                | denominator q == 1 = Unit' n ((fromInteger s') Prelude.* s) (Just . weaken $ u) (fromInteger $ s' Prelude.* numerator q)
 compositeNum _ _  _                                                  = error "The underlying unit does not have an exact integer conversion factor."
 
 compositeNum' :: Num a => UnitName m -> Integer -> Unit m1 d a -> Unit m d a
-compositeNum' n s' u@(Unit' _ s _ x) = Unit' n ((fromInteger s') Prelude.* s) (Just . weaken $ u) (fromInteger s' Prelude.* x)
+compositeNum' n s' u@(Unit' _ s _ x) | s' == 0   = error "Supplying zero as a conversion factor is not valid."
+                                     | otherwise = Unit' n ((fromInteger s') Prelude.* s) (Just . weaken $ u) (fromInteger s' Prelude.* x)
