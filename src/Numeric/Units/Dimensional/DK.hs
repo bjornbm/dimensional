@@ -321,7 +321,7 @@ instance KnownVariant 'DQuantity where
   dmap f (Quantity' x) = Quantity' (f x)
 
 instance (Typeable m) => KnownVariant ('DUnit m) where
-  data Dimensional ('DUnit m) d a = Unit' (UnitName m) ExactPi (Maybe (Unit 'NonMetric d ExactPi)) a
+  data Dimensional ('DUnit m) d a = Unit' !(UnitName m) !ExactPi !(Maybe (Unit 'NonMetric d ExactPi)) !a
   extractValue (Unit' _ e _ x) = (x, Just e)
   extractName (Unit' n _ _ _) = Just . Name.weaken $ n
   injectValue (Just n) (x, Just e) = let n' = relax n
