@@ -281,7 +281,7 @@ to occasionally cumbersome type classes.
 The relationship between (the value of) a 'Quantity', its numerical
 value and its 'Unit' is described in 7.1 "Value and numerical value
 of a quantity" of <#note1 [1]>. In short a 'Quantity' is the product of a
-number and a 'Unit'. We define the '(*~)' operator as a convenient
+number and a 'Unit'. We define the '*~' operator as a convenient
 way to declare quantities as such a product.
 
 -}
@@ -603,11 +603,11 @@ We define two convenience operators for applying units to all
 elements of a functor (e.g. a list).
 -}
 
--- | Applies '(*~)' to all values in a functor.
+-- | Applies '*~' to all values in a functor.
 (*~~) :: (Functor f, Num a) => f a -> Unit m d a -> f (Quantity d a)
 xs *~~ u = fmap (*~ u) xs
 
--- | Applies '(/~)' to all values in a functor.
+-- | Applies '/~' to all values in a functor.
 (/~~) :: (Functor f, Fractional a) => f (Quantity d a) -> Unit m d a -> f a
 xs /~~ u = fmap (/~ u) xs
 
