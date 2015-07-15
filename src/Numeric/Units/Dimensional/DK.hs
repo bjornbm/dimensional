@@ -210,10 +210,10 @@ module Numeric.Units.Dimensional.DK
     (*~~), (/~~), sum, mean, dimensionlessLength, nFromTo,
     -- * Dimension Synonyms
     -- $dimension-synonyms
-    DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
+    DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity, DPlaneAngle, DSolidAngle,
     -- * Quantity Synonyms
     -- $quantity-synonyms
-    Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity,
+    Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity, PlaneAngle, SolidAngle,
     -- * Constants
     -- $constants
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
@@ -372,6 +372,8 @@ type ElectricCurrent          = Quantity DElectricCurrent
 type ThermodynamicTemperature = Quantity DThermodynamicTemperature
 type AmountOfSubstance        = Quantity DAmountOfSubstance
 type LuminousIntensity        = Quantity DLuminousIntensity
+type PlaneAngle               = Quantity DPlaneAngle
+type SolidAngle               = Quantity DSolidAngle
 
 {- $dimension-arithmetic
 When performing arithmetic on units and quantities the arithmetics
@@ -568,22 +570,26 @@ We continue by defining elementary functions on 'Dimensionless'
 that may be obviously useful.
 -}
 
-exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh
+exp, log, sinh, cosh, tanh, asinh, acosh, atanh
   :: Floating a => Dimensionless a -> Dimensionless a
 exp   = fmap Prelude.exp
 log   = fmap Prelude.log
-sin   = fmap Prelude.sin
-cos   = fmap Prelude.cos
-tan   = fmap Prelude.tan
-asin  = fmap Prelude.asin
-acos  = fmap Prelude.acos
-atan  = fmap Prelude.atan
 sinh  = fmap Prelude.sinh
 cosh  = fmap Prelude.cosh
 tanh  = fmap Prelude.tanh
 asinh = fmap Prelude.asinh
 acosh = fmap Prelude.acosh
 atanh = fmap Prelude.atanh
+
+sin, cos, tan :: Floating a => PlaneAngle a -> Dimensionless a
+sin   = (*~ one) . Prelude.sin . (/~ siUnit)
+cos   = (*~ one) . Prelude.cos . (/~ siUnit)
+tan   = (*~ one) . Prelude.tan . (/~ siUnit)
+
+asin, acos, atan :: Floating a => Dimensionless a -> PlaneAngle a
+asin  = (*~ siUnit) . Prelude.asin . (/~ one)
+acos  = (*~ siUnit) . Prelude.acos . (/~ one)
+atan  = (*~ siUnit) . Prelude.atan . (/~ one)
 
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
 Dimensional x ** Dimensional y = Dimensional (x Prelude.** y)

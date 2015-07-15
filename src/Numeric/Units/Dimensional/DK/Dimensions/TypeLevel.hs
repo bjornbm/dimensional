@@ -18,7 +18,7 @@
    Portability: GHC only
 
 This module defines type-level physical dimensions expressed in terms of
-the SI base dimensions using 'Numeric.NumType.DK.NumType' for type-level integers.
+the SI base dimensions along with plane and solid angles using 'Numeric.NumType.DK.NumType' for type-level integers.
 
 Type-level arithmetic, synonyms for the base dimensions, and conversion to the term-level are included.
 -}
@@ -30,7 +30,7 @@ module Numeric.Units.Dimensional.DK.Dimensions.TypeLevel
   type (*), type (/), type (^), type Recip, type Root,
   -- * Synonyms for Base Dimensions
   DOne,
-  DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
+  DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity, DPlaneAngle, DSolidAngle,
   -- * Conversion to Term Level
   type KnownDimension
 )
@@ -45,6 +45,7 @@ import qualified Numeric.NumType.DK.Integers as N
 import Numeric.Units.Dimensional.DK.Dimensions.TermLevel
 
 -- | Represents a physical dimension in the basis of the 7 SI base dimensions, 
+-- along with the dimensions of plane and solid angles,
 -- where the respective dimensions are represented by type variables
 -- using the following convention.
 --
@@ -55,19 +56,23 @@ import Numeric.Units.Dimensional.DK.Dimensions.TermLevel
 --  * th: Thermodynamic temperature
 --  * n: Amount of substance
 --  * j: Luminous intensity
+--  * pa: Plane angle
+--  * sa: Solid angle
 --
 -- For the equivalent term-level representation, see 'Dimension''
-data Dimension = Dim TypeInt TypeInt TypeInt TypeInt TypeInt TypeInt TypeInt
+data Dimension = Dim TypeInt TypeInt TypeInt TypeInt TypeInt TypeInt TypeInt TypeInt TypeInt
 
 -- | The type-level dimensions of dimensionless values.
-type DOne                      = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
-type DLength                   = 'Dim 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
-type DMass                     = 'Dim 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
-type DTime                     = 'Dim 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero
-type DElectricCurrent          = 'Dim 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero
-type DThermodynamicTemperature = 'Dim 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero
-type DAmountOfSubstance        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero
-type DLuminousIntensity        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1
+type DOne                      = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DLength                   = 'Dim 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DMass                     = 'Dim 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DTime                     = 'Dim 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DElectricCurrent          = 'Dim 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DThermodynamicTemperature = 'Dim 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero
+type DAmountOfSubstance        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero
+type DLuminousIntensity        = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero
+type DPlaneAngle               = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero
+type DSolidAngle               = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -83,16 +88,16 @@ infixl 7  *, /
 type family (a::Dimension) * (b::Dimension) where
   DOne * d = d
   d * DOne = d
-  ('Dim l  m  t  i  th  n  j) * ('Dim l' m' t' i' th' n' j')
-    = 'Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j')
+  ('Dim l  m  t  i  th  n  j pa sa) * ('Dim l' m' t' i' th' n' j' pa' sa')
+    = 'Dim (l + l') (m + m') (t + t') (i + i') (th + th') (n + n') (j + j') (pa + pa') (sa + sa')
 
 -- | Division of dimensions corresponds to subtraction of the base
 -- dimensions' exponents.
 type family (a::Dimension) / (d::Dimension) where
   d / DOne = d
   d / d = DOne
-  ('Dim l  m  t  i  th  n  j) / ('Dim l' m' t' i' th' n' j')
-    = 'Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j')
+  ('Dim l  m  t  i  th  n  j pa sa) / ('Dim l' m' t' i' th' n' j' pa' sa')
+    = 'Dim (l - l') (m - m') (t - t') (i - i') (th - th') (n - n') (j - j') (pa - pa') (sa - sa')
 
 -- | The reciprocal of a dimension is defined as the result of dividing 'DOne' by it,
 -- or of negating each of the base dimensions' exponents.
@@ -107,8 +112,8 @@ type family (d::Dimension) ^ (x::TypeInt) where
   DOne ^ x = DOne
   d ^ 'Zero = DOne
   d ^ 'Pos1 = d
-  ('Dim l  m  t  i  th  n  j) ^ x
-    = 'Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
+  ('Dim l  m  t  i  th  n  j pa sa) ^ x
+    = 'Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x) (pa N.* x) (sa N.* x)
 
 -- | Roots of dimensions corresponds to division of the base dimensions'
 -- exponents by the order(?) of the root.
@@ -117,8 +122,8 @@ type family (d::Dimension) ^ (x::TypeInt) where
 type family Root (d::Dimension) (x::TypeInt) where
   Root DOne x = DOne
   Root d 'Pos1 = d
-  Root ('Dim l  m  t  i  th  n  j) x
-    = 'Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
+  Root ('Dim l  m  t  i  th  n  j pa sa) x
+    = 'Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x) (pa N./ x) (sa N./ x)
 
 -- | A KnownDimension is one for which we can construct a term-level representation.
 -- Each validly constructed type of kind 'Dimension' has a 'KnownDimension' instance.
@@ -134,7 +139,9 @@ instance ( KnownTypeInt l
          , KnownTypeInt th
          , KnownTypeInt n
          , KnownTypeInt j
-         ) => HasDimension (Proxy ('Dim l m t i th n j))
+         , KnownTypeInt pa
+         , KnownTypeInt sa
+         ) => HasDimension (Proxy ('Dim l m t i th n j pa sa))
   where 
     dimension _ = Dim'
                 (toNum (Proxy :: Proxy l))
@@ -144,3 +151,5 @@ instance ( KnownTypeInt l
                 (toNum (Proxy :: Proxy th))
                 (toNum (Proxy :: Proxy n))
                 (toNum (Proxy :: Proxy j))
+                (toNum (Proxy :: Proxy pa))
+                (toNum (Proxy :: Proxy sa))

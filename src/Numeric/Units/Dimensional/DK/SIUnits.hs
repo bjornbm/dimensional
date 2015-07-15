@@ -148,9 +148,9 @@ radian and steradian.
 -}
 
 radian :: Fractional a => Unit DPlaneAngle a
-radian = one -- meter * meter ^ neg1
+radian = siUnit
 steradian :: Fractional a => Unit DSolidAngle a
-steradian = one -- meter ^ pos2 * meter ^ neg2
+steradian = siUnit
 hertz :: Fractional a => Unit DFrequency a
 hertz = second ^ neg1
 newton :: Fractional a => Unit DForce a
