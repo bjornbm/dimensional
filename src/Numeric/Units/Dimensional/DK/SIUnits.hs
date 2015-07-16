@@ -118,7 +118,7 @@ We define the SI base units in the order of table 1.
 -}
 
 metre, meter :: Num a => Unit DLength a
-metre = siUnit -- International English.
+metre = baseUnit -- International English.
 meter = metre         -- American English.
 
 {-
@@ -130,17 +130,17 @@ The drawback is that we are forced to use 'Fractional'.
 -}
 
 gram    :: Fractional a => Unit DMass a
-gram    = milli siUnit
+gram    = milli baseUnit
 second  :: Num a => Unit DTime a
-second  = siUnit
+second  = baseUnit
 ampere  :: Num a => Unit DElectricCurrent a
-ampere  = siUnit
+ampere  = baseUnit
 kelvin  :: Num a => Unit DThermodynamicTemperature a
-kelvin  = siUnit
+kelvin  = baseUnit
 mole    :: Num a => Unit DAmountOfSubstance a
-mole    = siUnit
+mole    = baseUnit
 candela :: Num a => Unit DLuminousIntensity a
-candela = siUnit
+candela = baseUnit
 
 {- $derived-units
 From Table 3, SI derived units with special names and symbols, including the
@@ -148,9 +148,9 @@ radian and steradian.
 -}
 
 radian :: Fractional a => Unit DPlaneAngle a
-radian = siUnit
+radian = baseUnit
 steradian :: Fractional a => Unit DSolidAngle a
-steradian = siUnit
+steradian = baseUnit
 hertz :: Fractional a => Unit DFrequency a
 hertz = second ^ neg1
 newton :: Fractional a => Unit DForce a

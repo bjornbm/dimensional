@@ -220,7 +220,7 @@ module Numeric.Units.Dimensional.DK
     -- $constants
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     -- * Constructing Units
-    prefix, siUnit, one,
+    prefix, baseUnit, siUnit, one,
     -- * On 'Functor', and Conversion Between Number Representations
     -- $functor
     dmap, changeRep
@@ -585,14 +585,14 @@ acosh = fmap Prelude.acosh
 atanh = fmap Prelude.atanh
 
 sin, cos, tan :: Floating a => PlaneAngle a -> Dimensionless a
-sin   = (*~ one) . Prelude.sin . (/~ siUnit)
-cos   = (*~ one) . Prelude.cos . (/~ siUnit)
-tan   = (*~ one) . Prelude.tan . (/~ siUnit)
+sin   = (*~ one) . Prelude.sin . (/~ baseUnit)
+cos   = (*~ one) . Prelude.cos . (/~ baseUnit)
+tan   = (*~ one) . Prelude.tan . (/~ baseUnit)
 
 asin, acos, atan :: Floating a => Dimensionless a -> PlaneAngle a
-asin  = (*~ siUnit) . Prelude.asin . (/~ one)
-acos  = (*~ siUnit) . Prelude.acos . (/~ one)
-atan  = (*~ siUnit) . Prelude.atan . (/~ one)
+asin  = (*~ baseUnit) . Prelude.asin . (/~ one)
+acos  = (*~ baseUnit) . Prelude.acos . (/~ one)
+atan  = (*~ baseUnit) . Prelude.atan . (/~ one)
 
 -- | Removes angular dimensions from a dimensional value by equating radians
 -- and steradians with the dimensionless quantity one.
@@ -619,10 +619,22 @@ atan2 :: RealFloat a => Quantity d a -> Quantity d a -> PlaneAngle a
 atan2 (Dimensional y) (Dimensional x) = Dimensional (Prelude.atan2 y x)
 
 -- | A polymorphic 'Unit' which can be used in place of the coherent
+-- base unit of any dimension. This allows polymorphic quantity
+-- creation and destruction without exposing the 'Dimensional' constructor.
+--
+-- `siUnit` is similar but does not include the radians or steradians associated
+-- with plane or solid angles.
+baseUnit :: Num a => Unit d a
+baseUnit = Dimensional 1
+
+-- | A polymorphic 'Unit' which can be used in place of the coherent
 -- SI base unit of any dimension. This allows polymorphic quantity
 -- creation and destruction without exposing the 'Dimensional' constructor.
-siUnit :: Num a => Unit d a
-siUnit = Dimensional 1
+--
+-- `baseUnit` is similar but includes the radians and steradians associated
+-- with plane or solid angles.
+siUnit :: Num a => Unit ('Dim l m t i th n j 'Zero 'Zero) a
+siUnit = removeAngles baseUnit
 
 {-
 The only unit we will define in this module is 'one'.
@@ -635,7 +647,7 @@ The only unit we will define in this module is 'one'.
 -- appear in expressions. However, for us it is necessary to use 'one'
 -- as we would any other unit to perform the "boxing" of dimensionless values.
 one :: Num a => Unit DOne a
-one = siUnit
+one = baseUnit
 
 {- $constants
 For convenience we define some constants for small integer values
@@ -648,7 +660,7 @@ good measure.
 -- it to express zero Length or Capacitance or Velocity etc, in addition
 -- to the dimensionless value zero.
 _0 :: Num a => Quantity d a
-_0 = 0 *~ siUnit
+_0 = 0 *~ baseUnit
 
 _1, _2, _3, _4, _5, _6, _7, _8, _9 :: (Num a) => Dimensionless a
 _1 = 1 *~ one
