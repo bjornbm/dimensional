@@ -60,7 +60,7 @@ where
 
 import Numeric.Units.Dimensional.DK
 import Numeric.Units.Dimensional.DK.Quantities
-import Numeric.NumType.DK.Integers ( neg1, neg2, pos2, pos3 )
+import Numeric.NumType.DK.Integers ( pos3 )
 import Prelude ( (.), Num, Real, realToFrac, Fractional, Floating, recip )
 import qualified Prelude
 
@@ -147,46 +147,46 @@ From Table 3, SI derived units with special names and symbols, including the
 radian and steradian.
 -}
 
-radian :: Fractional a => Unit DPlaneAngle a
+radian :: Num a => Unit DPlaneAngle a
 radian = one -- meter * meter ^ neg1
-steradian :: Fractional a => Unit DSolidAngle a
+steradian :: Num a => Unit DSolidAngle a
 steradian = one -- meter ^ pos2 * meter ^ neg2
-hertz :: Fractional a => Unit DFrequency a
-hertz = second ^ neg1
-newton :: Fractional a => Unit DForce a
-newton = kilo gram * meter * second ^ neg2
-pascal :: Fractional a => Unit DPressure a
-pascal = newton / meter ^ pos2
-joule :: Fractional a => Unit DEnergy a
-joule = newton * meter
-watt :: Fractional a => Unit DPower a
-watt = joule / second
-coulomb :: Fractional a => Unit DElectricCharge a
-coulomb = second * ampere
-volt :: Fractional a => Unit DElectricPotential a
-volt = watt / ampere
-farad :: Fractional a => Unit DCapacitance a
-farad = coulomb / volt
-ohm :: Fractional a => Unit DElectricResistance a
-ohm = volt / ampere
-siemens :: Fractional a => Unit DElectricConductance a
-siemens = ampere / volt
-weber :: Fractional a => Unit DMagneticFlux a
-weber = volt * second
-tesla :: Fractional a => Unit DMagneticFluxDensity a
-tesla = weber / meter ^ pos2
-henry :: Fractional a => Unit DInductance a
-henry = weber / ampere
+hertz :: Num a => Unit DFrequency a
+hertz = siUnit -- second ^ neg1
+newton :: Num a => Unit DForce a
+newton = siUnit -- kilo gram * meter * second ^ neg2
+pascal :: Num a => Unit DPressure a
+pascal = siUnit -- newton / meter ^ pos2
+joule :: Num a => Unit DEnergy a
+joule = siUnit -- newton * meter
+watt :: Num a => Unit DPower a
+watt = siUnit -- joule / second
+coulomb :: Num a => Unit DElectricCharge a
+coulomb = siUnit -- second * ampere
+volt :: Num a => Unit DElectricPotential a
+volt = siUnit -- watt / ampere
+farad :: Num a => Unit DCapacitance a
+farad = siUnit -- coulomb / volt
+ohm :: Num a => Unit DElectricResistance a
+ohm = siUnit -- volt / ampere
+siemens :: Num a => Unit DElectricConductance a
+siemens = siUnit -- ampere / volt
+weber :: Num a => Unit DMagneticFlux a
+weber = siUnit -- volt * second
+tesla :: Num a => Unit DMagneticFluxDensity a
+tesla = siUnit -- weber / meter ^ pos2
+henry :: Num a => Unit DInductance a
+henry = siUnit -- weber / ampere
 
 {-
 We defer the definition of Celcius temperature to another section (would
 appear here if we stricly followed table 3).
 -}
 
-lumen :: Fractional a => Unit DLuminousFlux a
-lumen = candela * steradian
-lux :: Fractional a => Unit DIlluminance a
-lux = lumen / meter ^ pos2
+lumen :: Num a => Unit DLuminousFlux a
+lumen = siUnit -- candela * steradian
+lux :: Num a => Unit DIlluminance a
+lux = siUnit -- lumen / meter ^ pos2
 
 {- $celsius
 A problematic area is units which increase proportionally to the
@@ -216,14 +216,14 @@ The last units from Table 3 are SI derived units with special names and symbols 
 of safeguarding human health.
 -}
 
-becquerel :: Fractional a => Unit DActivity a
-becquerel = second ^ neg1
-gray :: Fractional a => Unit DAbsorbedDose a
-gray = joule / kilo gram
-sievert :: Fractional a => Unit DDoseEquivalent a
-sievert = joule / kilo gram
-katal :: Fractional a => Unit DCatalyticActivity a
-katal = mole / second
+becquerel :: Num a => Unit DActivity a
+becquerel = siUnit -- second ^ neg1
+gray :: Num a => Unit DAbsorbedDose a
+gray = siUnit -- joule / kilo gram
+sievert :: Num a => Unit DDoseEquivalent a
+sievert = siUnit -- joule / kilo gram
+katal :: Num a => Unit DCatalyticActivity a
+katal = siUnit -- mole / second
 
 {- $accepted-units
 There are several units that are not strictly part of the SI but
