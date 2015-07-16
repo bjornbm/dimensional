@@ -67,7 +67,7 @@ import Numeric.Units.Dimensional.DK.Quantities
 import Numeric.Units.Dimensional.DK.UnitNames (PrefixName, applyPrefix, nMeter, nGram, nSecond, nAmpere, nKelvin, nMole, nCandela)
 import qualified Numeric.Units.Dimensional.DK.UnitNames as N
 import Numeric.Units.Dimensional.DK.UnitNames.Internal (ucum, ucumMetric)
-import Numeric.NumType.DK.Integers ( neg1, neg2, pos2, pos3 )
+import Numeric.NumType.DK.Integers ( neg2, neg1, pos2, pos3 )
 import Prelude ( (.), ($), Real, realToFrac, Num, Fractional, Floating, Integer, Rational, recip)
 import qualified Prelude
 
