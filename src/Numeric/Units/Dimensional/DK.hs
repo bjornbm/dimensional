@@ -205,6 +205,8 @@ module Numeric.Units.Dimensional.DK
     negate, abs, nroot, sqrt, cbrt,
     -- ** Transcendental Functions
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
+    -- ** Dealing with Angles
+    removeAngles, coerceAngles,
     -- ** Operations on Collections
     -- $collections
     (*~~), (/~~), sum, mean, dimensionlessLength, nFromTo,
@@ -232,10 +234,11 @@ import Prelude
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
-  ( TypeInt (Pos2, Pos3)
+  ( TypeInt (Zero, Pos2, Pos3)
   , pos2, pos3
   , KnownTypeInt, toNum
   )
+import Data.Coerce (coerce)
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Monoid (Monoid(..))
 import Data.Ratio ((%))
@@ -591,15 +594,28 @@ asin  = (*~ siUnit) . Prelude.asin . (/~ one)
 acos  = (*~ siUnit) . Prelude.acos . (/~ one)
 atan  = (*~ siUnit) . Prelude.atan . (/~ one)
 
+-- | Removes angular dimensions from a dimensional value by equating radians
+-- and steradians with the dimensionless quantity one.
+removeAngles :: Dimensional v ('Dim l m t i th n j pa sa) a -> Dimensional v ('Dim l m t i th n j 'Zero 'Zero) a
+removeAngles = coerceAngles
+
+-- | Equates values whose dimensions differ in plane or solid angles by equating
+-- radians and steradians with the dimensionless quantity one.
+--
+-- See `removeAngles`, which offers a more specific result type, if you are only interested
+-- in ignoring plane and solid angle dimensions.
+coerceAngles :: Dimensional v ('Dim l m t i th n j pa sa) a -> Dimensional v ('Dim l m t i th n j pa' sa') a
+coerceAngles = coerce
+
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
 Dimensional x ** Dimensional y = Dimensional (x Prelude.** y)
 
 {-
 For 'atan2' the operands need not be dimensionless but they must be
-of the same type. The result will of course always be dimensionless.
+of the same type. The result will of course always be a plane angle.
 -}
 
-atan2 :: RealFloat a => Quantity d a -> Quantity d a -> Dimensionless a
+atan2 :: RealFloat a => Quantity d a -> Quantity d a -> PlaneAngle a
 atan2 (Dimensional y) (Dimensional x) = Dimensional (Prelude.atan2 y x)
 
 -- | A polymorphic 'Unit' which can be used in place of the coherent
