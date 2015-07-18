@@ -725,7 +725,7 @@ even a requirement.
 -}
 instance (KnownDimension d, Show a) => Show (Quantity d a) where
       show q@(Dimensional x) = let powers = asList $ dimension q
-                                   units = ["m", "kg", "s", "A", "K", "mol", "cd"]
+                                   units = ["m", "kg", "s", "A", "K", "mol", "cd", "rad", "sr"]
                                    dims = concat $ zipWith dimUnit units powers
                                in show x ++ dims
 
