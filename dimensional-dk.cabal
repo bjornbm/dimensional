@@ -51,7 +51,11 @@ library
                        Numeric.Units.Dimensional.DK.Dimensions,
                        Numeric.Units.Dimensional.DK.Dimensions.TermLevel,
                        Numeric.Units.Dimensional.DK.Dimensions.TypeLevel,
-                       Numeric.Units.Dimensional.DK.Functor
+                       Numeric.Units.Dimensional.DK.Functor,
+                       Numeric.Units.Dimensional.DK.SI,
+                       Numeric.Units.Dimensional.DK.SI.Prelude,
+                       Numeric.Units.Dimensional.DK.SI.SIUnits,
+                       Numeric.Units.Dimensional.DK.SI.Quantities
 
 test-suite tests
   type:                exitcode-stdio-1.0
