@@ -25,6 +25,7 @@ module Numeric.Units.Dimensional.DK.Prelude
 
 import Numeric.Units.Dimensional.DK hiding
     ( dmap
+    , removeAngles, coerceAngles
     )
 
 import Numeric.Units.Dimensional.DK.Quantities

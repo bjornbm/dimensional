@@ -1,6 +1,7 @@
 module Numeric.Units.Dimensional.DK.QuantitiesTest where
 
 import Numeric.Units.Dimensional.DK.Prelude
+import Numeric.Units.Dimensional.DK
 import qualified Prelude
 
 -- These definitions simply verify that the type synonyms are
