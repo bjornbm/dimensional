@@ -391,7 +391,7 @@ type DThrust = DForce
 type Thrust = Force
 
 type DTorque = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Neg1 'Zero
-type Torque = MomentOfForce
+type Torque = Quantity DTorque
 
 type DEnergyPerUnitMass = DSpecificEnergy
 type EnergyPerUnitMass = SpecificEnergy
