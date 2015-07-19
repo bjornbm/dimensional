@@ -27,11 +27,11 @@ import Numeric.Units.Dimensional.DK.SI.Quantities
 import qualified Numeric.Units.Dimensional.DK.SIUnits as A
 import Numeric.Units.Dimensional.DK.SIUnits hiding (radian, steradian, degree, arcminute, arcsecond, degreeOfArc, minuteOfArc, secondOfArc, lumen, lux)
 
-radian, steradian :: (Num a) => Unit DOne a
+radian, steradian :: (Num a) => Unit DPlaneAngle a
 radian = removeAngles A.radian
 steradian = removeAngles A.steradian
 
-degree, arcminute, arcsecond, degreeOfArc, minuteOfArc, secondOfArc :: (Floating a) => Unit DOne a
+degree, arcminute, arcsecond, degreeOfArc, minuteOfArc, secondOfArc :: (Floating a) => Unit DPlaneAngle a
 degree = removeAngles A.degree
 arcminute = removeAngles A.arcminute
 arcsecond = removeAngles A.arcsecond

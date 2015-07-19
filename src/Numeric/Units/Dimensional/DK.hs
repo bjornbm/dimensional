@@ -195,7 +195,7 @@ module Numeric.Units.Dimensional.DK
     Dimension (Dim),
     -- ** Dimension Arithmetic
     -- $dimension-arithmetic
-    type (*), type (/), type (^), Root, Recip,
+    type (*), type (/), type (^), Root, Recip, type SIDim, type ToSIDim,
     -- ** Term Level Representation of Dimensions
     -- $dimension-terms
     Dimension' (Dim'), HasDimension(..), KnownDimension,
@@ -234,7 +234,7 @@ import Prelude
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
-  ( TypeInt (Zero, Pos2, Pos3)
+  ( TypeInt (Pos2, Pos3)
   , pos2, pos3
   , KnownTypeInt, toNum
   )
@@ -596,7 +596,7 @@ atan  = (*~ baseUnit) . Prelude.atan . (/~ one)
 
 -- | Removes angular dimensions from a dimensional value by equating radians
 -- and steradians with the dimensionless quantity one.
-removeAngles :: Dimensional v ('Dim l m t i th n j pa sa) a -> Dimensional v ('Dim l m t i th n j 'Zero 'Zero) a
+removeAngles :: Dimensional v ('Dim l m t i th n j pa sa) a -> Dimensional v (SIDim l m t i th n j) a
 removeAngles = coerceAngles
 
 -- | Equates values whose dimensions differ in plane or solid angles by equating
@@ -633,7 +633,7 @@ baseUnit = Dimensional 1
 --
 -- `baseUnit` is similar but includes the radians and steradians associated
 -- with plane or solid angles.
-siUnit :: Num a => Unit ('Dim l m t i th n j 'Zero 'Zero) a
+siUnit :: Num a => Unit (SIDim l m t i th n j) a
 siUnit = removeAngles baseUnit
 
 {-

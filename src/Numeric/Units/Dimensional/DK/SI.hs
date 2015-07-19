@@ -27,9 +27,6 @@ where
 
 import qualified Numeric.Units.Dimensional.DK as A
 import Numeric.Units.Dimensional.DK hiding (sin, cos, tan, asin, acos, atan, atan2, DPlaneAngle, DSolidAngle, PlaneAngle, SolidAngle, baseUnit)
-import Numeric.NumType.DK.Integers
-  ( TypeInt (Zero)
-  )
 import Prelude hiding (sin, cos, tan, asin, acos, atan, atan2)
 
 sin, cos, tan, asin, acos, atan :: (Floating a) => Dimensionless a -> Dimensionless a
@@ -49,5 +46,5 @@ type DSolidAngle = DOne
 type PlaneAngle = Quantity DPlaneAngle
 type SolidAngle = Quantity DSolidAngle
 
-baseUnit :: (Num a) => Unit ('Dim l m t i th n j 'Zero 'Zero) a
+baseUnit :: (Num a) => Unit (SIDim l m t i th n j) a
 baseUnit = siUnit

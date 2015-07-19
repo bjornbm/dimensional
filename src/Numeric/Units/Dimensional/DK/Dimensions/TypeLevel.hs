@@ -31,6 +31,8 @@ module Numeric.Units.Dimensional.DK.Dimensions.TypeLevel
   -- * Synonyms for Base Dimensions
   DOne,
   DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity, DPlaneAngle, DSolidAngle,
+  -- * Conversion to SI Basis
+  type SIDim, type ToSIDim,
   -- * Conversion to Term Level
   type KnownDimension
 )
@@ -124,6 +126,24 @@ type family Root (d::Dimension) (x::TypeInt) where
   Root d 'Pos1 = d
   Root ('Dim l  m  t  i  th  n  j pa sa) x
     = 'Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x) (pa N./ x) (sa N./ x)
+
+-- | Represents a physical dimension in the basis of the 7 SI base dimensions, 
+-- where the respective dimensions are represented by type variables
+-- using the following convention.
+--
+--  * l: Length
+--  * m: Mass
+--  * t: Time
+--  * i: Electric current
+--  * th: Thermodynamic temperature
+--  * n: Amount of substance
+--  * j: Luminous intensity
+type SIDim l m t i th n j = 'Dim l m t i th n j 'Zero 'Zero
+
+-- | Projects a 'Dimension' in the extended basis including plane and solid angles to
+-- the SI basis.
+type family ToSIDim (d :: Dimension) :: Dimension where
+  ToSIDim ('Dim l m t i th n j pa sa) = SIDim l m t i th n j
 
 -- | A KnownDimension is one for which we can construct a term-level representation.
 -- Each validly constructed type of kind 'Dimension' has a 'KnownDimension' instance.

@@ -30,33 +30,27 @@ import Numeric.Units.Dimensional.DK.SI
 import qualified Numeric.Units.Dimensional.DK.Quantities as A
 import Numeric.Units.Dimensional.DK.Quantities hiding (LuminousFlux,  Illuminance,  AngularVelocity,  AngularAcceleration,  RadiantIntensity,  Radiance,  AngularMomentum,  Torque,
                                                        DLuminousFlux, DIlluminance, DAngularVelocity, DAngularAcceleration, DRadiantIntensity, DRadiance, DAngularMomentum, DTorque)
-import Numeric.NumType.DK.Integers
-  ( TypeInt (Zero)
-  )
 
-type family RemoveAngles (d :: Dimension) :: Dimension where
-  RemoveAngles ('Dim l m t i th n j pa sa) = 'Dim l m t i th n j 'Zero 'Zero
-
-type DLuminousFlux = RemoveAngles A.DLuminousFlux
+type DLuminousFlux = ToSIDim A.DLuminousFlux
 type LuminousFlux = Quantity DLuminousFlux
 
-type DIlluminance = RemoveAngles A.DIlluminance
+type DIlluminance = ToSIDim A.DIlluminance
 type Illuminance = Quantity DIlluminance
 
-type DAngularVelocity = RemoveAngles A.DAngularVelocity
+type DAngularVelocity = ToSIDim A.DAngularVelocity
 type AngularVelocity = Quantity DAngularVelocity
 
-type DAngularAcceleration = RemoveAngles A.DAngularAcceleration
+type DAngularAcceleration = ToSIDim A.DAngularAcceleration
 type AngularAcceleration = Quantity DAngularAcceleration
 
-type DRadiantIntensity = RemoveAngles A.DRadiantIntensity
+type DRadiantIntensity = ToSIDim A.DRadiantIntensity
 type RadiantIntensity = Quantity DRadiantIntensity
 
-type DRadiance = RemoveAngles A.DRadiance
+type DRadiance = ToSIDim A.DRadiance
 type Radiance = Quantity DRadiance
 
-type DAngularMomentum = RemoveAngles A.DAngularMomentum
+type DAngularMomentum = ToSIDim A.DAngularMomentum
 type AngularMomentum = Quantity DAngularMomentum
 
-type DTorque = RemoveAngles A.DTorque
+type DTorque = ToSIDim A.DTorque
 type Torque = Quantity DTorque
