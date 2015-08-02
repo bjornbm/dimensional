@@ -51,7 +51,7 @@ module Numeric.Units.Dimensional.DK.NonSI
   year, century,
   -- * Pressure Units
   -- $pressure-units
-  bar, atmosphere, technicalAtmosphere, mmHg, inHg, torr,
+  bar, atmosphere, technicalAtmosphere, mmHg, inHg, inHg_UCUM, inHg_NIST, torr,
   -- * Radiation Units
   rad,
   -- * Kinematic Viscosity
@@ -228,9 +228,27 @@ mHg = mkUnitR (ucumMetric "m[Hg]" "m Hg" "meter of mercury") (Approximate 133.32
 -- Column inches of mercury are also used to measure pressure, especially in
 -- meteorological or aeronautical contexts in the United States.
 --
--- This is the value defined by UCUM.
+-- This is the value defined by UCUM. For the value defined by NIST, see 'inHg_NIST'.
 inHg :: (Floating a) => Unit 'NonMetric DPressure a
-inHg = mkUnitR (ucum "[in_i'Hg]" "in Hg" "inch of mercury") 1 $ mHg * inch / meter
+inHg = inHg_UCUM
+
+-- | The conventional value for the pressure exerted by a 1 inch high column of mercury.
+--
+-- Column inches of mercury are also used to measure pressure, especially in
+-- meteorological or aeronautical contexts in the United States.
+--
+-- This is the value defined by UCUM. For the value defined by NIST, see 'inHg_NIST'.
+inHg_UCUM :: (Floating a) => Unit 'NonMetric DPressure a
+inHg_UCUM = mkUnitR (ucum "[in_i'Hg]" "in Hg" "inch of mercury") 1 $ mHg * inch / meter
+
+-- | The conventional value for the pressure exerted by a 1 inch high column of mercury.
+--
+-- Column inches of mercury are also used to measure pressure, especially in
+-- meteorological or aeronautical contexts in the United States.
+--
+-- This is the value defined by NIST. For the value defined by UCUM, see 'inHg_UCUM'.
+inHg_NIST :: (Floating a) => Unit 'NonMetric DPressure a
+inHg_NIST = mkUnitR (dimensionalAtom "[in_i'Hg_NIST]" "in Hg" "inch of mercury") 3.386389 $ pascal
 
 -- | One torr (symbol: Torr) is defined as 1/760 atm, which is approximately equal to 1 'mmHg'.
 torr :: (Fractional a) => Unit 'NonMetric DPressure a
