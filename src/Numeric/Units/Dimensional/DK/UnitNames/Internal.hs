@@ -19,6 +19,7 @@ import Data.Foldable (toList)
 #else
 import Data.Foldable (Foldable, toList)
 #endif
+import Numeric.Units.Dimensional.DK.Dimensions.TermLevel (Dimension', asList, HasDimension(..))
 import Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames
 import Numeric.Units.Dimensional.DK.Variants (Metricality(..))
 import Prelude hiding ((*), (/), (^), product)
@@ -137,6 +138,10 @@ nMole = ucumMetric "mol" "mol" "mole"
 
 nCandela :: UnitName 'Metric
 nCandela = ucumMetric "cd" "cd" "candela"
+
+baseUnitName :: Dimension' -> UnitName 'NonMetric
+baseUnitName d = let powers = asList $ dimension d
+                  in reduce . product $ zipWith (^) baseUnitNames powers
 
 baseUnitNames :: [UnitName 'NonMetric]
 baseUnitNames = [weaken nMeter, nKilogram, weaken nSecond, weaken nAmpere, weaken nKelvin, weaken nMole, weaken nCandela]

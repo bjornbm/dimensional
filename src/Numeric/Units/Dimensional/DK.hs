@@ -236,7 +236,7 @@ module Numeric.Units.Dimensional.DK
 import Prelude
   ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Floating, Real, RealFloat, Functor, fmap
   , (.), flip, show, (++), fromIntegral, fromInteger, fromRational, error, max, succ
-  , Int, Integer, Integral, ($), zipWith, uncurry, realToFrac, otherwise, String
+  , Int, Integer, Integral, ($), uncurry, realToFrac, otherwise, String
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
@@ -691,11 +691,7 @@ atan2 = liftUntyped2Q Prelude.atan2
 -- SI base unit of any dimension. This allows polymorphic quantity
 -- creation and destruction without exposing the 'Dimensional' constructor.
 siUnit :: forall d a.(KnownDimension d, Num a) => Unit 'NonMetric d a
-siUnit = Unit' (siBaseName (Proxy :: Proxy d)) 1 Nothing 1
-  where
-    siBaseName :: (KnownDimension d) => Proxy d -> UnitName 'NonMetric
-    siBaseName d = let powers = asList $ dimension d
-                    in reduce . product $ zipWith (Name.^) baseUnitNames powers
+siUnit = Unit' (baseUnitName $ dimension (Proxy :: Proxy d)) 1 Nothing 1
 
 {-
 The only unit we will define in this module is 'one'.
