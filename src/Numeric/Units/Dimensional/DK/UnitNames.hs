@@ -7,7 +7,7 @@ module Numeric.Units.Dimensional.DK.UnitNames
   nOne, nMeter, nGram, nKilogram, nSecond, nAmpere, nKelvin, nMole, nCandela,
   deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta,
   deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto,
-  baseUnitNames, baseUnitName,
+  baseUnitName,
   UnitNameTransformer, UnitNameTransformer2,
   weaken, strengthen, relax
 )
