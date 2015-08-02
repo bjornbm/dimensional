@@ -7,6 +7,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -801,9 +802,11 @@ mkUnitR n s' u@(Unit' _ s _ x) | isExactZero s = error "Supplying zero as a conv
 --
 -- For more information see 'mkUnitR'.
 mkUnitQ :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
-mkUnitQ n s' u@(Unit' _ s@(Exact 0 q) _ _) | s' == 0   = error "Supplying zero as a conversion factor is not valid."
-                                           | otherwise = Unit' n ((fromRational s') Prelude.* s) (Just . weaken $ u) (fromRational $ s' Prelude.* fromRational q)
-mkUnitQ _ _  _                             = error "The underlying unit does not have an exact rational conversion factor."
+mkUnitQ n s' u@(Unit' _ s _ _) | s' == 0                       = error "Supplying zero as a conversion factor is not valid."
+                               | Just q <- toExactRational s'' = Unit' n s'' (Just . weaken $ u) (fromRational q)
+                               | otherwise                     = error "The resulting conversion factor is not an exact rational." 
+  where
+    s'' = fromRational s' Prelude.* s                               
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 --
@@ -812,6 +815,8 @@ mkUnitQ _ _  _                             = error "The underlying unit does not
 --
 -- For more information see 'mkUnitR'.
 mkUnitZ :: Num a => UnitName m -> Integer -> Unit m1 d a -> Unit m d a
-mkUnitZ n s' u@(Unit' _ s@(Exact 0 q) _ _) | s' == 0            = error "Supplying zero as a conversion factor is not valid."
-                                           | denominator q == 1 = Unit' n ((fromInteger s') Prelude.* s) (Just . weaken $ u) (fromInteger $ s' Prelude.* numerator q)
-mkUnitZ _ _  _                                                  = error "The underlying unit does not have an exact integer conversion factor."
+mkUnitZ n s' u@(Unit' _ s _ _) | s' == 0                      = error "Supplying zero as a conversion factor is not valid."
+                               | Just z <- toExactInteger s'' = Unit' n s'' (Just . weaken $ u) (fromInteger z)
+                               | otherwise                    = error "The resulting conversion factor is not an exact integer."
+  where
+    s'' = fromInteger s' Prelude.* s
