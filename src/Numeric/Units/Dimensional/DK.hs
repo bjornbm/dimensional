@@ -322,15 +322,15 @@ instance KnownVariant 'DQuantity where
   dmap f (Quantity' x) = Quantity' (f x)
 
 instance (Typeable m) => KnownVariant ('DUnit m) where
-  data Dimensional ('DUnit m) d a = Unit' !(UnitName m) !ExactPi !(Maybe (Unit 'NonMetric d ExactPi)) !a
-  extractValue (Unit' _ e _ x) = (x, Just e)
-  extractName (Unit' n _ _ _) = Just . Name.weaken $ n
+  data Dimensional ('DUnit m) d a = Unit' !(UnitName m) !ExactPi !a
+  extractValue (Unit' _ e x) = (x, Just e)
+  extractName (Unit' n _ _) = Just . Name.weaken $ n
   injectValue (Just n) (x, Just e) = let n' = relax n
                                       in case n' of
-                                         Just n'' -> Unit' n'' e Nothing x
+                                         Just n'' -> Unit' n'' e x
                                          _        -> Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
   injectValue _        _ = Prelude.error "Shouldn't be reachable. Needed to name a quantity."
-  dmap f (Unit' n e _ x) = Unit' n e Nothing (f x)
+  dmap f (Unit' n e x) = Unit' n e (f x)
 
 -- | A unit of measurement.
 type Unit (m :: Metricality) = Dimensional ('DUnit m)
@@ -344,21 +344,21 @@ instance (Bounded a) => Bounded (Quantity d a) where
   maxBound = Quantity' maxBound
 
 instance HasInterchangeName (Unit m d a) where
-  interchangeName (Unit' n _ _ _) = interchangeName n
+  interchangeName (Unit' n _ _) = interchangeName n
 
 -- | Extracts the 'UnitName' of a 'Unit'.
 name :: Unit m d a -> UnitName m
-name (Unit' n _ _ _) = n
+name (Unit' n _ _) = n
 
 -- | Extracts the exact value of a 'Unit', expressed in terms of the SI coherent derived unit (see 'siUnit') of the same 'Dimension'.
 --
 -- Note that the actual value may in some cases be approximate, for example if the unit is defined by experiment.
 exactValue :: Unit m d a -> ExactPi
-exactValue (Unit' _ e _ _) = e
+exactValue (Unit' _ e _) = e
 
 -- | Discards potentially unwanted type level information about a 'Unit'.
 weaken :: Unit m d a -> Unit 'NonMetric d ExactPi
-weaken (Unit' n e d _) = Unit' (Name.weaken n) e d e
+weaken (Unit' n e _) = Unit' (Name.weaken n) e e
 
 -- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
 liftUntyped :: (KnownVariant v, KnownVariant (Weaken v)) => (ExactPi -> ExactPi) -> (a -> a) -> UnitNameTransformer -> (Dimensional v d1 a) -> (Dimensional (Weaken v) d2 a)
@@ -389,12 +389,12 @@ liftUntyped2Q f x1 x2 = let (x1', _) = extractValue x1
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
 (*~) :: Num a => a -> Unit m d a -> Quantity d a
-x *~ (Unit' _ _ _ y) = Quantity' (x Prelude.* y)
+x *~ (Unit' _ _ y) = Quantity' (x Prelude.* y)
 
 -- | Divides a 'Quantity' by a 'Unit' of the same physical dimension, obtaining the
 -- numerical value of the quantity expressed in that unit.
 (/~) :: Fractional a => Quantity d a -> Unit m d a -> a
-(Quantity' x) /~ (Unit' _ _ _ y) = (x Prelude./ y)
+(Quantity' x) /~ (Unit' _ _ y) = (x Prelude./ y)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
@@ -692,7 +692,7 @@ atan2 = liftUntyped2Q Prelude.atan2
 -- SI base unit of any dimension. This allows polymorphic quantity
 -- creation and destruction without exposing the 'Dimensional' constructor.
 siUnit :: forall d a.(KnownDimension d, Num a) => Unit 'NonMetric d a
-siUnit = Unit' (baseUnitName $ dimension (Proxy :: Proxy d)) 1 Nothing 1
+siUnit = Unit' (baseUnitName $ dimension (Proxy :: Proxy d)) 1 1
 
 {-
 The only unit we will define in this module is 'one'.
@@ -705,7 +705,7 @@ The only unit we will define in this module is 'one'.
 -- appear in expressions. However, for us it is necessary to use 'one'
 -- as we would any other unit to perform the "boxing" of dimensionless values.
 one :: Num a => Unit 'NonMetric DOne a
-one = Unit' nOne 1 Nothing 1
+one = Unit' nOne 1 1
 
 {- $constants
 For convenience we define some constants for small integer values
@@ -772,14 +772,11 @@ instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
 
 -- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
-showIn (Unit' n _ _ y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)
-                                       | otherwise           = (show (x Prelude./ y)) ++ " " ++ (show n)
+showIn (Unit' n _ y) q@(Quantity' x) | dimension q == dOne = show (x Prelude./ y)
+                                     | otherwise           = (show (x Prelude./ y)) ++ " " ++ (show n)
 
 instance (KnownDimension d, Show a) => Show (Unit m d a) where
-  show (Unit' n e d x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")" ++ definingClause d
-    where
-      definingClause Nothing = ""
-      definingClause (Just (Unit' n' e' _ _)) = ", defined to be " ++ show (e Prelude./ e') ++ " * " ++ show n'
+  show (Unit' n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 -- 
@@ -792,8 +789,8 @@ instance (KnownDimension d, Show a) => Show (Unit m d a) where
 -- Supplying negative defining quantities is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
 mkUnitR :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
-mkUnitR n s' u@(Unit' _ s _ x) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
-                               | otherwise     = Unit' n (s' Prelude.* s) (Just . weaken $ u) (approximateValue s' Prelude.* x)
+mkUnitR n s' (Unit' _ s x) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
+                           | otherwise     = Unit' n (s' Prelude.* s) (approximateValue s' Prelude.* x)
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 --
@@ -802,9 +799,9 @@ mkUnitR n s' u@(Unit' _ s _ x) | isExactZero s = error "Supplying zero as a conv
 --
 -- For more information see 'mkUnitR'.
 mkUnitQ :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
-mkUnitQ n s' u@(Unit' _ s _ _) | s' == 0                       = error "Supplying zero as a conversion factor is not valid."
-                               | Just q <- toExactRational s'' = Unit' n s'' (Just . weaken $ u) (fromRational q)
-                               | otherwise                     = error "The resulting conversion factor is not an exact rational." 
+mkUnitQ n s' (Unit' _ s _) | s' == 0                       = error "Supplying zero as a conversion factor is not valid."
+                           | Just q <- toExactRational s'' = Unit' n s'' (fromRational q)
+                           | otherwise                     = error "The resulting conversion factor is not an exact rational." 
   where
     s'' = fromRational s' Prelude.* s                               
 
@@ -815,8 +812,8 @@ mkUnitQ n s' u@(Unit' _ s _ _) | s' == 0                       = error "Supplyin
 --
 -- For more information see 'mkUnitR'.
 mkUnitZ :: Num a => UnitName m -> Integer -> Unit m1 d a -> Unit m d a
-mkUnitZ n s' u@(Unit' _ s _ _) | s' == 0                      = error "Supplying zero as a conversion factor is not valid."
-                               | Just z <- toExactInteger s'' = Unit' n s'' (Just . weaken $ u) (fromInteger z)
-                               | otherwise                    = error "The resulting conversion factor is not an exact integer."
+mkUnitZ n s' (Unit' _ s _) | s' == 0                      = error "Supplying zero as a conversion factor is not valid."
+                           | Just z <- toExactInteger s'' = Unit' n s'' (fromInteger z)
+                           | otherwise                    = error "The resulting conversion factor is not an exact integer."
   where
     s'' = fromInteger s' Prelude.* s
