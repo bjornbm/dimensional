@@ -230,7 +230,7 @@ module Numeric.Units.Dimensional.DK
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
     -- $functor
-    KnownVariant(dmap), changeRep,
+    KnownVariant(dmap), changeRep, changeRepApproximate
   )
   where
 
@@ -752,6 +752,10 @@ If you feel your work requires this instance, it is provided as an orphan in "Nu
 -- | Convenient conversion between numerical types while retaining dimensional information.
 changeRep :: (KnownVariant v, Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
 changeRep = dmap realToFrac
+
+-- | Convenient conversion from exactly represented values while retaining dimensional information.
+changeRepApproximate :: (KnownVariant v, Floating b) => Dimensional v d ExactPi -> Dimensional v d b
+changeRepApproximate = dmap approximateValue
 
 {- $dimension-terms
 To facilitate parsing and pretty-printing functions that may wish to operate on term-level representations of dimension,

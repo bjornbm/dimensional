@@ -27,6 +27,7 @@ import Numeric.Units.Dimensional.DK.UnitNames (UnitName, baseUnitName)
 import Data.ExactPi
 import Data.Proxy
 
+-- | A 'Quantity' whose 'Dimension' is only known dynamically.
 data AnyQuantity v = AnyQuantity Dimension' v
   deriving (Eq)
 
@@ -36,16 +37,19 @@ instance (Show v) => Show (AnyQuantity v) where
 instance HasDimension (AnyQuantity v) where
   dimension (AnyQuantity d _) = d
 
+-- | Converts a 'Quantity' of statically known 'Dimension' into an 'AnyQuantity'.
 demoteQuantity :: forall d v.(KnownDimension d, Fractional v) => Quantity d v -> AnyQuantity v
 demoteQuantity val = AnyQuantity dim (val /~ siUnit)
   where dim = dimension (Proxy :: Proxy d)
 
+-- | Converts an 'AnyQuantity' into a 'Quantity' of statically known 'Dimension', or 'Nothing' if the dimension does not match.
 promoteQuantity :: forall d v.(KnownDimension d, Fractional v) => AnyQuantity v -> Maybe (Quantity d v)
 promoteQuantity (AnyQuantity dim val) | dim == dim' = Just $ val *~ siUnit
                                       | otherwise   = Nothing
                                                     where
                                                       dim' = dimension (Proxy :: Proxy d)
 
+-- | A 'Unit' whose 'Dimension' is only known dynamically.
 data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
 
 instance Show AnyUnit where
@@ -54,11 +58,15 @@ instance Show AnyUnit where
 instance HasDimension AnyUnit where
   dimension (AnyUnit d _ _) = d
 
+-- | Converts a 'Unit' of statically known 'Dimension' into an 'AnyUnit'.
 demoteUnit :: forall a d v.(KnownDimension d) => Unit a d v -> AnyUnit
 demoteUnit u = AnyUnit dim (name $ weaken u) (exactValue u)
   where
     dim = dimension (Proxy :: Proxy d)
 
+-- | Converts an 'AnyUnit' into a 'Unit' of statically known 'Dimension', or 'Nothing' if the dimension does not match.
+--
+-- The result is represented in 'ExactPi', conversion to other representations is possible using 'changeRepApproximate'.
 promoteUnit :: forall d.(KnownDimension d) => AnyUnit -> Maybe (Unit 'NonMetric d ExactPi)
 promoteUnit (AnyUnit dim n e) | dim == dim' = Just $ mkUnitR n e siUnit
                               | otherwise   = Nothing
