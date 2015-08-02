@@ -85,11 +85,11 @@ had a combined uncertainty of 0.0000010e-27 kg.
 -}
 
 electronVolt :: Floating a => Unit 'Metric DEnergy a
-electronVolt = composite (ucumMetric "eV" "eV" "electron volt") (Approximate 1.60217733e-19) $ joule
+electronVolt = mkUnitR (ucumMetric "eV" "eV" "electron volt") (Approximate 1.60217733e-19) $ joule
 unifiedAtomicMassUnit :: Floating a => Unit 'Metric DMass a
-unifiedAtomicMassUnit = composite (ucumMetric "u" "u" "atomic mass unit") (Approximate 1.6605402e-27) $ kilo gram
+unifiedAtomicMassUnit = mkUnitR (ucumMetric "u" "u" "atomic mass unit") (Approximate 1.6605402e-27) $ kilo gram
 dalton :: Floating a => Unit 'Metric DMass a
-dalton = composite (ucumMetric "eV" "Da" "Dalton") 1 $ unifiedAtomicMassUnit
+dalton = mkUnitR (ucumMetric "eV" "Da" "Dalton") 1 $ unifiedAtomicMassUnit
 
 {- $standard-gravity
 In order to relate e.g. pounds mass to pounds force we define the unit
@@ -100,22 +100,22 @@ gravity). I.e. g_0 = 1 gee.
 -}
 
 gee :: Fractional a => Unit 'Metric DAcceleration a
-gee = compositeFrac (ucumMetric "[g]" "g" "gee") 9.80665 $ meter / second ^ pos2
+gee = mkUnitQ (ucumMetric "[g]" "g" "gee") 9.80665 $ meter / second ^ pos2
 
 {- $inch-pound-units
 Some US customary (that is, inch-pound) units.
 -}
 
 inch, foot, mil :: Fractional a => Unit 'NonMetric DLength a
-inch = compositeFrac (ucum "[in_i]" "in" "inch") 2.54 $ centi meter
-foot = compositeFrac (ucum "[ft_i]" "ft" "foot") 12 $ inch     -- 0.3048 m
-mil  = compositeFrac (ucum "[mil_i]" "mil" "mil") 0.001 $ inch
+inch = mkUnitQ (ucum "[in_i]" "in" "inch") 2.54 $ centi meter
+foot = mkUnitQ (ucum "[ft_i]" "ft" "foot") 12 $ inch     -- 0.3048 m
+mil  = mkUnitQ (ucum "[mil_i]" "mil" "mil") 0.001 $ inch
 poundMass, ounce :: Fractional a => Unit 'NonMetric DMass a
-poundMass = compositeFrac (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
-ounce     = compositeFrac (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
+poundMass = mkUnitQ (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
+ounce     = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
 
 poundForce :: Fractional a => Unit 'NonMetric DForce a
-poundForce = compositeFrac (ucum "[lbf_av]" "lbf" "pound force") 1 $ poundMass * gee  -- 4.4482 N
+poundForce = mkUnitQ (ucum "[lbf_av]" "lbf" "pound force") 1 $ poundMass * gee  -- 4.4482 N
 
 {-
 
@@ -133,7 +133,7 @@ Pounds of force per square inch.
 -}
 
 psi :: Fractional a => Unit 'NonMetric DPressure a
-psi = compositeFrac (ucum "[psi]" "psi" "pound per square inch") 1 $ poundForce / inch ^ pos2
+psi = mkUnitQ (ucum "[psi]" "psi" "pound per square inch") 1 $ poundForce / inch ^ pos2
 
 {-
 
@@ -142,20 +142,20 @@ psi = compositeFrac (ucum "[psi]" "psi" "pound per square inch") 1 $ poundForce 
 -}
 
 yard, mile :: (Fractional a) => Unit 'NonMetric DLength a
-yard = compositeFrac (ucum "[yd_i]" "yd" "yard") 3 $ foot
-mile = compositeFrac (ucum "[mi_i]" "mi" "mile") 5280 $ foot
+yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 3 $ foot
+mile = mkUnitQ (ucum "[mi_i]" "mi" "mile") 5280 $ foot
 nauticalMile :: (Num a) => Unit 'NonMetric DLength a
-nauticalMile = compositeNum (ucum "[nmi_i]" "NM" "nautical mile") 1852 $ meter
+nauticalMile = mkUnitZ (ucum "[nmi_i]" "NM" "nautical mile") 1852 $ meter
 knot :: (Fractional a) => Unit 'NonMetric DVelocity a
-knot = compositeFrac (ucum "[kt_i]" "kt" "knot") 1 $ nauticalMile / hour
+knot = mkUnitQ (ucum "[kt_i]" "kt" "knot") 1 $ nauticalMile / hour
 revolution :: (Floating a) => Unit 'NonMetric DOne a
-revolution = composite (dimensionalAtom "rev" "rev" "revolution") (2 Prelude.* Prelude.pi) $ radian
+revolution = mkUnitR (dimensionalAtom "rev" "rev" "revolution") (2 Prelude.* Prelude.pi) $ radian
 solid :: (Floating a) => Unit 'NonMetric DOne a
-solid = composite (dimensionalAtom "solid" "solid" "solid") (4 Prelude.* Prelude.pi) $ steradian
+solid = mkUnitR (dimensionalAtom "solid" "solid" "solid") (4 Prelude.* Prelude.pi) $ steradian
 teaspoon :: (Fractional a) => Unit 'NonMetric DVolume a
-teaspoon = compositeFrac (ucum "[tsp_m]" "tsp" "teaspoon") 5 $ milli liter
+teaspoon = mkUnitQ (ucum "[tsp_m]" "tsp" "teaspoon") 5 $ milli liter
 acre :: (Fractional a) => Unit 'NonMetric DArea a
-acre = compositeFrac (ucum "[acr_us]" "ac" "acre") 43560 $ square foot
+acre = mkUnitQ (ucum "[acr_us]" "ac" "acre") 43560 $ square foot
 
 {- $year
 
@@ -172,8 +172,8 @@ constraint, and also provide a Julian century.
 -}
 
 year, century :: Num a => Unit 'NonMetric DTime a
-year    = compositeNum (ucum "a_j" "a" "mean Julian year") 31557600 $ second
-century = compositeNum (dimensionalAtom "c_j" "cen" "mean Julian century") 100 $ year
+year    = mkUnitZ (ucum "a_j" "a" "mean Julian year") 31557600 $ second
+century = mkUnitZ (dimensionalAtom "c_j" "cen" "mean Julian century") 100 $ year
 
 {- $pressure-units
 It seems that nearly every area of application has its own customary unit for measuring pressure.
@@ -186,7 +186,7 @@ We include some of the common ones here. 'psi' was defined earlier.
 --
 --  It is about equal to the atmospheric pressure on Earth at sea level.
 bar :: (Num a) => Unit 'Metric DPressure a
-bar = compositeNum (ucumMetric "bar" "bar" "bar") 1e5 $ pascal
+bar = mkUnitZ (ucumMetric "bar" "bar" "bar") 1e5 $ pascal
 
 -- | The "standard atmosphere".
 --
@@ -196,7 +196,7 @@ bar = compositeNum (ucumMetric "bar" "bar" "bar") 1e5 $ pascal
 --  approximately equal to typical air pressure at earth mean sea
 --  level.
 atmosphere :: (Num a) => Unit 'NonMetric DPressure a
-atmosphere = compositeNum (ucum "atm" "atm" "standard atmosphere") 101325 $ pascal
+atmosphere = mkUnitZ (ucum "atm" "atm" "standard atmosphere") 101325 $ pascal
 
 -- | The "technical atmosphere"
 --
@@ -205,7 +205,7 @@ atmosphere = compositeNum (ucum "atm" "atm" "standard atmosphere") 101325 $ pasc
 --  A technical atmosphere (symbol: at) is a non-SI unit of pressure equal
 --  to one kilogram-force per square centimeter.
 technicalAtmosphere :: (Fractional a) => Unit 'NonMetric DPressure a
-technicalAtmosphere = compositeFrac (ucum "att" "at" "technical atmosphere") 1 $ kilo gram * gee * centi meter ^ neg2
+technicalAtmosphere = mkUnitQ (ucum "att" "at" "technical atmosphere") 1 $ kilo gram * gee * centi meter ^ neg2
 
 -- | The conventional value for the pressure exerted by a 1 mm high column of mercury.
 --
@@ -221,7 +221,7 @@ mmHg :: (Floating a) => Unit 'NonMetric DPressure a
 mmHg = milli mHg
 
 mHg :: (Floating a) => Unit 'Metric DPressure a
-mHg = composite (ucumMetric "m[Hg]" "m Hg" "meter of mercury") (Approximate 133.3220) $ kilo pascal
+mHg = mkUnitR (ucumMetric "m[Hg]" "m Hg" "meter of mercury") (Approximate 133.3220) $ kilo pascal
 
 -- | The conventional value for the pressure exerted by a 1 inch high column of mercury.
 --
@@ -230,28 +230,28 @@ mHg = composite (ucumMetric "m[Hg]" "m Hg" "meter of mercury") (Approximate 133.
 --
 -- This is the value defined by UCUM.
 inHg :: (Floating a) => Unit 'NonMetric DPressure a
-inHg = composite (ucum "[in_i'Hg]" "in Hg" "inch of mercury") 1 $ mHg * inch / meter
+inHg = mkUnitR (ucum "[in_i'Hg]" "in Hg" "inch of mercury") 1 $ mHg * inch / meter
 
 -- | One torr (symbol: Torr) is defined as 1/760 atm, which is approximately equal to 1 'mmHg'.
 torr :: (Fractional a) => Unit 'NonMetric DPressure a
-torr = compositeFrac (dimensionalAtom "Torr" "Torr" "Torr") (1 Prelude./ 760) $ atmosphere
+torr = mkUnitQ (dimensionalAtom "Torr" "Torr" "Torr") (1 Prelude./ 760) $ atmosphere
 
 {- Radiation -}
 rad :: (Fractional a) => Unit 'Metric DAbsorbedDose a
-rad = compositeFrac (ucumMetric "RAD" "RAD" "RAD") 1 $ centi gray
+rad = mkUnitQ (ucumMetric "RAD" "RAD" "RAD") 1 $ centi gray
 
 {- Kinematic Viscosity -}
 stokes :: (Fractional a) => Unit 'Metric DKinematicViscosity a
-stokes = compositeFrac (ucumMetric "St" "St" "Stokes") 1 $ centi meter ^ pos2 / second
+stokes = mkUnitQ (ucumMetric "St" "St" "Stokes") 1 $ centi meter ^ pos2 / second
 
 {- $temperature 
 These units of temperature are relative. For absolute temperatures, see 'Numeric.Units.Dimensional.DK.SIUnits.fromDegreeCelsiusAbsolute'.
 -}
 degreeFahrenheit :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
-degreeFahrenheit = compositeFrac (ucum "[degF]" "°F" "degree Fahrenheit") (5 Prelude./ 9) $ degreeCelsius
+degreeFahrenheit = mkUnitQ (ucum "[degF]" "°F" "degree Fahrenheit") (5 Prelude./ 9) $ degreeCelsius
 
 degreeRankine :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
-degreeRankine = compositeFrac (ucum "[degR]" "°R" "degree Rankine") 1 $ degreeFahrenheit
+degreeRankine = mkUnitQ (ucum "[degR]" "°R" "degree Rankine") 1 $ degreeFahrenheit
 
 {- $imperial-volumes
 Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki/Cup_(unit)#Imperial_cup.
@@ -260,12 +260,12 @@ Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki
 imperialGallon, imperialQuart, imperialPint, imperialCup,
                 imperialGill, imperialFluidOunce
                 :: (Fractional a) => Unit 'NonMetric DVolume a
-imperialGallon     = compositeFrac (ucum "[gal_br]" "gal" "gallon")         4.54609          $ liter
-imperialQuart      = compositeFrac (ucum "[qt_br]" "qt" "quart")            (1 Prelude./ 4)  $ imperialGallon
-imperialPint       = compositeFrac (ucum "[pt_br]" "pt" "pint")             (1 Prelude./ 8)  $ imperialGallon
-imperialCup        = compositeFrac (dimensionalAtom "[cup_br]" "cup" "cup") 0.5              $ imperialPint
-imperialGill       = compositeFrac (ucum "[gil_br]" "gill" "gill")          (1 Prelude./ 4)  $ imperialPint
-imperialFluidOunce = compositeFrac (ucum "[foz_br]" "fl oz" "fluid ounce")  (1 Prelude./ 20) $ imperialPint
+imperialGallon     = mkUnitQ (ucum "[gal_br]" "gal" "gallon")         4.54609          $ liter
+imperialQuart      = mkUnitQ (ucum "[qt_br]" "qt" "quart")            (1 Prelude./ 4)  $ imperialGallon
+imperialPint       = mkUnitQ (ucum "[pt_br]" "pt" "pint")             (1 Prelude./ 8)  $ imperialGallon
+imperialCup        = mkUnitQ (dimensionalAtom "[cup_br]" "cup" "cup") 0.5              $ imperialPint
+imperialGill       = mkUnitQ (ucum "[gil_br]" "gill" "gill")          (1 Prelude./ 4)  $ imperialPint
+imperialFluidOunce = mkUnitQ (ucum "[foz_br]" "fl oz" "fluid ounce")  (1 Prelude./ 20) $ imperialPint
 
 {- $us-customary-volumes
 Per http://www.nist.gov/pml/wmd/pubs/upload/2012-hb44-final.pdf page 452 and http://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume
@@ -273,9 +273,9 @@ Note that there exist rarely-used "dry" variants of units with overlapping names
 -}
 
 usGallon, usQuart, usPint, usCup, usGill, usFluidOunce :: (Fractional a) => Unit 'NonMetric DVolume a
-usGallon     = compositeFrac (ucum "[gal_us]" "gal" "gallon")        231              $ (cubic inch)
-usQuart      = compositeFrac (ucum "[qt_us]" "qt" "quart")           (1 Prelude./ 4)  $ usGallon
-usPint       = compositeFrac (ucum "[pt_us]" "pt" "pint")            (1 Prelude./ 8)  $ usGallon
-usCup        = compositeFrac (ucum "[cup_us]" "cup" "cup")           (1 Prelude./ 2)  $ usPint
-usGill       = compositeFrac (ucum "[gil_us]" "gill" "gill")         (1 Prelude./ 4)  $ usPint
-usFluidOunce = compositeFrac (ucum "[foz_us]" "fl oz" "fluid ounce") (1 Prelude./ 16) $ usPint -- sic, does not match factor used in imperial system
+usGallon     = mkUnitQ (ucum "[gal_us]" "gal" "gallon")        231              $ (cubic inch)
+usQuart      = mkUnitQ (ucum "[qt_us]" "qt" "quart")           (1 Prelude./ 4)  $ usGallon
+usPint       = mkUnitQ (ucum "[pt_us]" "pt" "pint")            (1 Prelude./ 8)  $ usGallon
+usCup        = mkUnitQ (ucum "[cup_us]" "cup" "cup")           (1 Prelude./ 2)  $ usPint
+usGill       = mkUnitQ (ucum "[gil_us]" "gill" "gill")         (1 Prelude./ 4)  $ usPint
+usFluidOunce = mkUnitQ (ucum "[foz_us]" "fl oz" "fluid ounce") (1 Prelude./ 16) $ usPint -- sic, does not match factor used in imperial system

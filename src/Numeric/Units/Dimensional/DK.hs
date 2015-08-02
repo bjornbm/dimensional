@@ -222,7 +222,7 @@ module Numeric.Units.Dimensional.DK
     -- $constants
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     -- * Constructing Units
-    siUnit, one, composite, compositeFrac, compositeNum, compositeFrac', compositeNum', 
+    siUnit, one, mkUnitR, mkUnitQ, mkUnitZ,
     -- * Unit Metadata
     name, exactValue, weaken,
     -- * Pretty Printing
@@ -786,29 +786,36 @@ siBaseName d = let powers = asList $ dimension d
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 -- 
+-- Use this variant when the scale factor of the resulting unit is irrational or 'Approximate'. See 'mkUnitQ' for when it is rational
+-- and 'mkUnitZ' for when it is an integer.
+--
 -- Note that supplying zero as a definining quantity is invalid, as the library relies
 -- upon units forming a group under multiplication.
 -- 
 -- Supplying negative defining quantities is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
-composite :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
-composite n s' u@(Unit' _ s _ x) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
-                                 | otherwise     = Unit' n (s' Prelude.* s) (Just . weaken $ u) (approximateValue s' Prelude.* x)
+mkUnitR :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
+mkUnitR n s' u@(Unit' _ s _ x) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
+                               | otherwise     = Unit' n (s' Prelude.* s) (Just . weaken $ u) (approximateValue s' Prelude.* x)
 
-compositeFrac :: Fractional a => UnitName m -> Rational -> Unit m1 d ExactPi -> Unit m d a
-compositeFrac n s' u@(Unit' _ s@(Exact 0 q) _ _) | s' == 0   = error "Supplying zero as a conversion factor is not valid."
-                                                 | otherwise = Unit' n ((fromRational s') Prelude.* s) (Just . weaken $ u) (fromRational $ s' Prelude.* fromRational q)
-compositeFrac _ _  _                             = error "The underlying unit does not have an exact rational conversion factor."
+-- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
+--
+-- Use this variant when the scale factor of the resulting unit is rational. See 'mkUnitZ' for when it is an integer
+-- and 'mkUnitR' for the general case.
+--
+-- For more information see 'mkUnitR'.
+mkUnitQ :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
+mkUnitQ n s' u@(Unit' _ s@(Exact 0 q) _ _) | s' == 0   = error "Supplying zero as a conversion factor is not valid."
+                                           | otherwise = Unit' n ((fromRational s') Prelude.* s) (Just . weaken $ u) (fromRational $ s' Prelude.* fromRational q)
+mkUnitQ _ _  _                             = error "The underlying unit does not have an exact rational conversion factor."
 
-compositeFrac' :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
-compositeFrac' n s' u@(Unit' _ s _ x) | s' == 0   = error "Supplying zero as a conversion factor is not valid."
-                                      | otherwise = Unit' n ((fromRational s') Prelude.* s) (Just . weaken $ u) (fromRational s' Prelude.* x)
-
-compositeNum :: Num a => UnitName m -> Integer -> Unit m1 d ExactPi -> Unit m d a
-compositeNum n s' u@(Unit' _ s@(Exact 0 q) _ _) | s' == 0            = error "Supplying zero as a conversion factor is not valid."
-                                                | denominator q == 1 = Unit' n ((fromInteger s') Prelude.* s) (Just . weaken $ u) (fromInteger $ s' Prelude.* numerator q)
-compositeNum _ _  _                                                  = error "The underlying unit does not have an exact integer conversion factor."
-
-compositeNum' :: Num a => UnitName m -> Integer -> Unit m1 d a -> Unit m d a
-compositeNum' n s' u@(Unit' _ s _ x) | s' == 0   = error "Supplying zero as a conversion factor is not valid."
-                                     | otherwise = Unit' n ((fromInteger s') Prelude.* s) (Just . weaken $ u) (fromInteger s' Prelude.* x)
+-- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
+--
+-- Use this variant when the scale factor of the resulting unit is an integer. See 'mkUnitQ' for when it is rational
+-- and 'mkUnitR' for the general case.
+--
+-- For more information see 'mkUnitR'.
+mkUnitZ :: Num a => UnitName m -> Integer -> Unit m1 d a -> Unit m d a
+mkUnitZ n s' u@(Unit' _ s@(Exact 0 q) _ _) | s' == 0            = error "Supplying zero as a conversion factor is not valid."
+                                           | denominator q == 1 = Unit' n ((fromInteger s') Prelude.* s) (Just . weaken $ u) (fromInteger $ s' Prelude.* numerator q)
+mkUnitZ _ _  _                                                  = error "The underlying unit does not have an exact integer conversion factor."
