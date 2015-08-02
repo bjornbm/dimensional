@@ -692,6 +692,10 @@ atan2 = liftUntyped2Q Prelude.atan2
 -- creation and destruction without exposing the 'Dimensional' constructor.
 siUnit :: forall d a.(KnownDimension d, Num a) => Unit 'NonMetric d a
 siUnit = Unit' (siBaseName (Proxy :: Proxy d)) 1 Nothing 1
+  where
+    siBaseName :: (KnownDimension d) => Proxy d -> UnitName 'NonMetric
+    siBaseName d = let powers = asList $ dimension d
+                    in reduce . product $ zipWith (Name.^) baseUnitNames powers
 
 {-
 The only unit we will define in this module is 'one'.
@@ -779,10 +783,6 @@ instance (KnownDimension d, Show a) => Show (Unit m d a) where
     where
       definingClause Nothing = ""
       definingClause (Just (Unit' n' e' _ _)) = ", defined to be " ++ show (e Prelude./ e') ++ " * " ++ show n'
-
-siBaseName :: HasDimension d => d -> UnitName 'NonMetric
-siBaseName d = let powers = asList $ dimension d
-                in reduce . product $ zipWith (Name.^) baseUnitNames powers
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 -- 
