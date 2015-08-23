@@ -3,22 +3,25 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module Numeric.Units.Dimensional.DK.UnitNames.Internal
 where
 
 import Control.Monad (join)
-import Data.Dynamic
+import Data.Data
 #if MIN_VERSION_base(4, 8, 0)
 import Data.Foldable (toList)
 #else
 import Data.Foldable (Foldable, toList)
 #endif
+import GHC.Generics
 import Numeric.Units.Dimensional.DK.Dimensions.TermLevel (Dimension', asList, HasDimension(..))
 import Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames
 import Numeric.Units.Dimensional.DK.Variants (Metricality(..))
@@ -108,7 +111,7 @@ reduce' n = n
 
 data NameAtomType = UnitAtom Metricality
                   | PrefixAtom
-  deriving (Eq, Ord, Typeable)                  
+  deriving (Eq, Ord, Data, Typeable, Generic)
 
 type PrefixName = NameAtom 'PrefixAtom
 
@@ -234,7 +237,7 @@ data NameAtom (m :: NameAtomType)
     abbreviation_en :: String, -- ^ The abbreviated name of the unit in international English
     name_en :: String -- ^ The full name of the unit in international English
   }
-  deriving (Eq, Ord, Typeable)
+  deriving (Eq, Ord, Data, Typeable, Generic)
 
 instance HasInterchangeName (NameAtom m) where
   interchangeName = _interchangeName

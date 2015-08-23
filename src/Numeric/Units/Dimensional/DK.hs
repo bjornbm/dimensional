@@ -3,6 +3,7 @@
 {-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -246,12 +247,13 @@ import Numeric.NumType.DK.Integers
   , KnownTypeInt, toNum
   )
 import Control.Applicative
-import Data.Dynamic
+import Data.Data
 import Data.ExactPi
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Maybe
 import Data.Monoid (Monoid(..))
 import Data.Ratio
+import GHC.Generics
 import Numeric.Units.Dimensional.DK.Dimensions
 import Numeric.Units.Dimensional.DK.UnitNames hiding ((*), (/), (^), weaken)
 import qualified Numeric.Units.Dimensional.DK.UnitNames.Internal as Name
@@ -315,7 +317,7 @@ deriving instance Typeable Dimensional
 
 instance KnownVariant 'DQuantity where
   newtype Dimensional 'DQuantity d a = Quantity' a
-    deriving (Eq, Ord)
+    deriving (Eq, Ord, Data, Typeable, Generic, Generic1)
   extractValue (Quantity' x) = (x, Nothing)
   extractName _ = Nothing
   injectValue _ (x, _) = Quantity' x
@@ -323,6 +325,7 @@ instance KnownVariant 'DQuantity where
 
 instance (Typeable m) => KnownVariant ('DUnit m) where
   data Dimensional ('DUnit m) d a = Unit' !(UnitName m) !ExactPi !a
+    deriving (Typeable, Generic, Generic1)
   extractValue (Unit' _ e x) = (x, Just e)
   extractName (Unit' n _ _) = Just . Name.weaken $ n
   injectValue (Just n) (x, Just e) = let n' = relax n
