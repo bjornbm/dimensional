@@ -39,17 +39,19 @@ data UnitName (m :: Metricality) where
   -- A name of a prefixed unit.
   Prefixed :: PrefixName -> UnitName 'Metric -> UnitName 'NonMetric
   -- A compound name formed from the product of two names.
-  Product :: UnitName a -> UnitName b -> UnitName 'NonMetric
+  Product :: UnitName 'NonMetric -> UnitName 'NonMetric -> UnitName 'NonMetric
   -- A compound name formed from the quotient of two names.
-  Quotient :: UnitName a -> UnitName b -> UnitName 'NonMetric
+  Quotient :: UnitName 'NonMetric -> UnitName 'NonMetric -> UnitName 'NonMetric
   -- A compound name formed by raising a unit name to an integer power.
-  Power :: UnitName a -> Int -> UnitName 'NonMetric
+  Power :: UnitName 'NonMetric -> Int -> UnitName 'NonMetric
   -- A compound name formed by grouping another name, which is generally compound.
-  Grouped :: UnitName a -> UnitName 'NonMetric
+  Grouped :: UnitName 'NonMetric -> UnitName 'NonMetric
   -- A weakened name formed by forgetting whether it could accept a metric prefix.
   -- Differs from 'Grouped' because it is displayed without parentheses.
-  Weaken :: UnitName a -> UnitName 'NonMetric
+  Weaken :: UnitName 'Metric -> UnitName 'NonMetric
   deriving (Typeable)
+
+deriving instance Eq (UnitName m)
 
 instance Show (UnitName m) where
   show One = "1"
@@ -85,7 +87,6 @@ reduce (Product n1 n2) = reduce' (reduce n1 * reduce n2)
 reduce (Quotient n1 n2) = reduce' (reduce n1 * reduce n2)
 reduce (Power n x) = reduce' ((reduce n) ^ x)
 reduce (Grouped n) = reduce' (Grouped (reduce n))
-reduce (Weaken (Weaken n)) = reduce' (Weaken (reduce n))
 reduce (Weaken n) = reduce' (Weaken (reduce n))
 
 -- reduce, knowing that subterms are already in reduced form
@@ -96,17 +97,8 @@ reduce' (Power (Power n x1) x2) = reduce (n ^ (x1 P.* x2))
 reduce' (Power (Grouped (Power n x1)) x2) = reduce (n ^ (x1 P.* x2))
 reduce' (Power _ 0) = One
 reduce' (Power n 1) = reduce' $ weaken n
-reduce' (Grouped n@(MetricAtomic _)) = reduce' $ weaken n
 reduce' (Grouped n) = reduce' $ weaken n
-reduce' (Weaken One) = One
 reduce' n@(Weaken (MetricAtomic _)) = n
-reduce' (Weaken n@(Atomic _)) = n
-reduce' (Weaken n@(Prefixed _ _)) = n
-reduce' (Weaken n@(Product _ _)) = n
-reduce' (Weaken n@(Quotient _ _)) = n
-reduce' (Weaken n@(Power _ _)) = n
-reduce' (Weaken (Grouped n)) = reduce' $ weaken n
-reduce' (Weaken n@(Weaken _)) = reduce' n
 reduce' n = n
 
 data NameAtomType = UnitAtom Metricality
@@ -185,15 +177,15 @@ infixr 8  ^
 infixl 7  *, /
 
 (*) :: UnitName a -> UnitName b -> UnitName 'NonMetric
-(*) = Product
+a * b = Product (weaken a) (weaken b)
 
 (/) :: UnitName a -> UnitName b -> UnitName 'NonMetric
-n1 / n2 | isAtomicOrProduct n1 = Quotient n1 n2
-        | otherwise            = Quotient (Grouped n1) n2
+n1 / n2 | isAtomicOrProduct n1 = Quotient (weaken n1) (weaken n2)
+        | otherwise            = Quotient (grouped n1) (weaken n2)
 
 (^) :: UnitName a -> Int -> UnitName 'NonMetric
-x ^ n | isAtomic x = Power x n
-      | otherwise  = Power (Grouped x) n
+x ^ n | isAtomic x = Power (weaken x) n
+      | otherwise  = Power (grouped x) n
 
 weaken :: UnitName a -> UnitName 'NonMetric
 weaken One = One
@@ -227,7 +219,7 @@ relax n = go (typeRep (Proxy :: Proxy m1)) (typeRep (Proxy :: Proxy m2)) n
 
 
 grouped :: UnitName a -> UnitName 'NonMetric
-grouped = Grouped
+grouped = Grouped . weaken
 
 -- | Represents the name of an atomic unit or prefix.
 data NameAtom (m :: NameAtomType)
