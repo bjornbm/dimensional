@@ -1,6 +1,7 @@
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 {-# LANGUAGE AutoDeriveTypeable #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -317,7 +318,11 @@ deriving instance Typeable Dimensional
 
 instance KnownVariant 'DQuantity where
   newtype Dimensional 'DQuantity d a = Quantity' a
-    deriving (Eq, Ord, Data, Typeable, Generic, Generic1)
+    deriving (Eq, Ord, Data, Generic, Generic1
+#if MIN_VERSION_base(4,8,0)
+     , Typeable -- GHC 7.8 doesn't support deriving this instance
+#endif
+    )
   extractValue (Quantity' x) = (x, Nothing)
   extractName _ = Nothing
   injectValue _ (x, _) = Quantity' x
@@ -325,7 +330,11 @@ instance KnownVariant 'DQuantity where
 
 instance (Typeable m) => KnownVariant ('DUnit m) where
   data Dimensional ('DUnit m) d a = Unit' !(UnitName m) !ExactPi !a
-    deriving (Typeable, Generic, Generic1)
+    deriving (Generic, Generic1
+#if MIN_VERSION_base(4,8,0)
+     , Typeable -- GHC 7.8 doesn't support deriving this instance
+#endif
+    )
   extractValue (Unit' _ e x) = (x, Just e)
   extractName (Unit' n _ _) = Just . Name.weaken $ n
   injectValue (Just n) (x, Just e) = let n' = relax n
