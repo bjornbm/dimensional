@@ -3,6 +3,7 @@
 {-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -236,10 +237,11 @@ import Numeric.NumType.DK.Integers
   , pos2, pos3
   , KnownTypeInt, toNum
   )
+import Data.Data
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Monoid (Monoid(..))
 import Data.Ratio ((%))
-import Data.Typeable
+import GHC.Generics
 import Numeric.Units.Dimensional.DK.Dimensions
 
 {-
@@ -285,7 +287,7 @@ way to declare quantities as such a product.
 -- 'Dimensional' as a newtype, avoiding boxing at runtime.
 type role Dimensional nominal phantom representational
 newtype Dimensional (v::Variant) (d::Dimension) a
-      = Dimensional a deriving (Eq, Ord, Bounded, Typeable)
+      = Dimensional a deriving (Eq, Ord, Bounded, Typeable, Data, Generic, Generic1)
 
 {-
 The variety 'v' of 'Dimensional'
