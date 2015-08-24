@@ -187,9 +187,11 @@ n1 / n2 | isAtomicOrProduct n1 = Quotient (weaken n1) (weaken n2)
 x ^ n | isAtomic x = Power (weaken x) n
       | otherwise  = Power (grouped x) n
 
+-- | Convert a 'UnitName' which may or may not be 'Metric' to one
+-- which is certainly 'NonMetric'.
 weaken :: UnitName a -> UnitName 'NonMetric
-weaken One = One
-weaken n@(MetricAtomic _) = Weaken n
+weaken n@(MetricAtomic _) = Weaken n -- we really only need this one case and a catchall, but the typechecker can't see it
+weaken n@One = n
 weaken n@(Atomic _) = n
 weaken n@(Prefixed _ _) = n
 weaken n@(Product _ _) = n
@@ -198,6 +200,8 @@ weaken n@(Power _ _) = n
 weaken n@(Grouped _) = n
 weaken n@(Weaken _) = n
 
+-- | Attempt to convert a 'UnitName' which may or may not be 'Metric' to one
+-- which is certainly 'Metric'.
 strengthen :: UnitName a -> Maybe (UnitName 'Metric)
 strengthen n@(MetricAtomic _) = Just n
 strengthen (Weaken n) = strengthen n
@@ -285,6 +289,5 @@ product = go . toList
     -- valid but meaningless occurences of nOne.
     go :: [UnitName 'NonMetric] -> UnitName 'NonMetric
     go [] = nOne
-    go [n1] = n1
-    go (n1 : n2 : []) = n1 * n2
+    go [n] = n
     go (n : ns) = n * go ns
