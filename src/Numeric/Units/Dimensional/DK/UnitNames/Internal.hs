@@ -91,13 +91,13 @@ reduce (Weaken n) = reduce' (Weaken (reduce n))
 
 -- reduce, knowing that subterms are already in reduced form
 reduce' :: UnitName m -> UnitName m
-reduce' (Product One n) = reduce' $ weaken n
-reduce' (Product n One) = reduce' $ weaken n
+reduce' (Product One n) = reduce' n
+reduce' (Product n One) = reduce' n
 reduce' (Power (Power n x1) x2) = reduce (n ^ (x1 P.* x2))
 reduce' (Power (Grouped (Power n x1)) x2) = reduce (n ^ (x1 P.* x2))
 reduce' (Power _ 0) = One
-reduce' (Power n 1) = reduce' $ weaken n
-reduce' (Grouped n) = reduce' $ weaken n
+reduce' (Power n 1) = reduce' n
+reduce' (Grouped n) = reduce' n
 reduce' n@(Weaken (MetricAtomic _)) = n
 reduce' n = n
 
@@ -176,13 +176,16 @@ as the Prelude.
 infixr 8  ^
 infixl 7  *, /
 
+-- | Form a 'UnitName' by taking the product of two others.
 (*) :: UnitName a -> UnitName b -> UnitName 'NonMetric
 a * b = Product (weaken a) (weaken b)
 
+-- | Form a 'UnitName' by dividing one by another.
 (/) :: UnitName a -> UnitName b -> UnitName 'NonMetric
 n1 / n2 | isAtomicOrProduct n1 = Quotient (weaken n1) (weaken n2)
         | otherwise            = Quotient (grouped n1) (weaken n2)
 
+-- | Form a 'UnitName' by raising a name to an integer power.
 (^) :: UnitName a -> Int -> UnitName 'NonMetric
 x ^ n | isAtomic x = Power (weaken x) n
       | otherwise  = Power (grouped x) n
@@ -221,7 +224,8 @@ relax n = go (typeRep (Proxy :: Proxy m1)) (typeRep (Proxy :: Proxy m2)) n
              | (p1 == metric) && (p2 == nonMetric) = cast . weaken
              | otherwise = error "Should be unreachable. TypeRep of an unexpected Metricality encountered."
 
-
+-- | Constructs a 'UnitName' by applying a grouping operation to
+-- another 'UnitName', which may be useful to express precedence.
 grouped :: UnitName a -> UnitName 'NonMetric
 grouped = Grouped . weaken
 
@@ -282,6 +286,10 @@ type UnitNameTransformer = (forall m.UnitName m -> UnitName 'NonMetric)
 -- | The type of a unit name transformation that may be associated with an operation that takes two units as input.
 type UnitNameTransformer2 = (forall m1 m2.UnitName m1 -> UnitName m2 -> UnitName 'NonMetric)
 
+-- | Forms the product of a list of 'UnitName's.
+--
+-- If you wish to form a heterogenous product of 'Metric' and 'NonMetric' units
+-- you should apply 'weaken' to the 'Metric' ones.
 product :: Foldable f => f (UnitName 'NonMetric) -> UnitName 'NonMetric
 product = go . toList
   where
