@@ -105,6 +105,7 @@ data NameAtomType = UnitAtom Metricality
                   | PrefixAtom
   deriving (Eq, Ord, Data, Typeable, Generic)
 
+-- | The name of a metric prefix.
 type PrefixName = NameAtom 'PrefixAtom
 
 nOne :: UnitName 'NonMetric
@@ -134,6 +135,7 @@ nMole = ucumMetric "mol" "mol" "mole"
 nCandela :: UnitName 'Metric
 nCandela = ucumMetric "cd" "cd" "candela"
 
+-- | The name of the base unit associated with a specified dimension.
 baseUnitName :: Dimension' -> UnitName 'NonMetric
 baseUnitName d = let powers = asList $ dimension d
                   in reduce . product $ zipWith (^) baseUnitNames powers
@@ -164,6 +166,7 @@ atto  = prefix "a" "a" "atto"
 zepto = prefix "z" "z" "zepto"
 yocto = prefix "y" "y" "yocto"
 
+-- | Forms a 'UnitName' from a 'Metric' name by applying a metric prefix.
 applyPrefix :: PrefixName -> UnitName 'Metric -> UnitName 'NonMetric
 applyPrefix = Prefixed
 
@@ -186,13 +189,13 @@ n1 / n2 | isAtomicOrProduct n1 = Quotient (weaken n1) (weaken n2)
         | otherwise            = Quotient (grouped n1) (weaken n2)
 
 -- | Form a 'UnitName' by raising a name to an integer power.
-(^) :: UnitName a -> Int -> UnitName 'NonMetric
+(^) :: UnitName m -> Int -> UnitName 'NonMetric
 x ^ n | isAtomic x = Power (weaken x) n
       | otherwise  = Power (grouped x) n
 
 -- | Convert a 'UnitName' which may or may not be 'Metric' to one
 -- which is certainly 'NonMetric'.
-weaken :: UnitName a -> UnitName 'NonMetric
+weaken :: UnitName m -> UnitName 'NonMetric
 weaken n@(MetricAtomic _) = Weaken n -- we really only need this one case and a catchall, but the typechecker can't see it
 weaken n@One = n
 weaken n@(Atomic _) = n
@@ -205,7 +208,7 @@ weaken n@(Weaken _) = n
 
 -- | Attempt to convert a 'UnitName' which may or may not be 'Metric' to one
 -- which is certainly 'Metric'.
-strengthen :: UnitName a -> Maybe (UnitName 'Metric)
+strengthen :: UnitName m -> Maybe (UnitName 'Metric)
 strengthen n@(MetricAtomic _) = Just n
 strengthen (Weaken n) = strengthen n
 strengthen _ = Nothing
@@ -226,7 +229,7 @@ relax n = go (typeRep (Proxy :: Proxy m1)) (typeRep (Proxy :: Proxy m2)) n
 
 -- | Constructs a 'UnitName' by applying a grouping operation to
 -- another 'UnitName', which may be useful to express precedence.
-grouped :: UnitName a -> UnitName 'NonMetric
+grouped :: UnitName m -> UnitName 'NonMetric
 grouped = Grouped . weaken
 
 -- | Represents the name of an atomic unit or prefix.
