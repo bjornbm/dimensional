@@ -180,11 +180,11 @@ infixr 8  ^
 infixl 7  *, /
 
 -- | Form a 'UnitName' by taking the product of two others.
-(*) :: UnitName a -> UnitName b -> UnitName 'NonMetric
+(*) :: UnitName m1 -> UnitName m2 -> UnitName 'NonMetric
 a * b = Product (weaken a) (weaken b)
 
 -- | Form a 'UnitName' by dividing one by another.
-(/) :: UnitName a -> UnitName b -> UnitName 'NonMetric
+(/) :: UnitName m1 -> UnitName m2 -> UnitName 'NonMetric
 n1 / n2 | isAtomicOrProduct n1 = Quotient (weaken n1) (weaken n2)
         | otherwise            = Quotient (grouped n1) (weaken n2)
 
