@@ -202,7 +202,7 @@ module Numeric.Units.Dimensional.DK
     -- * Dimensional Arithmetic
     (*~), (/~),
     (^), (^/), (**), (*), (/), (+), (-), (~*), (~/),
-    negate, abs, nroot, sqrt, cbrt,
+    negate, abs, nroot, sqrt, cbrt, split,
     -- ** Transcendental Functions
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
     -- ** Operations on Collections
@@ -226,7 +226,7 @@ module Numeric.Units.Dimensional.DK
   where
 
 import Prelude
-  ( Show, Eq, Ord(..), Bounded, Num, Fractional, Floating, Real, RealFloat, Integral, Functor, fmap
+  ( Show, Eq, Ord(..), Bounded, Num, Fractional, Floating, Real, RealFloat, RealFrac(..), Integral, Functor, fmap
   , (.), flip, show, (++), String, fromIntegral
   , Int, ($), zipWith, uncurry, concat, realToFrac, succ
   )
@@ -311,6 +311,13 @@ x *~ Dimensional y = Dimensional (x Prelude.* y)
 -- numerical value of the quantity expressed in that unit.
 (/~) :: Fractional a => Quantity d a -> Dimensional v d a -> a
 Dimensional x /~ Dimensional y = x Prelude./ y
+
+-- | Splits a 'Quantity' into an integer multiple of the supplied 'Unit' and a remainder quantity.
+--
+-- Note that the sign of the remainder will always match that of the original quantity.
+split :: (RealFrac a, Integral b) => Unit d a -> Quantity d a -> (b, Quantity d a)
+split u x = let (n, r) = properFraction $ x /~ u
+             in (n, r *~ u)
 
 {-
 '~*' and '~/' can be used to scale quantities or units. '~/'
