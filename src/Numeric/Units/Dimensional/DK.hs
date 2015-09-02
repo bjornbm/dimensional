@@ -372,7 +372,7 @@ weaken (Unit' n e _) = Unit' (Name.weaken n) e e
 
 -- | Attempts to convert a 'Unit' which may or may not be 'Metric' to one
 -- which is certainly 'Metric'.
-strengthen :: Unit 'NonMetric d a -> Maybe (Unit 'Metric d a)
+strengthen :: Unit m d a -> Maybe (Unit 'Metric d a)
 strengthen (Unit' n e v) | Just n' <- Name.strengthen n = Just $ Unit' n' e v
                          | otherwise                    = Nothing
 
