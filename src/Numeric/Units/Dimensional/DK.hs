@@ -48,7 +48,7 @@ sections from the guide and deviations will be explained.
 
 Merely an engineer, the author doubtlessly uses a language and
 notation that makes mathematicians and physicist cringe. He does
-not mind constructive criticism (or darcs patches).
+not mind constructive criticism (or pull requests).
 
 The sets of functions and units defined herein are incomplete and
 reflect only the author's needs to date. Again, patches are welcome.
