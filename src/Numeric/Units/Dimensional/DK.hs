@@ -227,7 +227,7 @@ module Numeric.Units.Dimensional.DK
     -- * Constructing Units
     siUnit, one, mkUnitR, mkUnitQ, mkUnitZ,
     -- * Unit Metadata
-    name, exactValue, weaken,
+    name, exactValue, weaken, strengthen,
     -- * Pretty Printing
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
@@ -256,7 +256,7 @@ import Data.Monoid (Monoid(..))
 import Data.Ratio
 import GHC.Generics
 import Numeric.Units.Dimensional.DK.Dimensions
-import Numeric.Units.Dimensional.DK.UnitNames hiding ((*), (/), (^), weaken)
+import Numeric.Units.Dimensional.DK.UnitNames hiding ((*), (/), (^), weaken, strengthen)
 import qualified Numeric.Units.Dimensional.DK.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames (HasInterchangeName(..))
 import Numeric.Units.Dimensional.DK.Variants hiding (type (*))
@@ -371,6 +371,12 @@ exactValue (Unit' _ e _) = e
 -- | Discards potentially unwanted type level information about a 'Unit'.
 weaken :: Unit m d a -> Unit 'NonMetric d ExactPi
 weaken (Unit' n e _) = Unit' (Name.weaken n) e e
+
+-- | Attempts to convert a 'Unit' which may or may not be 'Metric' to one
+-- which is certainly 'Metric'.
+strengthen :: Unit 'NonMetric d a -> Maybe (Unit 'Metric d a)
+strengthen (Unit' n e v) | Just n' <- Name.strengthen n = Just $ Unit' n' e v
+                         | otherwise                    = Nothing
 
 -- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
 liftUntyped :: (KnownVariant v, KnownVariant (Weaken v)) => (ExactPi -> ExactPi) -> (a -> a) -> UnitNameTransformer -> (Dimensional v d1 a) -> (Dimensional (Weaken v) d2 a)
