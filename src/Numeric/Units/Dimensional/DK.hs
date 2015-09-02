@@ -337,10 +337,8 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
     )
   extractValue (Unit' _ e x) = (x, Just e)
   extractName (Unit' n _ _) = Just . Name.weaken $ n
-  injectValue (Just n) (x, Just e) = let n' = relax n
-                                      in case n' of
-                                         Just n'' -> Unit' n'' e x
-                                         _        -> Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
+  injectValue (Just n) (x, Just e) | Just n' <- relax n = Unit' n' e x
+                                   | otherwise          = Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
   injectValue _        _ = Prelude.error "Shouldn't be reachable. Needed to name a quantity."
   dmap f (Unit' n e x) = Unit' n e (f x)
 
