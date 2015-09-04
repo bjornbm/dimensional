@@ -227,7 +227,7 @@ module Numeric.Units.Dimensional.DK
     -- * Constructing Units
     siUnit, one, mkUnitR, mkUnitQ, mkUnitZ,
     -- * Unit Metadata
-    name, exactValue, weaken, strengthen,
+    name, exactValue, weaken, strengthen, exactify,
     -- * Pretty Printing
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
@@ -367,14 +367,18 @@ exactValue :: Unit m d a -> ExactPi
 exactValue (Unit' _ e _) = e
 
 -- | Discards potentially unwanted type level information about a 'Unit'.
-weaken :: Unit m d a -> Unit 'NonMetric d ExactPi
-weaken (Unit' n e _) = Unit' (Name.weaken n) e e
+weaken :: Unit m d a -> Unit 'NonMetric d a
+weaken (Unit' n e v) = Unit' (Name.weaken n) e v
 
 -- | Attempts to convert a 'Unit' which may or may not be 'Metric' to one
 -- which is certainly 'Metric'.
 strengthen :: Unit m d a -> Maybe (Unit 'Metric d a)
 strengthen (Unit' n e v) | Just n' <- Name.strengthen n = Just $ Unit' n' e v
                          | otherwise                    = Nothing
+
+-- | Forms the exact version of a 'Unit'.
+exactify :: Unit m d a -> Unit m d ExactPi
+exactify (Unit' n e _) = Unit' n e e
 
 -- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
 liftUntyped :: (KnownVariant v, KnownVariant (Weaken v)) => (ExactPi -> ExactPi) -> (a -> a) -> UnitNameTransformer -> (Dimensional v d1 a) -> (Dimensional (Weaken v) d2 a)
