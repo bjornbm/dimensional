@@ -21,15 +21,15 @@ module Numeric.Units.Dimensional.DK.SI.Quantities
 (
   module Numeric.Units.Dimensional.DK.Quantities,
 
-  LuminousFlux,  Illuminance,  AngularVelocity,  AngularAcceleration,  RadiantIntensity,  Radiance,  AngularMomentum,  Torque,
-  DLuminousFlux, DIlluminance, DAngularVelocity, DAngularAcceleration, DRadiantIntensity, DRadiance, DAngularMomentum, DTorque
+  LuminousFlux,  Illuminance,  AngularVelocity,  AngularAcceleration,  RadiantIntensity,  Radiance,  AngularMomentum,  Torque, MomentOfInertia,
+  DLuminousFlux, DIlluminance, DAngularVelocity, DAngularAcceleration, DRadiantIntensity, DRadiance, DAngularMomentum, DTorque, DMomentOfInertia
 )
 where
 
 import Numeric.Units.Dimensional.DK.SI
 import qualified Numeric.Units.Dimensional.DK.Quantities as A
-import Numeric.Units.Dimensional.DK.Quantities hiding (LuminousFlux,  Illuminance,  AngularVelocity,  AngularAcceleration,  RadiantIntensity,  Radiance,  AngularMomentum,  Torque,
-                                                       DLuminousFlux, DIlluminance, DAngularVelocity, DAngularAcceleration, DRadiantIntensity, DRadiance, DAngularMomentum, DTorque)
+import Numeric.Units.Dimensional.DK.Quantities hiding (LuminousFlux,  Illuminance,  AngularVelocity,  AngularAcceleration,  RadiantIntensity,  Radiance,  AngularMomentum,  Torque, MomentOfInertia,
+                                                       DLuminousFlux, DIlluminance, DAngularVelocity, DAngularAcceleration, DRadiantIntensity, DRadiance, DAngularMomentum, DTorque, DMomentOfInertia)
 
 type DLuminousFlux = ToSIDim A.DLuminousFlux
 type LuminousFlux = Quantity DLuminousFlux
@@ -54,3 +54,6 @@ type AngularMomentum = Quantity DAngularMomentum
 
 type DTorque = ToSIDim A.DTorque
 type Torque = Quantity DTorque
+
+type DMomentOfInertia = ToSIDim A.DMomentOfInertia
+type MomentOfInertia = Quantity DMomentOfInertia
