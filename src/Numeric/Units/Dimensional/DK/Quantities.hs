@@ -345,10 +345,10 @@ type KinematicViscosity  = Quantity DKinematicViscosity
 type DFirstMassMoment = 'Dim 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type FirstMassMoment = Quantity DFirstMassMoment
 
-type DMomentOfInertia = 'Dim 'Pos2 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DMomentOfInertia = 'Dim 'Pos2 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Neg2 'Zero
 type MomentOfInertia = Quantity DMomentOfInertia
 
-type DAngularMomentum = 'Dim 'Pos2 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero
+type DAngularMomentum = 'Dim 'Pos2 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero 'Neg1 'Zero
 type AngularMomentum = Quantity DAngularMomentum
 
 {-
