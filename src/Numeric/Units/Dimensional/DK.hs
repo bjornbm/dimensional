@@ -241,6 +241,7 @@ import Numeric.NumType.DK.Integers
   , KnownTypeInt, toNum
   )
 import Control.DeepSeq
+import Control.Monad (liftM)
 import Data.Coerce (coerce)
 import Data.Data
 import Data.Foldable (Foldable(foldr, foldl'))
@@ -739,7 +740,7 @@ instance Storable a => Storable (Quantity d a) where
   {-# INLINE alignment #-}
   poke ptr = poke (castPtr ptr :: Ptr a) . coerce
   {-# INLINE poke #-}
-  peek ptr = fmap coerce (peek (castPtr ptr :: Ptr a))
+  peek ptr = liftM coerce (peek (castPtr ptr :: Ptr a))
   {-# INLINE peek #-}
 
 {-
@@ -756,9 +757,9 @@ instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
   {-# INLINE basicUnsafeSlice #-}
   basicOverlaps u v    = M.basicOverlaps (unMVQ u) (unMVQ v)
   {-# INLINE basicOverlaps #-}
-  basicUnsafeNew       = fmap MV_Quantity . M.basicUnsafeNew
+  basicUnsafeNew       = liftM MV_Quantity . M.basicUnsafeNew
   {-# INLINE basicUnsafeNew #-}
-  basicUnsafeRead v    = fmap coerce . M.basicUnsafeRead (unMVQ v)
+  basicUnsafeRead v    = liftM coerce . M.basicUnsafeRead (unMVQ v)
   {-# INLINE basicUnsafeRead #-}
   basicUnsafeWrite v i = M.basicUnsafeWrite (unMVQ v) i . coerce
   {-# INLINE basicUnsafeWrite #-}
@@ -768,13 +769,13 @@ instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
 #endif
 
 instance (G.Vector U.Vector a) => G.Vector U.Vector (Quantity d a) where
-  basicUnsafeFreeze    = fmap V_Quantity  . G.basicUnsafeFreeze . unMVQ
+  basicUnsafeFreeze    = liftM V_Quantity  . G.basicUnsafeFreeze . unMVQ
   {-# INLINE basicUnsafeFreeze #-}
-  basicUnsafeThaw      = fmap MV_Quantity . G.basicUnsafeThaw   . unVQ
+  basicUnsafeThaw      = liftM MV_Quantity . G.basicUnsafeThaw   . unVQ
   {-# INLINE basicUnsafeThaw #-}
   basicLength          = G.basicLength . unVQ
   {-# INLINE basicLength #-}
   basicUnsafeSlice m n = V_Quantity . G.basicUnsafeSlice m n . unVQ
   {-# INLINE basicUnsafeSlice #-}
-  basicUnsafeIndexM v  = fmap coerce . G.basicUnsafeIndexM (unVQ v)
+  basicUnsafeIndexM v  = liftM coerce . G.basicUnsafeIndexM (unVQ v)
   {-# INLINE basicUnsafeIndexM #-}
