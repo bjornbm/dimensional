@@ -11,6 +11,11 @@
 {-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE CPP #-}
+#if VECTOR
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+#endif
 
 {- |
    Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
@@ -229,7 +234,7 @@ module Numeric.Units.Dimensional.DK
 import Prelude
   ( Show, Eq, Ord(..), Bounded, Num, Fractional, Floating, Real, RealFloat, Integral, Functor, fmap
   , (.), flip, show, (++), String, fromIntegral
-  , Int, ($), zipWith, uncurry, concat, realToFrac, succ
+  , Int, ($), zipWith, uncurry, concat, realToFrac, succ, undefined
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
@@ -237,12 +242,21 @@ import Numeric.NumType.DK.Integers
   , pos2, pos3
   , KnownTypeInt, toNum
   )
+import Data.Coerce (coerce)
 import Data.Data
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Monoid (Monoid(..))
 import Data.Ratio ((%))
+import Foreign.Ptr (Ptr, castPtr)
+import Foreign.Storable (Storable(..))
 import GHC.Generics
 import Numeric.Units.Dimensional.DK.Dimensions
+
+#if VECTOR
+import qualified Data.Vector.Generic.Mutable as M
+import qualified Data.Vector.Generic as G
+import qualified Data.Vector.Unboxed.Base as U
+#endif
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -719,3 +733,49 @@ dimUnit u n = case n of
 -- on the grounds that it may be unexpected by other readers.
 prefix :: Num a => a -> Unit d a -> Unit d a
 prefix x (Dimensional y) = Dimensional (x Prelude.* y)
+
+instance Storable a => Storable (Quantity d a) where
+  sizeOf _ = sizeOf (undefined::a)
+  {-# INLINE sizeOf #-}
+  alignment _ = alignment (undefined::a)
+  {-# INLINE alignment #-}
+  poke ptr = poke (castPtr ptr :: Ptr a) . coerce
+  {-# INLINE poke #-}
+  peek ptr = fmap coerce (peek (castPtr ptr :: Ptr a))
+  {-# INLINE peek #-}
+
+#if VECTOR
+newtype instance U.Vector (Quantity d a)    =  V_Quantity {unVQ :: U.Vector a}
+newtype instance U.MVector s (Quantity d a) = MV_Quantity {unMVQ :: U.MVector s a}
+instance U.Unbox a => U.Unbox (Quantity d a)
+
+instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
+  {-# INLINE basicLength #-}
+  {-# INLINE basicUnsafeSlice #-}
+  {-# INLINE basicOverlaps #-}
+  {-# INLINE basicUnsafeNew #-}
+  {-# INLINE basicUnsafeRead #-}
+  {-# INLINE basicUnsafeWrite #-}
+  basicLength          = M.basicLength . unMVQ
+  basicUnsafeSlice m n = MV_Quantity . M.basicUnsafeSlice m n . unMVQ
+  basicOverlaps u v    = M.basicOverlaps (unMVQ u) (unMVQ v)
+  basicUnsafeNew       = fmap MV_Quantity . M.basicUnsafeNew
+  basicUnsafeRead v    = fmap coerce . M.basicUnsafeRead (unMVQ v)
+  basicUnsafeWrite v i = M.basicUnsafeWrite (unMVQ v) i . coerce
+#if MIN_VERSION_vector(0,11,0)
+  basicInitialize      = M.basicInitialize . unMVQ
+  {-# INLINE basicInitialize #-}
+#endif
+
+instance (G.Vector U.Vector a) => G.Vector U.Vector (Quantity d a) where
+  {-# INLINE basicUnsafeFreeze #-}
+  {-# INLINE basicUnsafeThaw #-}
+  {-# INLINE basicLength #-}
+  {-# INLINE basicUnsafeSlice #-}
+  {-# INLINE basicUnsafeIndexM #-}
+  basicUnsafeFreeze    = fmap V_Quantity  . G.basicUnsafeFreeze . unMVQ
+  basicUnsafeThaw      = fmap MV_Quantity . G.basicUnsafeThaw   . unVQ
+  basicLength          = G.basicLength . unVQ
+  basicUnsafeSlice m n = V_Quantity . G.basicUnsafeSlice m n . unVQ
+  basicUnsafeIndexM v  = fmap coerce . G.basicUnsafeIndexM (unVQ v)
+#endif
