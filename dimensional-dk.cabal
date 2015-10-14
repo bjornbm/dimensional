@@ -1,5 +1,5 @@
 name:                dimensional-dk
-version:             0.8.0.1
+version:             0.8.0.2
 license:             BSD3
 license-file:        LICENSE
 copyright:           Bjorn Buckwalter 2006-2015
@@ -40,8 +40,10 @@ source-repository head
 
 library
   build-depends:       base >= 4.7 && < 5,
+                       deepseq >= 1.3,
+                       exact-pi >= 0.2.1.1 && < 0.3,
                        numtype-dk >= 0.5 && < 1.1,
-                       exact-pi >= 0.2.1.1 && < 0.3
+                       vector >= 0.10
   hs-source-dirs:      src
   default-language:    Haskell98
   ghc-options:         -Wall
