@@ -750,32 +750,32 @@ newtype instance U.MVector s (Quantity d a) = MV_Quantity {unMVQ :: U.MVector s 
 instance U.Unbox a => U.Unbox (Quantity d a)
 
 instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
-  {-# INLINE basicLength #-}
-  {-# INLINE basicUnsafeSlice #-}
-  {-# INLINE basicOverlaps #-}
-  {-# INLINE basicUnsafeNew #-}
-  {-# INLINE basicUnsafeRead #-}
-  {-# INLINE basicUnsafeWrite #-}
   basicLength          = M.basicLength . unMVQ
+  {-# INLINE basicLength #-}
   basicUnsafeSlice m n = MV_Quantity . M.basicUnsafeSlice m n . unMVQ
+  {-# INLINE basicUnsafeSlice #-}
   basicOverlaps u v    = M.basicOverlaps (unMVQ u) (unMVQ v)
+  {-# INLINE basicOverlaps #-}
   basicUnsafeNew       = fmap MV_Quantity . M.basicUnsafeNew
+  {-# INLINE basicUnsafeNew #-}
   basicUnsafeRead v    = fmap coerce . M.basicUnsafeRead (unMVQ v)
+  {-# INLINE basicUnsafeRead #-}
   basicUnsafeWrite v i = M.basicUnsafeWrite (unMVQ v) i . coerce
+  {-# INLINE basicUnsafeWrite #-}
 #if MIN_VERSION_vector(0,11,0)
   basicInitialize      = M.basicInitialize . unMVQ
   {-# INLINE basicInitialize #-}
 #endif
 
 instance (G.Vector U.Vector a) => G.Vector U.Vector (Quantity d a) where
-  {-# INLINE basicUnsafeFreeze #-}
-  {-# INLINE basicUnsafeThaw #-}
-  {-# INLINE basicLength #-}
-  {-# INLINE basicUnsafeSlice #-}
-  {-# INLINE basicUnsafeIndexM #-}
   basicUnsafeFreeze    = fmap V_Quantity  . G.basicUnsafeFreeze . unMVQ
+  {-# INLINE basicUnsafeFreeze #-}
   basicUnsafeThaw      = fmap MV_Quantity . G.basicUnsafeThaw   . unVQ
+  {-# INLINE basicUnsafeThaw #-}
   basicLength          = G.basicLength . unVQ
+  {-# INLINE basicLength #-}
   basicUnsafeSlice m n = V_Quantity . G.basicUnsafeSlice m n . unVQ
+  {-# INLINE basicUnsafeSlice #-}
   basicUnsafeIndexM v  = fmap coerce . G.basicUnsafeIndexM (unVQ v)
+  {-# INLINE basicUnsafeIndexM #-}
 #endif

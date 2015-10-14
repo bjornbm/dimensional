@@ -58,7 +58,7 @@ library
                        Numeric.Units.Dimensional.DK.Dimensions.TypeLevel,
                        Numeric.Units.Dimensional.DK.Functor
   if flag(vector)
-    build-depends:     vector
+    build-depends:     vector >= 0.10
     cpp-options:       -DVECTOR
 
 test-suite tests
