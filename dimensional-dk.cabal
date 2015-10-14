@@ -1,5 +1,5 @@
 name:                dimensional-dk
-version:             0.8.0.1
+version:             0.8.0.2
 license:             BSD3
 license-file:        LICENSE
 copyright:           Bjorn Buckwalter 2006-2015
@@ -38,6 +38,10 @@ source-repository head
   type:     git
   location: https://github.com/bjornbm/dimensional-dk/
 
+flag vector
+  description: Enable `vector` instances.
+  default: False
+
 library
   build-depends:       base >= 4.7 && < 5,
                        numtype-dk >= 0.5 && < 1.1
@@ -53,6 +57,9 @@ library
                        Numeric.Units.Dimensional.DK.Dimensions.TermLevel,
                        Numeric.Units.Dimensional.DK.Dimensions.TypeLevel,
                        Numeric.Units.Dimensional.DK.Functor
+  if flag(vector)
+    build-depends:     vector >= 0.10
+    cpp-options:       -DVECTOR
 
 test-suite tests
   type:                exitcode-stdio-1.0
