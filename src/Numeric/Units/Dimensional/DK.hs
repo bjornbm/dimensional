@@ -1,6 +1,7 @@
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 {-# LANGUAGE AutoDeriveTypeable #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -8,14 +9,11 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses #-} -- for Vector instances only
 {-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE CPP #-}
-#if VECTOR
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-#endif
+{-# LANGUAGE TypeOperators #-}
 
 {- |
    Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
@@ -242,6 +240,7 @@ import Numeric.NumType.DK.Integers
   , pos2, pos3
   , KnownTypeInt, toNum
   )
+import Control.DeepSeq
 import Data.Coerce (coerce)
 import Data.Data
 import Data.Foldable (Foldable(foldr, foldl'))
@@ -251,12 +250,9 @@ import Foreign.Ptr (Ptr, castPtr)
 import Foreign.Storable (Storable(..))
 import GHC.Generics
 import Numeric.Units.Dimensional.DK.Dimensions
-
-#if VECTOR
 import qualified Data.Vector.Generic.Mutable as M
 import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Unboxed.Base as U
-#endif
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -734,6 +730,8 @@ dimUnit u n = case n of
 prefix :: Num a => a -> Unit d a -> Unit d a
 prefix x (Dimensional y) = Dimensional (x Prelude.* y)
 
+instance NFData a => NFData (Dimensional v d a) -- instance is derived from Generic instance
+
 instance Storable a => Storable (Quantity d a) where
   sizeOf _ = sizeOf (undefined::a)
   {-# INLINE sizeOf #-}
@@ -744,7 +742,9 @@ instance Storable a => Storable (Quantity d a) where
   peek ptr = fmap coerce (peek (castPtr ptr :: Ptr a))
   {-# INLINE peek #-}
 
-#if VECTOR
+{-
+Instances for vectors of quantities.
+-}
 newtype instance U.Vector (Quantity d a)    =  V_Quantity {unVQ :: U.Vector a}
 newtype instance U.MVector s (Quantity d a) = MV_Quantity {unMVQ :: U.MVector s a}
 instance U.Unbox a => U.Unbox (Quantity d a)
@@ -778,4 +778,3 @@ instance (G.Vector U.Vector a) => G.Vector U.Vector (Quantity d a) where
   {-# INLINE basicUnsafeSlice #-}
   basicUnsafeIndexM v  = fmap coerce . G.basicUnsafeIndexM (unVQ v)
   {-# INLINE basicUnsafeIndexM #-}
-#endif
