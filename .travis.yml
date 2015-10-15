@@ -71,6 +71,7 @@ script:
  - cabal build   # this builds all libraries and executables (including tests/benchmarks)
  - cabal test --show-details=always
  - cabal haddock
+ - cabal bench --benchmark-options="-o BenchmarkReport.html"
  - cabal check
  - cabal sdist   # tests that a source-distribution can be generated
 
