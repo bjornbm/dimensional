@@ -1,0 +1,50 @@
+\documentclass[12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{siunitx}
+
+\newcommand{\packagename}[1]{\textit{#1}}
+
+\title{
+	{Writing Physical Computations in Haskell with \packagename{dimensional-dk}}\\
+	{\small{Version 0.9}}
+}
+\author{Björn Buckwalter and Douglas McClean}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Introduction}
+
+\chapter{Dimensional Arithmetic}
+
+\chapter{Manipulating Units}
+
+\section{Unit Names}
+
+\subsection{Interchange Names}
+\subsection{Unit Name Normal Forms}
+
+\chapter{Interoperating with Other Packages}
+
+\section{\packagename{ad} for Automatic Differentiation}
+\section{\packagename{attoparsec} for Unit and Quantity Parsing}
+\section{\packagename{HaTeX} for \LaTeX{}\. Generation}
+\section{\packagename{lens}}
+\section{\packagename{linear} for Linear Algebra}
+\section{\packagename{parsec} for Unit and Quantity Parsing}
+\section{\packagename{time} for Times and Dates}
+\section{\packagename{vector} for Boxed and Unboxed Arrays}
+\section{\packagename{vector-space} for Linear Algebra}
+
+\chapter{Libraries Using \packagename{dimensional-dk}}
+
+\section{\packagename{atmos} for Modeling Earth's Atmosphere}
+\section{\packagename{igrf} for Modeling Earth's Magnetic Field}
+
+\chapter{Included Dimensions and Units}
+
+\end{document}

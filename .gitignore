@@ -4,3 +4,8 @@ cabal.sandbox.config
 *.hi
 *.o
 *.exe
+docs/*.aux
+docs/*.log
+docs/*.pdf
+docs/*.synctex.gz
+docs/*.toc
