@@ -216,10 +216,10 @@ module Numeric.Units.Dimensional.DK
     (*~~), (/~~), sum, mean, dimensionlessLength, nFromTo,
     -- * Dimension Synonyms
     -- $dimension-synonyms
-    DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity, DPlaneAngle, DSolidAngle,
+    DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity, DPlaneAngle,
     -- * Quantity Synonyms
     -- $quantity-synonyms
-    Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity, PlaneAngle, SolidAngle,
+    Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity, PlaneAngle,
     -- * Constants
     -- $constants
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
@@ -388,7 +388,6 @@ type ThermodynamicTemperature = Quantity DThermodynamicTemperature
 type AmountOfSubstance        = Quantity DAmountOfSubstance
 type LuminousIntensity        = Quantity DLuminousIntensity
 type PlaneAngle               = Quantity DPlaneAngle
-type SolidAngle               = Quantity DSolidAngle
 
 {- $dimension-arithmetic
 When performing arithmetic on units and quantities the arithmetics
@@ -607,16 +606,16 @@ acos  = (*~ baseUnit) . Prelude.acos . (/~ one)
 atan  = (*~ baseUnit) . Prelude.atan . (/~ one)
 
 -- | Removes angular dimensions from a dimensional value by equating radians
--- and steradians with the dimensionless quantity one.
-removeAngles :: Dimensional v ('Dim l m t i th n j pa sa) a -> Dimensional v (SIDim l m t i th n j) a
+-- with the dimensionless quantity one.
+removeAngles :: Dimensional v ('Dim l m t i th n j pa) a -> Dimensional v (SIDim l m t i th n j) a
 removeAngles = coerceAngles
 
--- | Equates values whose dimensions differ in plane or solid angles by equating
--- radians and steradians with the dimensionless quantity one.
+-- | Equates values whose dimensions differ in plane angles by equating
+-- radians with the dimensionless quantity one.
 --
 -- See `removeAngles`, which offers a more specific result type, if you are only interested
--- in ignoring plane and solid angle dimensions.
-coerceAngles :: Dimensional v ('Dim l m t i th n j pa sa) a -> Dimensional v ('Dim l m t i th n j pa' sa') a
+-- in ignoring angle dimensions.
+coerceAngles :: Dimensional v ('Dim l m t i th n j pa) a -> Dimensional v ('Dim l m t i th n j pa') a
 coerceAngles = coerce
 
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
@@ -634,8 +633,8 @@ atan2 (Dimensional y) (Dimensional x) = Dimensional (Prelude.atan2 y x)
 -- base unit of any dimension. This allows polymorphic quantity
 -- creation and destruction without exposing the 'Dimensional' constructor.
 --
--- `siUnit` is similar but does not include the radians or steradians associated
--- with plane or solid angles.
+-- `siUnit` is similar but does not include the radians associated
+-- with plane angles.
 baseUnit :: Num a => Unit d a
 baseUnit = Dimensional 1
 
@@ -643,8 +642,8 @@ baseUnit = Dimensional 1
 -- SI base unit of any dimension. This allows polymorphic quantity
 -- creation and destruction without exposing the 'Dimensional' constructor.
 --
--- `baseUnit` is similar but includes the radians and steradians associated
--- with plane or solid angles.
+-- `baseUnit` is similar but includes the radians associated
+-- with plane angles.
 siUnit :: Num a => Unit (SIDim l m t i th n j) a
 siUnit = removeAngles baseUnit
 

@@ -8,7 +8,7 @@
 
 = Summary
 
-This module defines a variant of "Numeric.Units.Dimensional.DK.SIUnits" where plane and solid angles are not treated as dimensions.
+This module defines a variant of "Numeric.Units.Dimensional.DK.SIUnits" where plane angles are treated as dimensionless.
 
 Compare, e.g., 'radian' with 'Numeric.Units.Dimensional.DK.SIUnits.radian'
 

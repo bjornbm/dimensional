@@ -8,7 +8,7 @@
 
 = Summary
 
-This module defines a variant of "Numeric.Units.Dimensional.DK.Prelude" where plane and solid angles are not treated as dimensions.
+This module defines a variant of "Numeric.Units.Dimensional.DK.Prelude" where plane angles are treated as dimensionless.
 
 -}
 module Numeric.Units.Dimensional.DK.SI.Prelude
@@ -42,3 +42,4 @@ import Prelude hiding
     , sinh, cosh, tanh, asinh, acosh, atanh
     , sum, product, minimum, maximum
     )  -- Hide definitions overridden by 'Numeric.Dimensional'.
+    

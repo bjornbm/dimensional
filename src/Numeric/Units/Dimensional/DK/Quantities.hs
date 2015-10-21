@@ -49,7 +49,7 @@ module Numeric.Units.Dimensional.DK.Quantities
   -- $not-nist-guide
   Impulse, MassFlow, VolumeFlow, GravitationalParameter, KinematicViscosity, FirstMassMoment, MomentOfInertia, AngularMomentum,
   ThermalResistivity, ThermalConductance, ThermalResistance, HeatTransferCoefficient, ThermalAdmittance, ThermalInsulance,
-  Jerk, Angle, Thrust, Torque, EnergyPerUnitMass,
+  Jerk, Angle, Thrust, Torque, EnergyPerUnitMass, SolidAngle,
   -- * Powers of Unit Lengths
   -- $powers-of-length-units
   square, cubic,
@@ -68,7 +68,7 @@ module Numeric.Units.Dimensional.DK.Quantities
   DMolarEnergy, DMolarEntropy, DMolarHeatCapacity, DExposure, DAbsorbedDoseRate,
   DImpulse, DMassFlow, DVolumeFlow, DGravitationalParameter, DKinematicViscosity, DFirstMassMoment, DMomentOfInertia, DAngularMomentum,
   DThermalResistivity, DThermalConductance, DThermalResistance, DHeatTransferCoefficient, DThermalAdmittance, DThermalInsulance,
-  DJerk, DAngle, DThrust, DTorque, DEnergyPerUnitMass
+  DJerk, DAngle, DThrust, DTorque, DEnergyPerUnitMass, DSolidAngle
 )
 where
 
@@ -104,41 +104,41 @@ For each 'Quantity' alias supplied above, we also supply a corresponding 'Dimens
 These dimension aliases may be convenient for supplying type signatures for 'Unit's or for other type-level dimensional programming.
 -}
 
-type DArea = 'Dim 'Pos2 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DArea = 'Dim 'Pos2 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type Area  = Quantity DArea
 
-type DVolume = 'Dim 'Pos3 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DVolume = 'Dim 'Pos3 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type Volume  = Quantity DVolume
 
-type DVelocity = 'Dim 'Pos1 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DVelocity = 'Dim 'Pos1 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
 type Velocity  = Quantity DVelocity
 
-type DAcceleration = 'Dim 'Pos1 'Zero 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DAcceleration = 'Dim 'Pos1 'Zero 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero
 type Acceleration  = Quantity DAcceleration
 
-type DWaveNumber = 'Dim 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DWaveNumber = 'Dim 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type WaveNumber  = Quantity DWaveNumber
 
-type DMassDensity = 'Dim 'Neg3 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DMassDensity = 'Dim 'Neg3 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type DDensity     = DMassDensity
 type MassDensity  = Quantity DMassDensity
 type Density      = MassDensity -- Short name.
 
-type DSpecificVolume = 'Dim 'Pos3 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DSpecificVolume = 'Dim 'Pos3 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type SpecificVolume  = Quantity DSpecificVolume
 
-type DCurrentDensity = 'Dim 'Neg2 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DCurrentDensity = 'Dim 'Neg2 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero
 type CurrentDensity  = Quantity DCurrentDensity
 
-type DMagneticFieldStrength = 'Dim 'Neg1 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DMagneticFieldStrength = 'Dim 'Neg1 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero
 type MagneticFieldStrength  = Quantity DMagneticFieldStrength
 
-type DAmountOfSubstanceConcentration = 'Dim 'Neg3 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero
+type DAmountOfSubstanceConcentration = 'Dim 'Neg3 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero
 type DConcentration                  = DAmountOfSubstanceConcentration
 type AmountOfSubstanceConcentration  = Quantity DAmountOfSubstanceConcentration
 type Concentration                   = AmountOfSubstanceConcentration -- Short name.
 
-type DLuminance = 'Dim 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Zero
+type DLuminance = 'Dim 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero
 type Luminance  = Quantity DLuminance
 
 
@@ -149,63 +149,63 @@ SI coherent derived units with special names and symbols.
 
 -}
 
-type DFrequency = 'Dim 'Zero 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DFrequency = 'Dim 'Zero 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
 type Frequency  = Quantity DFrequency
 
-type DForce = 'Dim 'Pos1 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DForce = 'Dim 'Pos1 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero
 type Force  = Quantity DForce
 
-type DPressure = 'Dim 'Neg1 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DPressure = 'Dim 'Neg1 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero
 type DStress   = DPressure
 type Pressure  = Quantity DPressure
 type Stress    = Quantity DStress
 
-type DEnergy         = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DEnergy         = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero
 type DWork           = DEnergy
 type DQuantityOfHeat = DEnergy
 type Energy          = Quantity DEnergy
 type Work            = Quantity DWork
 type QuantityOfHeat  = Quantity DQuantityOfHeat
 
-type DPower       = 'Dim 'Pos2 'Pos1 'Neg3 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DPower       = 'Dim 'Pos2 'Pos1 'Neg3 'Zero 'Zero 'Zero 'Zero 'Zero
 type DRadiantFlux = DPower
 type Power        = Quantity DPower
 type RadiantFlux  = Quantity DRadiantFlux
 
-type DElectricCharge        = 'Dim 'Zero 'Zero 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DElectricCharge        = 'Dim 'Zero 'Zero 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero
 type DQuantityOfElectricity = DElectricCharge
 type ElectricCharge         = Quantity DElectricCharge
 type QuantityOfElectricity  = Quantity DQuantityOfElectricity
 
-type DElectricPotential   = 'Dim 'Pos2 'Pos1 'Neg3 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DElectricPotential   = 'Dim 'Pos2 'Pos1 'Neg3 'Neg1 'Zero 'Zero 'Zero 'Zero
 type DPotentialDifference = DElectricPotential
 type DElectromotiveForce  = DElectricPotential
 type ElectricPotential    = Quantity DElectricPotential
 type PotentialDifference  = Quantity DPotentialDifference
 type ElectromotiveForce   = Quantity DElectromotiveForce
 
-type DCapacitance = 'Dim 'Neg2 'Neg1 'Pos4 'Pos2 'Zero 'Zero 'Zero 'Zero 'Zero
+type DCapacitance = 'Dim 'Neg2 'Neg1 'Pos4 'Pos2 'Zero 'Zero 'Zero 'Zero
 type Capacitance  = Quantity DCapacitance
 
-type DElectricResistance = 'Dim 'Pos2 'Pos1 'Neg3 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero
+type DElectricResistance = 'Dim 'Pos2 'Pos1 'Neg3 'Neg2 'Zero 'Zero 'Zero 'Zero
 type ElectricResistance  = Quantity DElectricResistance
 
-type DElectricConductance = 'Dim 'Neg2 'Neg1 'Pos3 'Pos2 'Zero 'Zero 'Zero 'Zero 'Zero
+type DElectricConductance = 'Dim 'Neg2 'Neg1 'Pos3 'Pos2 'Zero 'Zero 'Zero 'Zero
 type ElectricConductance  = Quantity DElectricConductance
 
-type DMagneticFlux = 'Dim 'Pos2 'Pos1 'Neg2 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DMagneticFlux = 'Dim 'Pos2 'Pos1 'Neg2 'Neg1 'Zero 'Zero 'Zero 'Zero
 type MagneticFlux  = Quantity DMagneticFlux
 
-type DMagneticFluxDensity = 'Dim 'Zero 'Pos1 'Neg2 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DMagneticFluxDensity = 'Dim 'Zero 'Pos1 'Neg2 'Neg1 'Zero 'Zero 'Zero 'Zero
 type MagneticFluxDensity  = Quantity DMagneticFluxDensity
 
-type DInductance = 'Dim 'Pos2 'Pos1 'Neg2 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero
+type DInductance = 'Dim 'Pos2 'Pos1 'Neg2 'Neg2 'Zero 'Zero 'Zero 'Zero
 type Inductance  = Quantity DInductance
 
-type DLuminousFlux = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Pos1
+type DLuminousFlux = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Pos2
 type LuminousFlux  = Quantity DLuminousFlux
 
-type DIlluminance = 'Dim 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero 'Pos1
+type DIlluminance = 'Dim 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos1 'Pos2
 type Illuminance  = Quantity DIlluminance
 
 type DCelsiusTemperature = DThermodynamicTemperature
@@ -214,7 +214,7 @@ type CelsiusTemperature  = Quantity DCelsiusTemperature
 type DActivity = DFrequency -- Activity of a radionuclide.
 type Activity  = Quantity DActivity
 
-type DAbsorbedDose   = 'Dim 'Pos2 'Zero 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DAbsorbedDose   = 'Dim 'Pos2 'Zero 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero
 type DSpecificEnergy = DAbsorbedDose
 type DKerma          = DAbsorbedDose
 type AbsorbedDose    = Quantity DAbsorbedDose
@@ -232,7 +232,7 @@ type DirectionalDoseEquivalent  = DoseEquivalent
 type PersonalDoseEquivalent     = DoseEquivalent
 type EquivalentDose             = DoseEquivalent
 
-type DCatalyticActivity = 'Dim 'Zero 'Zero 'Neg1 'Zero 'Zero 'Pos1 'Zero 'Zero 'Zero
+type DCatalyticActivity = 'Dim 'Zero 'Zero 'Neg1 'Zero 'Zero 'Pos1 'Zero 'Zero
 type CatalyticActivity  = Quantity DCatalyticActivity
 
 {- $table4
@@ -245,38 +245,38 @@ We use the same grouping as for table 2.
 
 -}
 
-type DAngularVelocity = 'Dim 'Zero 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero
+type DAngularVelocity = 'Dim 'Zero 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero 'Pos1
 type AngularVelocity  = Quantity DAngularVelocity
 
-type DAngularAcceleration = 'Dim 'Zero 'Zero 'Neg2 'Zero 'Zero 'Zero 'Zero 'Pos1 'Zero
+type DAngularAcceleration = 'Dim 'Zero 'Zero 'Neg2 'Zero 'Zero 'Zero 'Zero 'Pos1
 type AngularAcceleration  = Quantity DAngularAcceleration
 
-type DDynamicViscosity = 'Dim 'Neg1 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DDynamicViscosity = 'Dim 'Neg1 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
 type DynamicViscosity  = Quantity DDynamicViscosity
 
 type DMomentOfForce = DEnergy
 type MomentOfForce  = Quantity DMomentOfForce
 
-type DSurfaceTension = 'Dim 'Zero 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DSurfaceTension = 'Dim 'Zero 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero
 type SurfaceTension  = Quantity DSurfaceTension
 
-type DHeatFluxDensity = 'Dim 'Zero 'Pos1 'Neg3 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DHeatFluxDensity = 'Dim 'Zero 'Pos1 'Neg3 'Zero 'Zero 'Zero 'Zero 'Zero
 type DIrradiance      = DHeatFluxDensity
 type HeatFluxDensity  = Quantity DHeatFluxDensity
 type Irradiance       = Quantity DIrradiance
 
-type DRadiantIntensity = 'Dim 'Pos2 'Pos1 'Neg3 'Zero 'Zero 'Zero 'Zero 'Zero 'Neg1
+type DRadiantIntensity = 'Dim 'Pos2 'Pos1 'Neg3 'Zero 'Zero 'Zero 'Zero 'Neg2
 type RadiantIntensity  = Quantity DRadiantIntensity
 
-type DRadiance = 'Dim 'Zero 'Pos1 'Neg3 'Zero 'Zero 'Zero 'Zero 'Zero 'Neg1
+type DRadiance = 'Dim 'Zero 'Pos1 'Neg3 'Zero 'Zero 'Zero 'Zero 'Neg2
 type Radiance  = Quantity DRadiance
 
-type DHeatCapacity = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero
+type DHeatCapacity = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Neg1 'Zero 'Zero 'Zero
 type DEntropy      = DHeatCapacity
 type HeatCapacity  = Quantity DHeatCapacity
 type Entropy       = Quantity DEntropy
 
-type DSpecificHeatCapacity = 'Dim 'Pos2 'Zero 'Neg2 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero
+type DSpecificHeatCapacity = 'Dim 'Pos2 'Zero 'Neg2 'Zero 'Neg1 'Zero 'Zero 'Zero
 type DSpecificEntropy      = DSpecificHeatCapacity
 type SpecificHeatCapacity  = Quantity DSpecificHeatCapacity
 type SpecificEntropy       = Quantity DSpecificEntropy
@@ -287,39 +287,39 @@ Specific energy was already defined in table 3.
 
 -}
 
-type DThermalConductivity = 'Dim 'Pos1 'Pos1 'Neg3 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero
+type DThermalConductivity = 'Dim 'Pos1 'Pos1 'Neg3 'Zero 'Neg1 'Zero 'Zero 'Zero
 type ThermalConductivity  = Quantity DThermalConductivity
 
 type DEnergyDensity = DPressure
 type EnergyDensity  = Quantity DEnergyDensity
 
-type DElectricFieldStrength = 'Dim 'Pos1 'Pos1 'Neg3 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DElectricFieldStrength = 'Dim 'Pos1 'Pos1 'Neg3 'Neg1 'Zero 'Zero 'Zero 'Zero
 type ElectricFieldStrength  = Quantity DElectricFieldStrength
 
-type DElectricChargeDensity = 'Dim 'Neg3 'Zero 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DElectricChargeDensity = 'Dim 'Neg3 'Zero 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero
 type ElectricChargeDensity  = Quantity DElectricChargeDensity
 
-type DElectricFluxDensity = 'Dim 'Neg2 'Zero 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DElectricFluxDensity = 'Dim 'Neg2 'Zero 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero
 type ElectricFluxDensity  = Quantity DElectricFluxDensity
 
-type DPermittivity = 'Dim 'Neg3 'Neg1 'Pos4 'Pos2 'Zero 'Zero 'Zero 'Zero 'Zero
+type DPermittivity = 'Dim 'Neg3 'Neg1 'Pos4 'Pos2 'Zero 'Zero 'Zero 'Zero
 type Permittivity  = Quantity DPermittivity
 
-type DPermeability = 'Dim 'Pos1 'Pos1 'Neg2 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero
+type DPermeability = 'Dim 'Pos1 'Pos1 'Neg2 'Neg2 'Zero 'Zero 'Zero 'Zero
 type Permeability  = Quantity DPermeability
 
-type DMolarEnergy = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Zero 'Neg1 'Zero 'Zero 'Zero
+type DMolarEnergy = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Zero 'Neg1 'Zero 'Zero
 type MolarEnergy  = Quantity DMolarEnergy
 
-type DMolarEntropy      = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Neg1 'Neg1 'Zero 'Zero 'Zero
+type DMolarEntropy      = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Neg1 'Neg1 'Zero 'Zero
 type DMolarHeatCapacity = DMolarEntropy
 type MolarEntropy       = Quantity DMolarEntropy
 type MolarHeatCapacity  = Quantity DMolarHeatCapacity
 
-type DExposure = 'Dim 'Zero 'Neg1 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
+type DExposure = 'Dim 'Zero 'Neg1 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero
 type Exposure  = Quantity DExposure -- Exposure to x and gamma rays.
 
-type DAbsorbedDoseRate = 'Dim 'Pos2 'Zero 'Neg3 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DAbsorbedDoseRate = 'Dim 'Pos2 'Zero 'Neg3 'Zero 'Zero 'Zero 'Zero 'Zero
 type AbsorbedDoseRate  = Quantity DAbsorbedDoseRate
 
 {- $not-nist-guide
@@ -327,28 +327,28 @@ Here we define additional quantities on an as-needed basis. We also
 provide some synonyms that we anticipate will be useful.
 -}
 
-type DImpulse = 'Dim 'Pos1 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DImpulse = 'Dim 'Pos1 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
 type Impulse  = Quantity DImpulse
 
-type DMassFlow = 'Dim 'Zero 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DMassFlow = 'Dim 'Zero 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
 type MassFlow  = Quantity DMassFlow
 
-type DVolumeFlow = 'Dim 'Pos3 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DVolumeFlow = 'Dim 'Pos3 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
 type VolumeFlow = Quantity DVolumeFlow
 
-type DGravitationalParameter = 'Dim 'Pos3 'Zero 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DGravitationalParameter = 'Dim 'Pos3 'Zero 'Neg2 'Zero 'Zero 'Zero 'Zero 'Zero
 type GravitationalParameter  = Quantity DGravitationalParameter
 
-type DKinematicViscosity = 'Dim 'Pos2 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DKinematicViscosity = 'Dim 'Pos2 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero 'Zero
 type KinematicViscosity  = Quantity DKinematicViscosity
 
-type DFirstMassMoment = 'Dim 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DFirstMassMoment = 'Dim 'Pos1 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type FirstMassMoment = Quantity DFirstMassMoment
 
-type DMomentOfInertia = 'Dim 'Pos2 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Neg2 'Zero
+type DMomentOfInertia = 'Dim 'Pos2 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Neg2
 type MomentOfInertia = Quantity DMomentOfInertia
 
-type DAngularMomentum = 'Dim 'Pos2 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero 'Neg1 'Zero
+type DAngularMomentum = 'Dim 'Pos2 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero 'Neg1
 type AngularMomentum = Quantity DAngularMomentum
 
 {-
@@ -357,7 +357,7 @@ The reciprocal of thermal conductivity.
 
 -}
 
-type DThermalResistivity = 'Dim 'Neg1 'Neg1 'Pos3 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero
+type DThermalResistivity = 'Dim 'Neg1 'Neg1 'Pos3 'Zero 'Pos1 'Zero 'Zero 'Zero
 type ThermalResistivity = Quantity DThermalResistivity
 
 {-
@@ -366,22 +366,22 @@ Thermal conductance and resistance quantities after http://en.wikipedia.org/wiki
 
 -}
 
-type DThermalConductance = 'Dim 'Pos2 'Pos1 'Neg3 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero
+type DThermalConductance = 'Dim 'Pos2 'Pos1 'Neg3 'Zero 'Neg1 'Zero 'Zero 'Zero
 type ThermalConductance = Quantity DThermalConductance
 
-type DThermalResistance = 'Dim 'Neg2 'Neg1 'Pos3 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero
+type DThermalResistance = 'Dim 'Neg2 'Neg1 'Pos3 'Zero 'Pos1 'Zero 'Zero 'Zero
 type ThermalResistance = Quantity DThermalResistance
 
-type DHeatTransferCoefficient = 'Dim 'Zero 'Pos1 'Neg3 'Zero 'Neg1 'Zero 'Zero 'Zero 'Zero
+type DHeatTransferCoefficient = 'Dim 'Zero 'Pos1 'Neg3 'Zero 'Neg1 'Zero 'Zero 'Zero
 type HeatTransferCoefficient = Quantity DHeatTransferCoefficient
 
 type DThermalAdmittance = DHeatTransferCoefficient
 type ThermalAdmittance = HeatTransferCoefficient
 
-type DThermalInsulance = 'Dim 'Zero 'Neg1 'Pos3 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero
+type DThermalInsulance = 'Dim 'Zero 'Neg1 'Pos3 'Zero 'Pos1 'Zero 'Zero 'Zero
 type ThermalInsulance = Quantity DThermalInsulance
 
-type DJerk = 'Dim 'Pos1 'Zero 'Neg3 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
+type DJerk = 'Dim 'Pos1 'Zero 'Neg3 'Zero 'Zero 'Zero 'Zero 'Zero
 type Jerk = Quantity DJerk
 
 type DAngle = DPlaneAngle -- Abbreviation
@@ -390,11 +390,14 @@ type Angle = Quantity DAngle -- Abbreviation
 type DThrust = DForce
 type Thrust = Force
 
-type DTorque = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Neg1 'Zero
+type DTorque = 'Dim 'Pos2 'Pos1 'Neg2 'Zero 'Zero 'Zero 'Zero 'Neg1
 type Torque = Quantity DTorque
 
 type DEnergyPerUnitMass = DSpecificEnergy
 type EnergyPerUnitMass = SpecificEnergy
+
+type DSolidAngle = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Pos2
+type SolidAngle = Quantity DSolidAngle
 
 {- $powers-of-length-units
 It is permissible to express powers of length units by prefixing

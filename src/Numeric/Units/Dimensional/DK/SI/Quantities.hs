@@ -12,7 +12,7 @@
 
 = Summary
 
-This module defines a variant of "Numeric.Units.Dimensional.DK.Quantities" where plane and solid angles are not treated as dimensions.
+This module defines a variant of "Numeric.Units.Dimensional.DK.Quantities" where plane angles are treated as dimensionless.
 
 Compare, e.g., 'LuminousFlux' with 'Numeric.Units.Dimensional.DK.Quantities.LuminousFlux'
 
@@ -21,15 +21,15 @@ module Numeric.Units.Dimensional.DK.SI.Quantities
 (
   module Numeric.Units.Dimensional.DK.Quantities,
 
-  LuminousFlux,  Illuminance,  AngularVelocity,  AngularAcceleration,  RadiantIntensity,  Radiance,  AngularMomentum,  Torque, MomentOfInertia,
-  DLuminousFlux, DIlluminance, DAngularVelocity, DAngularAcceleration, DRadiantIntensity, DRadiance, DAngularMomentum, DTorque, DMomentOfInertia
+  LuminousFlux,  Illuminance,  AngularVelocity,  AngularAcceleration,  RadiantIntensity,  Radiance,  AngularMomentum,  Torque, MomentOfInertia, SolidAngle,
+  DLuminousFlux, DIlluminance, DAngularVelocity, DAngularAcceleration, DRadiantIntensity, DRadiance, DAngularMomentum, DTorque, DMomentOfInertia, DSolidAngle
 )
 where
 
 import Numeric.Units.Dimensional.DK.SI
 import qualified Numeric.Units.Dimensional.DK.Quantities as A
-import Numeric.Units.Dimensional.DK.Quantities hiding (LuminousFlux,  Illuminance,  AngularVelocity,  AngularAcceleration,  RadiantIntensity,  Radiance,  AngularMomentum,  Torque, MomentOfInertia,
-                                                       DLuminousFlux, DIlluminance, DAngularVelocity, DAngularAcceleration, DRadiantIntensity, DRadiance, DAngularMomentum, DTorque, DMomentOfInertia)
+import Numeric.Units.Dimensional.DK.Quantities hiding (LuminousFlux,  Illuminance,  AngularVelocity,  AngularAcceleration,  RadiantIntensity,  Radiance,  AngularMomentum,  Torque,  MomentOfInertia,  SolidAngle,
+                                                       DLuminousFlux, DIlluminance, DAngularVelocity, DAngularAcceleration, DRadiantIntensity, DRadiance, DAngularMomentum, DTorque, DMomentOfInertia, DSolidAngle)
 
 type DLuminousFlux = ToSIDim A.DLuminousFlux
 type LuminousFlux = Quantity DLuminousFlux
@@ -57,3 +57,6 @@ type Torque = Quantity DTorque
 
 type DMomentOfInertia = ToSIDim A.DMomentOfInertia
 type MomentOfInertia = Quantity DMomentOfInertia
+
+type DSolidAngle = ToSIDim A.DSolidAngle
+type SolidAngle = Quantity DSolidAngle
