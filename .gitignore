@@ -6,6 +6,8 @@ cabal.sandbox.config
 *.exe
 docs/*.aux
 docs/*.log
+docs/*.out
 docs/*.pdf
+docs/*.pyg
 docs/*.synctex.gz
 docs/*.toc
