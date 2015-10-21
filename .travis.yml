@@ -5,12 +5,8 @@ sudo: false
 addons:
   apt:
     packages:
-    - texlive-base
+    - texlive-full
     - biblatex
-    - texlive-latex-base
-    - texlive-latex-recommended
-    - texlive-latex-extra
-    - texlive-fonts-recommended
     - texlive-fonts-extra
     - texlive-science
 
