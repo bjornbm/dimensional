@@ -8,9 +8,10 @@
 }
 
 \newcommand{\packagename}[1]{\textit{#1}}
+\newcommand{\thispackage}{\packagename{dimensional-dk}}
 
 \title{
-	{Writing Physical Computations in Haskell with \packagename{dimensional-dk}}\\
+	{Writing Physical Computations in Haskell with \thispackage}\\
 	{\small{Version 0.9}}
 }
 \author{Björn Buckwalter and Douglas McClean}
@@ -24,9 +25,18 @@
 
 \chapter{Introduction}
 
+The \thispackage library provides data types for performing arithmetic with physical
+quantities. Information about the physical dimensions of each quantity is embedded in
+its type.
+
+This allows the compiler to statically verify that no dimensional mistakes have been
+made in a calculation. It also facilitates interconversion between quantities expressed
+in different units and provides documentation of dimension and units of each physical
+quantity a program manipulates.
+
 \section{Installation}
 
-The latest version of \packagename{dimensional-dk} can be installed in the ordinary way, using the following commands:
+The latest version of \thispackage can be installed in the ordinary way, using the following commands:
 
 \begin{lstlisting}[language=bash]
 cabal update
@@ -37,12 +47,13 @@ Historical versions and Haddock documentation are available at \url{http://hacka
 
 \section{Licensing}
 
-The \packagename{dimensional-dk} package is provided under a BSD 3-clause license.
+The \thispackage package is provided under a BSD 3-clause license.
 
 \section{Contributing}
 
-Contributions to \packagename{dimensional-dk} development, in the form of bug reports, feature requests, or pull requests, is welcome.
-The source code repository and issue tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional-dk}.
+Contributions to \thispackage development, in the form of bug reports,
+feature requests, or pull requests, are welcome. The source code repository and issue
+tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional-dk}.
 
 \chapter{Dimensional Arithmetic}
 
@@ -57,7 +68,7 @@ The source code repository and issue tracker are both hosted by GitHub at \url{h
 
 \section{\packagename{ad} for Automatic Differentiation}
 \section{\packagename{attoparsec} for Unit and Quantity Parsing}
-\section{\packagename{HaTeX} for \LaTeX{}\. Generation}
+\section{\packagename{HaTeX} for \LaTeX{} Generation}
 \section{\packagename{lens}}
 \section{\packagename{linear} for Linear Algebra}
 \section{\packagename{parsec} for Unit and Quantity Parsing}
@@ -65,7 +76,7 @@ The source code repository and issue tracker are both hosted by GitHub at \url{h
 \section{\packagename{vector} for Boxed and Unboxed Arrays}
 \section{\packagename{vector-space} for Linear Algebra}
 
-\chapter{Libraries Using \packagename{dimensional-dk}}
+\chapter{Libraries Using \thispackage}
 
 \section{\packagename{atmos} for Modeling Earth's Atmosphere}
 \section{\packagename{igrf} for Modeling Earth's Magnetic Field}
