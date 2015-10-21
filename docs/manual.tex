@@ -1,6 +1,11 @@
 \documentclass[12pt]{report}
 \usepackage[utf8]{inputenc}
 \usepackage{siunitx}
+\usepackage{listings}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=false,
+}
 
 \newcommand{\packagename}[1]{\textit{#1}}
 
@@ -18,6 +23,26 @@
 \tableofcontents
 
 \chapter{Introduction}
+
+\section{Installation}
+
+The latest version of \packagename{dimensional-dk} can be installed in the ordinary way, using the following commands:
+
+\begin{lstlisting}[language=bash]
+cabal update
+cabal install dimensional-dk
+\end{lstlisting}
+
+Historical versions and Haddock documentation are available at \url{http://hackage.haskell.org/package/dimensional-dk}.
+
+\section{Licensing}
+
+The \packagename{dimensional-dk} package is provided under a BSD 3-clause license.
+
+\section{Contributing}
+
+Contributions to \packagename{dimensional-dk} development, in the form of bug reports, feature requests, or pull requests, is welcome.
+The source code repository and issue tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional-dk}.
 
 \chapter{Dimensional Arithmetic}
 
