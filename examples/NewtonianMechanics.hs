@@ -33,8 +33,8 @@ rotationalMomentum i w = i * w
 rotationalPower :: (Num a) => Torque a -> AngularVelocity a -> Power a
 rotationalPower t w = t * w
 
-torque :: (Num a) => Force a -> Length a -> Torque a
-torque r f = r * f
+torque :: (Fractional a) => Force a -> Length a -> Torque a
+torque r f = r * f / (1 *~ radian)
 
 torqueFromChangeInMomentum :: (Fractional a) => AngularMomentum a -> Time a -> Torque a
 torqueFromChangeInMomentum dL dt = dL / dt
