@@ -9,6 +9,11 @@
 
 \newcommand{\packagename}[1]{\textit{#1}}
 \newcommand{\thispackage}{\packagename{dimensional-dk}}
+\newcommand{\experimentalpackage}{\packagename{dimensional-dk-experimental}}
+\newcommand{\classname}[1]{\textit{#1}}
+\newcommand{\typename}[1]{\textit{#1}}
+\newcommand{\modulename}[1]{\textit{#1}}
+\newcommand{\submodule}[1]{\modulename{Numeric.Units.Dimensional.DK.{#1}}}
 
 \title{
 	{Writing Physical Computations in Haskell with \thispackage}\\
@@ -36,7 +41,7 @@ quantity a program manipulates.
 
 \section{Installation}
 
-The latest version of \thispackage can be installed in the ordinary way, using the following commands:
+The latest version of \thispackage can be installed in the usual way, using the following commands:
 
 \begin{lstlisting}[language=bash]
 cabal update
@@ -69,17 +74,58 @@ tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional
 \section{\packagename{ad} for Automatic Differentiation}
 \section{\packagename{attoparsec} for Unit and Quantity Parsing}
 \section{\packagename{HaTeX} for \LaTeX{} Generation}
+\section{\packagename{ihaskell} for Interactive Notebooks}
+
+The IHaskell project provides support for interactive notebook documents containing
+Haskell code through the Jupyter project.
+
+Instances of \classname{IHaskellDisplay} for \typename{Quantity} and \typename{Unit}
+allow attractive \LaTeX{}-style display of dimensional values in your notebooks. These
+instances can be found in the \submodule{IHaskell} module of the \experimentalpackage{}
+package.
+
 \section{\packagename{lens}}
+
+Todo: Without taking a dependency on lens, offer a declaration that can convert a unit into a lens from quantities to numeric values.
+Explain here how to use that facility.
+
 \section{\packagename{linear} for Linear Algebra}
+
+Todo: create instances for linear's type classes, recognizing that they require the nasty Functor orphan instance.
+
 \section{\packagename{parsec} for Unit and Quantity Parsing}
 \section{\packagename{time} for Times and Dates}
+
+Users of the \packagename{time} package can find functions and lenses for converting
+between the \typename{DiffTime} representation and \thispackage{}'s \typename{Time} representation in the
+\submodule{Time} module of the \experimentalpackage{} package.
+
 \section{\packagename{vector} for Boxed and Unboxed Arrays}
+
+The \thispackage{} package provides instances of the \typename{Vector} and \typename{MVector} data families and the \classname{Unbox} class
+allowing \typename{Quantity}s to be stored in unboxed vectors for improved performance and reduced storage overhead.
+
 \section{\packagename{vector-space} for Linear Algebra}
+
+Users of the \packagename{vector-space} package can find appropriate instances of
+the \classname{AdditiveGroup} and \classname{VectorSpace} classes, along with an
+instance of \classname{InnerSpace} for dimensionless quantities, in the
+\submodule{VectorSpace} module of the \experimentalpackage{} package.
 
 \chapter{Libraries Using \thispackage}
 
 \section{\packagename{atmos} for Modeling Earth's Atmosphere}
+
+The \packagename{atmos} package provides a dimensionally-typed implementation of the 1976 International Standard
+Atmosphere, a model of how pressure, temperature, the speed of sound, and related quantities vary with
+altitude in the Earth's atmosphere.
+
 \section{\packagename{igrf} for Modeling Earth's Magnetic Field}
+
+The \packagename{igrf} package provides a dimensionally-typed implementation of the International Geomagnetic
+Reference Field, including parsing of model text files in the format released by the International Association of
+Geomagnetism and Aeronomy and the United States National Oceanographic and Atmospheric Administration. The
+package also directly includes the model coeffecients for the most recent model releases.
 
 \chapter{Included Dimensions and Units}
 
