@@ -3,9 +3,6 @@ module NewtonianMechanics where
 
 import Numeric.Units.Dimensional.DK.Prelude
 
-type DMomentum = DImpulse
-type Momentum = Quantity DMomentum
-
 translationalKineticEnergy :: (Fractional a) => Mass a -> Velocity a -> Energy a
 translationalKineticEnergy m v = m * v ^ pos2 / _2
 
