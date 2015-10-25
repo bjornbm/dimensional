@@ -199,7 +199,7 @@ module Numeric.Units.Dimensional.DK
     Dimension (Dim),
     -- ** Dimension Arithmetic
     -- $dimension-arithmetic
-    type (*), type (/), type (^), Root, Recip,
+    type (*), type (/), type (^), Root, Recip, type SIDim, type ToSIDim,
     -- ** Term Level Representation of Dimensions
     -- $dimension-terms
     Dimension' (Dim'), HasDimension(..), KnownDimension,
@@ -209,20 +209,22 @@ module Numeric.Units.Dimensional.DK
     negate, abs, nroot, sqrt, cbrt,
     -- ** Transcendental Functions
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
+    -- ** Dealing with Angles
+    removeAngles, coerceAngles,
     -- ** Operations on Collections
     -- $collections
     (*~~), (/~~), sum, mean, dimensionlessLength, nFromTo,
     -- * Dimension Synonyms
     -- $dimension-synonyms
-    DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
+    DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity, DPlaneAngle,
     -- * Quantity Synonyms
     -- $quantity-synonyms
-    Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity,
+    Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity, PlaneAngle,
     -- * Constants
     -- $constants
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
     -- * Constructing Units
-    prefix, siUnit, one,
+    prefix, baseUnit, siUnit, one,
     -- * On 'Functor', and Conversion Between Number Representations
     -- $functor
     dmap, changeRep
@@ -385,6 +387,7 @@ type ElectricCurrent          = Quantity DElectricCurrent
 type ThermodynamicTemperature = Quantity DThermodynamicTemperature
 type AmountOfSubstance        = Quantity DAmountOfSubstance
 type LuminousIntensity        = Quantity DLuminousIntensity
+type PlaneAngle               = Quantity DPlaneAngle
 
 {- $dimension-arithmetic
 When performing arithmetic on units and quantities the arithmetics
@@ -581,16 +584,10 @@ We continue by defining elementary functions on 'Dimensionless'
 that may be obviously useful.
 -}
 
-exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh
+exp, log, sinh, cosh, tanh, asinh, acosh, atanh
   :: Floating a => Dimensionless a -> Dimensionless a
 exp   = fmap Prelude.exp
 log   = fmap Prelude.log
-sin   = fmap Prelude.sin
-cos   = fmap Prelude.cos
-tan   = fmap Prelude.tan
-asin  = fmap Prelude.asin
-acos  = fmap Prelude.acos
-atan  = fmap Prelude.atan
 sinh  = fmap Prelude.sinh
 cosh  = fmap Prelude.cosh
 tanh  = fmap Prelude.tanh
@@ -598,22 +595,57 @@ asinh = fmap Prelude.asinh
 acosh = fmap Prelude.acosh
 atanh = fmap Prelude.atanh
 
+sin, cos, tan :: Floating a => PlaneAngle a -> Dimensionless a
+sin   = (*~ one) . Prelude.sin . (/~ baseUnit)
+cos   = (*~ one) . Prelude.cos . (/~ baseUnit)
+tan   = (*~ one) . Prelude.tan . (/~ baseUnit)
+
+asin, acos, atan :: Floating a => Dimensionless a -> PlaneAngle a
+asin  = (*~ baseUnit) . Prelude.asin . (/~ one)
+acos  = (*~ baseUnit) . Prelude.acos . (/~ one)
+atan  = (*~ baseUnit) . Prelude.atan . (/~ one)
+
+-- | Removes angular dimensions from a dimensional value by equating radians
+-- with the dimensionless quantity one.
+removeAngles :: Dimensional v ('Dim l m t i th n j pa) a -> Dimensional v (SIDim l m t i th n j) a
+removeAngles = coerceAngles
+
+-- | Equates values whose dimensions differ in plane angles by equating
+-- radians with the dimensionless quantity one.
+--
+-- See `removeAngles`, which offers a more specific result type, if you are only interested
+-- in ignoring angle dimensions.
+coerceAngles :: Dimensional v ('Dim l m t i th n j pa) a -> Dimensional v ('Dim l m t i th n j pa') a
+coerceAngles = coerce
+
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
 Dimensional x ** Dimensional y = Dimensional (x Prelude.** y)
 
 {-
 For 'atan2' the operands need not be dimensionless but they must be
-of the same type. The result will of course always be dimensionless.
+of the same type. The result will of course always be a plane angle.
 -}
 
-atan2 :: RealFloat a => Quantity d a -> Quantity d a -> Dimensionless a
+atan2 :: RealFloat a => Quantity d a -> Quantity d a -> PlaneAngle a
 atan2 (Dimensional y) (Dimensional x) = Dimensional (Prelude.atan2 y x)
+
+-- | A polymorphic 'Unit' which can be used in place of the coherent
+-- base unit of any dimension. This allows polymorphic quantity
+-- creation and destruction without exposing the 'Dimensional' constructor.
+--
+-- `siUnit` is similar but does not include the radians associated
+-- with plane angles.
+baseUnit :: Num a => Unit d a
+baseUnit = Dimensional 1
 
 -- | A polymorphic 'Unit' which can be used in place of the coherent
 -- SI base unit of any dimension. This allows polymorphic quantity
 -- creation and destruction without exposing the 'Dimensional' constructor.
-siUnit :: Num a => Unit d a
-siUnit = Dimensional 1
+--
+-- `baseUnit` is similar but includes the radians associated
+-- with plane angles.
+siUnit :: Num a => Unit (SIDim l m t i th n j) a
+siUnit = removeAngles baseUnit
 
 {-
 The only unit we will define in this module is 'one'.
@@ -626,7 +658,7 @@ The only unit we will define in this module is 'one'.
 -- appear in expressions. However, for us it is necessary to use 'one'
 -- as we would any other unit to perform the "boxing" of dimensionless values.
 one :: Num a => Unit DOne a
-one = siUnit
+one = baseUnit
 
 {- $constants
 For convenience we define some constants for small integer values
@@ -639,7 +671,7 @@ good measure.
 -- it to express zero Length or Capacitance or Velocity etc, in addition
 -- to the dimensionless value zero.
 _0 :: Num a => Quantity d a
-_0 = 0 *~ siUnit
+_0 = 0 *~ baseUnit
 
 _1, _2, _3, _4, _5, _6, _7, _8, _9 :: (Num a) => Dimensionless a
 _1 = 1 *~ one
@@ -704,7 +736,7 @@ even a requirement.
 -}
 instance (KnownDimension d, Show a) => Show (Quantity d a) where
       show q@(Dimensional x) = let powers = asList $ dimension q
-                                   units = ["m", "kg", "s", "A", "K", "mol", "cd"]
+                                   units = ["m", "kg", "s", "A", "K", "mol", "cd", "rad", "sr"]
                                    dims = concat $ zipWith dimUnit units powers
                                in show x ++ dims
 

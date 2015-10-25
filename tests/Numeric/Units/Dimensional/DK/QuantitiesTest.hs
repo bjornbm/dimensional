@@ -1,6 +1,7 @@
 module Numeric.Units.Dimensional.DK.QuantitiesTest where
 
 import Numeric.Units.Dimensional.DK.Prelude
+import Numeric.Units.Dimensional.DK
 import qualified Prelude
 
 -- These definitions simply verify that the type synonyms are
@@ -35,9 +36,9 @@ x11 = 1 *~ (candela / meter ^ pos2)
 -- definitions compile the type synonyms are good.
 
 y1 :: PlaneAngle Double
-y1 = 1 *~ (meter / meter)
+y1 = coerceAngles $ 1 *~ (meter / meter)
 y2 :: SolidAngle Double
-y2 = 1 *~ (meter ^ pos2 / meter ^ pos2)
+y2 = coerceAngles $ 1 *~ (meter ^ pos2 / meter ^ pos2)
 y3 :: Frequency Double
 y3 = 1 *~ (one / second)
 y4 :: Force Double

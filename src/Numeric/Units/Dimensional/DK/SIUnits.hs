@@ -118,7 +118,7 @@ We define the SI base units in the order of table 1.
 -}
 
 metre, meter :: Num a => Unit DLength a
-metre = siUnit -- International English.
+metre = baseUnit -- International English.
 meter = metre         -- American English.
 
 {-
@@ -130,17 +130,17 @@ The drawback is that we are forced to use 'Fractional'.
 -}
 
 gram    :: Fractional a => Unit DMass a
-gram    = milli siUnit
+gram    = milli baseUnit
 second  :: Num a => Unit DTime a
-second  = siUnit
+second  = baseUnit
 ampere  :: Num a => Unit DElectricCurrent a
-ampere  = siUnit
+ampere  = baseUnit
 kelvin  :: Num a => Unit DThermodynamicTemperature a
-kelvin  = siUnit
+kelvin  = baseUnit
 mole    :: Num a => Unit DAmountOfSubstance a
-mole    = siUnit
+mole    = baseUnit
 candela :: Num a => Unit DLuminousIntensity a
-candela = siUnit
+candela = baseUnit
 
 {- $derived-units
 From Table 3, SI derived units with special names and symbols, including the
@@ -148,9 +148,9 @@ radian and steradian.
 -}
 
 radian :: Num a => Unit DPlaneAngle a
-radian = one -- meter * meter ^ neg1
+radian = baseUnit -- meter * meter ^ neg1
 steradian :: Num a => Unit DSolidAngle a
-steradian = one -- meter ^ pos2 * meter ^ neg2
+steradian = baseUnit -- meter ^ pos2 * meter ^ neg2
 hertz :: Num a => Unit DFrequency a
 hertz = siUnit -- second ^ neg1
 newton :: Num a => Unit DForce a
@@ -184,9 +184,9 @@ appear here if we stricly followed table 3).
 -}
 
 lumen :: Num a => Unit DLuminousFlux a
-lumen = siUnit -- candela * steradian
+lumen = baseUnit -- candela * steradian
 lux :: Num a => Unit DIlluminance a
-lux = siUnit -- lumen / meter ^ pos2
+lux = baseUnit -- lumen / meter ^ pos2
 
 {- $celsius
 A problematic area is units which increase proportionally to the
