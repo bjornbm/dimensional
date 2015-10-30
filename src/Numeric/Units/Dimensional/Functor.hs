@@ -25,9 +25,9 @@ Note that, while this instance overlaps with that given for 'Dimensionless', it 
 
 Note that this is an orphan instance.
 -}
-module Numeric.Units.Dimensional.DK.Functor where
+module Numeric.Units.Dimensional.Functor where
 
-import Numeric.Units.Dimensional.DK
+import Numeric.Units.Dimensional
 
 -- | A 'Functor' instance for 'Dimensional'.
 --

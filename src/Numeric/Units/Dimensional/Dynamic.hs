@@ -14,7 +14,7 @@ Define types for manipulation of units and quantities without phantom types for 
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Numeric.Units.Dimensional.DK.Dynamic
+module Numeric.Units.Dimensional.Dynamic
 (
   AnyQuantity
 , demoteQuantity, promoteQuantity
@@ -22,8 +22,8 @@ module Numeric.Units.Dimensional.DK.Dynamic
 , demoteUnit, promoteUnit
 ) where
 
-import Numeric.Units.Dimensional.DK.Prelude hiding (lookup)
-import Numeric.Units.Dimensional.DK.UnitNames (UnitName, baseUnitName)
+import Numeric.Units.Dimensional.Prelude hiding (lookup)
+import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
 import Data.ExactPi
 import Data.Proxy
 

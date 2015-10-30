@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames
+module Numeric.Units.Dimensional.UnitNames.InterchangeNames
 (
   InterchangeNameAuthority(..),
   InterchangeName(..),

@@ -1,6 +1,6 @@
 {-# LANGUAGE PatternSynonyms #-}
 
-module Numeric.Units.Dimensional.DK.UnitNames
+module Numeric.Units.Dimensional.UnitNames
 (
   -- * Data Types
   UnitName, NameAtom, PrefixName, Metricality(..),
@@ -20,6 +20,6 @@ module Numeric.Units.Dimensional.DK.UnitNames
 )
 where
 
-import Numeric.Units.Dimensional.DK.UnitNames.Internal
-import Numeric.Units.Dimensional.DK.Variants
+import Numeric.Units.Dimensional.UnitNames.Internal
+import Numeric.Units.Dimensional.Variants
 import Prelude hiding ((*), (/), (^), product)

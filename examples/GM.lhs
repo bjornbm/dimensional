@@ -18,7 +18,7 @@ same epoch -- determine the value of 'mu' used to convert between the two.
 > {-# LANGUAGE NegativeLiterals #-}
 > module GM where
 
-> import Numeric.Units.Dimensional.DK.Prelude
+> import Numeric.Units.Dimensional.Prelude
 > import qualified Prelude
 
 }}}

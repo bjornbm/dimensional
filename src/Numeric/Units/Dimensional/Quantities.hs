@@ -28,7 +28,7 @@ dimensionality type synonyms are provided for each quantity type.
 
 -}
 
-module Numeric.Units.Dimensional.DK.Quantities 
+module Numeric.Units.Dimensional.Quantities 
 (
   -- * Quantities from the NIST Guide
   -- $nist-guide
@@ -72,7 +72,7 @@ module Numeric.Units.Dimensional.DK.Quantities
 )
 where
 
-import Numeric.Units.Dimensional.DK
+import Numeric.Units.Dimensional
   ( Dimension (Dim), Quantity, Dimensionless
   , DOne, DLuminousIntensity, DThermodynamicTemperature
   , Unit, DLength, (^)  -- Used only for 'square' and 'cubic'.

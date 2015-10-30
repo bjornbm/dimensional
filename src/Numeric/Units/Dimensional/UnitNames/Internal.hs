@@ -11,7 +11,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
-module Numeric.Units.Dimensional.DK.UnitNames.Internal
+module Numeric.Units.Dimensional.UnitNames.Internal
 where
 
 import Control.Monad (join)
@@ -22,9 +22,9 @@ import Data.Foldable (toList)
 import Data.Foldable (Foldable, toList)
 #endif
 import GHC.Generics
-import Numeric.Units.Dimensional.DK.Dimensions.TermLevel (Dimension', asList, HasDimension(..))
-import Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames
-import Numeric.Units.Dimensional.DK.Variants (Metricality(..))
+import Numeric.Units.Dimensional.Dimensions.TermLevel (Dimension', asList, HasDimension(..))
+import Numeric.Units.Dimensional.UnitNames.InterchangeNames
+import Numeric.Units.Dimensional.Variants (Metricality(..))
 import Prelude hiding ((*), (/), (^), product)
 import qualified Prelude as P
 

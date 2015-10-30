@@ -12,7 +12,7 @@ This module defines physical dimensions expressed in terms of
 the SI base dimensions, including arithmetic.
 
 -}
-module Numeric.Units.Dimensional.DK.Dimensions.TermLevel
+module Numeric.Units.Dimensional.Dimensions.TermLevel
 (
   -- * Type
   Dimension'(..),

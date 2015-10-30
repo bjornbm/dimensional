@@ -25,7 +25,7 @@ referenced are from <#note1 [1]> unless otherwise specified.
 
 -}
 
-module Numeric.Units.Dimensional.DK.SIUnits 
+module Numeric.Units.Dimensional.SIUnits 
 (
   -- * SI Base Units
   -- $base-units
@@ -62,11 +62,11 @@ module Numeric.Units.Dimensional.DK.SIUnits
 )
 where
 
-import Numeric.Units.Dimensional.DK
-import Numeric.Units.Dimensional.DK.Quantities
-import Numeric.Units.Dimensional.DK.UnitNames (PrefixName, applyPrefix, nMeter, nGram, nSecond, nAmpere, nKelvin, nMole, nCandela)
-import qualified Numeric.Units.Dimensional.DK.UnitNames as N
-import Numeric.Units.Dimensional.DK.UnitNames.Internal (ucum, ucumMetric)
+import Numeric.Units.Dimensional
+import Numeric.Units.Dimensional.Quantities
+import Numeric.Units.Dimensional.UnitNames (PrefixName, applyPrefix, nMeter, nGram, nSecond, nAmpere, nKelvin, nMole, nCandela)
+import qualified Numeric.Units.Dimensional.UnitNames as N
+import Numeric.Units.Dimensional.UnitNames.Internal (ucum, ucumMetric)
 import Numeric.NumType.DK.Integers ( pos3 )
 import Prelude ( (.), ($), Real, realToFrac, Num, Fractional, Floating, Integer, Rational, recip)
 import qualified Prelude

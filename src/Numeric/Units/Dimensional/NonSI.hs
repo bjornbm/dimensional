@@ -34,7 +34,7 @@ a conversion function similar to for degrees Celsius.
 
 -}
 
-module Numeric.Units.Dimensional.DK.NonSI 
+module Numeric.Units.Dimensional.NonSI 
 (
   -- * Units Defined By Experiment
   -- $values-obtained-experimentally
@@ -69,8 +69,8 @@ module Numeric.Units.Dimensional.DK.NonSI
 where
 
 import Data.ExactPi
-import Numeric.Units.Dimensional.DK.Prelude
-import Numeric.Units.Dimensional.DK.UnitNames.Internal (ucumMetric, ucum, dimensionalAtom)
+import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.UnitNames.Internal (ucumMetric, ucum, dimensionalAtom)
 import qualified Prelude
 
 {- $values-obtained-experimentally

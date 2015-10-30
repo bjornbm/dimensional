@@ -19,7 +19,7 @@
 Provides a type level representation of 'Variant's of dimensional values,
 which may be quantities or units.
 -}
-module Numeric.Units.Dimensional.DK.Variants
+module Numeric.Units.Dimensional.Variants
 (
   type Variant(..),
   Metricality(..),

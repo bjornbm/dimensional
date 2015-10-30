@@ -1,12 +1,12 @@
-name:                dimensional-dk
-version:             0.8.0.2
+name:                dimensional
+version:             1.0.0.0
 license:             BSD3
 license-file:        LICENSE
 copyright:           Bjorn Buckwalter 2006-2015
 author:              Bjorn Buckwalter
 maintainer:          bjorn@buckwalter.se
 stability:           experimental
-homepage:            http://dimensional.googlecode.com/
+homepage:            https://github.com/bjornbm/dimensional-dk/
 category:            Math, Physics
 synopsis:            Statically checked physical dimensions,
                      using Type Families and Data Kinds.
@@ -24,9 +24,10 @@ description:
     multiplication and division with units. The library is designed to, as
     far as is practical, enforce/encourage best practices of unit usage.
 
-    The dimensional-dk package differs from the dimensional package in that
-    the dimension tracking is implemented using Type Families and Data Kinds
-    rather than functional dependencies.
+    Version 1 of the dimensional package differs from earlier version in that
+    the dimension tracking is implemented using Closed Type Families and Data Kinds
+    rather than functional dependencies. This enables a number of features, including
+    improved support for unit names and quantities with statically-unknown dimensions.
 
     Requires GHC 7.8 or later.
 
@@ -47,30 +48,30 @@ library
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall
-  exposed-modules:     Numeric.Units.Dimensional.DK,
-                       Numeric.Units.Dimensional.DK.Prelude,
-                       Numeric.Units.Dimensional.DK.Quantities,
-                       Numeric.Units.Dimensional.DK.SIUnits,
-                       Numeric.Units.Dimensional.DK.NonSI,
-                       Numeric.Units.Dimensional.DK.Dimensions,
-                       Numeric.Units.Dimensional.DK.Dimensions.TermLevel,
-                       Numeric.Units.Dimensional.DK.Dimensions.TypeLevel,
-                       Numeric.Units.Dimensional.DK.Dynamic,
-                       Numeric.Units.Dimensional.DK.Functor,
-                       Numeric.Units.Dimensional.DK.UnitNames,
-                       Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames,
-                       Numeric.Units.Dimensional.DK.Variants
-  other-modules:       Numeric.Units.Dimensional.DK.UnitNames.Internal
+  exposed-modules:     Numeric.Units.Dimensional,
+                       Numeric.Units.Dimensional.Prelude,
+                       Numeric.Units.Dimensional.Quantities,
+                       Numeric.Units.Dimensional.SIUnits,
+                       Numeric.Units.Dimensional.NonSI,
+                       Numeric.Units.Dimensional.Dimensions,
+                       Numeric.Units.Dimensional.Dimensions.TermLevel,
+                       Numeric.Units.Dimensional.Dimensions.TypeLevel,
+                       Numeric.Units.Dimensional.Dynamic,
+                       Numeric.Units.Dimensional.Functor,
+                       Numeric.Units.Dimensional.UnitNames,
+                       Numeric.Units.Dimensional.UnitNames.InterchangeNames,
+                       Numeric.Units.Dimensional.Variants
+  other-modules:       Numeric.Units.Dimensional.UnitNames.Internal
 
 test-suite tests
   type:                exitcode-stdio-1.0
   main-is:             Test.hs
   hs-source-dirs:      tests
-  other-modules:       Numeric.Units.Dimensional.DK.QuantitiesTest,
-                       Numeric.Units.Dimensional.DK.Test
+  other-modules:       Numeric.Units.Dimensional.QuantitiesTest,
+                       Numeric.Units.Dimensional.Test
   default-language:    Haskell2010
   ghc-options:         -Wall
-  build-depends:       dimensional-dk,
+  build-depends:       dimensional,
                        HUnit,
                        base
 
@@ -81,7 +82,7 @@ benchmark simple
   build-depends:       base,
                        criterion,
                        deepseq,
-                       dimensional-dk
+                       dimensional
   default-language:    Haskell2010
   ghc-options:         -O2
   

@@ -1,8 +1,8 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
-module Numeric.Units.Dimensional.DK.Test where
+module Numeric.Units.Dimensional.Test where
 
-import Numeric.Units.Dimensional.DK.Prelude
+import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 import Test.HUnit
 

@@ -14,22 +14,22 @@ and a comprehensive set of SI units and units accepted for use with the SI.
 It re-exports the "Prelude", hiding arithmetic functions whose names collide with the dimensionally-typed versions supplied by this package.
 
 -}
-module Numeric.Units.Dimensional.DK.Prelude
-    ( module Numeric.Units.Dimensional.DK
-    , module Numeric.Units.Dimensional.DK.Quantities
-    , module Numeric.Units.Dimensional.DK.SIUnits
+module Numeric.Units.Dimensional.Prelude
+    ( module Numeric.Units.Dimensional
+    , module Numeric.Units.Dimensional.Quantities
+    , module Numeric.Units.Dimensional.SIUnits
     , module Numeric.NumType.DK.Integers
     , module Data.Foldable
     , module Prelude
     ) where
 
-import Numeric.Units.Dimensional.DK hiding
+import Numeric.Units.Dimensional hiding
     ( dmap
     )
 
-import Numeric.Units.Dimensional.DK.Quantities
+import Numeric.Units.Dimensional.Quantities
 
-import Numeric.Units.Dimensional.DK.SIUnits
+import Numeric.Units.Dimensional.SIUnits
 
 import Numeric.NumType.DK.Integers
     ( neg5, neg4, neg3, neg2, neg1, zero, pos1, pos2, pos3, pos4, pos5

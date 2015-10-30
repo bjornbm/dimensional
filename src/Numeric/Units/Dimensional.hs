@@ -191,7 +191,7 @@ particularly noteworthy.
 
 -}
 
-module Numeric.Units.Dimensional.DK
+module Numeric.Units.Dimensional
   ( 
     -- * Types
     -- $types
@@ -261,12 +261,12 @@ import Data.Ratio
 import Foreign.Ptr (Ptr, castPtr)
 import Foreign.Storable (Storable(..))
 import GHC.Generics
-import Numeric.Units.Dimensional.DK.Dimensions
-import Numeric.Units.Dimensional.DK.UnitNames hiding ((*), (/), (^), weaken, strengthen)
-import qualified Numeric.Units.Dimensional.DK.UnitNames.Internal as Name
-import Numeric.Units.Dimensional.DK.UnitNames.InterchangeNames (HasInterchangeName(..))
-import Numeric.Units.Dimensional.DK.Variants hiding (type (*))
-import qualified Numeric.Units.Dimensional.DK.Variants as V
+import Numeric.Units.Dimensional.Dimensions
+import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
+import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
+import Numeric.Units.Dimensional.UnitNames.InterchangeNames (HasInterchangeName(..))
+import Numeric.Units.Dimensional.Variants hiding (type (*))
+import qualified Numeric.Units.Dimensional.Variants as V
 import qualified Data.Vector.Generic.Mutable as M
 import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Unboxed.Base as U
