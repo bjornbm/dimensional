@@ -7,6 +7,7 @@ Data kinds and closed type families provide a flexible, safe, and discoverable i
 client code.
 
 [![Build Status](https://travis-ci.org/bjornbm/dimensional-dk.svg?branch=master)](https://travis-ci.org/bjornbm/dimensional-dk)
+[![Hackage Version](http://img.shields.io/hackage/v/dimensional.svg)](http://hackage.haskell.org/package/dimensional)
 
 Usage
 -----
