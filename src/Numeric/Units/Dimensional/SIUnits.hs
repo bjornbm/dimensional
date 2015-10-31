@@ -55,10 +55,7 @@ module Numeric.Units.Dimensional.SIUnits
   -- $multiples
   deka, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta,
   -- $submultiples
-  deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto,
-  -- * Difftime Conversion
-  -- $difftime
-  fromDiffTime, toDiffTime
+  deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto
 )
 where
 
@@ -68,7 +65,7 @@ import Numeric.Units.Dimensional.UnitNames (PrefixName, applyPrefix, nMeter, nGr
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.UnitNames.Internal (ucum, ucumMetric)
 import Numeric.NumType.DK.Integers ( pos3 )
-import Prelude ( (.), ($), Real, realToFrac, Num, Fractional, Floating, Integer, Rational, recip)
+import Prelude ( ($), Num, Fractional, Floating, Integer, Rational, recip)
 import qualified Prelude
 
 {- $multiples
@@ -298,19 +295,3 @@ unit of length directly tied to the meter, with a length of exactly
 
 astronomicalUnit :: Num a => Unit 'NonMetric DLength a
 astronomicalUnit = mkUnitZ (ucum "AU" "AU" "astronomical unit") 149597870700 $ meter
-
-{- $difftime
-It is not within the scope of this library to handle the complex
-task of date and time arithmetic. It is recommended to use the
-'Data.Time' library for handling dates and using 'Time' quantities
-only when time differences are involved in calculations with other
-quantities. In order to convert between the 'DiffTime' data type
-in the 'Data.Time' library and 'Time' quantities we provide the
-functions 'fromDiffTime' and 'toDiffTime'.
--}
-
-{-# DEPRECATED fromDiffTime, toDiffTime "These will probably go away." #-}
-fromDiffTime :: (Real a, Fractional b) => a -> Time b
-fromDiffTime = (*~ second) . realToFrac
-toDiffTime :: (Real a, Fractional a, Fractional b) => Time a -> b
-toDiffTime = realToFrac . (/~ second)
