@@ -6,7 +6,7 @@
     Stability  : Stable
     Portability: GHC only?
 
-Define types for manipulation of units and quantities without phantom types for their dimensions.
+Defines types for manipulation of units and quantities without phantom types for their dimensions.
 -}
 
 {-# LANGUAGE DataKinds #-}

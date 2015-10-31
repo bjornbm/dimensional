@@ -1,5 +1,19 @@
 {-# LANGUAGE PatternSynonyms #-}
 
+{- |
+   Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
+   License    : BSD3
+
+   Maintainer : bjorn@buckwalter.se
+   Stability  : Stable
+   Portability: GHC only
+
+This module provides types and functions for manipulating unit names.
+
+Please note that the details of the name representation may be less stable than the other APIs
+provided by this package, as new features using them are still being developed.
+
+-}
 module Numeric.Units.Dimensional.UnitNames
 (
   -- * Data Types
