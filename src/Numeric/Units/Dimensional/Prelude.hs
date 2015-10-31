@@ -8,7 +8,7 @@
 
 = Summary
 
-This module supplies a convenient set of imports for working with the dimensional-dk package, including aliases for common 'Quantity's and 'Dimension's,
+This module supplies a convenient set of imports for working with the dimensional package, including aliases for common 'Quantity's and 'Dimension's,
 and a comprehensive set of SI units and units accepted for use with the SI.
 
 It re-exports the "Prelude", hiding arithmetic functions whose names collide with the dimensionally-typed versions supplied by this package.

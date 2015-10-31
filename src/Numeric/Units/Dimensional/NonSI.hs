@@ -12,7 +12,7 @@
 = Summary
 
 This module defines units that are not part of the SI, with the
-exception of those defined in the "Numeric.Units.Dimensional.DK.SIUnits" module (units outside
+exception of those defined in the "Numeric.Units.Dimensional.SIUnits" module (units outside
 of the SI accepted for use with the SI).
 
 Any chapters, sections or tables referenced are from <#note1 [1]> unless
@@ -180,7 +180,7 @@ It seems that nearly every area of application has its own customary unit for me
 We include some of the common ones here. 'psi' was defined earlier.
 -}
 
--- | The bar is exactly 100,000 'Numeric.Units.Dimensional.DK.SIUnits.pascal'.
+-- | The bar is exactly 100,000 'Numeric.Units.Dimensional.SIUnits.pascal'.
 --
 -- From Wikipedia:
 --
@@ -263,7 +263,7 @@ stokes :: (Fractional a) => Unit 'Metric DKinematicViscosity a
 stokes = mkUnitQ (ucumMetric "St" "St" "Stokes") 1 $ centi meter ^ pos2 / second
 
 {- $temperature 
-These units of temperature are relative. For absolute temperatures, see 'Numeric.Units.Dimensional.DK.SIUnits.fromDegreeCelsiusAbsolute'.
+These units of temperature are relative. For absolute temperatures, see 'Numeric.Units.Dimensional.SIUnits.fromDegreeCelsiusAbsolute'.
 -}
 degreeFahrenheit :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
 degreeFahrenheit = mkUnitQ (ucum "[degF]" "°F" "degree Fahrenheit") (5 Prelude./ 9) $ degreeCelsius

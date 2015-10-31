@@ -453,7 +453,7 @@ behind convenient type classes as will be seen later.
 
 {- $dimension-synonyms
 Using our 'Dimension' data kind we define some type synonyms for convenience.
-We start with the base dimensions, others can be found in "Numeric.Units.Dimensional.DK.Quantities".
+We start with the base dimensions, others can be found in "Numeric.Units.Dimensional.Quantities".
 
 -}
 
@@ -461,7 +461,7 @@ We start with the base dimensions, others can be found in "Numeric.Units.Dimensi
 Using the above type synonyms we can define type synonyms for
 quantities of particular physical dimensions.
 
-Again we limit ourselves to the base dimensions, others can be found in "Numeric.Units.Dimensional.DK.Quantities".
+Again we limit ourselves to the base dimensions, others can be found in "Numeric.Units.Dimensional.Quantities".
 
 -}
 
@@ -518,7 +518,7 @@ Multiplication, division and powers apply to both units and quantities.
 -- Because the power chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
 -- of the exponent in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
 -- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
--- also reexported by "Numeric.Units.Dimensional.DK.Prelude".
+-- also reexported by "Numeric.Units.Dimensional.Prelude".
 --
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
@@ -568,7 +568,7 @@ for units as well as quantities.
 -- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
 -- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
 -- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
--- also reexported by "Numeric.Units.Dimensional.DK.Prelude".
+-- also reexported by "Numeric.Units.Dimensional.Prelude".
 --
 -- Also available in operator form, see '^/'.
 nroot :: (KnownTypeInt n, Floating a)
@@ -608,7 +608,7 @@ prefer such.
 -- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
 -- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
 -- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
--- also reexported by "Numeric.Units.Dimensional.DK.Prelude".
+-- also reexported by "Numeric.Units.Dimensional.Prelude".
 --
 -- Also available in prefix form, see 'nroot'.
 (^/) :: (KnownTypeInt n, Floating a)
@@ -774,7 +774,7 @@ tau = _2 * pi
 We intentionally decline to provide a 'Functor' instance for 'Dimensional' because its use breaks the
 abstraction of physical dimensions.
 
-If you feel your work requires this instance, it is provided as an orphan in "Numeric.Units.Dimensional.DK.Functor".
+If you feel your work requires this instance, it is provided as an orphan in "Numeric.Units.Dimensional.Functor".
 
 -}
 

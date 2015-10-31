@@ -12,7 +12,7 @@ a single import for convenience.
 Presuming that users intend to work primarily with type level dimensions, this module hides
 arithmetic operators over term level dimensions and aliases for the base term-level dimensions
 to avoid namespace pollution. These features are available directly from
-"Numeric.Units.Dimensional.DK.Dimensions.TermLevel" if desired.
+"Numeric.Units.Dimensional.Dimensions.TermLevel" if desired.
 -}
 module Numeric.Units.Dimensional.Dimensions
 (

@@ -289,7 +289,7 @@ metricTon = tonne                   -- American name.
 {- $values-obtained-experimentally
 We decline to provide here those units - listed in Table 7 - which,
 while accepted for use with the SI, have values which are determined experimentally.
-For versioning purposes, those units can be found in "Numeric.Units.Dimensional.DK.NonSI".
+For versioning purposes, those units can be found in "Numeric.Units.Dimensional.NonSI".
 
 However, in 2012 the IAU redefined the astronomical unit as a conventional
 unit of length directly tied to the meter, with a length of exactly

@@ -34,7 +34,7 @@ import qualified Prelude as P
 
 -- | A physical dimension, encoded as 7 integers, representing a factorization of the dimension into the
 -- 7 SI base dimensions. By convention they are stored in the same order as 
--- in the 'Numeric.Units.Dimensional.DK.Dimensions.TypeLevel.Dimension' data kind.
+-- in the 'Numeric.Units.Dimensional.Dimensions.TypeLevel.Dimension' data kind.
 data Dimension' = Dim' !Int !Int !Int !Int !Int !Int !Int 
   deriving (Show, Eq, Ord)
 

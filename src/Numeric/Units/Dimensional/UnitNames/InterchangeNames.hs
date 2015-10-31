@@ -14,8 +14,8 @@ import GHC.Generics
 
 -- | Represents the authority which issued an interchange name for a unit.
 data InterchangeNameAuthority = UCUM -- ^ The interchange name originated with the Unified Code for Units of Measure.
-                              | DimensionalLibrary -- ^ The interchange name originated with the dimensional-dk library.
-                              | Custom -- ^ The interchange name originated with a user of the dimensional-dk library.
+                              | DimensionalLibrary -- ^ The interchange name originated with the dimensional library.
+                              | Custom -- ^ The interchange name originated with a user of the dimensional library.
   deriving (Eq, Ord, Show, Data, Typeable, Generic)
 
 data InterchangeName = InterchangeName { name :: String, authority :: InterchangeNameAuthority }
