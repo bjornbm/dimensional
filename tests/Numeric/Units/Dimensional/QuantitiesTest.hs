@@ -1,6 +1,6 @@
-module Numeric.Units.Dimensional.DK.QuantitiesTest where
+module Numeric.Units.Dimensional.QuantitiesTest where
 
-import Numeric.Units.Dimensional.DK.Prelude
+import Numeric.Units.Dimensional.Prelude
 import qualified Prelude
 
 -- These definitions simply verify that the type synonyms are

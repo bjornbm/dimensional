@@ -28,7 +28,7 @@ dimensionality type synonyms are provided for each quantity type.
 
 -}
 
-module Numeric.Units.Dimensional.DK.Quantities 
+module Numeric.Units.Dimensional.Quantities 
 (
   -- * Quantities from the NIST Guide
   -- $nist-guide
@@ -72,16 +72,18 @@ module Numeric.Units.Dimensional.DK.Quantities
 )
 where
 
-import Numeric.Units.Dimensional.DK
+import Numeric.Units.Dimensional
   ( Dimension (Dim), Quantity, Dimensionless
   , DOne, DLuminousIntensity, DThermodynamicTemperature
   , Unit, DLength, (^)  -- Used only for 'square' and 'cubic'.
+  , Metricality(..)
   )
 import Numeric.NumType.DK.Integers
   ( TypeInt (Neg3, Neg2, Neg1, Zero, Pos1, Pos2, Pos3, Pos4)
   , pos2, pos3  -- Used only for 'square' and 'cubic'.
   )
 import Prelude (Fractional)
+import Data.Typeable
 
 {- $nist-guide
 The following quantities are all from the NIST publication "Guide
@@ -416,9 +418,9 @@ to the definitions of 'DLength' and 'DVolume'.
 -}
 
 -- | Constructs a unit of area from a unit of length, taking the area of a square whose sides are that length.
-square :: Fractional a => Unit DLength a -> Unit DArea a
+square :: (Fractional a, Typeable m) => Unit m DLength a -> Unit 'NonMetric DArea a
 square x = x ^ pos2
 
 -- | Constructs a unit of volume from a unit of length, taking the volume of a cube whose sides are that length.
-cubic  :: Fractional a => Unit DLength a -> Unit DVolume a
+cubic  :: (Fractional a, Typeable m) => Unit m DLength a -> Unit 'NonMetric DVolume a
 cubic  x = x ^ pos3

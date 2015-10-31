@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module NewtonianMechanics where
 
-import Numeric.Units.Dimensional.DK.Prelude
+import Numeric.Units.Dimensional.Prelude
 
 translationalKineticEnergy :: (Fractional a) => Mass a -> Velocity a -> Energy a
 translationalKineticEnergy m v = m * v ^ pos2 / _2

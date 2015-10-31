@@ -1,3 +1,7 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE NumDecimals #-}
+{-# LANGUAGE RankNTypes #-}
+
 {- |
    Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
    License    : BSD3
@@ -21,7 +25,7 @@ referenced are from <#note1 [1]> unless otherwise specified.
 
 -}
 
-module Numeric.Units.Dimensional.DK.SIUnits 
+module Numeric.Units.Dimensional.SIUnits 
 (
   -- * SI Base Units
   -- $base-units
@@ -58,10 +62,13 @@ module Numeric.Units.Dimensional.DK.SIUnits
 )
 where
 
-import Numeric.Units.Dimensional.DK
-import Numeric.Units.Dimensional.DK.Quantities
+import Numeric.Units.Dimensional
+import Numeric.Units.Dimensional.Quantities
+import Numeric.Units.Dimensional.UnitNames (PrefixName, applyPrefix, nMeter, nGram, nSecond, nAmpere, nKelvin, nMole, nCandela)
+import qualified Numeric.Units.Dimensional.UnitNames as N
+import Numeric.Units.Dimensional.UnitNames.Internal (ucum, ucumMetric)
 import Numeric.NumType.DK.Integers ( pos3 )
-import Prelude ( (.), Num, Real, realToFrac, Fractional, Floating, recip )
+import Prelude ( (.), ($), Real, realToFrac, Num, Fractional, Floating, Integer, Rational, recip)
 import qualified Prelude
 
 {- $multiples
@@ -76,36 +83,42 @@ section 6.2.6 "Unacceptability of stand-alone prefixes".
 We define all SI prefixes from Table 5. Multiples first.
 -}
 
+applyMultiple :: (Num a) => PrefixName -> Integer -> Unit 'Metric d a -> Unit 'NonMetric d a
+applyMultiple p x u = mkUnitZ (applyPrefix p (name u)) x u
+
 deka, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta
-  :: Num a => Unit d a -> Unit d a
-deka  = prefix 10 -- International English.
+  :: Num a => Unit 'Metric d a -> Unit 'NonMetric d a
+deka  = applyMultiple N.deka 10 -- International English.
 deca  = deka      -- American English.
-hecto = prefix 100
-kilo  = prefix 1000
-mega  = kilo . kilo
-giga  = kilo . mega
-tera  = kilo . giga
-peta  = kilo . tera
-exa   = kilo . peta
-zetta = kilo . exa
-yotta = kilo . zetta
+hecto = applyMultiple N.hecto 100
+kilo  = applyMultiple N.kilo 1e3
+mega  = applyMultiple N.mega 1e6
+giga  = applyMultiple N.giga 1e9
+tera  = applyMultiple N.tera 1e12
+peta  = applyMultiple N.peta 1e15
+exa   = applyMultiple N.exa 1e18
+zetta = applyMultiple N.zetta 1e21
+yotta = applyMultiple N.yotta 1e24
 
 {- $submultiples
 Then the submultiples.
 -}
 
+applySubmultiple :: (Fractional a) => PrefixName -> Rational -> Unit 'Metric d a -> Unit 'NonMetric d a
+applySubmultiple p x u = mkUnitQ (applyPrefix p (name u)) x u
+
 deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto
-  :: Fractional a => Unit d a -> Unit d a
-deci  = prefix 0.1
-centi = prefix 0.01
-milli = prefix 1e-3
-micro = prefix 1e-6
-nano  = prefix 1e-9
-pico  = prefix 1e-12
-femto = prefix 1e-15
-atto  = prefix 1e-18
-zepto = prefix 1e-21
-yocto = prefix 1e-24
+  :: Fractional a => Unit 'Metric d a -> Unit 'NonMetric d a
+deci  = applySubmultiple N.deci 0.1
+centi = applySubmultiple N.centi 0.01
+milli = applySubmultiple N.milli 1e-3
+micro = applySubmultiple N.micro 1e-6
+nano  = applySubmultiple N.nano 1e-9
+pico  = applySubmultiple N.pico 1e-12
+femto = applySubmultiple N.femto 1e-15
+atto  = applySubmultiple N.atto 1e-18
+zepto = applySubmultiple N.zepto 1e-21
+yocto = applySubmultiple N.yocto 1e-24
 
 {- $base-units
 These are the base units from section 4.1. To avoid a
@@ -117,8 +130,8 @@ singular form, as allowed by section 9.7 "Other spelling conventions".
 We define the SI base units in the order of table 1.
 -}
 
-metre, meter :: Num a => Unit DLength a
-metre = siUnit -- International English.
+metre, meter :: Num a => Unit 'Metric DLength a
+metre = mkUnitZ nMeter 1 siUnit -- International English.
 meter = metre         -- American English.
 
 {-
@@ -129,64 +142,64 @@ The drawback is that we are forced to use 'Fractional'.
 
 -}
 
-gram    :: Fractional a => Unit DMass a
-gram    = milli siUnit
-second  :: Num a => Unit DTime a
-second  = siUnit
-ampere  :: Num a => Unit DElectricCurrent a
-ampere  = siUnit
-kelvin  :: Num a => Unit DThermodynamicTemperature a
-kelvin  = siUnit
-mole    :: Num a => Unit DAmountOfSubstance a
-mole    = siUnit
-candela :: Num a => Unit DLuminousIntensity a
-candela = siUnit
+gram    :: Fractional a => Unit 'Metric DMass a
+gram    = mkUnitQ nGram 1e-3 siUnit
+second  :: Num a => Unit 'Metric DTime a
+second  = mkUnitZ nSecond 1 siUnit
+ampere  :: Num a => Unit 'Metric DElectricCurrent a
+ampere  = mkUnitZ nAmpere 1 siUnit
+kelvin  :: Num a => Unit 'Metric DThermodynamicTemperature a
+kelvin  = mkUnitZ nKelvin 1 siUnit
+mole    :: Num a => Unit 'Metric DAmountOfSubstance a
+mole    = mkUnitZ nMole 1 siUnit
+candela :: Num a => Unit 'Metric DLuminousIntensity a
+candela = mkUnitZ nCandela 1 siUnit
 
 {- $derived-units
 From Table 3, SI derived units with special names and symbols, including the
 radian and steradian.
 -}
 
-radian :: Num a => Unit DPlaneAngle a
-radian = one -- meter * meter ^ neg1
-steradian :: Num a => Unit DSolidAngle a
-steradian = one -- meter ^ pos2 * meter ^ neg2
-hertz :: Num a => Unit DFrequency a
-hertz = siUnit -- second ^ neg1
-newton :: Num a => Unit DForce a
-newton = siUnit -- kilo gram * meter * second ^ neg2
-pascal :: Num a => Unit DPressure a
-pascal = siUnit -- newton / meter ^ pos2
-joule :: Num a => Unit DEnergy a
-joule = siUnit -- newton * meter
-watt :: Num a => Unit DPower a
-watt = siUnit -- joule / second
-coulomb :: Num a => Unit DElectricCharge a
-coulomb = siUnit -- second * ampere
-volt :: Num a => Unit DElectricPotential a
-volt = siUnit -- watt / ampere
-farad :: Num a => Unit DCapacitance a
-farad = siUnit -- coulomb / volt
-ohm :: Num a => Unit DElectricResistance a
-ohm = siUnit -- volt / ampere
-siemens :: Num a => Unit DElectricConductance a
-siemens = siUnit -- ampere / volt
-weber :: Num a => Unit DMagneticFlux a
-weber = siUnit -- volt * second
-tesla :: Num a => Unit DMagneticFluxDensity a
-tesla = siUnit -- weber / meter ^ pos2
-henry :: Num a => Unit DInductance a
-henry = siUnit -- weber / ampere
+radian :: Num a => Unit 'Metric DPlaneAngle a
+radian = mkUnitZ (ucumMetric "rad" "rad" "radian") 1 siUnit -- meter * meter ^ neg1
+steradian :: Num a => Unit 'Metric DSolidAngle a
+steradian = mkUnitZ (ucumMetric "sr" "sr" "steradian") 1 siUnit -- meter ^ pos2 * meter ^ neg2
+hertz :: Num a => Unit 'Metric DFrequency a
+hertz = mkUnitZ (ucumMetric "Hz" "Hz" "Hertz") 1 $ siUnit
+newton :: Num a => Unit 'Metric DForce a
+newton = mkUnitZ (ucumMetric "N" "N" "Newton") 1 $ siUnit
+pascal :: Num a => Unit 'Metric DPressure a
+pascal = mkUnitZ (ucumMetric "Pa" "Pa" "Pascal") 1 $ siUnit
+joule :: Num a => Unit 'Metric DEnergy a
+joule = mkUnitZ (ucumMetric "J" "J" "Joule") 1 $ siUnit
+watt :: Num a => Unit 'Metric DPower a
+watt = mkUnitZ (ucumMetric "W" "W" "Watt") 1 $ siUnit
+coulomb :: Num a => Unit 'Metric DElectricCharge a
+coulomb = mkUnitZ (ucumMetric "C" "C" "Coulomb") 1 $ siUnit
+volt :: Num a => Unit 'Metric DElectricPotential a
+volt = mkUnitZ (ucumMetric "V" "V" "Volt") 1 $ siUnit
+farad :: Num a => Unit 'Metric DCapacitance a
+farad = mkUnitZ (ucumMetric "F" "F" "Farad") 1 $ siUnit
+ohm :: Num a => Unit 'Metric DElectricResistance a
+ohm = mkUnitZ (ucumMetric "Ohm" "Ω" "Ohm") 1 $ siUnit
+siemens :: Num a => Unit 'Metric DElectricConductance a
+siemens = mkUnitZ (ucumMetric "S" "S" "Siemens") 1 $ siUnit
+weber :: Num a => Unit 'Metric DMagneticFlux a
+weber = mkUnitZ (ucumMetric "Wb" "Wb" "Weber") 1 $ siUnit
+tesla :: Num a => Unit 'Metric DMagneticFluxDensity a
+tesla = mkUnitZ (ucumMetric "T" "T" "Tesla") 1 $ siUnit
+henry :: Num a => Unit 'Metric DInductance a
+henry = mkUnitZ (ucumMetric "H" "H" "Henry") 1 $ siUnit
 
 {-
 We defer the definition of Celcius temperature to another section (would
 appear here if we stricly followed table 3).
 -}
 
-lumen :: Num a => Unit DLuminousFlux a
-lumen = siUnit -- candela * steradian
-lux :: Num a => Unit DIlluminance a
-lux = siUnit -- lumen / meter ^ pos2
+lumen :: Num a => Unit 'Metric DLuminousFlux a
+lumen = mkUnitZ (ucumMetric "lm" "lm" "lumen") 1 $ siUnit
+lux :: Num a => Unit 'Metric DIlluminance a
+lux = mkUnitZ (ucumMetric "lx" "lx" "lux") 1 $ siUnit
 
 {- $celsius
 A problematic area is units which increase proportionally to the
@@ -202,12 +215,12 @@ The function 'fromDegreeCelsiusAbsolute' should be used in lieu of
 when working with absolute temperatures.
 -}
 
-degreeCelsius :: Num a => Unit DCelsiusTemperature a
+degreeCelsius :: Num a => Unit 'Metric DCelsiusTemperature a
 degreeCelsius = kelvin
 
-fromDegreeCelsiusAbsolute :: Fractional a => a -> ThermodynamicTemperature a
+fromDegreeCelsiusAbsolute :: Floating a => a -> ThermodynamicTemperature a
 fromDegreeCelsiusAbsolute x = x *~ degreeCelsius + 273.15 *~ degreeCelsius
-toDegreeCelsiusAbsolute :: Fractional a => ThermodynamicTemperature a -> a
+toDegreeCelsiusAbsolute :: Floating a => ThermodynamicTemperature a -> a
 toDegreeCelsiusAbsolute x = (x - 273.15 *~ degreeCelsius) /~ degreeCelsius
 
 {- $health
@@ -216,14 +229,14 @@ The last units from Table 3 are SI derived units with special names and symbols 
 of safeguarding human health.
 -}
 
-becquerel :: Num a => Unit DActivity a
-becquerel = siUnit -- second ^ neg1
-gray :: Num a => Unit DAbsorbedDose a
-gray = siUnit -- joule / kilo gram
-sievert :: Num a => Unit DDoseEquivalent a
-sievert = siUnit -- joule / kilo gram
-katal :: Num a => Unit DCatalyticActivity a
-katal = siUnit -- mole / second
+becquerel :: Num a => Unit 'Metric DActivity a
+becquerel = mkUnitZ (ucumMetric "Bq" "Bq" "Becquerel") 1 $ siUnit
+gray :: Num a => Unit 'Metric DAbsorbedDose a
+gray = mkUnitZ (ucumMetric "Gy" "Gy" "Gray") 1 $ siUnit
+sievert :: Num a => Unit 'Metric DDoseEquivalent a
+sievert = mkUnitZ (ucumMetric "Sv" "Sv" "Sievert") 1 $ siUnit
+katal :: Num a => Unit 'Metric DCatalyticActivity a
+katal = mkUnitZ (ucumMetric "kat" "kat" "katal") 1 $ siUnit
 
 {- $accepted-units
 There are several units that are not strictly part of the SI but
@@ -235,10 +248,10 @@ From Table 6, Units accepted for use with the SI.
 We start with time which we grant exclusive rights to 'minute' and
 'second'.
 -}
-minute, hour, day :: Num a => Unit DTime a
-minute = prefix 60 second
-hour   = prefix 60 minute
-day    = prefix 24 hour -- Mean solar day.
+minute, hour, day :: Num a => Unit 'NonMetric DTime a
+minute = mkUnitZ (ucum "min" "min" "minute") 60 $ second
+hour   = mkUnitZ (ucum "h" "h" "hour")       60 $ minute
+day    = mkUnitZ (ucum "d" "d" "day")        24 $ hour -- Mean solar day.
 
 {- $arc-units
 
@@ -246,10 +259,10 @@ Since 'minute' and 'second' are already in use for time we use
 'arcminute' and 'arcsecond' <#note2 [2]> for plane angle instead.
 -}
 
-degree, arcminute, arcsecond :: Floating a => Unit DPlaneAngle a
-degree = prefix (Prelude.pi Prelude./ 180) radian
-arcminute = prefix (recip 60) degreeOfArc
-arcsecond = prefix (recip 60) minuteOfArc
+degree, arcminute, arcsecond :: Floating a => Unit 'NonMetric DPlaneAngle a
+degree    = mkUnitR (ucum "deg" "°" "degree")    (Prelude.pi Prelude./ 180) $ radian
+arcminute = mkUnitR (ucum "'" "'" "arcminute")   (recip 60)                 $ degreeOfArc
+arcsecond = mkUnitR (ucum "''" "''" "arcsecond") (recip 60)                 $ minuteOfArc
 
 {- $arc-units-alternate
 Alternate (longer) forms of the above. In particular 'degreeOfArc'
@@ -257,34 +270,34 @@ can be used if there is a percieved need to disambiguate from e.g.
 temperature.
 -}
 
-degreeOfArc, minuteOfArc, secondOfArc :: Floating a => Unit DPlaneAngle a
+degreeOfArc, minuteOfArc, secondOfArc :: Floating a => Unit 'NonMetric DPlaneAngle a
 degreeOfArc = degree
 secondOfArc = arcsecond
 minuteOfArc = arcminute
 
-hectare :: Fractional a => Unit DArea a
+hectare :: Fractional a => Unit 'NonMetric DArea a
 hectare = square (hecto meter)
 
-litre, liter :: Fractional a => Unit DVolume a
-litre = deci meter ^ pos3 -- International English.
+litre, liter :: Fractional a => Unit 'Metric DVolume a
+litre = mkUnitQ (ucumMetric "L" "L" "litre") 1 $ deci meter ^ pos3 -- International English.
 liter = litre             -- American English.
 
-tonne, metricTon :: Fractional a => Unit DMass a
-tonne     = prefix 1000 (kilo gram) -- Name in original SI text.
+tonne, metricTon :: Num a => Unit 'Metric DMass a
+tonne     = mkUnitZ (ucumMetric "t" "t" "tonne") 1000 $ siUnit -- Name in original SI text.
 metricTon = tonne                   -- American name.
 
 {- $values-obtained-experimentally
 We decline to provide here those units - listed in Table 7 - which,
 while accepted for use with the SI, have values which are determined experimentally.
-For versioning purposes, those units can be found in "Numeric.Units.Dimensional.DK.NonSI".
+For versioning purposes, those units can be found in "Numeric.Units.Dimensional.NonSI".
 
 However, in 2012 the IAU redefined the astronomical unit as a conventional
 unit of length directly tied to the meter, with a length of exactly
 149,597,870,700 m and the official abbreviation of au <#note3 [3]>. We therefore include it here.
 -}
 
-astronomicalUnit :: Num a => Unit DLength a
-astronomicalUnit = prefix 149597870700 meter
+astronomicalUnit :: Num a => Unit 'NonMetric DLength a
+astronomicalUnit = mkUnitZ (ucum "AU" "AU" "astronomical unit") 149597870700 $ meter
 
 {- $difftime
 It is not within the scope of this library to handle the complex

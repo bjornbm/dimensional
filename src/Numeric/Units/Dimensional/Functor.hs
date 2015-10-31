@@ -25,9 +25,9 @@ Note that, while this instance overlaps with that given for 'Dimensionless', it 
 
 Note that this is an orphan instance.
 -}
-module Numeric.Units.Dimensional.DK.Functor where
+module Numeric.Units.Dimensional.Functor where
 
-import Numeric.Units.Dimensional.DK
+import Numeric.Units.Dimensional
 
 -- | A 'Functor' instance for 'Dimensional'.
 --
@@ -36,5 +36,5 @@ import Numeric.Units.Dimensional.DK
 -- Note that, while this instance overlaps with that given for 'Dimensionless', it is confluent with that instance.
 --
 -- Note that this is an orphan instance.
-instance {-# OVERLAPPING #-} Functor (Dimensional v d) where
+instance {-# OVERLAPPING #-} (KnownVariant v) => Functor (Dimensional v d) where
   fmap = dmap
