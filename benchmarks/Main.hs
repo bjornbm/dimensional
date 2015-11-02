@@ -3,7 +3,7 @@
 module Main where
 
 import Criterion.Main
-import Numeric.Units.Dimensional.DK.Prelude
+import Numeric.Units.Dimensional.Prelude
 import qualified Prelude as P
 
 main :: IO ()

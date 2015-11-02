@@ -1,5 +1,4 @@
-dimensional-dk
-==============
+# dimensional
 
 This library provides statically-checked dimensional arithmetic for physical quantities, using the 7 SI base dimensions.
 
@@ -7,11 +6,11 @@ Data kinds and closed type families provide a flexible, safe, and discoverable i
 client code.
 
 [![Build Status](https://travis-ci.org/bjornbm/dimensional-dk.svg?branch=master)](https://travis-ci.org/bjornbm/dimensional-dk)
+[![Hackage Version](http://img.shields.io/hackage/v/dimensional.svg)](http://hackage.haskell.org/package/dimensional)
 
-Usage
------
+## Usage
 
-Simply importing `Numeric.Units.Dimensional.DK.Prelude` provides access to dimensional arithmetic opertors, SI units and other common units
+Simply importing `Numeric.Units.Dimensional.Prelude` provides access to dimensional arithmetic opertors, SI units and other common units
 accepted for use with the SI, and convenient aliases for quantities with commonly used dimensions.
 
 The `Unit d a` type represents a unit with dimension `d`, whose conversion factor to the coherent SI base unit of the corresponding dimension
@@ -20,13 +19,13 @@ provided for `Fractional` or `Num` values.
 
 Similarly, the `Quantity d a` type represents a quantity with dimension `d`, whose numeric value is of type `a`. Aliases allow the use of, e.g.,
 `Length Double` to mean `Quantity DLength Double`. A complete list of available aliases is given in the haddock documentation for the
-`Numeric.Units.Dimensional.DK.Quantities`.
+`Numeric.Units.Dimensional.Quantities`.
 
 ```haskell
 {-# LANGUAGE NoImplicitPrelude #-}
 
-import Numeric.Units.Dimensional.DK.Prelude
-import Numeric.Units.Dimensional.DK.NonSI (gee)
+import Numeric.Units.Dimensional.Prelude
+import Numeric.Units.Dimensional.NonSI (gee)
 
 radiusOfEarth :: Length Double
 radiusOfEarth = 6371 *~ kilo meter
@@ -45,8 +44,7 @@ approximateAccelerationDueToGravityOnEarth = gravitationalFieldStrength massOfEa
 differenceFromStandardValue = approximateAccelerationDueToGravityOnEarth /~ gee
 ```
 
-Contributing
-------------
+## Contributing
 
 For project information (issues, updates, wiki, examples) see:
   https://github.com/bjornbm/dimensional-dk

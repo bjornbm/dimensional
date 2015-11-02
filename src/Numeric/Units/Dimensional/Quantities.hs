@@ -28,7 +28,7 @@ dimensionality type synonyms are provided for each quantity type.
 
 -}
 
-module Numeric.Units.Dimensional.DK.Quantities 
+module Numeric.Units.Dimensional.Quantities 
 (
   -- * Quantities from the NIST Guide
   -- $nist-guide
@@ -47,7 +47,7 @@ module Numeric.Units.Dimensional.DK.Quantities
   MolarEnergy, MolarEntropy, MolarHeatCapacity, Exposure, AbsorbedDoseRate,
   -- * Quantities not from the NIST Guide
   -- $not-nist-guide
-  Impulse, MassFlow, VolumeFlow, GravitationalParameter, KinematicViscosity, FirstMassMoment, MomentOfInertia, AngularMomentum,
+  Impulse, Momentum, MassFlow, VolumeFlow, GravitationalParameter, KinematicViscosity, FirstMassMoment, MomentOfInertia, AngularMomentum,
   ThermalResistivity, ThermalConductance, ThermalResistance, HeatTransferCoefficient, ThermalAdmittance, ThermalInsulance,
   Jerk, Angle, Thrust, Torque, EnergyPerUnitMass,
   -- * Powers of Unit Lengths
@@ -66,22 +66,24 @@ module Numeric.Units.Dimensional.DK.Quantities
   DIrradiance, DRadiantIntensity, DRadiance, DHeatCapacity, DEntropy, DSpecificHeatCapacity, DSpecificEntropy,
   DThermalConductivity, DEnergyDensity, DElectricFieldStrength, DElectricChargeDensity, DElectricFluxDensity, DPermittivity, DPermeability,
   DMolarEnergy, DMolarEntropy, DMolarHeatCapacity, DExposure, DAbsorbedDoseRate,
-  DImpulse, DMassFlow, DVolumeFlow, DGravitationalParameter, DKinematicViscosity, DFirstMassMoment, DMomentOfInertia, DAngularMomentum,
+  DImpulse, DMomentum, DMassFlow, DVolumeFlow, DGravitationalParameter, DKinematicViscosity, DFirstMassMoment, DMomentOfInertia, DAngularMomentum,
   DThermalResistivity, DThermalConductance, DThermalResistance, DHeatTransferCoefficient, DThermalAdmittance, DThermalInsulance,
   DJerk, DAngle, DThrust, DTorque, DEnergyPerUnitMass
 )
 where
 
-import Numeric.Units.Dimensional.DK
+import Numeric.Units.Dimensional
   ( Dimension (Dim), Quantity, Dimensionless
   , DOne, DLuminousIntensity, DThermodynamicTemperature
   , Unit, DLength, (^)  -- Used only for 'square' and 'cubic'.
+  , Metricality(..)
   )
 import Numeric.NumType.DK.Integers
   ( TypeInt (Neg3, Neg2, Neg1, Zero, Pos1, Pos2, Pos3, Pos4)
   , pos2, pos3  -- Used only for 'square' and 'cubic'.
   )
 import Prelude (Fractional)
+import Data.Typeable
 
 {- $nist-guide
 The following quantities are all from the NIST publication "Guide
@@ -336,6 +338,9 @@ provide some synonyms that we anticipate will be useful.
 type DImpulse = 'Dim 'Pos1 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero
 type Impulse  = Quantity DImpulse
 
+type DMomentum = DImpulse
+type Momentum = Quantity DMomentum
+
 type DMassFlow = 'Dim 'Zero 'Pos1 'Neg1 'Zero 'Zero 'Zero 'Zero
 type MassFlow  = Quantity DMassFlow
 
@@ -413,9 +418,9 @@ to the definitions of 'DLength' and 'DVolume'.
 -}
 
 -- | Constructs a unit of area from a unit of length, taking the area of a square whose sides are that length.
-square :: Fractional a => Unit DLength a -> Unit DArea a
+square :: (Fractional a, Typeable m) => Unit m DLength a -> Unit 'NonMetric DArea a
 square x = x ^ pos2
 
 -- | Constructs a unit of volume from a unit of length, taking the volume of a cube whose sides are that length.
-cubic  :: Fractional a => Unit DLength a -> Unit DVolume a
+cubic  :: (Fractional a, Typeable m) => Unit m DLength a -> Unit 'NonMetric DVolume a
 cubic  x = x ^ pos3

@@ -22,7 +22,7 @@ the SI base dimensions using 'Numeric.NumType.DK.NumType' for type-level integer
 
 Type-level arithmetic, synonyms for the base dimensions, and conversion to the term-level are included.
 -}
-module Numeric.Units.Dimensional.DK.Dimensions.TypeLevel
+module Numeric.Units.Dimensional.Dimensions.TypeLevel
 (
   -- * Kind of Type-Level Dimensions
   type Dimension(..),
@@ -42,7 +42,7 @@ import Numeric.NumType.DK.Integers
   , KnownTypeInt, toNum
   )
 import qualified Numeric.NumType.DK.Integers as N
-import Numeric.Units.Dimensional.DK.Dimensions.TermLevel
+import Numeric.Units.Dimensional.Dimensions.TermLevel
 
 -- | Represents a physical dimension in the basis of the 7 SI base dimensions, 
 -- where the respective dimensions are represented by type variables
