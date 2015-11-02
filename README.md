@@ -1,5 +1,4 @@
-dimensional
-==============
+# dimensional
 
 This library provides statically-checked dimensional arithmetic for physical quantities, using the 7 SI base dimensions.
 
@@ -9,8 +8,7 @@ client code.
 [![Build Status](https://travis-ci.org/bjornbm/dimensional-dk.svg?branch=master)](https://travis-ci.org/bjornbm/dimensional-dk)
 [![Hackage Version](http://img.shields.io/hackage/v/dimensional.svg)](http://hackage.haskell.org/package/dimensional)
 
-Usage
------
+## Usage
 
 Simply importing `Numeric.Units.Dimensional.Prelude` provides access to dimensional arithmetic opertors, SI units and other common units
 accepted for use with the SI, and convenient aliases for quantities with commonly used dimensions.
@@ -46,8 +44,7 @@ approximateAccelerationDueToGravityOnEarth = gravitationalFieldStrength massOfEa
 differenceFromStandardValue = approximateAccelerationDueToGravityOnEarth /~ gee
 ```
 
-Contributing
-------------
+## Contributing
 
 For project information (issues, updates, wiki, examples) see:
   https://github.com/bjornbm/dimensional-dk
