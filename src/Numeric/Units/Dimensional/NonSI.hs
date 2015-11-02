@@ -165,8 +165,7 @@ The IAU recommends <#note2 [2]> that:
   several kinds of day), it is best to regard a year as a julian
   year of 365.25 days (31.5576 Ms) unless otherwise specified.
 
-This aligns well with my needs so I'm happy to oblige. We define
-the year in terms of seconds in order to avoid a 'Fractional'
+We define the year in terms of seconds in order to avoid a 'Fractional'
 constraint, and also provide a Julian century.
 
 -}

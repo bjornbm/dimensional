@@ -16,8 +16,10 @@ Defines types for manipulation of units and quantities without phantom types for
 
 module Numeric.Units.Dimensional.Dynamic
 (
+  -- * Dynamic Quantities
   AnyQuantity
 , demoteQuantity, promoteQuantity
+  -- * Dynamic Units
 , AnyUnit
 , demoteUnit, promoteUnit
 ) where

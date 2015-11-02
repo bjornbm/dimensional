@@ -117,22 +117,28 @@ best case GHC will be able to use the type synonyms we have defined
 in its error messages.
 
 >>> x = 1 *~ meter + 1 *~ second
-Couldn't match expected type `Pos1' against inferred type `Zero'
-    Expected type: Unit DLength t
-    Inferred type: Unit DTime a
+Couldn't match type 'Numeric.NumType.DK.Integers.Zero
+               with 'Numeric.NumType.DK.Integers.Pos1
+  Expected type: Unit 'Metric DLength a
+    Actual type: Unit 'Metric DTime a
   In the second argument of `(*~)', namely `second'
   In the second argument of `(+)', namely `1 *~ second'
 
 In other cases the error messages aren't very friendly.
 
 >>> x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
-Couldn't match expected type `Zero'
-    against inferred type `Neg Zero'
-  When using functional dependencies to combine
-    Sub Zero (Pos Zero) (Neg Zero),
-      arising from use of `/' at ...
-    Sub Zero (Pos Zero) Zero,
-      arising from use of `/' at ...
+Couldn't match type 'Numeric.NumType.DK.Integers.Zero
+               with 'Numeric.NumType.DK.Integers.Neg1
+  Expected type: Quantity DMass a
+    Actual type: Dimensional
+                   ('Numeric.Units.Dimensional.Variants.DQuantity
+                    Numeric.Units.Dimensional.Variants.* 'Numeric.Units.Dimensional.Variants.DQuantity)
+                   (DLength / DTime)
+                   a
+  In the first argument of `(+)', namely `1 *~ meter / (1 *~ second)'
+  In the expression: 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+  In an equation for `x':
+      x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
 
 It is the author's experience that the usefullness of the compiler
 error messages is more often than not limited to pinpointing the
@@ -148,18 +154,6 @@ of SI will most likely be added on an as-needed basis.
 
 There are also plenty of elementary functions to add. The 'Floating'
 class can be used as reference.
-
-Another useful addition would be decent 'Show' and 'Read' instances.
-The 'show' implementation could output the numerical value and the
-unit expressed in (base?) SI units, along the lines of:
-
-> instance (Fractional a, Show a) => Show (Length a)
->   where show x = show (x /~ meter) ++ " m"
-
-Additional functions could be provided for "showing" with any unit
-and prefix.  The 'read' implementation should be able to read values
-with any unit and prefix. It is not clear to the author how to best
-implement these.
 
 Additional physics models could be implemented. See <#note3 [3]> for ideas.
 
@@ -483,9 +477,9 @@ as type operators.
 
 We could provide the 'Mul' and 'Div' classes with full functional
 dependencies but that would be of limited utility as there is no
-obvious use for "backwards" type inference and would also limit
-what we can achieve overlapping instances. (In particular, it breaks
-the 'Extensible' module.)
+limited use for "backwards" type inference. Efforts are underway to
+develop a type-checker plugin that does enable these scenarios, e.g.
+for linear algebra.
 
 -}
 
