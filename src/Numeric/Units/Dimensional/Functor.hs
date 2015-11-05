@@ -28,6 +28,7 @@ Note that this is an orphan instance.
 module Numeric.Units.Dimensional.Functor where
 
 import Numeric.Units.Dimensional
+import Prelude
 
 -- | A 'Functor' instance for 'Dimensional'.
 --

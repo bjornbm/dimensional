@@ -190,7 +190,7 @@ module Numeric.Units.Dimensional
     -- * Types
     -- $types
     Dimensional,
-    Unit, Quantity,
+    Unit, Quantity, SQuantity,
     Metricality(..),
     -- * Physical Dimensions
     -- $dimensions
@@ -227,7 +227,7 @@ module Numeric.Units.Dimensional
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
     -- $functor
-    KnownVariant(dmap), changeRep, changeRepApproximate
+    KnownVariant(dmap), changeRep, changeRepRound, changeRepApproximate
   )
   where
 
@@ -235,6 +235,7 @@ import Prelude
   ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Floating, Real, RealFloat, Functor, fmap
   , (.), flip, show, (++), fromIntegral, fromInteger, fromRational, error, max, succ
   , Int, Integer, Integral, ($), uncurry, realToFrac, otherwise, undefined, String
+  , RealFrac, round
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
@@ -248,6 +249,7 @@ import Control.Monad (liftM)
 import Data.Coerce (coerce)
 import Data.Data
 import Data.ExactPi
+import qualified Data.ExactPi.TypeLevel as E
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Maybe
 import Data.Monoid (Monoid(..))
@@ -309,6 +311,8 @@ way to declare quantities as such a product.
 class KnownVariant (v :: Variant) where
   -- | A dimensional value, either a 'Quantity' or a 'Unit', parameterized by its 'Dimension' and representation.
   data Dimensional v :: Dimension -> * -> *
+  -- | A scale factor by which the numerical value of this dimensional value is implicitly multiplied.
+  type ScaleFactor v :: E.ExactPi'
   extractValue :: Dimensional v d a -> (a, Maybe ExactPi)
   extractName :: Dimensional v d a -> Maybe (UnitName 'NonMetric)
   injectValue :: (Maybe (UnitName 'NonMetric)) -> (a, Maybe ExactPi) -> Dimensional v d a
@@ -319,13 +323,14 @@ class KnownVariant (v :: Variant) where
 
 deriving instance Typeable Dimensional
 
-instance KnownVariant 'DQuantity where
-  newtype Dimensional 'DQuantity d a = Quantity' a
+instance (E.KnownExactPi s) => KnownVariant ('DQuantity s) where
+  newtype Dimensional ('DQuantity s) d a = Quantity' a
     deriving (Eq, Ord, Data, Generic, Generic1
 #if MIN_VERSION_base(4,8,0)
      , Typeable -- GHC 7.8 doesn't support deriving this instance
 #endif
     )
+  type (ScaleFactor ('DQuantity s)) = s
   extractValue (Quantity' x) = (x, Nothing)
   extractName _ = Nothing
   injectValue _ (x, _) = Quantity' x
@@ -338,6 +343,7 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
      , Typeable -- GHC 7.8 doesn't support deriving this instance
 #endif
     )
+  type (ScaleFactor ('DUnit m)) = E.One
   extractValue (Unit' _ e x) = (x, Just e)
   extractName (Unit' n _ _) = Just . Name.weaken $ n
   injectValue (Just n) (x, Just e) | Just n' <- relax n = Unit' n' e x
@@ -349,7 +355,10 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
 type Unit (m :: Metricality) = Dimensional ('DUnit m)
 
 -- | A dimensional quantity.
-type Quantity = Dimensional 'DQuantity
+type Quantity = SQuantity E.One
+
+-- | A dimensional quantity, stored as an 'ExactPi'' multiple of its value in its dimension's SI coherent unit.
+type SQuantity s = Dimensional ('DQuantity s)
 
 -- GHC is somewhat unclear about why, but it won't derive this instance, so we give it explicitly.
 instance (Bounded a) => Bounded (Quantity d a) where
@@ -384,7 +393,7 @@ exactify :: Unit m d a -> Unit m d ExactPi
 exactify (Unit' n e _) = Unit' n e e
 
 -- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
-liftUntyped :: (KnownVariant v, KnownVariant (Weaken v)) => (ExactPi -> ExactPi) -> (a -> a) -> UnitNameTransformer -> (Dimensional v d1 a) -> (Dimensional (Weaken v) d2 a)
+liftUntyped :: (KnownVariant v1, KnownVariant v2) => (ExactPi -> ExactPi) -> (a -> b) -> UnitNameTransformer -> (Dimensional v1 d1 a) -> (Dimensional v2 d2 b)
 liftUntyped fe f nt x = let (x', e') = extractValue x
                             n = extractName x
                             n' = (liftA nt) n
@@ -411,13 +420,13 @@ liftUntyped2Q f x1 x2 = let (x1', _) = extractValue x1
                          in Quantity' (f x1' x2') 
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
-(*~) :: Num a => a -> Unit m d a -> Quantity d a
+(*~) :: (Num a) => a -> Unit m d a -> Quantity d a
 x *~ (Unit' _ _ y) = Quantity' (x Prelude.* y)
 
--- | Divides a 'Quantity' by a 'Unit' of the same physical dimension, obtaining the
+-- | Divides a possibly scaled 'SQuantity' by a 'Unit' of the same physical dimension, obtaining the
 -- numerical value of the quantity expressed in that unit.
-(/~) :: Fractional a => Quantity d a -> Unit m d a -> a
-(Quantity' x) /~ (Unit' _ _ y) = (x Prelude./ y)
+(/~) :: forall s m d a.(Fractional a, E.MinCtxt s a) => SQuantity s d a -> Unit m d a -> a
+(Quantity' x) /~ (Unit' _ _ y) = (x Prelude.* E.injMin (Proxy :: Proxy s) Prelude./ y)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
@@ -632,7 +641,7 @@ elements of a functor (e.g. a list).
 xs *~~ u = fmap (*~ u) xs
 
 -- | Applies '/~' to all values in a functor.
-(/~~) :: (Functor f, Fractional a) => f (Quantity d a) -> Unit m d a -> f a
+(/~~) :: forall f s m d a.(Functor f, Fractional a, E.MinCtxt s a) => f (SQuantity s d a) -> Unit m d a -> f a
 xs /~~ u = fmap (/~ u) xs
 
 infixl 7  *~~, /~~
@@ -773,8 +782,31 @@ If you feel your work requires this instance, it is provided as an orphan in "Nu
 -}
 
 -- | Convenient conversion between numerical types while retaining dimensional information.
-changeRep :: (KnownVariant v, Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
-changeRep = dmap realToFrac
+changeRep :: forall v1 v2 d a b.
+            (KnownVariant v1, KnownVariant v2, 
+             CompatibleVariants v1 v2,
+             E.MinCtxt (ScaleFactor v1 E./ ScaleFactor v2) b,
+             Real a, Fractional b) 
+          => Dimensional v1 d a -> Dimensional v2 d b
+changeRep = liftUntyped (Prelude.* s) ((Prelude.* s') . realToFrac) Name.weaken
+  where
+    p :: Proxy (ScaleFactor v1 E./ ScaleFactor v2)
+    p = Proxy
+    s = E.exactPiVal p
+    s' = E.injMin p
+
+changeRepRound :: forall v1 v2 d a b.
+                 (KnownVariant v1, KnownVariant v2, 
+                  CompatibleVariants v1 v2,
+                  E.MinCtxt (ScaleFactor v1 E./ ScaleFactor v2) a,
+                  RealFrac a, Integral b) 
+               => Dimensional v1 d a -> Dimensional v2 d b
+changeRepRound = liftUntyped (Prelude.* s) (round . (Prelude.* s')) Name.weaken
+  where
+    p :: Proxy (ScaleFactor v1 E./ ScaleFactor v2)
+    p = Proxy
+    s = E.exactPiVal p
+    s' = E.injMin p
 
 -- | Convenient conversion from exactly represented values while retaining dimensional information.
 changeRepApproximate :: (KnownVariant v, Floating b) => Dimensional v d ExactPi -> Dimensional v d b

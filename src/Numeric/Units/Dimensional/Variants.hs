@@ -1,6 +1,7 @@
 {-# OPTIONS_HADDOCK not-home, show-extensions #-}
 
 {-# LANGUAGE AutoDeriveTypeable #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -23,11 +24,13 @@ module Numeric.Units.Dimensional.Variants
 (
   type Variant(..),
   Metricality(..),
-  type (*), type Weaken
+  type (*), type Weaken,
+  type CompatibleVariants
 )
 where
 
 import Data.Data
+import qualified Data.ExactPi.TypeLevel as E
 import GHC.Generics
 
 -- | Encodes whether a unit is a metric unit, that is, whether it can be combined
@@ -44,9 +47,9 @@ and quantities. It must be one of the following:
 -}
 
 -- | The kind of variants of dimensional values.
-data Variant = DQuantity         -- ^ The value is a quantity.
-             | DUnit Metricality -- ^ The value is a unit, possibly a 'Metric' unit.
-  deriving (Eq, Ord, Data, Typeable, Generic)
+data Variant = DQuantity E.ExactPi' -- ^ The value is a quantity, stored as an `ExactPi` multiple of its value in its dimension's SI coherent unit.
+             | DUnit Metricality  -- ^ The value is a unit, possibly a 'Metric' unit.
+  deriving (Typeable, Generic)
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -63,9 +66,21 @@ infixl 7  *
 -- The product of quantities is a quantity.
 type family (v1 :: Variant) * (v2 :: Variant) :: Variant where
   'DUnit m1  * 'DUnit m2  = 'DUnit 'NonMetric
-  'DQuantity * 'DQuantity = 'DQuantity 
+  'DQuantity s1 * 'DQuantity s2 = 'DQuantity (s1 E.* s2)
 
 -- | Weakens a 'Variant' by forgetting possibly uninteresting type-level information.
 type family Weaken (v :: Variant) :: Variant where
-  Weaken 'DQuantity = 'DQuantity
+  Weaken ('DQuantity s) = 'DQuantity s
   Weaken ('DUnit m) = 'DUnit 'NonMetric
+
+-- | Two 'Variant's are compatible when dimensional values of the first may be converted
+-- into the second merely by changing the representation of their values.
+type family AreCompatible (v1 :: Variant) (v2 :: Variant) :: Bool where
+  AreCompatible ('DQuantity s1)  ('DQuantity s2) = 'True
+  AreCompatible ('DUnit m) ('DUnit 'NonMetric)   = 'True
+  AreCompatible s s   = 'True
+  AreCompatible s1 s2 = 'False
+
+-- | Two 'Variant's are compatible when dimensional values of the first may be converted
+-- into the second merely by changing the representation of their values.
+type CompatibleVariants v1 v2 = ('True ~ AreCompatible v1 v2)
