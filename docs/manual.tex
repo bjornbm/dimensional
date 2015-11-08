@@ -3,7 +3,6 @@
 \usepackage{siunitx}
 \usepackage{listings}
 \usepackage{hyperref}
-\usepackage[toc,page]{appendix}
 \hypersetup{
     colorlinks=false,
 }
@@ -18,7 +17,7 @@
 
 \title{
 	{Writing Physical Computations in Haskell with \thispackage}\\
-	{\small{Version 0.9}}
+	{\small{Version 1.0}}
 }
 \author{Björn Buckwalter and Douglas McClean}
 \date{\today}
@@ -31,7 +30,7 @@
 
 \chapter{Introduction}
 
-The \thispackage library provides data types for performing arithmetic with physical
+The \thispackage{} library provides data types for performing arithmetic with physical
 quantities. Information about the physical dimensions of each quantity is embedded in
 its type.
 
@@ -42,7 +41,7 @@ quantity a program manipulates.
 
 \section{Installation}
 
-The latest version of \thispackage can be installed in the usual way, using the following commands:
+The latest version of \thispackage{} can be installed in the usual way, using the following commands:
 
 \begin{lstlisting}[language=bash]
 cabal update
@@ -53,11 +52,11 @@ Historical versions and Haddock documentation are available at \url{http://hacka
 
 \section{Licensing}
 
-The \thispackage package is provided under a BSD 3-clause license.
+The \thispackage{} package is provided under a BSD 3-clause license.
 
 \section{Contributing}
 
-Contributions to \thispackage development, in the form of bug reports,
+Contributions to \thispackage{} development, in the form of bug reports,
 feature requests, or pull requests, are welcome. The source code repository and issue
 tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional-dk}.
 
@@ -70,7 +69,72 @@ tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional
 \subsection{Interchange Names}
 \subsection{Unit Name Normal Forms}
 
-\chapter{Fixed-Point Dimensional Arithmetic}
+\chapter{Fixed Point Dimensional Arithmetic}
+
+Although floating point arithmetic is fast and convenient for many applications, the \thispackage{} package also provides
+support for performing fixed point computations with dimensional values.
+
+Using the \packagename{exact-pi} package's support for type-level positive rationals extended with an exact representation
+of $ \pi $, \thispackage{} statically encodes the scale factor between the least significant bit of the chosen \classname{Integral}
+representation and the coherent SI unit of the quantity's dimension. This allows fixed point representations to be
+treated uniformly and correctly by arithmetic operations without requiring the programmer to appropriately scale the results
+before storing them.
+
+The familiar \typename{Quantity} type is an alias for \typename{SQuantity One} (where \typename{One}) is the \packagename{exact-pi}
+package's representation of the number 1. While it is possible to use \typename{SQuantity} with other scaling factors and a
+floating point or exact rational representation type, it is rarely necessary to do so because the range of common floating
+point representations can comfortably encode both very large and very small physical quantities directly represented in the
+coherent SI unit of their dimension.
+
+Where \typename{SQuantity} becomes more directly useful, and where special fixed point support is required, is when an
+\classname{Integral} representation type is desired. For example, an embedded system may wish to encode the estimated
+velocity of a vehicle as a 16-bit signed integer with a minimum increment of \SI{1}{\centi\meter\per\second}. It is common
+to represent such a value by a variable of type \typename{Int16} and an accompanying comment or naming convention indicating
+the dimension and scale factor, but \thispackage{} provides a more expressive type, which can be written in one of several ways.
+
+Without using Template Haskell, one could write:
+
+\begin{lstlisting}[language=haskell]
+import Numeric.Units.Dimensional.FixedPoint.Prelude
+import qualified Data.ExactPi.TypeLevel as E
+import Data.Int
+
+type VehicleSpeed = SQuantity (E.One E./ (E.ExactNatural 100)) DLength Int16
+\end{lstlisting}
+
+With Template Haskell either of the following simpler forms is equivalent to the one given above:
+
+\begin{lstlisting}[language=haskell]
+import Numeric.Units.Dimensional.FixedPoint.Prelude
+import Numeric.Units.Dimensional.TH
+import Data.Int
+
+type VehicleSpeed1 = SQuantity [exact| 1/100] DLength Int16
+type VehicleSpeed2 = [fp| cm / s] Int16
+\end{lstlisting}
+
+In the latter example, note that both the scale factor and dimension were determined by the type quasiquoter, and so it
+only remained to specify the representation type.
+
+TODO: give an example where the scale isn't an exact unit, other examples of accepted syntax for quasiquoter
+
+TODO: give examples of performing arithmetic with such values
+
+The transcendental functions from \modulename{Numeric.Units.Dimensional} have types like:
+
+\begin{lstlisting}[language=haskell]
+sin :: Floating a => Dimensionless a -> Dimensionless a
+\end{lstlisting}
+
+However when using fixed point values, we wish to use representation types which lack \classname{Floating} instances. Accordingly,
+the \modulename{Numeric.Units.Dimensional.FixedPoint} module provides transcendental functions with types like the one given below.
+Note that as is often the case in the fixed point module, in order to provide maximal flexibilty and preserve precision of
+intermediate results, the result type of the operation is not fully determined by the types of its operand and instead is
+determined from context.
+
+\begin{lstlisting}[language=haskell]
+sin :: (KnownExactPi s1, KnownExactPi s2 Integral a) => SQuantity s1 DOne a -> SQuantity s2 DOne a
+\end{lstlisting}
 
 \chapter{Interoperating with Other Packages}
 
