@@ -42,7 +42,7 @@ its type.
 
 This allows the compiler to statically verify that no dimensional mistakes have been
 made in a calculation. It also facilitates interconversion between quantities expressed
-in different units and provides documentation of dimension and units of each physical
+in different units and provides documentation of the dimension and units of each physical
 quantity a program manipulates.
 
 \section{Installation}
@@ -58,7 +58,44 @@ Historical versions and Haddock documentation are available at \url{http://hacka
 
 \section{\thispackage{} in Five Minutes}
 
-TODO: quick example
+It's extremely easy to get started using the \thispackage{} library.
+
+\begin{lstlisting}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+
+import Numeric.Units.Dimensional.Prelude
+
+-- The list of quantity synonyms in Numeric.Units.Dimensional.Quantities
+-- makes declaring everything from Length to MagneticFluxDensity easy.
+radiusOfEarth :: Length Double
+radiusOfEarth = 6371 *~ kilo meter
+  -- Use the *~ operator to multiply a raw number by a Unit, 
+  -- forming a Quantity. The /~ operator divides a Quantity
+  -- by a Unit yielding a raw number and is useful for
+  -- transferring results to code which is not dimensionally-typed.
+
+massOfEarth :: Mass Double
+massOfEarth = 5.97e24 *~ kilo gram
+
+-- Types can be inferred for most operations, although in some
+-- circumstances (like this one) it may require activating
+-- the NoMonomorphismRestriction extension.
+g = 6.67384e-11 *~ (newton * (meter / kilo gram)^pos2)
+  -- Combine units using multiplication, division, and exponentiation.
+  -- pos3, neg1, etc. are proxies for type-level integers
+  -- from the numtype-dk library.
+
+-- You can easily declare functions that are polymorphic in the
+-- numeric representation type.
+gravitationalFieldStrength :: (Fractional a) => Mass a -> Length a -> Acceleration a
+gravitationalFieldStrength m r = g * m / r^pos2
+  -- Exponentiation of quantities uses the same proxies as does
+  -- exponentiation of units.
+
+approximateAccelerationDueToGravityOnEarth = gravitationalFieldStrength massOfEarth radiusOfEarth
+  -- Showing this yields: "9.816008178047202 m s^-2"
+\end{lstlisting}
 
 \section{Licensing}
 
