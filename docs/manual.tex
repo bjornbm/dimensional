@@ -2,18 +2,24 @@
 \usepackage[utf8]{inputenc}
 \usepackage{siunitx}
 \usepackage{listings}
+\usepackage[letterpaper, margin=1in]{geometry}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks=false,
 }
 
 \newcommand{\packagename}[1]{\textit{#1}}
-\newcommand{\thispackage}{\packagename{dimensional-dk}}
+\newcommand{\thispackage}{\packagename{dimensional}}
 \newcommand{\experimentalpackage}{\packagename{dimensional-dk-experimental}}
 \newcommand{\classname}[1]{\textit{#1}}
 \newcommand{\typename}[1]{\textit{#1}}
 \newcommand{\modulename}[1]{\textit{#1}}
-\newcommand{\submodule}[1]{\modulename{Numeric.Units.Dimensional.DK.{#1}}}
+\newcommand{\submodule}[1]{\modulename{Numeric.Units.Dimensional.{#1}}}
+
+\lstset{language=haskell,
+numberstyle=\footnotesize,
+basicstyle=\ttfamily\footnotesize,
+breaklines=true}
 
 \title{
 	{Writing Physical Computations in Haskell with \thispackage}\\
@@ -45,10 +51,14 @@ The latest version of \thispackage{} can be installed in the usual way, using th
 
 \begin{lstlisting}[language=bash]
 cabal update
-cabal install dimensional-dk
+cabal install dimensional
 \end{lstlisting}
 
-Historical versions and Haddock documentation are available at \url{http://hackage.haskell.org/package/dimensional-dk}.
+Historical versions and Haddock documentation are available at \url{http://hackage.haskell.org/package/dimensional}.
+
+\section{\thispackage{} in Five Minutes}
+
+TODO: quick example
 
 \section{Licensing}
 
@@ -94,7 +104,7 @@ the dimension and scale factor, but \thispackage{} provides a more expressive ty
 
 Without using Template Haskell, one could write:
 
-\begin{lstlisting}[language=haskell]
+\begin{lstlisting}
 import Numeric.Units.Dimensional.FixedPoint.Prelude
 import qualified Data.ExactPi.TypeLevel as E
 import Data.Int
@@ -104,13 +114,13 @@ type VehicleSpeed = SQuantity (E.One E./ (E.ExactNatural 100)) DLength Int16
 
 With Template Haskell either of the following simpler forms is equivalent to the one given above:
 
-\begin{lstlisting}[language=haskell]
+\begin{lstlisting}
 import Numeric.Units.Dimensional.FixedPoint.Prelude
 import Numeric.Units.Dimensional.TH
 import Data.Int
 
 type VehicleSpeed1 = SQuantity [exact| 1/100] DLength Int16
-type VehicleSpeed2 = [fp| cm / s] Int16
+type VehicleSpeed2 = [fixed| cm / s] Int16
 \end{lstlisting}
 
 In the latter example, note that both the scale factor and dimension were determined by the type quasiquoter, and so it
@@ -122,7 +132,7 @@ TODO: give examples of performing arithmetic with such values
 
 The transcendental functions from \modulename{Numeric.Units.Dimensional} have types like:
 
-\begin{lstlisting}[language=haskell]
+\begin{lstlisting}
 sin :: Floating a => Dimensionless a -> Dimensionless a
 \end{lstlisting}
 
@@ -132,7 +142,7 @@ Note that as is often the case in the fixed point module, in order to provide ma
 intermediate results, the result type of the operation is not fully determined by the types of its operand and instead is
 determined from context.
 
-\begin{lstlisting}[language=haskell]
+\begin{lstlisting}
 sin :: (KnownExactPi s1, KnownExactPi s2 Integral a) => SQuantity s1 DOne a -> SQuantity s2 DOne a
 \end{lstlisting}
 
