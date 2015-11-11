@@ -1,9 +1,10 @@
-\documentclass[12pt]{report}
+\documentclass[11pt]{report}
 \usepackage[utf8]{inputenc}
 \usepackage{siunitx}
 \usepackage{listings}
 \usepackage[letterpaper, margin=1in]{geometry}
 \usepackage{hyperref}
+\usepackage{tcolorbox}
 \hypersetup{
     colorlinks=false,
 }
@@ -15,6 +16,9 @@
 \newcommand{\typename}[1]{\textit{#1}}
 \newcommand{\modulename}[1]{\textit{#1}}
 \newcommand{\submodule}[1]{\modulename{Numeric.Units.Dimensional.{#1}}}
+\newcommand{\prerelease}{\begin{tcolorbox}
+The functionality discussed in this section has not yet been released.
+\end{tcolorbox}}
 
 \lstset{language=haskell,
 numberstyle=\footnotesize,
@@ -118,6 +122,8 @@ tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional
 
 \chapter{Fixed Point Dimensional Arithmetic}
 
+\prerelease{}
+
 Although floating point arithmetic is fast and convenient for many applications, the \thispackage{} package also provides
 support for performing fixed point computations with dimensional values.
 
@@ -156,8 +162,8 @@ import Numeric.Units.Dimensional.FixedPoint.Prelude
 import Numeric.Units.Dimensional.TH
 import Data.Int
 
-type VehicleSpeed1 = SQuantity [exact| 1/100] DLength Int16
-type VehicleSpeed2 = [fixed| cm / s] Int16
+type VehicleSpeed1 = SQuantity [exact| 1/100 |] DLength Int16
+type VehicleSpeed2 = [fixed| cm / s |] Int16
 \end{lstlisting}
 
 In the latter example, note that both the scale factor and dimension were determined by the type quasiquoter, and so it
@@ -186,9 +192,20 @@ sin :: (KnownExactPi s1, KnownExactPi s2 Integral a) => SQuantity s1 DOne a -> S
 \chapter{Interoperating with Other Packages}
 
 \section{\packagename{ad} for Automatic Differentiation}
+
+\prerelease{}
+
 \section{\packagename{attoparsec} for Unit and Quantity Parsing}
+
+\prerelease{}
+
 \section{\packagename{HaTeX} for \LaTeX{} Generation}
+
+\prerelease{}
+
 \section{\packagename{ihaskell} for Interactive Notebooks}
+
+\prerelease{}
 
 The IHaskell project provides support for interactive notebook documents containing
 Haskell code through the Jupyter project.
@@ -205,9 +222,14 @@ Explain here how to use that facility.
 
 \section{\packagename{linear} for Linear Algebra}
 
+\prerelease{}
+
 Todo: create instances for linear's type classes, recognizing that they require the nasty Functor orphan instance.
 
 \section{\packagename{parsec} for Unit and Quantity Parsing}
+
+\prerelease{}
+
 \section{\packagename{time} for Times and Dates}
 
 Users of the \packagename{time} package can find functions and lenses for converting
@@ -220,6 +242,8 @@ The \thispackage{} package provides instances of the \typename{Vector} and \type
 allowing \typename{Quantity}s to be stored in unboxed vectors for improved performance and reduced storage overhead.
 
 \section{\packagename{vector-space} for Linear Algebra}
+
+\prerelease{}
 
 Users of the \packagename{vector-space} package can find appropriate instances of
 the \classname{AdditiveGroup} and \classname{VectorSpace} classes, along with an
@@ -235,6 +259,8 @@ Atmosphere, a model of how pressure, temperature, the speed of sound, and relate
 altitude in the Earth's atmosphere.
 
 \section{\packagename{igrf} for Modeling Earth's Magnetic Field}
+
+\prerelease{}
 
 The \packagename{igrf} package provides a dimensionally-typed implementation of the International Geomagnetic
 Reference Field, including parsing of model text files in the format released by the International Association of
