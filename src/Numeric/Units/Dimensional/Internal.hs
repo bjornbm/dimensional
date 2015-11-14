@@ -2,8 +2,11 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses #-} -- for Vector instances only
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeSynonymInstances #-}
@@ -12,19 +15,28 @@ module Numeric.Units.Dimensional.Internal
 (
   KnownVariant(..),
   Dimensional(..),
-  type Unit, type Quantity, type SQuantity
+  type Unit, type Quantity, type SQuantity,
+  siUnit, showIn
 )
 where
 
+import Control.DeepSeq
+import Control.Monad (liftM)
+import Data.Coerce (coerce)
 import Data.Data
 import Data.ExactPi
 import qualified Data.ExactPi.TypeLevel as E
+import Foreign.Ptr (Ptr, castPtr)
+import Foreign.Storable (Storable(..))
 import GHC.Generics
 import Numeric.Units.Dimensional.Dimensions
 import Numeric.Units.Dimensional.Variants
 import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.UnitNames.InterchangeNames (HasInterchangeName(..))
+import qualified Data.Vector.Generic.Mutable as M
+import qualified Data.Vector.Generic as G
+import qualified Data.Vector.Unboxed.Base as U
 
 -- | A unit of measurement.
 type Unit (m :: Metricality) = Dimensional ('DUnit m)
@@ -33,6 +45,8 @@ type Unit (m :: Metricality) = Dimensional ('DUnit m)
 type Quantity = SQuantity E.One
 
 -- | A dimensional quantity, stored as an 'ExactPi'' multiple of its value in its dimension's SI coherent unit.
+--
+-- The name is an abbreviation for scaled quantity.
 type SQuantity s = Dimensional ('DQuantity s)
 
 -- | A physical quantity or unit.
@@ -120,3 +134,77 @@ We provide this freedom by making 'Dimensionless' an instance of
 
 instance (E.KnownExactPi s) => Functor (SQuantity s DOne) where
   fmap = dmap
+
+instance (KnownDimension d) => HasDimension (Dimensional v d a) where
+  dimension _ = dimension (Proxy :: Proxy d)
+
+-- | A polymorphic 'Unit' which can be used in place of the coherent
+-- SI base unit of any dimension. This allows polymorphic quantity
+-- creation and destruction without exposing the 'Dimensional' constructor.
+siUnit :: forall d a.(KnownDimension d, Num a) => Unit 'NonMetric d a
+siUnit = Unit' (baseUnitName $ dimension (Proxy :: Proxy d)) 1 1
+
+instance NFData a => NFData (Quantity d a) -- instance is derived from Generic instance
+
+instance Storable a => Storable (Quantity d a) where
+  sizeOf _ = sizeOf (undefined::a)
+  {-# INLINE sizeOf #-}
+  alignment _ = alignment (undefined::a)
+  {-# INLINE alignment #-}
+  poke ptr = poke (castPtr ptr :: Ptr a) . coerce
+  {-# INLINE poke #-}
+  peek ptr = liftM Quantity' (peek (castPtr ptr :: Ptr a))
+  {-# INLINE peek #-}
+
+{-
+Instances for vectors of quantities.
+-}
+newtype instance U.Vector (Quantity d a)    =  V_Quantity {unVQ :: U.Vector a}
+newtype instance U.MVector s (Quantity d a) = MV_Quantity {unMVQ :: U.MVector s a}
+instance U.Unbox a => U.Unbox (Quantity d a)
+
+instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
+  basicLength          = M.basicLength . unMVQ
+  {-# INLINE basicLength #-}
+  basicUnsafeSlice m n = MV_Quantity . M.basicUnsafeSlice m n . unMVQ
+  {-# INLINE basicUnsafeSlice #-}
+  basicOverlaps u v    = M.basicOverlaps (unMVQ u) (unMVQ v)
+  {-# INLINE basicOverlaps #-}
+  basicUnsafeNew       = liftM MV_Quantity . M.basicUnsafeNew
+  {-# INLINE basicUnsafeNew #-}
+  basicUnsafeRead v    = liftM Quantity' . M.basicUnsafeRead (unMVQ v)
+  {-# INLINE basicUnsafeRead #-}
+  basicUnsafeWrite v i = M.basicUnsafeWrite (unMVQ v) i . coerce
+  {-# INLINE basicUnsafeWrite #-}
+#if MIN_VERSION_vector(0,11,0)
+  basicInitialize      = M.basicInitialize . unMVQ
+  {-# INLINE basicInitialize #-}
+#endif
+
+instance (G.Vector U.Vector a) => G.Vector U.Vector (Quantity d a) where
+  basicUnsafeFreeze    = liftM V_Quantity  . G.basicUnsafeFreeze . unMVQ
+  {-# INLINE basicUnsafeFreeze #-}
+  basicUnsafeThaw      = liftM MV_Quantity . G.basicUnsafeThaw   . unVQ
+  {-# INLINE basicUnsafeThaw #-}
+  basicLength          = G.basicLength . unVQ
+  {-# INLINE basicLength #-}
+  basicUnsafeSlice m n = V_Quantity . G.basicUnsafeSlice m n . unVQ
+  {-# INLINE basicUnsafeSlice #-}
+  basicUnsafeIndexM v  = liftM Quantity' . G.basicUnsafeIndexM (unVQ v)
+  {-# INLINE basicUnsafeIndexM #-}
+
+{-
+We will conclude by providing a reasonable 'Show' instance for
+quantities. The SI unit of the quantity is inferred
+from its dimension.
+-}
+instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
+  show = showIn siUnit
+
+-- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
+showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
+showIn (Unit' n _ y) (Quantity' x) | Name.weaken n == nOne = show (x Prelude./ y)
+                                   | otherwise             = (show (x Prelude./ y)) ++ " " ++ (show n)
+
+instance (KnownDimension d, Show a) => Show (Unit m d a) where
+  show (Unit' n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"

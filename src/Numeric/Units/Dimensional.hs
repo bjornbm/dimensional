@@ -10,7 +10,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE MultiParamTypeClasses #-} -- for Vector instances only
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RoleAnnotations #-}
@@ -233,9 +232,9 @@ module Numeric.Units.Dimensional
   where
 
 import Prelude
-  ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Floating, Real, RealFloat, Functor, fmap
-  , (.), flip, show, (++), fromIntegral, fromInteger, fromRational, error, max, succ
-  , Int, Integer, Integral, ($), uncurry, realToFrac, otherwise, undefined, String
+  ( Eq(..), Num, Fractional, Floating, Real, RealFloat, Functor, fmap
+  , (.), flip, (++), fromIntegral, fromInteger, fromRational, error, max, succ
+  , Int, Integer, Integral, ($), uncurry, realToFrac, otherwise
   , RealFrac, round
   )
 import qualified Prelude
@@ -245,29 +244,18 @@ import Numeric.NumType.DK.Integers
   , KnownTypeInt, toNum
   )
 import Control.Applicative
-import Control.DeepSeq
-import Control.Monad (liftM)
-import Data.Coerce (coerce)
 import Data.Data
 import Data.ExactPi
 import qualified Data.ExactPi.TypeLevel as E
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Maybe
-import Data.Monoid (Monoid(..))
 import Data.Ratio
-import Foreign.Ptr (Ptr, castPtr)
-import Foreign.Storable (Storable(..))
-import GHC.Generics
 import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.Dimensions
 import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
-import Numeric.Units.Dimensional.UnitNames.InterchangeNames (HasInterchangeName(..))
 import Numeric.Units.Dimensional.Variants hiding (type (*))
 import qualified Numeric.Units.Dimensional.Variants as V
-import qualified Data.Vector.Generic.Mutable as M
-import qualified Data.Vector.Generic as G
-import qualified Data.Vector.Unboxed.Base as U
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -627,12 +615,6 @@ atanh = fmap Prelude.atanh
 atan2 :: (RealFloat a) => Quantity d a -> Quantity d a -> Dimensionless a
 atan2 = liftUntyped2Q Prelude.atan2
 
--- | A polymorphic 'Unit' which can be used in place of the coherent
--- SI base unit of any dimension. This allows polymorphic quantity
--- creation and destruction without exposing the 'Dimensional' constructor.
-siUnit :: forall d a.(KnownDimension d, Num a) => Unit 'NonMetric d a
-siUnit = Unit' (baseUnitName $ dimension (Proxy :: Proxy d)) 1 1
-
 {-
 The only unit we will define in this module is 'one'.
 -}
@@ -725,25 +707,6 @@ we provide a means for converting from type-level dimensions to term-level dimen
 
 -}
 
-instance (KnownDimension d) => HasDimension (Dimensional v d a) where
-  dimension _ = dimension (Proxy :: Proxy d)
-
-{-
-We will conclude by providing a reasonable 'Show' instance for
-quantities. The SI unit of the quantity is inferred
-from its dimension.
--}
-instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
-  show = showIn siUnit
-
--- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
-showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
-showIn (Unit' n _ y) (Quantity' x) | Name.weaken n == nOne = show (x Prelude./ y)
-                                   | otherwise             = (show (x Prelude./ y)) ++ " " ++ (show n)
-
-instance (KnownDimension d, Show a) => Show (Unit m d a) where
-  show (Unit' n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
-
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 -- 
 -- Use this variant when the scale factor of the resulting unit is irrational or 'Approximate'. See 'mkUnitQ' for when it is rational
@@ -783,52 +746,3 @@ mkUnitZ n s' (Unit' _ s _) | s' == 0                      = error "Supplying zer
                            | otherwise                    = error "The resulting conversion factor is not an exact integer."
   where
     s'' = fromInteger s' Prelude.* s
-
-instance NFData a => NFData (Quantity d a) -- instance is derived from Generic instance
-
-instance Storable a => Storable (Quantity d a) where
-  sizeOf _ = sizeOf (undefined::a)
-  {-# INLINE sizeOf #-}
-  alignment _ = alignment (undefined::a)
-  {-# INLINE alignment #-}
-  poke ptr = poke (castPtr ptr :: Ptr a) . coerce
-  {-# INLINE poke #-}
-  peek ptr = liftM Quantity' (peek (castPtr ptr :: Ptr a))
-  {-# INLINE peek #-}
-
-{-
-Instances for vectors of quantities.
--}
-newtype instance U.Vector (Quantity d a)    =  V_Quantity {unVQ :: U.Vector a}
-newtype instance U.MVector s (Quantity d a) = MV_Quantity {unMVQ :: U.MVector s a}
-instance U.Unbox a => U.Unbox (Quantity d a)
-
-instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
-  basicLength          = M.basicLength . unMVQ
-  {-# INLINE basicLength #-}
-  basicUnsafeSlice m n = MV_Quantity . M.basicUnsafeSlice m n . unMVQ
-  {-# INLINE basicUnsafeSlice #-}
-  basicOverlaps u v    = M.basicOverlaps (unMVQ u) (unMVQ v)
-  {-# INLINE basicOverlaps #-}
-  basicUnsafeNew       = liftM MV_Quantity . M.basicUnsafeNew
-  {-# INLINE basicUnsafeNew #-}
-  basicUnsafeRead v    = liftM Quantity' . M.basicUnsafeRead (unMVQ v)
-  {-# INLINE basicUnsafeRead #-}
-  basicUnsafeWrite v i = M.basicUnsafeWrite (unMVQ v) i . coerce
-  {-# INLINE basicUnsafeWrite #-}
-#if MIN_VERSION_vector(0,11,0)
-  basicInitialize      = M.basicInitialize . unMVQ
-  {-# INLINE basicInitialize #-}
-#endif
-
-instance (G.Vector U.Vector a) => G.Vector U.Vector (Quantity d a) where
-  basicUnsafeFreeze    = liftM V_Quantity  . G.basicUnsafeFreeze . unMVQ
-  {-# INLINE basicUnsafeFreeze #-}
-  basicUnsafeThaw      = liftM MV_Quantity . G.basicUnsafeThaw   . unVQ
-  {-# INLINE basicUnsafeThaw #-}
-  basicLength          = G.basicLength . unVQ
-  {-# INLINE basicLength #-}
-  basicUnsafeSlice m n = V_Quantity . G.basicUnsafeSlice m n . unVQ
-  {-# INLINE basicUnsafeSlice #-}
-  basicUnsafeIndexM v  = liftM Quantity' . G.basicUnsafeIndexM (unVQ v)
-  {-# INLINE basicUnsafeIndexM #-}
