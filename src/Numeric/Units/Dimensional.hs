@@ -328,13 +328,13 @@ liftUntyped2 fe f nt x1 x2 = let (x1', e1') = extractValue x1
                                  n1 = extractName x1
                                  n2 = extractName x2
                                  n' = (liftA2 nt) n1 n2
-                              in injectValue n' (f x1' x2', fe <$> e1' <*> e2') 
+                              in injectValue n' (f x1' x2', fe <$> e1' <*> e2')
 
 -- Combines two dimensional values using a binary operation on values, yielding a Quantity.
 liftUntyped2Q :: (KnownVariant v1, KnownVariant v2) => (a -> a -> a) -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Quantity d3 a
 liftUntyped2Q f x1 x2 = let (x1', _) = extractValue x1
                             (x2', _) = extractValue x2
-                         in Quantity' (f x1' x2') 
+                         in Quantity' (f x1' x2')
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
 (*~) :: (Num a) => a -> Unit m d a -> Quantity d a
@@ -684,6 +684,7 @@ changeRep = liftUntyped (Prelude.* s) ((Prelude.* s') . realToFrac) Name.weaken
     s = E.exactPiVal p
     s' = E.injMin p
 
+-- | Convenient conversion to types with `Integral` representations using `round`.
 changeRepRound :: forall v1 v2 d a b.
                  (KnownVariant v1, KnownVariant v2, 
                   CompatibleVariants v1 v2,
