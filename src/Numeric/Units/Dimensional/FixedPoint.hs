@@ -1,6 +1,8 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Numeric.Units.Dimensional.FixedPoint
 (
@@ -11,15 +13,31 @@ module Numeric.Units.Dimensional.FixedPoint
   -- *** Via 'Double'
   expD, logD, sinD, cosD, tanD, asinD, acosD, atanD, sinhD, coshD, tanhD, asinhD, acoshD, atanhD,
   -- *** Via arbitary 'Floating' type
-  expVia, logVia, sinVia, cosVia, tanVia, asinVia, acosVia, atanVia, sinhVia, coshVia, tanhVia, asinhVia, acoshVia, atanhVia
+  expVia, logVia, sinVia, cosVia, tanVia, asinVia, acosVia, atanVia, sinhVia, coshVia, tanhVia, asinhVia, acoshVia, atanhVia,
+  -- * Commonly Used Type Synonyms
+  type Q, type Angle8, type Angle16, type Angle32
 )
 where
 
 import Numeric.Units.Dimensional.Prelude hiding ((+), (-), abs, negate, (*~), (/~))
 import qualified Prelude as P
 import qualified Data.ExactPi.TypeLevel as E
+import Data.Int
 import Data.Proxy
+import qualified GHC.TypeLits as N
 import Numeric.Units.Dimensional.Internal
+
+-- | A dimensionless number with `n` fractional bits, using a representation of type `a`.
+type Q n a = SQuantity (E.One E./ (E.ExactNatural (2 N.^ n))) DOne a
+
+-- | A single-turn angle represented as a signed 8-bit integer.
+type Angle8  = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 8)))  DPlaneAngle Int8
+
+-- | A single-turn angle represented as a signed 16-bit integer.
+type Angle16 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 15))) DPlaneAngle Int16
+
+-- | A single-turn angle represented as a signed 32-bit integer.
+type Angle32 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 31))) DPlaneAngle Int32
 
 -- | Adds two possibly scaled 'SQuantity's, preserving any scale factor.
 --
