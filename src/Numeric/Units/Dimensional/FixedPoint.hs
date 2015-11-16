@@ -21,6 +21,7 @@ where
 
 import Numeric.Units.Dimensional.Prelude hiding ((+), (-), abs, negate, (*~), (/~))
 import qualified Prelude as P
+import Data.ExactPi
 import qualified Data.ExactPi.TypeLevel as E
 import Data.Int
 import Data.Proxy
@@ -60,7 +61,7 @@ negate :: (Num a) => SQuantity s d a -> SQuantity s d a
 negate = liftUntypedQ (P.negate)
 
 expD, logD, sinD, cosD, tanD, asinD, acosD, atanD, sinhD, coshD, tanhD, asinhD, acoshD, atanhD
-  :: forall s1 s2 a b.(Real a, Integral b, E.MinCtxt s1 Double, E.MinCtxt s2 Double) => SQuantity s1 DOne a -> SQuantity s2 DOne b
+  :: forall s1 s2 a b.(Real a, Integral a, Integral b, E.MinCtxt s1 Double, E.MinCtxt s2 Double) => SQuantity s1 DOne a -> SQuantity s2 DOne b
 expD = expVia (Proxy :: Proxy P.Double)
 logD = logVia (Proxy :: Proxy P.Double)
 sinD = sinVia (Proxy :: Proxy P.Double)
@@ -77,24 +78,36 @@ acoshD = acoshVia (Proxy :: Proxy P.Double)
 atanhD = atanhVia (Proxy :: Proxy P.Double)
 
 expVia, logVia, sinVia, cosVia, tanVia, asinVia, acosVia, atanVia, sinhVia, coshVia, tanhVia, asinhVia, acoshVia, atanhVia
-  :: forall s1 s2 a b c.(Real a, RealFrac b, Floating b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
+  :: forall s1 s2 a b c.(Real a, Integral a, RealFrac b, Floating b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
 expVia = liftDimensionlessVia P.exp
 logVia = liftDimensionlessVia P.log
-sinVia = liftDimensionlessVia P.sin
-cosVia = liftDimensionlessVia P.cos
-tanVia = liftDimensionlessVia P.tan
+sinVia = liftDimensionlessPeriodicVia (2 P.* P.pi) P.sin
+cosVia = liftDimensionlessPeriodicVia (2 P.* P.pi) P.cos
+tanVia = liftDimensionlessPeriodicVia P.pi P.tan
 asinVia = liftDimensionlessVia P.asin
 acosVia = liftDimensionlessVia P.acos
 atanVia = liftDimensionlessVia P.atan
-sinhVia = liftDimensionlessVia P.sinh
-coshVia = liftDimensionlessVia P.cosh
-tanhVia = liftDimensionlessVia P.tanh
+sinhVia = liftDimensionlessPeriodicVia (2 P.* P.pi) P.sinh
+coshVia = liftDimensionlessPeriodicVia (2 P.* P.pi) P.cosh
+tanhVia = liftDimensionlessPeriodicVia P.pi P.tanh
 asinhVia = liftDimensionlessVia P.asinh
 acoshVia = liftDimensionlessVia P.acosh
 atanhVia = liftDimensionlessVia P.atanh
 
-liftDimensionlessVia :: forall s1 s2 a b c.(Real a, RealFrac b, Floating b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => (forall d.Floating d => d -> d) -> Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
-liftDimensionlessVia f _ theta = (*~ siUnit) . (f :: b -> b) $ (theta /~ siUnit)
+-- | Lift a function on dimensionless values of a specified intermediate type to operate on possibly scaled dimensionless.
+liftDimensionlessVia :: forall s1 s2 a b c.(Real a, RealFrac b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => (b -> b) -> Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
+liftDimensionlessVia f _ = (*~ siUnit) . (f :: b -> b) . (/~ siUnit)
+
+-- | Lift a periodic function on dimensionless values of a specified intermediate type to operate on possibly scaled dimensionless.
+--
+-- If the scale factor of the input type is an exact integer divisor of the function's period, the argument
+-- will be clamped via an integer `mod` operation prior to applying the function to avoid errors introduced by a floating point modulus.
+liftDimensionlessPeriodicVia :: forall s1 s2 a b c.(Real a, Integral a, RealFrac b, Floating b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => ExactPi -> (forall d.Floating d => d -> d) -> Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
+liftDimensionlessPeriodicVia p f proxy | Just p'' <- p', p'' /= 0 = (liftDimensionlessVia f proxy) . dmap (`mod` p'')
+                                       | otherwise = liftDimensionlessVia f proxy
+  where
+    p' :: Maybe a
+    p' = fmap fromInteger . toExactInteger . recip . (P./ p) . E.exactPiVal $ (Proxy :: Proxy s1)
 
 -- | Forms a possibly scaled 'SQuantity' by multipliying a number and a unit.
 (*~) :: forall s m d a b.(RealFrac a, Integral b, E.MinCtxt s a) => a -> Unit m d a -> SQuantity s d b
