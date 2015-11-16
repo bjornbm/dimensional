@@ -243,7 +243,6 @@ import Numeric.NumType.DK.Integers
   , pos2, pos3
   , KnownTypeInt, toNum
   )
-import Control.Applicative
 import Data.Data
 import Data.ExactPi
 import qualified Data.ExactPi.TypeLevel as E
@@ -308,33 +307,6 @@ strengthen (Unit' n e v) | Just n' <- Name.strengthen n = Just $ Unit' n' e v
 -- | Forms the exact version of a 'Unit'.
 exactify :: Unit m d a -> Unit m d ExactPi
 exactify (Unit' n e _) = Unit' n e e
-
--- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
-liftUntyped :: (KnownVariant v1, KnownVariant v2) => (ExactPi -> ExactPi) -> (a -> b) -> UnitNameTransformer -> (Dimensional v1 d1 a) -> (Dimensional v2 d2 b)
-liftUntyped fe f nt x = let (x', e') = extractValue x
-                            n = extractName x
-                            n' = (liftA nt) n
-                         in injectValue n' (f x', fmap fe e')
-
--- Operates on a dimensional value using a unary operation on values, yielding a Quantity.
-liftUntypedQ :: (KnownVariant v) => (a -> a) -> Dimensional v d1 a -> Quantity d2 a
-liftUntypedQ f x = let (x', _) = extractValue x
-                    in Quantity' (f x')
-
--- Combines two dimensional values using a binary operation on values, possibly yielding a Unit.
-liftUntyped2 :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2)) => (ExactPi -> ExactPi -> ExactPi) -> (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) d3 a
-liftUntyped2 fe f nt x1 x2 = let (x1', e1') = extractValue x1
-                                 (x2', e2') = extractValue x2
-                                 n1 = extractName x1
-                                 n2 = extractName x2
-                                 n' = (liftA2 nt) n1 n2
-                              in injectValue n' (f x1' x2', fe <$> e1' <*> e2')
-
--- Combines two dimensional values using a binary operation on values, yielding a Quantity.
-liftUntyped2Q :: (KnownVariant v1, KnownVariant v2) => (a -> a -> a) -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Quantity d3 a
-liftUntyped2Q f x1 x2 = let (x1', _) = extractValue x1
-                            (x2', _) = extractValue x2
-                         in Quantity' (f x1' x2')
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
 (*~) :: (Num a) => a -> Unit m d a -> Quantity d a

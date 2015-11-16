@@ -6,9 +6,11 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-} -- for Vector instances only
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
 module Numeric.Units.Dimensional.Internal
@@ -16,10 +18,13 @@ module Numeric.Units.Dimensional.Internal
   KnownVariant(..),
   Dimensional(..),
   type Unit, type Quantity, type SQuantity,
-  siUnit, showIn
+  siUnit, showIn,
+  liftUntyped, liftUntyped2,
+  liftUntypedQ, liftUntyped2Q
 )
 where
 
+import Control.Applicative
 import Control.DeepSeq
 import Control.Monad (liftM)
 import Data.Coerce (coerce)
@@ -30,7 +35,8 @@ import Foreign.Ptr (Ptr, castPtr)
 import Foreign.Storable (Storable(..))
 import GHC.Generics
 import Numeric.Units.Dimensional.Dimensions
-import Numeric.Units.Dimensional.Variants
+import Numeric.Units.Dimensional.Variants hiding (type (*))
+import qualified Numeric.Units.Dimensional.Variants as V
 import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.UnitNames.InterchangeNames (HasInterchangeName(..))
@@ -208,3 +214,27 @@ showIn (Unit' n _ y) (Quantity' x) | Name.weaken n == nOne = show (x Prelude./ y
 
 instance (KnownDimension d, Show a) => Show (Unit m d a) where
   show (Unit' n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
+
+-- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
+liftUntyped :: (KnownVariant v1, KnownVariant v2) => (ExactPi -> ExactPi) -> (a -> b) -> UnitNameTransformer -> (Dimensional v1 d1 a) -> (Dimensional v2 d2 b)
+liftUntyped fe f nt x = let (x', e') = extractValue x
+                            n = extractName x
+                            n' = (liftA nt) n
+                         in injectValue n' (f x', fmap fe e')
+
+-- Operates on a dimensional value using a unary operation on values, yielding a Quantity.
+liftUntypedQ :: (a -> a) -> SQuantity s1 d1 a -> SQuantity s2 d2 a
+liftUntypedQ f (Quantity' x) = Quantity' (f x)
+
+-- Combines two dimensional values using a binary operation on values, possibly yielding a Unit.
+liftUntyped2 :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2)) => (ExactPi -> ExactPi -> ExactPi) -> (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) d3 a
+liftUntyped2 fe f nt x1 x2 = let (x1', e1') = extractValue x1
+                                 (x2', e2') = extractValue x2
+                                 n1 = extractName x1
+                                 n2 = extractName x2
+                                 n' = (liftA2 nt) n1 n2
+                              in injectValue n' (f x1' x2', fe <$> e1' <*> e2')
+
+-- Combines two dimensional values using a binary operation on values, yielding a Quantity.
+liftUntyped2Q :: (a -> a -> a) -> SQuantity s1 d1 a -> SQuantity s2 d2 a -> SQuantity s3 d3 a
+liftUntyped2Q f (Quantity' x1) (Quantity' x2) = Quantity' (f x1 x2)
