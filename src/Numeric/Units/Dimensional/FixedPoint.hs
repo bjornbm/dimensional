@@ -44,6 +44,16 @@ type Angle16 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 15))) DPlaneAngle Int1
 -- | A single-turn angle represented as a signed 32-bit integer.
 type Angle32 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 31))) DPlaneAngle Int32
 
+{-
+We will reuse the operators and function names from the Prelude.
+To prevent unpleasant surprises we give operators the same fixity
+as the Prelude.
+-}
+
+--infixr 8  ^, ^/, **
+--infixl 7  *, /
+infixl 6  +, -
+
 -- | Adds two possibly scaled 'SQuantity's, preserving any scale factor.
 --
 -- Use in conjunction with 'changeRepRound' to combine quantities with differing scale factors.
@@ -63,6 +73,8 @@ abs = liftUntypedQ (P.abs)
 -- | Negates the value of a possibly scaled 'SQuantity', preserving any scale factor.
 negate :: (Num a) => SQuantity s d a -> SQuantity s d a
 negate = liftUntypedQ (P.negate)
+
+infixl 7  *~~, /~~
 
 -- | Applies '*~' to all values in a functor.
 (*~~) :: (Functor f, RealFrac a, Integral b, E.MinCtxt s a) => f a -> Unit m d a -> f (SQuantity s d b)
@@ -168,6 +180,14 @@ pi = (P.pi :: P.Double) *~ one
 -- feel free to review http://www.thepimanifesto.com).
 tau :: (Integral a, E.MinCtxt s P.Double) => SQuantity s DOne a
 tau = (2 P.* P.pi :: P.Double) *~ one
+
+{-
+We give '*~' and '/~' the same fixity as '*' and '/' defined below.
+Note that this necessitates the use of parenthesis when composing
+units using '*' and '/', e.g. "1 *~ (meter / second)".
+-}
+
+infixl 7  *~, /~
 
 -- | Forms a possibly scaled 'SQuantity' by multipliying a number and a unit.
 (*~) :: forall s m d a b.(RealFrac a, Integral b, E.MinCtxt s a) => a -> Unit m d a -> SQuantity s d b
