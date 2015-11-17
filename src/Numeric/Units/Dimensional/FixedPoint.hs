@@ -11,15 +11,19 @@ module Numeric.Units.Dimensional.FixedPoint
   (+), (-), negate, abs,
   -- ** Transcendental Functions
   -- *** Via 'Double'
-  expD, logD, sinD, cosD, tanD, asinD, acosD, atanD, sinhD, coshD, tanhD, asinhD, acoshD, atanhD,
+  expD, logD, sinD, cosD, tanD, asinD, acosD, atanD, sinhD, coshD, tanhD, asinhD, acoshD, atanhD, atan2D,
   -- *** Via arbitary 'Floating' type
-  expVia, logVia, sinVia, cosVia, tanVia, asinVia, acosVia, atanVia, sinhVia, coshVia, tanhVia, asinhVia, acoshVia, atanhVia,
+  expVia, logVia, sinVia, cosVia, tanVia, asinVia, acosVia, atanVia, sinhVia, coshVia, tanhVia, asinhVia, acoshVia, atanhVia, atan2Via,
+  -- ** Operations on Collections
+  (*~~), (/~~), sum, mean, -- dimensionlessLength, nFromTo,
+  -- * Constants
+  _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
   -- * Commonly Used Type Synonyms
   type Q, type Angle8, type Angle16, type Angle32
 )
 where
 
-import Numeric.Units.Dimensional.Prelude hiding ((+), (-), abs, negate, (*~), (/~))
+import Numeric.Units.Dimensional.Prelude hiding ((+), (-), abs, negate, (*~), (/~), (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
 import qualified Prelude as P
 import Data.ExactPi
 import qualified Data.ExactPi.TypeLevel as E
@@ -32,7 +36,7 @@ import Numeric.Units.Dimensional.Internal
 type Q n a = SQuantity (E.One E./ (E.ExactNatural (2 N.^ n))) DOne a
 
 -- | A single-turn angle represented as a signed 8-bit integer.
-type Angle8  = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 8)))  DPlaneAngle Int8
+type Angle8  = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 7)))  DPlaneAngle Int8
 
 -- | A single-turn angle represented as a signed 16-bit integer.
 type Angle16 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 15))) DPlaneAngle Int16
@@ -60,8 +64,27 @@ abs = liftUntypedQ (P.abs)
 negate :: (Num a) => SQuantity s d a -> SQuantity s d a
 negate = liftUntypedQ (P.negate)
 
+-- | Applies '*~' to all values in a functor.
+(*~~) :: (Functor f, RealFrac a, Integral b, E.MinCtxt s a) => f a -> Unit m d a -> f (SQuantity s d b)
+xs *~~ u = fmap (*~ u) xs
+
+-- | Applies '/~' to all values in a functor.
+(/~~) :: (Functor f, Real a, Fractional b,  E.MinCtxt s b) => f (SQuantity s d a) -> Unit m d b -> f b
+xs /~~ u = fmap (/~ u) xs
+
+-- | The sum of all elements in a list.
+sum :: (Num a, Foldable f) => f (SQuantity s d a) -> SQuantity s d a
+sum = foldr (+) _0
+
+-- | The arithmetic mean of all elements in a list.
+mean :: (Fractional a, Foldable f, E.KnownExactPi s) => f (SQuantity s d a) -> SQuantity s d a
+mean = reduce . foldr accumulate (_0, 0 :: Int)
+  where
+    reduce (s, n) = dmap (P./ fromIntegral n) s
+    accumulate val (accum, count) = (accum + val, count P.+ 1)
+
 expD, logD, sinD, cosD, tanD, asinD, acosD, atanD, sinhD, coshD, tanhD, asinhD, acoshD, atanhD
-  :: forall s1 s2 a b.(Real a, Integral a, Integral b, E.MinCtxt s1 Double, E.MinCtxt s2 Double) => SQuantity s1 DOne a -> SQuantity s2 DOne b
+  :: (Real a, Integral a, Integral b, E.MinCtxt s1 Double, E.MinCtxt s2 Double) => SQuantity s1 DOne a -> SQuantity s2 DOne b
 expD = expVia (Proxy :: Proxy P.Double)
 logD = logVia (Proxy :: Proxy P.Double)
 sinD = sinVia (Proxy :: Proxy P.Double)
@@ -77,8 +100,11 @@ asinhD = asinhVia (Proxy :: Proxy P.Double)
 acoshD = acoshVia (Proxy :: Proxy P.Double)
 atanhD = atanhVia (Proxy :: Proxy P.Double)
 
+atan2D :: (Real a, Integral a, Integral b, E.MinCtxt s1 Double, E.MinCtxt s2 Double, E.MinCtxt s3 Double) => SQuantity s1 DOne a -> SQuantity s2 DOne a -> SQuantity s3 DOne b
+atan2D = atan2Via (Proxy :: Proxy P.Double)
+
 expVia, logVia, sinVia, cosVia, tanVia, asinVia, acosVia, atanVia, sinhVia, coshVia, tanhVia, asinhVia, acoshVia, atanhVia
-  :: forall s1 s2 a b c.(Real a, Integral a, RealFrac b, Floating b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
+  :: (Real a, Integral a, RealFrac b, Floating b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
 expVia = liftDimensionlessVia P.exp
 logVia = liftDimensionlessVia P.log
 sinVia = liftDimensionlessPeriodicVia (2 P.* P.pi) P.sin
@@ -94,6 +120,11 @@ asinhVia = liftDimensionlessVia P.asinh
 acoshVia = liftDimensionlessVia P.acosh
 atanhVia = liftDimensionlessVia P.atanh
 
+-- | The standard two argument arctangent function.
+-- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
+atan2Via :: forall s1 s2 s3 a b c d.(Real a, Integral a, RealFloat b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b, E.MinCtxt s3 b, KnownDimension d) => Proxy b -> SQuantity s1 d a -> SQuantity s2 d a -> SQuantity s3 DOne c
+atan2Via _ y x = (*~ siUnit) $ (P.atan2 :: b -> b -> b) (y /~ siUnit) (x /~ siUnit)
+
 -- | Lift a function on dimensionless values of a specified intermediate type to operate on possibly scaled dimensionless.
 liftDimensionlessVia :: forall s1 s2 a b c.(Real a, RealFrac b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => (b -> b) -> Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
 liftDimensionlessVia f _ = (*~ siUnit) . (f :: b -> b) . (/~ siUnit)
@@ -108,6 +139,35 @@ liftDimensionlessPeriodicVia p f proxy | Just p'' <- p', p'' /= 0 = (liftDimensi
   where
     p' :: Maybe a
     p' = fmap fromInteger . toExactInteger . recip . (P./ p) . E.exactPiVal $ (Proxy :: Proxy s1)
+
+-- | The constant for zero is polymorphic, allowing
+-- it to express zero 'Length' or 'Capacitance' or 'Velocity' etc, in addition
+-- to the 'Dimensionless' value zero.
+_0 :: Num a => SQuantity s d a
+_0 = Quantity' 0
+
+-- Note that these constants may not be exactly representable with certain scale factors.
+-- Note that multiplication by the scale factor is done with 'P.Double' precision and then rounded.
+_1, _2, _3, _4, _5, _6, _7, _8, _9 :: (Integral a, E.MinCtxt s P.Double) => SQuantity s DOne a
+_1 = (1 :: P.Double) *~ one
+_2 = (2 :: P.Double) *~ one
+_3 = (3 :: P.Double) *~ one
+_4 = (4 :: P.Double) *~ one
+_5 = (5 :: P.Double) *~ one
+_6 = (6 :: P.Double) *~ one
+_7 = (7 :: P.Double) *~ one
+_8 = (8 :: P.Double) *~ one
+_9 = (9 :: P.Double) *~ one
+
+pi :: (Integral a, E.MinCtxt s P.Double) => SQuantity s DOne a
+pi = (P.pi :: P.Double) *~ one
+
+-- | Twice 'pi'.
+--
+-- For background on 'tau' see http://tauday.com/tau-manifesto (but also
+-- feel free to review http://www.thepimanifesto.com).
+tau :: (Integral a, E.MinCtxt s P.Double) => SQuantity s DOne a
+tau = (2 P.* P.pi :: P.Double) *~ one
 
 -- | Forms a possibly scaled 'SQuantity' by multipliying a number and a unit.
 (*~) :: forall s m d a b.(RealFrac a, Integral b, E.MinCtxt s a) => a -> Unit m d a -> SQuantity s d b
