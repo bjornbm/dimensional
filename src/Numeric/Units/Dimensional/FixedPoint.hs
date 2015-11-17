@@ -8,7 +8,8 @@ module Numeric.Units.Dimensional.FixedPoint
 (
   -- * Dimensional Arithmetic
   (*~), (/~),
-  (+), (-), negate, abs,
+  (*), (/), (+), (-),
+  negate, abs,
   -- ** Transcendental Functions
   -- *** Via 'Double'
   expD, logD, sinD, cosD, tanD, asinD, acosD, atanD, sinhD, coshD, tanhD, asinhD, acoshD, atanhD, atan2D,
@@ -17,13 +18,13 @@ module Numeric.Units.Dimensional.FixedPoint
   -- ** Operations on Collections
   (*~~), (/~~), sum, mean, -- dimensionlessLength, nFromTo,
   -- * Constants
-  _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
+  _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau, epsilon,
   -- * Commonly Used Type Synonyms
   type Q, type Angle8, type Angle16, type Angle32
 )
 where
 
-import Numeric.Units.Dimensional.Prelude hiding ((+), (-), abs, negate, (*~), (/~), (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
+import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (*), (/), (+), (-), negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
 import qualified Prelude as P
 import Data.ExactPi
 import qualified Data.ExactPi.TypeLevel as E
@@ -51,8 +52,22 @@ as the Prelude.
 -}
 
 --infixr 8  ^, ^/, **
---infixl 7  *, /
+infixl 7  *, /
 infixl 6  +, -
+
+(*) :: forall s1 s2 s3 d1 d2 a.(Integral a, E.MinCtxt (s3 E./ (s1 E.* s2)) Double) => SQuantity s1 d1 a -> SQuantity s2 d2 a -> SQuantity s3 (d1 * d2) a
+(Quantity' x) * (Quantity' y) | rs == 1   = Quantity' $ x P.* y
+                              | rs > 1    = Quantity' $ (x P.* y) `P.quot` (r s)
+                              | otherwise = Quantity' $ (x P.* y) P.* (r $ P.recip s)
+                              -- TODO: handle the case where x is near 1 and we need to do both a multiply and a divide
+  where
+    r :: (Double -> a)
+    r = round
+    rs = r s
+    s = approximateValue . E.exactPiVal $ (Proxy :: Proxy (s3 E./ (s1 E.* s2)))
+
+(/) :: forall s1 s2 s3 d1 d2 a.(Integral a, E.MinCtxt s1 Double, E.MinCtxt s2 Double, E.MinCtxt s3 Double) => SQuantity s1 d1 a -> SQuantity s2 d2 a -> SQuantity s3 (d1 * d2) a
+(/) = undefined
 
 -- | Adds two possibly scaled 'SQuantity's, preserving any scale factor.
 --
@@ -180,6 +195,10 @@ pi = (P.pi :: P.Double) *~ one
 -- feel free to review http://www.thepimanifesto.com).
 tau :: (Integral a, E.MinCtxt s P.Double) => SQuantity s DOne a
 tau = (2 P.* P.pi :: P.Double) *~ one
+
+-- | The least positive representable value in a given fixed-point scaled quantity type.
+epsilon :: (Integral a) => SQuantity s d a
+epsilon = Quantity' 1
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
