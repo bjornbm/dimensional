@@ -5,6 +5,16 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 
+{- |
+    Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
+    License    : BSD3
+
+    Maintainer : bjorn@buckwalter.se
+    Stability  : Experimental
+    Portability: GHC only?
+
+Defines types for manipulation of quantities with fixed point representations.
+-}
 module Numeric.Units.Dimensional.FixedPoint
 (
   -- * Dimensional Arithmetic
