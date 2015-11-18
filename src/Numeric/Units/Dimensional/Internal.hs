@@ -31,6 +31,7 @@ import Data.Coerce (coerce)
 import Data.Data
 import Data.ExactPi
 import qualified Data.ExactPi.TypeLevel as E
+import Data.Monoid (Monoid(..))
 import Foreign.Ptr (Ptr, castPtr)
 import Foreign.Storable (Storable(..))
 import GHC.Generics
@@ -43,6 +44,12 @@ import Numeric.Units.Dimensional.UnitNames.InterchangeNames (HasInterchangeName(
 import qualified Data.Vector.Generic.Mutable as M
 import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Unboxed.Base as U
+import Prelude
+  ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Functor
+  , String, Maybe(..)
+  , (.), ($), (++), (+), (/)
+  , show, otherwise, undefined, error, fmap
+  )
 
 -- | A unit of measurement.
 type Unit (m :: Metricality) = Dimensional ('DUnit m)
@@ -107,8 +114,8 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
   extractValue (Unit _ e x) = (x, Just e)
   extractName (Unit n _ _) = Just . Name.weaken $ n
   injectValue (Just n) (x, Just e) | Just n' <- relax n = Unit n' e x
-                                   | otherwise          = Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
-  injectValue _        _ = Prelude.error "Shouldn't be reachable. Needed to name a quantity."
+                                   | otherwise          = error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
+  injectValue _        _ = error "Shouldn't be reachable. Needed to name a quantity."
   dmap f (Unit n e x) = Unit n e (f x)
 
 -- GHC is somewhat unclear about why, but it won't derive this instance, so we give it explicitly.
@@ -209,8 +216,8 @@ instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
 
 -- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
-showIn (Unit n _ y) (Quantity x) | Name.weaken n == nOne = show (x Prelude./ y)
-                                 | otherwise             = (show (x Prelude./ y)) ++ " " ++ (show n)
+showIn (Unit n _ y) (Quantity x) | Name.weaken n == nOne = show (x / y)
+                                 | otherwise             = (show (x / y)) ++ " " ++ (show n)
 
 instance (KnownDimension d, Show a) => Show (Unit m d a) where
   show (Unit n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
