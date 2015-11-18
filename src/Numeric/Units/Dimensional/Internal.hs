@@ -127,7 +127,7 @@ we will define a monoid instance that adds.
 -- | 'Quantity's of a given 'Dimension' form a 'Monoid' under addition.
 instance (Num a) => Monoid (SQuantity s d a) where
   mempty = Quantity 0
-  mappend = undefined -- (+)
+  mappend = liftUntyped2Q (+)
 
 {-
 
