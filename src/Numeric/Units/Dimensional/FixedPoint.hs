@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
@@ -25,14 +26,19 @@ module Numeric.Units.Dimensional.FixedPoint
 )
 where
 
-import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
-import qualified Prelude as P
 import Data.ExactPi
 import qualified Data.ExactPi.TypeLevel as E
 import Data.Int
 import Data.Proxy
+#if MIN_VERSION_base(4,8,0)
+-- This import is implied in GHC 7.10. Because we are using only a qualified import of Prelude we can't avoid this warning by rearranging the import list.
+#else
+import Data.Foldable (Foldable(foldr))
+#endif
 import qualified GHC.TypeLits as N
 import Numeric.Units.Dimensional.Internal
+import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
+import qualified Prelude as P
 
 -- | A dimensionless number with `n` fractional bits, using a representation of type `a`.
 type Q n a = SQuantity (E.One E./ (E.ExactNatural (2 N.^ n))) DOne a
