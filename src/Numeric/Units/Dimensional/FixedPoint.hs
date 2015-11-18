@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
@@ -30,15 +29,11 @@ import Data.ExactPi
 import qualified Data.ExactPi.TypeLevel as E
 import Data.Int
 import Data.Proxy
-#if MIN_VERSION_base(4,8,0)
--- This import is implied in GHC 7.10. Because we are using only a qualified import of Prelude we can't avoid this warning by rearranging the import list.
-#else
-import Data.Foldable (Foldable(foldr))
-#endif
+import qualified Data.Foldable as F
 import qualified GHC.TypeLits as N
 import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
-import qualified Prelude as P hiding (foldr)
+import qualified Prelude as P
 
 -- | A dimensionless number with `n` fractional bits, using a representation of type `a`.
 type Q n a = SQuantity (E.One E./ (E.ExactNatural (2 N.^ n))) DOne a
@@ -103,12 +98,12 @@ xs *~~ u = fmap (*~ u) xs
 xs /~~ u = fmap (/~ u) xs
 
 -- | The sum of all elements in a list.
-sum :: (Num a, Foldable f) => f (SQuantity s d a) -> SQuantity s d a
-sum = foldr (+) _0
+sum :: (Num a, F.Foldable f) => f (SQuantity s d a) -> SQuantity s d a
+sum = F.foldr (+) _0
 
 -- | The arithmetic mean of all elements in a list.
-mean :: (Fractional a, Foldable f, E.KnownExactPi s) => f (SQuantity s d a) -> SQuantity s d a
-mean = reduce . foldr accumulate (_0, 0 :: Int)
+mean :: (Fractional a, F.Foldable f, E.KnownExactPi s) => f (SQuantity s d a) -> SQuantity s d a
+mean = reduce . F.foldr accumulate (_0, 0 :: Int)
   where
     reduce (s, n) = dmap (P./ fromIntegral n) s
     accumulate val (accum, count) = (accum + val, count P.+ 1)
