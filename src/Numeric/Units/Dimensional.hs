@@ -302,7 +302,7 @@ weaken (Unit n e v) = Unit (Name.weaken n) e v
 -- which is certainly 'Metric'.
 strengthen :: Unit m d a -> Maybe (Unit 'Metric d a)
 strengthen (Unit n e v) | Just n' <- Name.strengthen n = Just $ Unit n' e v
-                         | otherwise                    = Nothing
+                        | otherwise                    = Nothing
 
 -- | Forms the exact version of a 'Unit'.
 exactify :: Unit m d a -> Unit m d ExactPi

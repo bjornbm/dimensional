@@ -210,7 +210,7 @@ instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
 -- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
 showIn (Unit n _ y) (Quantity x) | Name.weaken n == nOne = show (x Prelude./ y)
-                                   | otherwise             = (show (x Prelude./ y)) ++ " " ++ (show n)
+                                 | otherwise             = (show (x Prelude./ y)) ++ " " ++ (show n)
 
 instance (KnownDimension d, Show a) => Show (Unit m d a) where
   show (Unit n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"

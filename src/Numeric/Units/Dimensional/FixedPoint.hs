@@ -57,9 +57,9 @@ infixl 6  +, -
 
 approxProduct :: forall s1 s2 s3 d1 d2 a.(Integral a, E.MinCtxt (s3 E./ (s1 E.* s2)) Double) => SQuantity s1 d1 a -> SQuantity s2 d2 a -> SQuantity s3 (d1 * d2) a
 approxProduct (Quantity x) (Quantity y) | rs == 1   = Quantity $ x P.* y
-                                          | rs > 1    = Quantity $ (x P.* y) `P.quot` (r s)
-                                          | otherwise = Quantity $ (x P.* y) P.* (r $ P.recip s)
-                                          -- TODO: handle the case where x is near 1 and we need to do both a multiply and a divide
+                                        | rs > 1    = Quantity $ (x P.* y) `P.quot` (r s)
+                                        | otherwise = Quantity $ (x P.* y) P.* (r $ P.recip s)
+                                        -- TODO: handle the case where x is near 1 and we need to do both a multiply and a divide
   where
     r :: (Double -> a)
     r = round
