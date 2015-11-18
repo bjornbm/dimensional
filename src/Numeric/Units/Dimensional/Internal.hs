@@ -84,40 +84,40 @@ class KnownVariant (v :: Variant) where
 deriving instance Typeable Dimensional
 
 instance (E.KnownExactPi s) => KnownVariant ('DQuantity s) where
-  newtype Dimensional ('DQuantity s) d a = Quantity' a
+  newtype Dimensional ('DQuantity s) d a = Quantity a
     deriving (Eq, Ord, Data, Generic, Generic1
 #if MIN_VERSION_base(4,8,0)
      , Typeable -- GHC 7.8 doesn't support deriving this instance
 #endif
     )
   type (ScaleFactor ('DQuantity s)) = s
-  extractValue (Quantity' x) = (x, Nothing)
+  extractValue (Quantity x) = (x, Nothing)
   extractName _ = Nothing
-  injectValue _ (x, _) = Quantity' x
-  dmap f (Quantity' x) = Quantity' (f x)
+  injectValue _ (x, _) = Quantity x
+  dmap f (Quantity x) = Quantity (f x)
 
 instance (Typeable m) => KnownVariant ('DUnit m) where
-  data Dimensional ('DUnit m) d a = Unit' !(UnitName m) !ExactPi !a
+  data Dimensional ('DUnit m) d a = Unit !(UnitName m) !ExactPi !a
     deriving (Generic, Generic1
 #if MIN_VERSION_base(4,8,0)
      , Typeable -- GHC 7.8 doesn't support deriving this instance
 #endif
     )
   type (ScaleFactor ('DUnit m)) = E.One
-  extractValue (Unit' _ e x) = (x, Just e)
-  extractName (Unit' n _ _) = Just . Name.weaken $ n
-  injectValue (Just n) (x, Just e) | Just n' <- relax n = Unit' n' e x
+  extractValue (Unit _ e x) = (x, Just e)
+  extractName (Unit n _ _) = Just . Name.weaken $ n
+  injectValue (Just n) (x, Just e) | Just n' <- relax n = Unit n' e x
                                    | otherwise          = Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
   injectValue _        _ = Prelude.error "Shouldn't be reachable. Needed to name a quantity."
-  dmap f (Unit' n e x) = Unit' n e (f x)
+  dmap f (Unit n e x) = Unit n e (f x)
 
 -- GHC is somewhat unclear about why, but it won't derive this instance, so we give it explicitly.
 instance (Bounded a) => Bounded (Quantity d a) where
-  minBound = Quantity' minBound
-  maxBound = Quantity' maxBound
+  minBound = Quantity minBound
+  maxBound = Quantity maxBound
 
 instance HasInterchangeName (Unit m d a) where
-  interchangeName (Unit' n _ _) = interchangeName n
+  interchangeName (Unit n _ _) = interchangeName n
 
 {-
 Since quantities form a monoid under addition, but not under multiplication unless they are dimensionless,
@@ -126,7 +126,7 @@ we will define a monoid instance that adds.
 
 -- | 'Quantity's of a given 'Dimension' form a 'Monoid' under addition.
 instance (Num a) => Monoid (SQuantity s d a) where
-  mempty = Quantity' 0
+  mempty = Quantity 0
   mappend = undefined -- (+)
 
 {-
@@ -148,7 +148,7 @@ instance (KnownDimension d) => HasDimension (Dimensional v d a) where
 -- SI base unit of any dimension. This allows polymorphic quantity
 -- creation and destruction without exposing the 'Dimensional' constructor.
 siUnit :: forall d a.(KnownDimension d, Num a) => Unit 'NonMetric d a
-siUnit = Unit' (baseUnitName $ dimension (Proxy :: Proxy d)) 1 1
+siUnit = Unit (baseUnitName $ dimension (Proxy :: Proxy d)) 1 1
 
 instance NFData a => NFData (Quantity d a) -- instance is derived from Generic instance
 
@@ -159,7 +159,7 @@ instance Storable a => Storable (Quantity d a) where
   {-# INLINE alignment #-}
   poke ptr = poke (castPtr ptr :: Ptr a) . coerce
   {-# INLINE poke #-}
-  peek ptr = liftM Quantity' (peek (castPtr ptr :: Ptr a))
+  peek ptr = liftM Quantity (peek (castPtr ptr :: Ptr a))
   {-# INLINE peek #-}
 
 {-
@@ -178,7 +178,7 @@ instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
   {-# INLINE basicOverlaps #-}
   basicUnsafeNew       = liftM MV_Quantity . M.basicUnsafeNew
   {-# INLINE basicUnsafeNew #-}
-  basicUnsafeRead v    = liftM Quantity' . M.basicUnsafeRead (unMVQ v)
+  basicUnsafeRead v    = liftM Quantity . M.basicUnsafeRead (unMVQ v)
   {-# INLINE basicUnsafeRead #-}
   basicUnsafeWrite v i = M.basicUnsafeWrite (unMVQ v) i . coerce
   {-# INLINE basicUnsafeWrite #-}
@@ -196,7 +196,7 @@ instance (G.Vector U.Vector a) => G.Vector U.Vector (Quantity d a) where
   {-# INLINE basicLength #-}
   basicUnsafeSlice m n = V_Quantity . G.basicUnsafeSlice m n . unVQ
   {-# INLINE basicUnsafeSlice #-}
-  basicUnsafeIndexM v  = liftM Quantity' . G.basicUnsafeIndexM (unVQ v)
+  basicUnsafeIndexM v  = liftM Quantity . G.basicUnsafeIndexM (unVQ v)
   {-# INLINE basicUnsafeIndexM #-}
 
 {-
@@ -209,11 +209,11 @@ instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
 
 -- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
-showIn (Unit' n _ y) (Quantity' x) | Name.weaken n == nOne = show (x Prelude./ y)
+showIn (Unit n _ y) (Quantity x) | Name.weaken n == nOne = show (x Prelude./ y)
                                    | otherwise             = (show (x Prelude./ y)) ++ " " ++ (show n)
 
 instance (KnownDimension d, Show a) => Show (Unit m d a) where
-  show (Unit' n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
+  show (Unit n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
 
 -- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
 liftUntyped :: (KnownVariant v1, KnownVariant v2) => (ExactPi -> ExactPi) -> (a -> b) -> UnitNameTransformer -> (Dimensional v1 d1 a) -> (Dimensional v2 d2 b)
@@ -224,7 +224,7 @@ liftUntyped fe f nt x = let (x', e') = extractValue x
 
 -- Operates on a dimensional value using a unary operation on values, yielding a Quantity.
 liftUntypedQ :: (a -> a) -> SQuantity s1 d1 a -> SQuantity s2 d2 a
-liftUntypedQ f (Quantity' x) = Quantity' (f x)
+liftUntypedQ f (Quantity x) = Quantity (f x)
 
 -- Combines two dimensional values using a binary operation on values, possibly yielding a Unit.
 liftUntyped2 :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2)) => (ExactPi -> ExactPi -> ExactPi) -> (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) d3 a
@@ -237,4 +237,4 @@ liftUntyped2 fe f nt x1 x2 = let (x1', e1') = extractValue x1
 
 -- Combines two dimensional values using a binary operation on values, yielding a Quantity.
 liftUntyped2Q :: (a -> a -> a) -> SQuantity s1 d1 a -> SQuantity s2 d2 a -> SQuantity s3 d3 a
-liftUntyped2Q f (Quantity' x1) (Quantity' x2) = Quantity' (f x1 x2)
+liftUntyped2Q f (Quantity x1) (Quantity x2) = Quantity (f x1 x2)

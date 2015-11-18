@@ -286,36 +286,36 @@ way to declare quantities as such a product.
 
 -- | Extracts the 'UnitName' of a 'Unit'.
 name :: Unit m d a -> UnitName m
-name (Unit' n _ _) = n
+name (Unit n _ _) = n
 
 -- | Extracts the exact value of a 'Unit', expressed in terms of the SI coherent derived unit (see 'siUnit') of the same 'Dimension'.
 --
 -- Note that the actual value may in some cases be approximate, for example if the unit is defined by experiment.
 exactValue :: Unit m d a -> ExactPi
-exactValue (Unit' _ e _) = e
+exactValue (Unit _ e _) = e
 
 -- | Discards potentially unwanted type level information about a 'Unit'.
 weaken :: Unit m d a -> Unit 'NonMetric d a
-weaken (Unit' n e v) = Unit' (Name.weaken n) e v
+weaken (Unit n e v) = Unit (Name.weaken n) e v
 
 -- | Attempts to convert a 'Unit' which may or may not be 'Metric' to one
 -- which is certainly 'Metric'.
 strengthen :: Unit m d a -> Maybe (Unit 'Metric d a)
-strengthen (Unit' n e v) | Just n' <- Name.strengthen n = Just $ Unit' n' e v
+strengthen (Unit n e v) | Just n' <- Name.strengthen n = Just $ Unit n' e v
                          | otherwise                    = Nothing
 
 -- | Forms the exact version of a 'Unit'.
 exactify :: Unit m d a -> Unit m d ExactPi
-exactify (Unit' n e _) = Unit' n e e
+exactify (Unit n e _) = Unit n e e
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
 (*~) :: (Num a) => a -> Unit m d a -> Quantity d a
-x *~ (Unit' _ _ y) = Quantity' (x Prelude.* y)
+x *~ (Unit _ _ y) = Quantity (x Prelude.* y)
 
 -- | Divides a possibly scaled 'SQuantity' by a 'Unit' of the same physical dimension, obtaining the
 -- numerical value of the quantity expressed in that unit.
 (/~) :: forall s m d a.(Fractional a, E.MinCtxt s a) => SQuantity s d a -> Unit m d a -> a
-(Quantity' x) /~ (Unit' _ _ y) = (x Prelude.* E.injMin (Proxy :: Proxy s) Prelude./ y)
+(Quantity x) /~ (Unit _ _ y) = (x Prelude.* E.injMin (Proxy :: Proxy s) Prelude./ y)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
@@ -598,7 +598,7 @@ The only unit we will define in this module is 'one'.
 -- appear in expressions. However, for us it is necessary to use 'one'
 -- as we would any other unit to perform the "boxing" of dimensionless values.
 one :: Num a => Unit 'NonMetric DOne a
-one = Unit' nOne 1 1
+one = Unit nOne 1 1
 
 {- $constants
 For convenience we define some constants for small integer values
@@ -611,7 +611,7 @@ good measure.
 -- it to express zero 'Length' or 'Capacitance' or 'Velocity' etc, in addition
 -- to the 'Dimensionless' value zero.
 _0 :: Num a => Quantity d a
-_0 = Quantity' 0
+_0 = Quantity 0
 
 _1, _2, _3, _4, _5, _6, _7, _8, _9 :: (Num a) => Dimensionless a
 _1 = 1 *~ one
@@ -691,8 +691,8 @@ we provide a means for converting from type-level dimensions to term-level dimen
 -- Supplying negative defining quantities is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
 mkUnitR :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
-mkUnitR n s' (Unit' _ s x) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
-                           | otherwise     = Unit' n (s' Prelude.* s) (approximateValue s' Prelude.* x)
+mkUnitR n s' (Unit _ s x) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
+                          | otherwise     = Unit n (s' Prelude.* s) (approximateValue s' Prelude.* x)
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 --
@@ -701,9 +701,9 @@ mkUnitR n s' (Unit' _ s x) | isExactZero s = error "Supplying zero as a conversi
 --
 -- For more information see 'mkUnitR'.
 mkUnitQ :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
-mkUnitQ n s' (Unit' _ s _) | s' == 0                       = error "Supplying zero as a conversion factor is not valid."
-                           | Just q <- toExactRational s'' = Unit' n s'' (fromRational q)
-                           | otherwise                     = error "The resulting conversion factor is not an exact rational." 
+mkUnitQ n s' (Unit _ s _) | s' == 0                       = error "Supplying zero as a conversion factor is not valid."
+                          | Just q <- toExactRational s'' = Unit n s'' (fromRational q)
+                          | otherwise                     = error "The resulting conversion factor is not an exact rational." 
   where
     s'' = fromRational s' Prelude.* s                               
 
@@ -714,8 +714,8 @@ mkUnitQ n s' (Unit' _ s _) | s' == 0                       = error "Supplying ze
 --
 -- For more information see 'mkUnitR'.
 mkUnitZ :: Num a => UnitName m -> Integer -> Unit m1 d a -> Unit m d a
-mkUnitZ n s' (Unit' _ s _) | s' == 0                      = error "Supplying zero as a conversion factor is not valid."
-                           | Just z <- toExactInteger s'' = Unit' n s'' (fromInteger z)
-                           | otherwise                    = error "The resulting conversion factor is not an exact integer."
+mkUnitZ n s' (Unit _ s _) | s' == 0                      = error "Supplying zero as a conversion factor is not valid."
+                          | Just z <- toExactInteger s'' = Unit n s'' (fromInteger z)
+                          | otherwise                    = error "The resulting conversion factor is not an exact integer."
   where
     s'' = fromInteger s' Prelude.* s

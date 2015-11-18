@@ -56,9 +56,9 @@ as the Prelude.
 infixl 6  +, -
 
 approxProduct :: forall s1 s2 s3 d1 d2 a.(Integral a, E.MinCtxt (s3 E./ (s1 E.* s2)) Double) => SQuantity s1 d1 a -> SQuantity s2 d2 a -> SQuantity s3 (d1 * d2) a
-approxProduct (Quantity' x) (Quantity' y) | rs == 1   = Quantity' $ x P.* y
-                                          | rs > 1    = Quantity' $ (x P.* y) `P.quot` (r s)
-                                          | otherwise = Quantity' $ (x P.* y) P.* (r $ P.recip s)
+approxProduct (Quantity x) (Quantity y) | rs == 1   = Quantity $ x P.* y
+                                          | rs > 1    = Quantity $ (x P.* y) `P.quot` (r s)
+                                          | otherwise = Quantity $ (x P.* y) P.* (r $ P.recip s)
                                           -- TODO: handle the case where x is near 1 and we need to do both a multiply and a divide
   where
     r :: (Double -> a)
@@ -168,7 +168,7 @@ liftDimensionlessPeriodicVia p f proxy | Just p'' <- p', p'' /= 0 = (liftDimensi
 -- it to express zero 'Length' or 'Capacitance' or 'Velocity' etc, in addition
 -- to the 'Dimensionless' value zero.
 _0 :: Num a => SQuantity s d a
-_0 = Quantity' 0
+_0 = Quantity 0
 
 -- Note that these constants may not be exactly representable with certain scale factors.
 -- Note that multiplication by the scale factor is done with 'P.Double' precision and then rounded.
@@ -195,7 +195,7 @@ tau = (2 P.* P.pi :: P.Double) *~ one
 
 -- | The least positive representable value in a given fixed-point scaled quantity type.
 epsilon :: (Integral a) => SQuantity s d a
-epsilon = Quantity' 1
+epsilon = Quantity 1
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
@@ -207,13 +207,13 @@ infixl 7  *~, /~
 
 -- | Forms a possibly scaled 'SQuantity' by multipliying a number and a unit.
 (*~) :: forall s m d a b.(RealFrac a, Integral b, E.MinCtxt s a) => a -> Unit m d a -> SQuantity s d b
-x *~ (Unit' _ _ y) = Quantity' . round $ (x P.* y P./ s)
+x *~ (Unit _ _ y) = Quantity . round $ (x P.* y P./ s)
   where
     s = E.injMin (Proxy :: Proxy s)
 
 -- | Divides a possibly scaled 'SQuantity' by a 'Unit' of the same physical dimension, obtaining the
 -- numerical value of the quantity expressed in that unit.
 (/~) :: forall s m d a b.(Real a, Fractional b,  E.MinCtxt s b) => SQuantity s d a -> Unit m d b -> b
-(Quantity' x) /~ (Unit' _ _ y) = ((realToFrac x) P.* s P./ y)
+(Quantity x) /~ (Unit _ _ y) = ((realToFrac x) P.* s P./ y)
   where
     s = E.injMin (Proxy :: Proxy s)
