@@ -1,7 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
@@ -39,7 +38,7 @@ import Data.Foldable (Foldable(foldr))
 import qualified GHC.TypeLits as N
 import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
-import qualified Prelude as P
+import qualified Prelude as P hiding (foldr)
 
 -- | A dimensionless number with `n` fractional bits, using a representation of type `a`.
 type Q n a = SQuantity (E.One E./ (E.ExactNatural (2 N.^ n))) DOne a
