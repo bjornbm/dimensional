@@ -394,14 +394,14 @@ Multiplication, division and powers apply to both units and quantities.
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NonMetric'.
 (*) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Num a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 * d2) a
-(*) = liftUntyped2 (Prelude.*) (Prelude.*) (Name.*)
+(*) = liftD2 (Prelude.*) (Prelude.*) (Name.*)
 
 -- | Divides one 'Quantity' by another or one 'Unit' by another.
 --
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
 (/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
-(/) = liftUntyped2 (Prelude./) (Prelude./) (Name./)
+(/) = liftD2 (Prelude./) (Prelude./) (Name./)
 
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
@@ -415,7 +415,7 @@ Multiplication, division and powers apply to both units and quantities.
 (^) :: (Fractional a, KnownTypeInt i, KnownVariant v, KnownVariant (Weaken v))
     => Dimensional v d1 a -> Proxy i -> Dimensional (Weaken v) (d1 ^ i) a
 x ^ n = let n' = (toNum n) :: Int
-         in liftUntyped (Prelude.^^ n') (Prelude.^^ n') (Name.^ n') x
+         in liftD (Prelude.^^ n') (Prelude.^^ n') (Name.^ n') x
 
 {-
 A special case is that dimensionless quantities are not restricted
@@ -432,19 +432,19 @@ as they are done in a single physical dimension.
 
 -- | Negates the value of a 'Quantity'.
 negate :: Num a => Quantity d a -> Quantity d a
-negate = liftUntypedQ Prelude.negate
+negate = liftQ Prelude.negate
 
 -- | Adds two 'Quantity's.
 (+) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
-(+) = liftUntyped2Q (Prelude.+)
+(+) = liftQ2 (Prelude.+)
 
 -- | Subtracts one 'Quantity' from another.
 (-) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
-x - y = x + negate y
+(-) = liftQ2 (Prelude.-)
 
 -- | Takes the absolute value of a 'Quantity'.
 abs :: Num a => Quantity d a -> Quantity d a
-abs = liftUntypedQ Prelude.abs
+abs = liftQ Prelude.abs
 
 {-
 Roots of arbitrary (integral) degree. Appears to occasionally be useful
@@ -464,7 +464,7 @@ for units as well as quantities.
 nroot :: (KnownTypeInt n, Floating a)
       => Proxy n -> Quantity d a -> Quantity (Root d n) a
 nroot n = let n' = 1 Prelude./ toNum n
-           in liftUntypedQ (Prelude.** n')
+           in liftQ (Prelude.** n')
 
 {-
 We provide short-hands for the square and cubic roots.
@@ -578,12 +578,12 @@ atanh = fmap Prelude.atanh
 
 -- | Raises a dimensionless quantity to a floating power using 'Prelude.**'.
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
-(**) = liftUntyped2Q (Prelude.**)
+(**) = liftQ2 (Prelude.**)
 
 -- | The standard two argument arctangent function.
 -- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
 atan2 :: (RealFloat a) => Quantity d a -> Quantity d a -> Dimensionless a
-atan2 = liftUntyped2Q Prelude.atan2
+atan2 = liftQ2 Prelude.atan2
 
 {-
 The only unit we will define in this module is 'one'.
