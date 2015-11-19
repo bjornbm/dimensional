@@ -50,6 +50,7 @@ library
   default-language:    Haskell2010
   ghc-options:         -Wall
   exposed-modules:     Numeric.Units.Dimensional,
+                       Numeric.Units.Dimensional.Coercion,
                        Numeric.Units.Dimensional.Prelude,
                        Numeric.Units.Dimensional.Quantities,
                        Numeric.Units.Dimensional.SIUnits,
