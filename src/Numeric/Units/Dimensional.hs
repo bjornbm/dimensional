@@ -249,8 +249,8 @@ import qualified Data.ExactPi.TypeLevel as E
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Maybe
 import Data.Ratio
-import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.Dimensions
+import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.Variants hiding (type (*))
@@ -312,10 +312,10 @@ exactify (Unit n e _) = Unit n e e
 (*~) :: (Num a) => a -> Unit m d a -> Quantity d a
 x *~ (Unit _ _ y) = Quantity (x Prelude.* y)
 
--- | Divides a possibly scaled 'SQuantity' by a 'Unit' of the same physical dimension, obtaining the
+-- | Divides a 'Quantity' by a 'Unit' of the same physical dimension, obtaining the
 -- numerical value of the quantity expressed in that unit.
-(/~) :: forall s m d a.(Fractional a, E.MinCtxt s a) => SQuantity s d a -> Unit m d a -> a
-(Quantity x) /~ (Unit _ _ y) = (x Prelude.* E.injMin (Proxy :: Proxy s) Prelude./ y)
+(/~) :: Fractional a => Quantity d a -> Unit m d a -> a
+(Quantity x) /~ (Unit _ _ y) = (x Prelude./ y)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
@@ -396,14 +396,14 @@ Multiplication, division and powers apply to both units and quantities.
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NonMetric'.
 (*) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Num a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 * d2) a
-(*) = liftUntyped2 (Prelude.*) (Prelude.*) (Name.*)
+(*) = liftD2 (Prelude.*) (Prelude.*) (Name.*)
 
 -- | Divides one 'Quantity' by another or one 'Unit' by another.
 --
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
 (/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
-(/) = liftUntyped2 (Prelude./) (Prelude./) (Name./)
+(/) = liftD2 (Prelude./) (Prelude./) (Name./)
 
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
@@ -417,7 +417,7 @@ Multiplication, division and powers apply to both units and quantities.
 (^) :: (Fractional a, KnownTypeInt i, KnownVariant v, KnownVariant (Weaken v))
     => Dimensional v d1 a -> Proxy i -> Dimensional (Weaken v) (d1 ^ i) a
 x ^ n = let n' = (toNum n) :: Int
-         in liftUntyped (Prelude.^^ n') (Prelude.^^ n') (Name.^ n') x
+         in liftD (Prelude.^^ n') (Prelude.^^ n') (Name.^ n') x
 
 {-
 A special case is that dimensionless quantities are not restricted
@@ -434,19 +434,19 @@ as they are done in a single physical dimension.
 
 -- | Negates the value of a 'Quantity'.
 negate :: Num a => Quantity d a -> Quantity d a
-negate = liftUntypedQ Prelude.negate
+negate = liftQ Prelude.negate
 
 -- | Adds two 'Quantity's.
 (+) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
-(+) = liftUntyped2Q (Prelude.+)
+(+) = liftQ2 (Prelude.+)
 
 -- | Subtracts one 'Quantity' from another.
 (-) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
-x - y = x + negate y
+(-) = liftQ2 (Prelude.-)
 
 -- | Takes the absolute value of a 'Quantity'.
 abs :: Num a => Quantity d a -> Quantity d a
-abs = liftUntypedQ Prelude.abs
+abs = liftQ Prelude.abs
 
 {-
 Roots of arbitrary (integral) degree. Appears to occasionally be useful
@@ -466,7 +466,7 @@ for units as well as quantities.
 nroot :: (KnownTypeInt n, Floating a)
       => Proxy n -> Quantity d a -> Quantity (Root d n) a
 nroot n = let n' = 1 Prelude./ toNum n
-           in liftUntypedQ (Prelude.** n')
+           in liftQ (Prelude.** n')
 
 {-
 We provide short-hands for the square and cubic roots.
@@ -520,7 +520,7 @@ elements of a functor (e.g. a list).
 xs *~~ u = fmap (*~ u) xs
 
 -- | Applies '/~' to all values in a functor.
-(/~~) :: forall f s m d a.(Functor f, Fractional a, E.MinCtxt s a) => f (SQuantity s d a) -> Unit m d a -> f a
+(/~~) :: forall f m d a.(Functor f, Fractional a) => f (Quantity d a) -> Unit m d a -> f a
 xs /~~ u = fmap (/~ u) xs
 
 infixl 7  *~~, /~~
@@ -580,12 +580,12 @@ atanh = fmap Prelude.atanh
 
 -- | Raises a dimensionless quantity to a floating power using 'Prelude.**'.
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
-(**) = liftUntyped2Q (Prelude.**)
+(**) = liftQ2 (Prelude.**)
 
 -- | The standard two argument arctangent function.
 -- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
 atan2 :: (RealFloat a) => Quantity d a -> Quantity d a -> Dimensionless a
-atan2 = liftUntyped2Q Prelude.atan2
+atan2 = liftQ2 Prelude.atan2
 
 {-
 The only unit we will define in this module is 'one'.
@@ -649,7 +649,7 @@ changeRep :: forall v1 v2 d a b.
              E.MinCtxt (ScaleFactor v1 E./ ScaleFactor v2) b,
              Real a, Fractional b) 
           => Dimensional v1 d a -> Dimensional v2 d b
-changeRep = liftUntyped (Prelude.* s) ((Prelude.* s') . realToFrac) Name.weaken
+changeRep = liftD (Prelude.* s) ((Prelude.* s') . realToFrac) Name.weaken
   where
     p :: Proxy (ScaleFactor v1 E./ ScaleFactor v2)
     p = Proxy
@@ -663,7 +663,7 @@ changeRepRound :: forall v1 v2 d a b.
                   E.MinCtxt (ScaleFactor v1 E./ ScaleFactor v2) a,
                   RealFrac a, Integral b) 
                => Dimensional v1 d a -> Dimensional v2 d b
-changeRepRound = liftUntyped (Prelude.* s) (round . (Prelude.* s')) Name.weaken
+changeRepRound = liftD (Prelude.* s) (round . (Prelude.* s')) Name.weaken
   where
     p :: Proxy (ScaleFactor v1 E./ ScaleFactor v2)
     p = Proxy

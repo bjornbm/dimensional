@@ -14,6 +14,9 @@ because the coercion doesn't explicitly mention the unit of the representation. 
 'Quantity' constructor constructs a 'Numeric.Units.Dimensional.SQuantity' which may have a scale factor
 other than 'Data.ExactPi.TypeLevel.One'.
 
+Note that the haddock documentation doesn't mention the 'Quantity' constructor because it is a part of the
+'Dimensional' associated data family, but it is exported by this module.
+
 -}
 
 module Numeric.Units.Dimensional.Coercion

@@ -82,21 +82,21 @@ approxProduct (Quantity x) (Quantity y) | rs == 1   = Quantity $ x P.* y
 --
 -- Use in conjunction with 'changeRepRound' to combine quantities with differing scale factors.
 (+) :: (Num a) => SQuantity s d a -> SQuantity s d a -> SQuantity s d a
-(+) = liftUntyped2Q (P.+)
+(+) = liftQ2 (P.+)
 
 -- | Subtracts one possibly scaled 'SQuantity' from another, preserving any scale factor.
 --
 -- Use in conjunction with 'changeRepRound' to combine quantities with differing scale factors.
 (-) :: (Num a) => SQuantity s d a -> SQuantity s d a -> SQuantity s d a
-(-) = liftUntyped2Q (P.-)
+(-) = liftQ2 (P.-)
 
 -- | Takes the absolute value of a possibly scaled 'SQuantity', preserving any scale factor.
 abs :: (Num a) => SQuantity s d a -> SQuantity s d a
-abs = liftUntypedQ (P.abs)
+abs = liftQ (P.abs)
 
 -- | Negates the value of a possibly scaled 'SQuantity', preserving any scale factor.
 negate :: (Num a) => SQuantity s d a -> SQuantity s d a
-negate = liftUntypedQ (P.negate)
+negate = liftQ (P.negate)
 
 infixl 7  *~~, /~~
 
