@@ -119,7 +119,7 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
   dmap f (Unit n e x) = Unit n e (f x)
 
 -- GHC is somewhat unclear about why, but it won't derive this instance, so we give it explicitly.
-instance (Bounded a) => Bounded (Quantity d a) where
+instance (Bounded a) => Bounded (SQuantity s d a) where
   minBound = Quantity minBound
   maxBound = Quantity maxBound
 
@@ -159,7 +159,7 @@ siUnit = Unit (baseUnitName $ dimension (Proxy :: Proxy d)) 1 1
 
 instance NFData a => NFData (Quantity d a) -- instance is derived from Generic instance
 
-instance Storable a => Storable (Quantity d a) where
+instance Storable a => Storable (SQuantity s d a) where
   sizeOf _ = sizeOf (undefined::a)
   {-# INLINE sizeOf #-}
   alignment _ = alignment (undefined::a)
@@ -172,11 +172,11 @@ instance Storable a => Storable (Quantity d a) where
 {-
 Instances for vectors of quantities.
 -}
-newtype instance U.Vector (Quantity d a)    =  V_Quantity {unVQ :: U.Vector a}
-newtype instance U.MVector s (Quantity d a) = MV_Quantity {unMVQ :: U.MVector s a}
-instance U.Unbox a => U.Unbox (Quantity d a)
+newtype instance U.Vector (SQuantity s d a)    =  V_Quantity {unVQ :: U.Vector a}
+newtype instance U.MVector v (SQuantity s d a) = MV_Quantity {unMVQ :: U.MVector v a}
+instance U.Unbox a => U.Unbox (SQuantity s d a)
 
-instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
+instance (M.MVector U.MVector a) => M.MVector U.MVector (SQuantity s d a) where
   basicLength          = M.basicLength . unMVQ
   {-# INLINE basicLength #-}
   basicUnsafeSlice m n = MV_Quantity . M.basicUnsafeSlice m n . unMVQ
@@ -194,7 +194,7 @@ instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
   {-# INLINE basicInitialize #-}
 #endif
 
-instance (G.Vector U.Vector a) => G.Vector U.Vector (Quantity d a) where
+instance (G.Vector U.Vector a) => G.Vector U.Vector (SQuantity s d a) where
   basicUnsafeFreeze    = liftM V_Quantity  . G.basicUnsafeFreeze . unMVQ
   {-# INLINE basicUnsafeFreeze #-}
   basicUnsafeThaw      = liftM MV_Quantity . G.basicUnsafeThaw   . unVQ
