@@ -31,11 +31,14 @@ module Numeric.Units.Dimensional.FixedPoint
   (*~~), (/~~), sum, mean, -- dimensionlessLength, nFromTo,
   -- * Constants
   _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau, epsilon,
+  -- ** Conversion Between Representations
+  rescale, rescaleFinite, rescaleD, rescaleVia,
   -- * Commonly Used Type Synonyms
   type Q, type Angle8, type Angle16, type Angle32
 )
 where
 
+import Data.Bits
 import Data.ExactPi
 import qualified Data.ExactPi.TypeLevel as E
 import Data.Int
@@ -208,6 +211,18 @@ tau = (2 P.* P.pi :: P.Double) *~ one
 -- | The least positive representable value in a given fixed-point scaled quantity type.
 epsilon :: (Integral a) => SQuantity s d a
 epsilon = Quantity 1
+
+rescale :: (Integral a, Integral b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
+rescale = undefined -- I think there is a way to meet this type and still guarantee exact answers, but I'm not sure what it is
+
+rescaleFinite :: (Integral a, FiniteBits a, Integral b, FiniteBits b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
+rescaleFinite = undefined -- It should be possible to do this more quickly, since we have a priori knowledge of how well we need to approximate the result
+
+rescaleVia :: forall a b c d s1 s2.(Integral a, RealFrac b, Floating b, Integral c, E.KnownExactPi s1, E.KnownExactPi s2) => Proxy b -> SQuantity s1 d a -> SQuantity s2 d c
+rescaleVia _ = undefined -- This implementation is correct but has a crazy context: changeRepRound . (\x -> x :: Quantity d b) . changeRep
+
+rescaleD :: (Integral a, Integral b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
+rescaleD = rescaleVia (Proxy :: Proxy Double)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
