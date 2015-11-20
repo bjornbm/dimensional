@@ -228,10 +228,10 @@ rescaleFinite = undefined -- It should be possible to do this more quickly, sinc
 --
 -- Uses approximate arithmetic by way of an intermediate `Floating` type, to which a proxy must be supplied.
 rescaleVia :: forall a b c d s1 s2.(Integral a, RealFrac b, Floating b, Integral c, E.KnownExactPi s1, E.KnownExactPi s2) => Proxy b -> SQuantity s1 d a -> SQuantity s2 d c
-rescaleVia _ (Quantity x) = Quantity . round $ x' P.* s
+rescaleVia _ = Quantity . round . (P.* s) . fromIntegral . unD
   where
-    x' = fromIntegral x :: b
-    s = s1' P./ s2'
+    unD (Quantity x) = x
+    s = (s1' P./ s2') :: b
     s1' = approximateValue . E.exactPiVal $ (Proxy :: Proxy s1)
     s2' = approximateValue . E.exactPiVal $ (Proxy :: Proxy s2)
 
