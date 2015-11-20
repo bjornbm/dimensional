@@ -17,6 +17,11 @@ Defines types for manipulation of quantities with fixed point representations.
 -}
 module Numeric.Units.Dimensional.FixedPoint
 (
+  -- * Types
+  -- $types
+  Dimensional,
+  Unit, Quantity, SQuantity,
+  Metricality(..),
   -- * Dimensional Arithmetic
   (*~), (/~),
   (*), (/), (+), (-),
@@ -44,7 +49,9 @@ import qualified Data.ExactPi.TypeLevel as E
 import Data.Int
 import Data.Proxy
 import qualified Data.Foldable as F
+import Data.Ratio
 import qualified GHC.TypeLits as N
+import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
 import qualified Prelude as P
@@ -70,7 +77,7 @@ as the Prelude.
 --infixr 8  ^, ^/, **
 infixl 6  +, -
 
-approxProduct :: forall s1 s2 s3 d1 d2 a.(Integral a, E.MinCtxt (s3 E./ (s1 E.* s2)) Double) => SQuantity s1 d1 a -> SQuantity s2 d2 a -> SQuantity s3 (d1 * d2) a
+approxProduct :: forall s1 s2 s3 d1 d2 a.(Integral a, E.KnownExactPi s1, E.KnownExactPi s2, E.KnownExactPi s3) => SQuantity s1 d1 a -> SQuantity s2 d2 a -> SQuantity s3 (d1 * d2) a
 approxProduct (Quantity x) (Quantity y) | rs == 1   = Quantity $ x P.* y
                                         | rs > 1    = Quantity $ (x P.* y) `P.quot` (r s)
                                         | otherwise = Quantity $ (x P.* y) P.* (r $ P.recip s)
@@ -79,7 +86,10 @@ approxProduct (Quantity x) (Quantity y) | rs == 1   = Quantity $ x P.* y
     r :: (Double -> a)
     r = round
     rs = r s
-    s = approximateValue . E.exactPiVal $ (Proxy :: Proxy (s3 E./ (s1 E.* s2)))
+    s = approximateValue $ s3' P./ (s1' P.* s2')
+    s1' = E.exactPiVal (Proxy :: Proxy s1)
+    s2' = E.exactPiVal (Proxy :: Proxy s2)
+    s3' = E.exactPiVal (Proxy :: Proxy s3)
 
 -- | Adds two possibly scaled 'SQuantity's, preserving any scale factor.
 --
@@ -213,8 +223,16 @@ epsilon :: (Integral a) => SQuantity s d a
 epsilon = Quantity 1
 
 -- | Rescales a fixed point quantity, accomodating changes both in its scale factor and its representation type.
-rescale :: (Integral a, Integral b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
-rescale = undefined -- I think there is a way to meet this type and still guarantee exact answers, but I'm not sure what it is
+rescale :: forall a b d s1 s2.(Integral a, Integral b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
+rescale | Just s' <- toExactInteger s           = viaInteger (P.* s')
+        | Just s' <- toExactInteger (P.recip s) = viaInteger (`P.quot` s')
+        | Just q  <- toExactRational s          = viaInteger $ (`P.quot` denominator q) . (P.* numerator q)
+        | otherwise                             = error "Not implemented, exact rescale by irrational scaling factor."
+  where
+    s = (s1' P./ s2')
+    s1' = E.exactPiVal (Proxy :: Proxy s1)
+    s2' = E.exactPiVal (Proxy :: Proxy s2)
+  -- I think there is a way to meet this type and still guarantee exact answers, but I'm not sure what it is
   -- I suspect that it involves extending Data.ExactPi to provide a list of increasingly good rational approximations to ExactPi values,
   -- perhaps using a strategy culled from http://qr.ae/RbXMVR
 
@@ -228,9 +246,8 @@ rescaleFinite = undefined -- It should be possible to do this more quickly, sinc
 --
 -- Uses approximate arithmetic by way of an intermediate `Floating` type, to which a proxy must be supplied.
 rescaleVia :: forall a b c d s1 s2.(Integral a, RealFrac b, Floating b, Integral c, E.KnownExactPi s1, E.KnownExactPi s2) => Proxy b -> SQuantity s1 d a -> SQuantity s2 d c
-rescaleVia _ = Quantity . round . (P.* s) . fromIntegral . unD
+rescaleVia _ = viaFloating (P.* s)
   where
-    unD (Quantity x) = x
     s = (s1' P./ s2') :: b
     s1' = approximateValue . E.exactPiVal $ (Proxy :: Proxy s1)
     s2' = approximateValue . E.exactPiVal $ (Proxy :: Proxy s2)
@@ -240,6 +257,17 @@ rescaleVia _ = Quantity . round . (P.* s) . fromIntegral . unD
 -- Uses approximate arithmetic by way of an intermediate `Double` representation.
 rescaleD :: (Integral a, Integral b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
 rescaleD = rescaleVia (Proxy :: Proxy Double)
+
+-- Note that this does not respect scaling factors at all.
+viaInteger :: (Integral a, Integral b) => (P.Integer -> P.Integer) -> SQuantity s1 d a -> SQuantity s2 d b
+viaInteger f = Quantity . fromInteger . f . fromIntegral . unQuantity
+
+-- Note that this does not respect scaling factors at all.
+viaFloating :: (Integral a, RealFrac b, Floating b, Integral c) => (b -> b) -> SQuantity s1 d a -> SQuantity s2 d c
+viaFloating f = Quantity . round . f . fromIntegral . unQuantity
+
+unQuantity :: SQuantity s d a -> a
+unQuantity = coerce
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
