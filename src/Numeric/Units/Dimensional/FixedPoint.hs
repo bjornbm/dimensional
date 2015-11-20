@@ -22,6 +22,13 @@ module Numeric.Units.Dimensional.FixedPoint
   Dimensional,
   Unit, Quantity, SQuantity,
   Metricality(..),
+  -- * Physical Dimensions
+  Dimension (Dim),
+  -- ** Dimension Arithmetic
+  type (*), type (/), type (^), Root, Recip,
+  -- ** Term Level Representation of Dimensions
+  -- $dimension-terms
+  Dimension' (Dim'), HasDimension(..), KnownDimension,
   -- * Dimensional Arithmetic
   (*~), (/~),
   (*), (/), (+), (-),
@@ -34,10 +41,18 @@ module Numeric.Units.Dimensional.FixedPoint
   expVia, logVia, sinVia, cosVia, tanVia, asinVia, acosVia, atanVia, sinhVia, coshVia, tanhVia, asinhVia, acoshVia, atanhVia, atan2Via,
   -- ** Operations on Collections
   (*~~), (/~~), sum, mean, -- dimensionlessLength, nFromTo,
+  -- ** Conversion Between Representations
+  rescale, rescaleFinite, rescaleD, rescaleVia, KnownVariant(dmap), changeRep, changeRepRound, changeRepApproximate,
+  -- * Dimension Synonyms
+  DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
+  -- * Quantity Synonyms
+  Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity,
   -- * Constants
   _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau, epsilon,
-  -- ** Conversion Between Representations
-  rescale, rescaleFinite, rescaleD, rescaleVia,
+  -- * Constructing Units
+  siUnit, one, mkUnitR, mkUnitQ, mkUnitZ,
+  -- * Unit Metadata
+  name, exactValue, weaken, strengthen, exactify,
   -- * Commonly Used Type Synonyms
   type Q, type Angle8, type Angle16, type Angle32
 )
