@@ -212,15 +212,32 @@ tau = (2 P.* P.pi :: P.Double) *~ one
 epsilon :: (Integral a) => SQuantity s d a
 epsilon = Quantity 1
 
+-- | Rescales a fixed point quantity, accomodating changes both in its scale factor and its representation type.
 rescale :: (Integral a, Integral b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
 rescale = undefined -- I think there is a way to meet this type and still guarantee exact answers, but I'm not sure what it is
+  -- I suspect that it involves extending Data.ExactPi to provide a list of increasingly good rational approximations to ExactPi values,
+  -- perhaps using a strategy culled from http://qr.ae/RbXMVR
 
+-- | Rescales a fixed point quantity, accomodating changes both in its scale factor and its representation type.
+--
+-- Expected to outperform `rescale` when a `FiniteBits` context is available for the source and destination representation types.
 rescaleFinite :: (Integral a, FiniteBits a, Integral b, FiniteBits b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
 rescaleFinite = undefined -- It should be possible to do this more quickly, since we have a priori knowledge of how well we need to approximate the result
 
+-- | Approximately rescales a fixed point quantity, accomodating changes both in its scale factor and its representation type.
+--
+-- Uses approximate arithmetic by way of an intermediate `Floating` type, to which a proxy must be supplied.
 rescaleVia :: forall a b c d s1 s2.(Integral a, RealFrac b, Floating b, Integral c, E.KnownExactPi s1, E.KnownExactPi s2) => Proxy b -> SQuantity s1 d a -> SQuantity s2 d c
-rescaleVia _ = undefined -- This implementation is correct but has a crazy context: changeRepRound . (\x -> x :: Quantity d b) . changeRep
+rescaleVia _ (Quantity x) = Quantity . round $ x' P.* s
+  where
+    x' = fromIntegral x :: b
+    s = s1' P./ s2'
+    s1' = approximateValue . E.exactPiVal $ (Proxy :: Proxy s1)
+    s2' = approximateValue . E.exactPiVal $ (Proxy :: Proxy s2)
 
+-- | Approximately rescales a fixed point quantity, accomodating changes both in its scale factor and its representation type.
+--
+-- Uses approximate arithmetic by way of an intermediate `Double` representation.
 rescaleD :: (Integral a, Integral b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
 rescaleD = rescaleVia (Proxy :: Proxy Double)
 
