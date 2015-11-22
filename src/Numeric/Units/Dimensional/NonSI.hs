@@ -34,7 +34,7 @@ a conversion function similar to for degrees Celsius.
 
 -}
 
-module Numeric.Units.Dimensional.NonSI 
+module Numeric.Units.Dimensional.NonSI
 (
   -- * Units Defined By Experiment
   -- $values-obtained-experimentally
@@ -62,6 +62,9 @@ module Numeric.Units.Dimensional.NonSI
   -- * Imperial Volumes
   -- $imperial-volumes
   imperialGallon, imperialQuart, imperialPint, imperialCup, imperialGill, imperialFluidOunce,
+  -- * British thermal unit
+  -- $british-thermal-unit
+  btu,
   -- * US Customary Volumes
   -- $us-customary-volumes
   usGallon, usQuart, usPint, usCup, usGill, usFluidOunce
@@ -261,7 +264,7 @@ rad = mkUnitQ (ucumMetric "RAD" "RAD" "RAD") 1 $ centi gray
 stokes :: (Fractional a) => Unit 'Metric DKinematicViscosity a
 stokes = mkUnitQ (ucumMetric "St" "St" "Stokes") 1 $ centi meter ^ pos2 / second
 
-{- $temperature 
+{- $temperature
 These units of temperature are relative. For absolute temperatures, see 'Numeric.Units.Dimensional.SIUnits.fromDegreeCelsiusAbsolute'.
 -}
 degreeFahrenheit :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
@@ -283,6 +286,13 @@ imperialPint       = mkUnitQ (ucum "[pt_br]" "pt" "pint")             (1 Prelude
 imperialCup        = mkUnitQ (dimensionalAtom "[cup_br]" "cup" "cup") 0.5              $ imperialPint
 imperialGill       = mkUnitQ (ucum "[gil_br]" "gill" "gill")          (1 Prelude./ 4)  $ imperialPint
 imperialFluidOunce = mkUnitQ (ucum "[foz_br]" "fl oz" "fluid ounce")  (1 Prelude./ 20) $ imperialPint
+
+{- $british-thermal-unit
+Per https://en.wikipedia.org/wiki/British_thermal_unit
+-}
+btu:: Fractional a => Unit 'NonMetric DEnergy a
+btu = mkUnitQ (ucum "[btu]" "btu" "British Thermal Unit") 0.293071 $
+      (watt * hour)
 
 {- $us-customary-volumes
 Per http://www.nist.gov/pml/wmd/pubs/upload/2012-hb44-final.pdf page 452 and http://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume
