@@ -232,9 +232,9 @@ module Numeric.Units.Dimensional
   where
 
 import Prelude
-  ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Floating, Real, RealFloat, Functor, fmap
-  , (.), flip, show, (++), fromIntegral, fromInteger, fromRational, error, max, succ
-  , Int, Integer, Integral, ($), uncurry, realToFrac, otherwise, undefined, String
+  ( Eq(..), Num, Fractional, Floating, Real, RealFloat, Functor, fmap
+  , (.), flip, (++), fromIntegral, fromInteger, fromRational, error, max, succ
+  , Int, Integer, Integral, ($), uncurry, realToFrac, otherwise
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
@@ -242,28 +242,17 @@ import Numeric.NumType.DK.Integers
   , pos2, pos3
   , KnownTypeInt, toNum
   )
-import Control.Applicative
-import Control.DeepSeq
-import Control.Monad (liftM)
-import Data.Coerce (coerce)
 import Data.Data
 import Data.ExactPi
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Maybe
-import Data.Monoid (Monoid(..))
 import Data.Ratio
-import Foreign.Ptr (Ptr, castPtr)
-import Foreign.Storable (Storable(..))
-import GHC.Generics
 import Numeric.Units.Dimensional.Dimensions
+import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
-import Numeric.Units.Dimensional.UnitNames.InterchangeNames (HasInterchangeName(..))
 import Numeric.Units.Dimensional.Variants hiding (type (*))
 import qualified Numeric.Units.Dimensional.Variants as V
-import qualified Data.Vector.Generic.Mutable as M
-import qualified Data.Vector.Generic as G
-import qualified Data.Vector.Unboxed.Base as U
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -293,131 +282,38 @@ way to declare quantities as such a product.
 
 -}
 
--- | A physical quantity or unit.
---
--- We call this data type 'Dimensional' to capture the notion that the
--- units and quantities it represents have physical dimensions.
--- 
--- The type variable 'a' is the only non-phantom type variable and
--- represents the numerical value of a quantity or the scale (w.r.t.
--- SI units) of a unit. For SI units the scale will always be 1. For
--- non-SI units the scale is the ratio of the unit to the SI unit with
--- the same physical dimension.
---
--- Since 'a' is the only non-phantom type we were able to define
--- 'Dimensional' as a newtype, avoiding boxing at runtime.
-class KnownVariant (v :: Variant) where
-  -- | A dimensional value, either a 'Quantity' or a 'Unit', parameterized by its 'Dimension' and representation.
-  data Dimensional v :: Dimension -> * -> *
-  extractValue :: Dimensional v d a -> (a, Maybe ExactPi)
-  extractName :: Dimensional v d a -> Maybe (UnitName 'NonMetric)
-  injectValue :: (Maybe (UnitName 'NonMetric)) -> (a, Maybe ExactPi) -> Dimensional v d a
-  -- | Maps over the underlying representation of a dimensional value.
-  -- The caller is responsible for ensuring that the supplied function respects the dimensional abstraction.
-  -- This means that the function must preserve numerical values, or linearly scale them while preserving the origin.
-  dmap :: (a1 -> a2) -> Dimensional v d a1 -> Dimensional v d a2
-
-deriving instance Typeable Dimensional
-
-instance KnownVariant 'DQuantity where
-  newtype Dimensional 'DQuantity d a = Quantity' a
-    deriving (Eq, Ord, Data, Generic, Generic1
-#if MIN_VERSION_base(4,8,0)
-     , Typeable -- GHC 7.8 doesn't support deriving this instance
-#endif
-    )
-  extractValue (Quantity' x) = (x, Nothing)
-  extractName _ = Nothing
-  injectValue _ (x, _) = Quantity' x
-  dmap f (Quantity' x) = Quantity' (f x)
-
-instance (Typeable m) => KnownVariant ('DUnit m) where
-  data Dimensional ('DUnit m) d a = Unit' !(UnitName m) !ExactPi !a
-    deriving (Generic, Generic1
-#if MIN_VERSION_base(4,8,0)
-     , Typeable -- GHC 7.8 doesn't support deriving this instance
-#endif
-    )
-  extractValue (Unit' _ e x) = (x, Just e)
-  extractName (Unit' n _ _) = Just . Name.weaken $ n
-  injectValue (Just n) (x, Just e) | Just n' <- relax n = Unit' n' e x
-                                   | otherwise          = Prelude.error "Shouldn't be reachable. Needed a metric name but got a non-metric one."
-  injectValue _        _ = Prelude.error "Shouldn't be reachable. Needed to name a quantity."
-  dmap f (Unit' n e x) = Unit' n e (f x)
-
--- | A unit of measurement.
-type Unit (m :: Metricality) = Dimensional ('DUnit m)
-
--- | A dimensional quantity.
-type Quantity = Dimensional 'DQuantity
-
--- GHC is somewhat unclear about why, but it won't derive this instance, so we give it explicitly.
-instance (Bounded a) => Bounded (Quantity d a) where
-  minBound = Quantity' minBound
-  maxBound = Quantity' maxBound
-
-instance HasInterchangeName (Unit m d a) where
-  interchangeName (Unit' n _ _) = interchangeName n
-
 -- | Extracts the 'UnitName' of a 'Unit'.
 name :: Unit m d a -> UnitName m
-name (Unit' n _ _) = n
+name (Unit n _ _) = n
 
 -- | Extracts the exact value of a 'Unit', expressed in terms of the SI coherent derived unit (see 'siUnit') of the same 'Dimension'.
 --
 -- Note that the actual value may in some cases be approximate, for example if the unit is defined by experiment.
 exactValue :: Unit m d a -> ExactPi
-exactValue (Unit' _ e _) = e
+exactValue (Unit _ e _) = e
 
 -- | Discards potentially unwanted type level information about a 'Unit'.
 weaken :: Unit m d a -> Unit 'NonMetric d a
-weaken (Unit' n e v) = Unit' (Name.weaken n) e v
+weaken (Unit n e v) = Unit (Name.weaken n) e v
 
 -- | Attempts to convert a 'Unit' which may or may not be 'Metric' to one
 -- which is certainly 'Metric'.
 strengthen :: Unit m d a -> Maybe (Unit 'Metric d a)
-strengthen (Unit' n e v) | Just n' <- Name.strengthen n = Just $ Unit' n' e v
-                         | otherwise                    = Nothing
+strengthen (Unit n e v) | Just n' <- Name.strengthen n = Just $ Unit n' e v
+                        | otherwise                    = Nothing
 
 -- | Forms the exact version of a 'Unit'.
 exactify :: Unit m d a -> Unit m d ExactPi
-exactify (Unit' n e _) = Unit' n e e
-
--- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
-liftUntyped :: (KnownVariant v, KnownVariant (Weaken v)) => (ExactPi -> ExactPi) -> (a -> a) -> UnitNameTransformer -> (Dimensional v d1 a) -> (Dimensional (Weaken v) d2 a)
-liftUntyped fe f nt x = let (x', e') = extractValue x
-                            n = extractName x
-                            n' = (liftA nt) n
-                         in injectValue n' (f x', fmap fe e')
-
--- Operates on a dimensional value using a unary operation on values, yielding a Quantity.
-liftUntypedQ :: (KnownVariant v) => (a -> a) -> Dimensional v d1 a -> Quantity d2 a
-liftUntypedQ f x = let (x', _) = extractValue x
-                    in Quantity' (f x')
-
--- Combines two dimensional values using a binary operation on values, possibly yielding a Unit.
-liftUntyped2 :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2)) => (ExactPi -> ExactPi -> ExactPi) -> (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) d3 a
-liftUntyped2 fe f nt x1 x2 = let (x1', e1') = extractValue x1
-                                 (x2', e2') = extractValue x2
-                                 n1 = extractName x1
-                                 n2 = extractName x2
-                                 n' = (liftA2 nt) n1 n2
-                              in injectValue n' (f x1' x2', fe <$> e1' <*> e2') 
-
--- Combines two dimensional values using a binary operation on values, yielding a Quantity.
-liftUntyped2Q :: (KnownVariant v1, KnownVariant v2) => (a -> a -> a) -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Quantity d3 a
-liftUntyped2Q f x1 x2 = let (x1', _) = extractValue x1
-                            (x2', _) = extractValue x2
-                         in Quantity' (f x1' x2') 
+exactify (Unit n e _) = Unit n e e
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
 (*~) :: Num a => a -> Unit m d a -> Quantity d a
-x *~ (Unit' _ _ y) = Quantity' (x Prelude.* y)
+x *~ (Unit _ _ y) = Quantity (x Prelude.* y)
 
 -- | Divides a 'Quantity' by a 'Unit' of the same physical dimension, obtaining the
 -- numerical value of the quantity expressed in that unit.
 (/~) :: Fractional a => Quantity d a -> Unit m d a -> a
-(Quantity' x) /~ (Unit' _ _ y) = (x Prelude./ y)
+(Quantity x) /~ (Unit _ _ y) = (x Prelude./ y)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
@@ -498,14 +394,14 @@ Multiplication, division and powers apply to both units and quantities.
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NonMetric'.
 (*) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Num a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 * d2) a
-(*) = liftUntyped2 (Prelude.*) (Prelude.*) (Name.*)
+(*) = liftD2 (Prelude.*) (Prelude.*) (Name.*)
 
 -- | Divides one 'Quantity' by another or one 'Unit' by another.
 --
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
 (/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
-(/) = liftUntyped2 (Prelude./) (Prelude./) (Name./)
+(/) = liftD2 (Prelude./) (Prelude./) (Name./)
 
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
@@ -519,7 +415,7 @@ Multiplication, division and powers apply to both units and quantities.
 (^) :: (Fractional a, KnownTypeInt i, KnownVariant v, KnownVariant (Weaken v))
     => Dimensional v d1 a -> Proxy i -> Dimensional (Weaken v) (d1 ^ i) a
 x ^ n = let n' = (toNum n) :: Int
-         in liftUntyped (Prelude.^^ n') (Prelude.^^ n') (Name.^ n') x
+         in liftD (Prelude.^^ n') (Prelude.^^ n') (Name.^ n') x
 
 {-
 A special case is that dimensionless quantities are not restricted
@@ -536,19 +432,19 @@ as they are done in a single physical dimension.
 
 -- | Negates the value of a 'Quantity'.
 negate :: Num a => Quantity d a -> Quantity d a
-negate = liftUntypedQ Prelude.negate
+negate = liftQ Prelude.negate
 
 -- | Adds two 'Quantity's.
 (+) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
-(+) = liftUntyped2Q (Prelude.+)
+(+) = liftQ2 (Prelude.+)
 
 -- | Subtracts one 'Quantity' from another.
 (-) :: Num a => Quantity d a -> Quantity d a -> Quantity d a
-x - y = x + negate y
+(-) = liftQ2 (Prelude.-)
 
 -- | Takes the absolute value of a 'Quantity'.
 abs :: Num a => Quantity d a -> Quantity d a
-abs = liftUntypedQ Prelude.abs
+abs = liftQ Prelude.abs
 
 {-
 Roots of arbitrary (integral) degree. Appears to occasionally be useful
@@ -568,7 +464,7 @@ for units as well as quantities.
 nroot :: (KnownTypeInt n, Floating a)
       => Proxy n -> Quantity d a -> Quantity (Root d n) a
 nroot n = let n' = 1 Prelude./ toNum n
-           in liftUntypedQ (Prelude.** n')
+           in liftQ (Prelude.** n')
 
 {-
 We provide short-hands for the square and cubic roots.
@@ -608,16 +504,6 @@ prefer such.
 (^/) :: (KnownTypeInt n, Floating a)
      => Quantity d a -> Proxy n -> Quantity (Root d n) a
 (^/) = flip nroot
-
-{-
-Since quantities form a monoid under addition, but not under multiplication unless they are dimensionless,
-we will define a monoid instance that adds.
--}
-
--- | 'Quantity's of a given 'Dimension' form a 'Monoid' under addition.
-instance (Num a) => Monoid (Quantity d a) where
-  mempty = _0
-  mappend = (+)
 
 {- $collections
 Here we define operators and functions to make working with homogenuous
@@ -669,18 +555,6 @@ nFromTo xi xf n = fmap f [0..n'] ++ [xf]
     f i = xi + realToFrac (i % succ n') *~ one * (xf - xi)
 
 {-
-
-= Dimensionless =
-
-For dimensionless quantities pretty much any operation is applicable.
-We provide this freedom by making 'Dimensionless' an instance of
-'Functor'.
--}
-
-instance Functor Dimensionless where
-  fmap = dmap
-
-{-
 We continue by defining elementary functions on 'Dimensionless'
 that may be obviously useful.
 -}
@@ -704,18 +578,12 @@ atanh = fmap Prelude.atanh
 
 -- | Raises a dimensionless quantity to a floating power using 'Prelude.**'.
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
-(**) = liftUntyped2Q (Prelude.**)
+(**) = liftQ2 (Prelude.**)
 
 -- | The standard two argument arctangent function.
 -- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
 atan2 :: (RealFloat a) => Quantity d a -> Quantity d a -> Dimensionless a
-atan2 = liftUntyped2Q Prelude.atan2
-
--- | A polymorphic 'Unit' which can be used in place of the coherent
--- SI base unit of any dimension. This allows polymorphic quantity
--- creation and destruction without exposing the 'Dimensional' constructor.
-siUnit :: forall d a.(KnownDimension d, Num a) => Unit 'NonMetric d a
-siUnit = Unit' (baseUnitName $ dimension (Proxy :: Proxy d)) 1 1
+atan2 = liftQ2 Prelude.atan2
 
 {-
 The only unit we will define in this module is 'one'.
@@ -728,7 +596,7 @@ The only unit we will define in this module is 'one'.
 -- appear in expressions. However, for us it is necessary to use 'one'
 -- as we would any other unit to perform the "boxing" of dimensionless values.
 one :: Num a => Unit 'NonMetric DOne a
-one = Unit' nOne 1 1
+one = Unit nOne 1 1
 
 {- $constants
 For convenience we define some constants for small integer values
@@ -741,7 +609,7 @@ good measure.
 -- it to express zero 'Length' or 'Capacitance' or 'Velocity' etc, in addition
 -- to the 'Dimensionless' value zero.
 _0 :: Num a => Quantity d a
-_0 = Quantity' 0
+_0 = Quantity 0
 
 _1, _2, _3, _4, _5, _6, _7, _8, _9 :: (Num a) => Dimensionless a
 _1 = 1 *~ one
@@ -786,25 +654,6 @@ we provide a means for converting from type-level dimensions to term-level dimen
 
 -}
 
-instance (KnownDimension d) => HasDimension (Dimensional v d a) where
-  dimension _ = dimension (Proxy :: Proxy d)
-
-{-
-We will conclude by providing a reasonable 'Show' instance for
-quantities. The SI unit of the quantity is inferred
-from its dimension.
--}
-instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
-  show = showIn siUnit
-
--- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
-showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
-showIn (Unit' n _ y) (Quantity' x) | Name.weaken n == nOne = show (x Prelude./ y)
-                                   | otherwise             = (show (x Prelude./ y)) ++ " " ++ (show n)
-
-instance (KnownDimension d, Show a) => Show (Unit m d a) where
-  show (Unit' n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
-
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 -- 
 -- Use this variant when the scale factor of the resulting unit is irrational or 'Approximate'. See 'mkUnitQ' for when it is rational
@@ -816,8 +665,8 @@ instance (KnownDimension d, Show a) => Show (Unit m d a) where
 -- Supplying negative defining quantities is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
 mkUnitR :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
-mkUnitR n s' (Unit' _ s x) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
-                           | otherwise     = Unit' n (s' Prelude.* s) (approximateValue s' Prelude.* x)
+mkUnitR n s' (Unit _ s x) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
+                          | otherwise     = Unit n (s' Prelude.* s) (approximateValue s' Prelude.* x)
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 --
@@ -826,9 +675,9 @@ mkUnitR n s' (Unit' _ s x) | isExactZero s = error "Supplying zero as a conversi
 --
 -- For more information see 'mkUnitR'.
 mkUnitQ :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
-mkUnitQ n s' (Unit' _ s _) | s' == 0                       = error "Supplying zero as a conversion factor is not valid."
-                           | Just q <- toExactRational s'' = Unit' n s'' (fromRational q)
-                           | otherwise                     = error "The resulting conversion factor is not an exact rational." 
+mkUnitQ n s' (Unit _ s _) | s' == 0                       = error "Supplying zero as a conversion factor is not valid."
+                          | Just q <- toExactRational s'' = Unit n s'' (fromRational q)
+                          | otherwise                     = error "The resulting conversion factor is not an exact rational." 
   where
     s'' = fromRational s' Prelude.* s                               
 
@@ -839,57 +688,8 @@ mkUnitQ n s' (Unit' _ s _) | s' == 0                       = error "Supplying ze
 --
 -- For more information see 'mkUnitR'.
 mkUnitZ :: Num a => UnitName m -> Integer -> Unit m1 d a -> Unit m d a
-mkUnitZ n s' (Unit' _ s _) | s' == 0                      = error "Supplying zero as a conversion factor is not valid."
-                           | Just z <- toExactInteger s'' = Unit' n s'' (fromInteger z)
-                           | otherwise                    = error "The resulting conversion factor is not an exact integer."
+mkUnitZ n s' (Unit _ s _) | s' == 0                      = error "Supplying zero as a conversion factor is not valid."
+                          | Just z <- toExactInteger s'' = Unit n s'' (fromInteger z)
+                          | otherwise                    = error "The resulting conversion factor is not an exact integer."
   where
     s'' = fromInteger s' Prelude.* s
-
-instance NFData a => NFData (Quantity d a) -- instance is derived from Generic instance
-
-instance Storable a => Storable (Quantity d a) where
-  sizeOf _ = sizeOf (undefined::a)
-  {-# INLINE sizeOf #-}
-  alignment _ = alignment (undefined::a)
-  {-# INLINE alignment #-}
-  poke ptr = poke (castPtr ptr :: Ptr a) . coerce
-  {-# INLINE poke #-}
-  peek ptr = liftM Quantity' (peek (castPtr ptr :: Ptr a))
-  {-# INLINE peek #-}
-
-{-
-Instances for vectors of quantities.
--}
-newtype instance U.Vector (Quantity d a)    =  V_Quantity {unVQ :: U.Vector a}
-newtype instance U.MVector s (Quantity d a) = MV_Quantity {unMVQ :: U.MVector s a}
-instance U.Unbox a => U.Unbox (Quantity d a)
-
-instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
-  basicLength          = M.basicLength . unMVQ
-  {-# INLINE basicLength #-}
-  basicUnsafeSlice m n = MV_Quantity . M.basicUnsafeSlice m n . unMVQ
-  {-# INLINE basicUnsafeSlice #-}
-  basicOverlaps u v    = M.basicOverlaps (unMVQ u) (unMVQ v)
-  {-# INLINE basicOverlaps #-}
-  basicUnsafeNew       = liftM MV_Quantity . M.basicUnsafeNew
-  {-# INLINE basicUnsafeNew #-}
-  basicUnsafeRead v    = liftM Quantity' . M.basicUnsafeRead (unMVQ v)
-  {-# INLINE basicUnsafeRead #-}
-  basicUnsafeWrite v i = M.basicUnsafeWrite (unMVQ v) i . coerce
-  {-# INLINE basicUnsafeWrite #-}
-#if MIN_VERSION_vector(0,11,0)
-  basicInitialize      = M.basicInitialize . unMVQ
-  {-# INLINE basicInitialize #-}
-#endif
-
-instance (G.Vector U.Vector a) => G.Vector U.Vector (Quantity d a) where
-  basicUnsafeFreeze    = liftM V_Quantity  . G.basicUnsafeFreeze . unMVQ
-  {-# INLINE basicUnsafeFreeze #-}
-  basicUnsafeThaw      = liftM MV_Quantity . G.basicUnsafeThaw   . unVQ
-  {-# INLINE basicUnsafeThaw #-}
-  basicLength          = G.basicLength . unVQ
-  {-# INLINE basicLength #-}
-  basicUnsafeSlice m n = V_Quantity . G.basicUnsafeSlice m n . unVQ
-  {-# INLINE basicUnsafeSlice #-}
-  basicUnsafeIndexM v  = liftM Quantity' . G.basicUnsafeIndexM (unVQ v)
-  {-# INLINE basicUnsafeIndexM #-}
