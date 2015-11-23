@@ -25,6 +25,7 @@ module Numeric.Units.Dimensional.Dynamic
 ) where
 
 import Numeric.Units.Dimensional.Prelude hiding (lookup)
+import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
 import Data.ExactPi
 import Data.Proxy
@@ -40,16 +41,16 @@ instance HasDimension (AnyQuantity v) where
   dimension (AnyQuantity d _) = d
 
 -- | Converts a 'Quantity' of statically known 'Dimension' into an 'AnyQuantity'.
-demoteQuantity :: forall d v.(KnownDimension d, Fractional v) => Quantity d v -> AnyQuantity v
-demoteQuantity val = AnyQuantity dim (val /~ siUnit)
+demoteQuantity :: forall d v.(KnownDimension d) => Quantity d v -> AnyQuantity v
+demoteQuantity (Quantity val) = AnyQuantity dim val
   where dim = dimension (Proxy :: Proxy d)
 
 -- | Converts an 'AnyQuantity' into a 'Quantity' of statically known 'Dimension', or 'Nothing' if the dimension does not match.
-promoteQuantity :: forall d v.(KnownDimension d, Fractional v) => AnyQuantity v -> Maybe (Quantity d v)
-promoteQuantity (AnyQuantity dim val) | dim == dim' = Just $ val *~ siUnit
+promoteQuantity :: forall d v.(KnownDimension d) => AnyQuantity v -> Maybe (Quantity d v)
+promoteQuantity (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
                                       | otherwise   = Nothing
-                                                    where
-                                                      dim' = dimension (Proxy :: Proxy d)
+  where
+    dim' = dimension (Proxy :: Proxy d)
 
 -- | A 'Unit' whose 'Dimension' is only known dynamically.
 data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
