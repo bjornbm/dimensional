@@ -1,3 +1,10 @@
+1.0.1.0 (2015-11)
+------------------
+* Added Numeric.Units.Dimensional.Coercion module.
+* Bumped exact-pi dependency to < 0.5.
+* Restored changelog.
+* Addressed issues with documentation.
+
 1.0.0.0 (2015-11)
 ------------------
 * Changed to DataKinds and ClosedTypeFamilies encoding of dimensions.
