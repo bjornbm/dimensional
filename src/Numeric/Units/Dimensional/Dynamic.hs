@@ -10,6 +10,8 @@ Defines types for manipulation of units and quantities without phantom types for
 -}
 
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -27,26 +29,30 @@ module Numeric.Units.Dimensional.Dynamic
 import Numeric.Units.Dimensional.Prelude hiding (lookup)
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
+import Control.DeepSeq
+import Data.Data
 import Data.ExactPi
-import Data.Proxy
+import GHC.Generics
 
 -- | A 'Quantity' whose 'Dimension' is only known dynamically.
-data AnyQuantity v = AnyQuantity Dimension' v
-  deriving (Eq)
+data AnyQuantity a = AnyQuantity Dimension' a
+  deriving (Eq, Data, Generic, Generic1, Typeable)
 
-instance (Show v) => Show (AnyQuantity v) where
-  show (AnyQuantity d v) = (show v) ++ " " ++ (show . baseUnitName $ d)
+instance (Show a) => Show (AnyQuantity a) where
+  show (AnyQuantity d a) = (show a) ++ " " ++ (show . baseUnitName $ d)
 
-instance HasDimension (AnyQuantity v) where
+instance HasDimension (AnyQuantity a) where
   dimension (AnyQuantity d _) = d
 
+instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic instance
+
 -- | Converts a 'Quantity' of statically known 'Dimension' into an 'AnyQuantity'.
-demoteQuantity :: forall d v.(KnownDimension d) => Quantity d v -> AnyQuantity v
+demoteQuantity :: forall d a.(KnownDimension d) => Quantity d a -> AnyQuantity a
 demoteQuantity (Quantity val) = AnyQuantity dim val
   where dim = dimension (Proxy :: Proxy d)
 
 -- | Converts an 'AnyQuantity' into a 'Quantity' of statically known 'Dimension', or 'Nothing' if the dimension does not match.
-promoteQuantity :: forall d v.(KnownDimension d) => AnyQuantity v -> Maybe (Quantity d v)
+promoteQuantity :: forall d a.(KnownDimension d) => AnyQuantity a -> Maybe (Quantity d a)
 promoteQuantity (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
                                       | otherwise   = Nothing
   where
@@ -54,6 +60,7 @@ promoteQuantity (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
 
 -- | A 'Unit' whose 'Dimension' is only known dynamically.
 data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
+  deriving (Generic, Typeable)
 
 instance Show AnyUnit where
   show (AnyUnit _ n e) = "1 " ++ (show n) ++ " =def= " ++ (show e) ++ " of the SI base unit"
@@ -62,7 +69,7 @@ instance HasDimension AnyUnit where
   dimension (AnyUnit d _ _) = d
 
 -- | Converts a 'Unit' of statically known 'Dimension' into an 'AnyUnit'.
-demoteUnit :: forall a d v.(KnownDimension d) => Unit a d v -> AnyUnit
+demoteUnit :: forall m d a.(KnownDimension d) => Unit m d a -> AnyUnit
 demoteUnit u = AnyUnit dim (name $ weaken u) (exactValue u)
   where
     dim = dimension (Proxy :: Proxy d)
