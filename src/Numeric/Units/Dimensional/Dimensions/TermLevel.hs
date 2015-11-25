@@ -1,5 +1,9 @@
 {-# OPTIONS_HADDOCK not-home, show-extensions #-}
 
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 {- |
    Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
    License    : BSD3
@@ -28,7 +32,10 @@ module Numeric.Units.Dimensional.Dimensions.TermLevel
 )
 where
 
+import Control.DeepSeq
+import Data.Data
 import Data.Monoid (Monoid(..))
+import GHC.Generics
 import Prelude (id, (+), (-), Int, Show, Eq, Ord)
 import qualified Prelude as P
 
@@ -36,7 +43,10 @@ import qualified Prelude as P
 -- 7 SI base dimensions. By convention they are stored in the same order as 
 -- in the 'Numeric.Units.Dimensional.Dimensions.TypeLevel.Dimension' data kind.
 data Dimension' = Dim' !Int !Int !Int !Int !Int !Int !Int 
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Data, Generic, Typeable)
+
+instance NFData Dimension' where
+  rnf !_ = () -- The Dimension' constructor is already fully strict.
 
 -- | The monoid of dimensions under multiplication.
 instance Monoid Dimension' where
