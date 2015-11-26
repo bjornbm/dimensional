@@ -149,11 +149,8 @@ location of errors.
 == Future work
 
 While there is an insane amount of units in use around the world
-it is reasonable to provide at least all SI units. Units outside
+it is reasonable to provide those in relatively widespread use. Units outside
 of SI will most likely be added on an as-needed basis.
-
-There are also plenty of elementary functions to add. The 'Floating'
-class can be used as reference.
 
 Additional physics models could be implemented. See <#note3 [3]> for ideas.
 

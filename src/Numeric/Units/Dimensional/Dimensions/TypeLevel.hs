@@ -46,7 +46,7 @@ import Numeric.Units.Dimensional.Dimensions.TermLevel
 
 -- | Represents a physical dimension in the basis of the 7 SI base dimensions, 
 -- where the respective dimensions are represented by type variables
--- using the following convention.
+-- using the following convention:
 --
 --  * l: Length
 --  * m: Mass
@@ -59,7 +59,7 @@ import Numeric.Units.Dimensional.Dimensions.TermLevel
 -- For the equivalent term-level representation, see 'Dimension''
 data Dimension = Dim TypeInt TypeInt TypeInt TypeInt TypeInt TypeInt TypeInt
 
--- | The type-level dimensions of dimensionless values.
+-- | The type-level dimension of dimensionless values.
 type DOne                      = 'Dim 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type DLength                   = 'Dim 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero 'Zero
 type DMass                     = 'Dim 'Zero 'Pos1 'Zero 'Zero 'Zero 'Zero 'Zero
