@@ -19,9 +19,15 @@ Note that the haddock documentation doesn't mention the 'Quantity' constructor b
 
 module Numeric.Units.Dimensional.Coercion
 (
-  coerce, Dimensional(Quantity)
+  coerce, Dimensional(Quantity), unQuantity
 )
 where
 
 import Data.Coerce (coerce)
-import Numeric.Units.Dimensional.Internal (Dimensional(Quantity))
+import Numeric.Units.Dimensional.Internal (Quantity, Dimensional(Quantity))
+
+-- | Unwraps a `Quantity`, yielding its underlying representation.
+--
+-- This is a type-restricted version of `coerce`.
+unQuantity :: Quantity d a -> a
+unQuantity = coerce
