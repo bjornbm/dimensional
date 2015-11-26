@@ -281,9 +281,6 @@ viaInteger f = Quantity . fromInteger . f . fromIntegral . unQuantity
 viaFloating :: (Integral a, RealFrac b, Floating b, Integral c) => (b -> b) -> SQuantity s1 d a -> SQuantity s2 d c
 viaFloating f = Quantity . round . f . fromIntegral . unQuantity
 
-unQuantity :: SQuantity s d a -> a
-unQuantity = coerce
-
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
 Note that this necessitates the use of parenthesis when composing

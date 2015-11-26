@@ -26,10 +26,10 @@ module Numeric.Units.Dimensional.Coercion
 where
 
 import Data.Coerce (coerce)
-import Numeric.Units.Dimensional.Internal (Quantity, Dimensional(Quantity))
+import Numeric.Units.Dimensional.Internal (SQuantity, Dimensional(Quantity))
 
--- | Unwraps a `Quantity`, yielding its underlying representation.
+-- | Unwraps a possibly-scaled `SQuantity`, yielding its underlying representation.
 --
 -- This is a type-restricted version of `coerce`.
-unQuantity :: Quantity d a -> a
+unQuantity :: SQuantity s d a -> a
 unQuantity = coerce
