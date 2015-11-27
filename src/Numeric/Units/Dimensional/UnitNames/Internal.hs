@@ -2,6 +2,7 @@
 
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -14,6 +15,7 @@
 module Numeric.Units.Dimensional.UnitNames.Internal
 where
 
+import Control.DeepSeq
 import Control.Monad (join)
 import Data.Data
 #if MIN_VERSION_base(4, 8, 0)
@@ -52,6 +54,19 @@ data UnitName (m :: Metricality) where
   deriving (Typeable)
 
 deriving instance Eq (UnitName m)
+
+-- As it is for a GADT, this instance cannot be derived or use the generic default implementation
+instance NFData (UnitName m) where
+  rnf n = case n of
+    One -> ()
+    MetricAtomic a -> rnf a
+    Atomic a -> rnf a
+    Prefixed p n' -> rnf p `seq` rnf n'
+    Product n1 n2 -> rnf n1 `seq` rnf n2
+    Quotient n1 n2 -> rnf n1 `seq` rnf n2
+    Power n' e -> rnf n' `seq` rnf e
+    Grouped n' -> rnf n'
+    Weaken n' -> rnf n'
 
 instance Show (UnitName m) where
   show One = "1"
@@ -103,7 +118,7 @@ reduce' n = n
 
 data NameAtomType = UnitAtom Metricality
                   | PrefixAtom
-  deriving (Eq, Ord, Data, Typeable, Generic)
+  deriving (Eq, Ord, Data, Typeable, Generic, NFData)
 
 -- | The name of a metric prefix.
 type PrefixName = NameAtom 'PrefixAtom
@@ -240,7 +255,7 @@ data NameAtom (m :: NameAtomType)
     abbreviation_en :: String, -- ^ The abbreviated name of the unit in international English
     name_en :: String -- ^ The full name of the unit in international English
   }
-  deriving (Eq, Ord, Data, Typeable, Generic)
+  deriving (Eq, Ord, Data, Typeable, Generic, NFData)
 
 instance HasInterchangeName (NameAtom m) where
   interchangeName = _interchangeName

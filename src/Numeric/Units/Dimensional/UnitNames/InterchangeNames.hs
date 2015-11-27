@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -9,6 +10,7 @@ module Numeric.Units.Dimensional.UnitNames.InterchangeNames
 )
 where
 
+import Control.DeepSeq
 import Data.Data
 import GHC.Generics
 
@@ -16,10 +18,10 @@ import GHC.Generics
 data InterchangeNameAuthority = UCUM -- ^ The interchange name originated with the Unified Code for Units of Measure.
                               | DimensionalLibrary -- ^ The interchange name originated with the dimensional library.
                               | Custom -- ^ The interchange name originated with a user of the dimensional library.
-  deriving (Eq, Ord, Show, Data, Typeable, Generic)
+  deriving (Eq, Ord, Show, Data, Typeable, Generic, NFData)
 
 data InterchangeName = InterchangeName { name :: String, authority :: InterchangeNameAuthority }
-  deriving (Eq, Ord, Data, Typeable, Generic)
+  deriving (Eq, Ord, Data, Typeable, Generic, NFData)
 
 instance Show InterchangeName where
   show n = name n ++ " (Issued by " ++ show (authority n) ++ ")"

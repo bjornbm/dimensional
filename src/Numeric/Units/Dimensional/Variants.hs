@@ -2,6 +2,7 @@
 
 {-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE KindSignatures #-}
@@ -27,6 +28,7 @@ module Numeric.Units.Dimensional.Variants
 )
 where
 
+import Control.DeepSeq
 import Data.Data
 import GHC.Generics
 
@@ -34,7 +36,7 @@ import GHC.Generics
 -- with a metric prefix to form a related unit.
 data Metricality = Metric    -- ^ Capable of receiving a metric prefix.
                  | NonMetric -- ^ Incapable of receiving a metric prefix.
-  deriving (Eq, Ord, Data, Typeable, Generic)
+  deriving (Eq, Ord, Data, Typeable, Generic, NFData)
 
 {-
 The variety 'v' of 'Dimensional'
@@ -46,7 +48,7 @@ and quantities. It must be one of the following:
 -- | The kind of variants of dimensional values.
 data Variant = DQuantity         -- ^ The value is a quantity.
              | DUnit Metricality -- ^ The value is a unit, possibly a 'Metric' unit.
-  deriving (Eq, Ord, Data, Typeable, Generic)
+  deriving (Eq, Ord, Data, Typeable, Generic, NFData)
 
 {-
 We will reuse the operators and function names from the Prelude.
