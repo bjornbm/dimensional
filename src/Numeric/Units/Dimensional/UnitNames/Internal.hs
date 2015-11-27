@@ -2,7 +2,6 @@
 
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -118,7 +117,9 @@ reduce' n = n
 
 data NameAtomType = UnitAtom Metricality
                   | PrefixAtom
-  deriving (Eq, Ord, Data, Typeable, Generic, NFData)
+  deriving (Eq, Ord, Data, Typeable, Generic)
+
+instance NFData NameAtomType where -- instance is derived from Generic instance
 
 -- | The name of a metric prefix.
 type PrefixName = NameAtom 'PrefixAtom
@@ -255,7 +256,9 @@ data NameAtom (m :: NameAtomType)
     abbreviation_en :: String, -- ^ The abbreviated name of the unit in international English
     name_en :: String -- ^ The full name of the unit in international English
   }
-  deriving (Eq, Ord, Data, Typeable, Generic, NFData)
+  deriving (Eq, Ord, Data, Typeable, Generic)
+
+instance NFData (NameAtom m) where -- instance is derived from Generic instance
 
 instance HasInterchangeName (NameAtom m) where
   interchangeName = _interchangeName

@@ -2,7 +2,6 @@
 
 {-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE KindSignatures #-}
@@ -36,7 +35,9 @@ import GHC.Generics
 -- with a metric prefix to form a related unit.
 data Metricality = Metric    -- ^ Capable of receiving a metric prefix.
                  | NonMetric -- ^ Incapable of receiving a metric prefix.
-  deriving (Eq, Ord, Data, Typeable, Generic, NFData)
+  deriving (Eq, Ord, Data, Typeable, Generic)
+
+instance NFData Metricality where -- instance is derived from Generic instance
 
 {-
 The variety 'v' of 'Dimensional'
@@ -48,7 +49,9 @@ and quantities. It must be one of the following:
 -- | The kind of variants of dimensional values.
 data Variant = DQuantity         -- ^ The value is a quantity.
              | DUnit Metricality -- ^ The value is a unit, possibly a 'Metric' unit.
-  deriving (Eq, Ord, Data, Typeable, Generic, NFData)
+  deriving (Eq, Ord, Data, Typeable, Generic)
+
+instance NFData Variant where -- instance is derived from Generic instance
 
 {-
 We will reuse the operators and function names from the Prelude.

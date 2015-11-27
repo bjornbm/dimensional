@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -18,10 +17,14 @@ import GHC.Generics
 data InterchangeNameAuthority = UCUM -- ^ The interchange name originated with the Unified Code for Units of Measure.
                               | DimensionalLibrary -- ^ The interchange name originated with the dimensional library.
                               | Custom -- ^ The interchange name originated with a user of the dimensional library.
-  deriving (Eq, Ord, Show, Data, Typeable, Generic, NFData)
+  deriving (Eq, Ord, Show, Data, Typeable, Generic)
+
+instance NFData InterchangeNameAuthority where -- instance is derived from Generic instance
 
 data InterchangeName = InterchangeName { name :: String, authority :: InterchangeNameAuthority }
-  deriving (Eq, Ord, Data, Typeable, Generic, NFData)
+  deriving (Eq, Ord, Data, Typeable, Generic)
+
+instance NFData InterchangeName where -- instance is derived from Generic instance
 
 instance Show InterchangeName where
   show n = name n ++ " (Issued by " ++ show (authority n) ++ ")"
