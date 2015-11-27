@@ -29,6 +29,8 @@ module Numeric.Units.Dimensional.Dynamic
 import Numeric.Units.Dimensional.Prelude hiding (lookup)
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
+import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as T
+import qualified Prelude as P
 import Control.DeepSeq
 import Data.Data
 import Data.ExactPi
@@ -45,6 +47,12 @@ instance HasDimension (AnyQuantity a) where
   dimension (AnyQuantity d _) = d
 
 instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic instance
+
+-- | 'AnyQuantity's form a 'Monoid' under multiplication, but not under addition because
+-- they may not be added together if their dimensions do not match.
+instance Num a => Monoid (AnyQuantity a) where
+  mempty = demoteQuantity (1 *~ one)
+  mappend (AnyQuantity d1 a1) (AnyQuantity d2 a2) = AnyQuantity (d1 T.* d2) (a1 P.* a2)
 
 -- | Converts a 'Quantity' of statically known 'Dimension' into an 'AnyQuantity'.
 demoteQuantity :: forall d a.(KnownDimension d) => Quantity d a -> AnyQuantity a
