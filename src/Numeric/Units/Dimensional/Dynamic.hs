@@ -26,15 +26,17 @@ module Numeric.Units.Dimensional.Dynamic
 , demoteUnit, promoteUnit
 ) where
 
-import Numeric.Units.Dimensional.Prelude hiding (lookup)
-import Numeric.Units.Dimensional.Coercion
-import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
-import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as T
-import qualified Prelude as P
 import Control.DeepSeq
 import Data.Data
 import Data.ExactPi
+import Data.Monoid (Monoid(..))
 import GHC.Generics
+import Prelude (Eq(..), Num(..), Show(..), Maybe(..), (.), ($), (++), otherwise)
+import qualified Prelude as P
+import Numeric.Units.Dimensional
+import Numeric.Units.Dimensional.Coercion
+import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
+import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as T
 
 -- | A 'Quantity' whose 'Dimension' is only known dynamically.
 data AnyQuantity a = AnyQuantity Dimension' a
