@@ -241,21 +241,20 @@ epsilon = Quantity 1
 rescale :: forall a b d s1 s2.(Integral a, Integral b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
 rescale | Just s' <- toExactInteger s           = viaInteger (P.* s')
         | Just s' <- toExactInteger (P.recip s) = viaInteger (`P.quot` s')
-        | Just q  <- toExactRational s          = viaInteger $ (`P.quot` denominator q) . (P.* numerator q)
-        | otherwise                             = error "Not implemented, exact rescale by irrational scaling factor."
+        | Just q  <- toExactRational s          = viaInteger $ timesRational q
+        | otherwise                             = viaInteger $ \x -> fixedPoint (fmap (($ x) . timesRational) (rationalApproximations s)) -- "Not implemented, exact rescale by irrational scaling factor."
   where
     s = (s1' P./ s2')
     s1' = E.exactPiVal (Proxy :: Proxy s1)
     s2' = E.exactPiVal (Proxy :: Proxy s2)
-  -- I think there is a way to meet this type and still guarantee exact answers, but I'm not sure what it is
-  -- I suspect that it involves extending Data.ExactPi to provide a list of increasingly good rational approximations to ExactPi values,
-  -- perhaps using a strategy culled from http://qr.ae/RbXMVR
+    timesRational :: Rational -> Integer -> Integer
+    timesRational q = (`P.quot` denominator q) . (P.* numerator q)
 
 -- | Rescales a fixed point quantity, accomodating changes both in its scale factor and its representation type.
 --
 -- Expected to outperform `rescale` when a `FiniteBits` context is available for the source and destination representation types.
 rescaleFinite :: (Integral a, FiniteBits a, Integral b, FiniteBits b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
-rescaleFinite = undefined -- It should be possible to do this more quickly, since we have a priori knowledge of how well we need to approximate the result
+rescaleFinite = rescale -- It should be possible to do this more quickly, since we have a priori knowledge of how well we need to approximate the result
 
 -- | Approximately rescales a fixed point quantity, accomodating changes both in its scale factor and its representation type.
 --
@@ -280,6 +279,12 @@ viaInteger f = Quantity . fromInteger . f . fromIntegral . unQuantity
 -- Note that this does not respect scaling factors at all.
 viaFloating :: (Integral a, RealFrac b, Floating b, Integral c) => (b -> b) -> SQuantity s1 d a -> SQuantity s2 d c
 viaFloating f = Quantity . round . f . fromIntegral . unQuantity
+
+fixedPoint :: (Eq a) => [a] -> a
+fixedPoint []                     = error "Fixed point of empty list."
+fixedPoint [x]                    = x
+fixedPoint (x1:x2:xs) | x1 == x2  = x1
+                      | otherwise = fixedPoint (x2:xs)
 
 {-
 We give '*~' and '/~' the same fixity as '*' and '/' defined below.
