@@ -5,7 +5,7 @@ This library provides statically-checked dimensional arithmetic for physical qua
 Data kinds and closed type families provide a flexible, safe, and discoverable implementation that leads to largely self-documenting
 client code.
 
-[![Build Status](https://travis-ci.org/bjornbm/dimensional-dk.svg?branch=master)](https://travis-ci.org/bjornbm/dimensional-dk)
+[![Build Status](https://travis-ci.org/bjornbm/dimensional.svg?branch=master)](https://travis-ci.org/bjornbm/dimensional)
 [![Hackage Version](http://img.shields.io/hackage/v/dimensional.svg)](http://hackage.haskell.org/package/dimensional)
 
 ## Usage
@@ -47,4 +47,4 @@ differenceFromStandardValue = approximateAccelerationDueToGravityOnEarth /~ gee
 ## Contributing
 
 For project information (issues, updates, wiki, examples) see:
-  https://github.com/bjornbm/dimensional-dk
+  https://github.com/bjornbm/dimensional
