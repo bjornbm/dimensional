@@ -1,3 +1,13 @@
+vNext
+-----
+* Breaking: Changed Numeric.Units.Dimensional.Prelude to export a dimensionally
+  typed `recip` instead of the one from `Prelude`.
+* Added `Data`, `Generic`, `Typeable` and `NFData` instances for many ancillary types.
+* Added `unQuantity` to the Coercion module to ease unwrapping without
+  introducing ambiguous type variables.
+* Added a multiplicative `Monoid` instance for `AnyQuantity`.
+* Relocated git repository to https://github.com/bjornbm/dimensional
+
 1.0.1.0 (2015-11)
 -----------------
 * Added Numeric.Units.Dimensional.Coercion module.
