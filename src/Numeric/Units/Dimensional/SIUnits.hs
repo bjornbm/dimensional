@@ -68,7 +68,7 @@ import Numeric.Units.Dimensional.UnitNames (Prefix, siPrefixes, nMeter, nGram, n
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.UnitNames.Internal (ucum, ucumMetric)
 import Numeric.NumType.DK.Integers ( pos3 )
-import Prelude ( Eq(..), ($), Num, Fractional, Floating)
+import Prelude ( Eq(..), ($), Num, Fractional, Floating, otherwise, error)
 import qualified Prelude
 
 {- $multiples
@@ -85,6 +85,7 @@ We define all SI prefixes from Table 5. Multiples first.
 
 applyMultiple :: (Num a) => Prefix -> Unit 'Metric d a -> Unit 'NonMetric d a
 applyMultiple p u | denominator x == 1 = mkUnitZ n' (numerator x) u
+                  | otherwise = error "Attempt to apply a submultiple prefix as a multiple."
   where
     n' = N.applyPrefix p (name u)
     x = N.scaleFactor p
