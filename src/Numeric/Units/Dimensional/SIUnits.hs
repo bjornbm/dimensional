@@ -55,17 +55,20 @@ module Numeric.Units.Dimensional.SIUnits
   -- $multiples
   deka, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta,
   -- $submultiples
-  deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto
+  deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto,
+  -- $reified-prefixes
+  Prefix, applyPrefix, siPrefixes
 )
 where
 
+import Data.Ratio
 import Numeric.Units.Dimensional
 import Numeric.Units.Dimensional.Quantities
-import Numeric.Units.Dimensional.UnitNames (PrefixName, applyPrefix, nMeter, nGram, nSecond, nAmpere, nKelvin, nMole, nCandela)
+import Numeric.Units.Dimensional.UnitNames (Prefix, siPrefixes, nMeter, nGram, nSecond, nAmpere, nKelvin, nMole, nCandela)
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.UnitNames.Internal (ucum, ucumMetric)
 import Numeric.NumType.DK.Integers ( pos3 )
-import Prelude ( ($), Num, Fractional, Floating, Integer, Rational)
+import Prelude ( Eq(..), ($), Num, Fractional, Floating)
 import qualified Prelude
 
 {- $multiples
@@ -80,42 +83,55 @@ section 6.2.6 "Unacceptability of stand-alone prefixes".
 We define all SI prefixes from Table 5. Multiples first.
 -}
 
-applyMultiple :: (Num a) => PrefixName -> Integer -> Unit 'Metric d a -> Unit 'NonMetric d a
-applyMultiple p x u = mkUnitZ (applyPrefix p (name u)) x u
+applyMultiple :: (Num a) => Prefix -> Unit 'Metric d a -> Unit 'NonMetric d a
+applyMultiple p u | denominator x == 1 = mkUnitZ n' (numerator x) u
+  where
+    n' = N.applyPrefix p (name u)
+    x = N.scaleFactor p
 
 deka, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta
   :: Num a => Unit 'Metric d a -> Unit 'NonMetric d a
-deka  = applyMultiple N.deka 10 -- International English.
+deka  = applyMultiple N.deka -- International English.
 deca  = deka      -- American English.
-hecto = applyMultiple N.hecto 100
-kilo  = applyMultiple N.kilo 1e3
-mega  = applyMultiple N.mega 1e6
-giga  = applyMultiple N.giga 1e9
-tera  = applyMultiple N.tera 1e12
-peta  = applyMultiple N.peta 1e15
-exa   = applyMultiple N.exa 1e18
-zetta = applyMultiple N.zetta 1e21
-yotta = applyMultiple N.yotta 1e24
+hecto = applyMultiple N.hecto
+kilo  = applyMultiple N.kilo
+mega  = applyMultiple N.mega
+giga  = applyMultiple N.giga
+tera  = applyMultiple N.tera
+peta  = applyMultiple N.peta
+exa   = applyMultiple N.exa
+zetta = applyMultiple N.zetta
+yotta = applyMultiple N.yotta
 
 {- $submultiples
 Then the submultiples.
 -}
 
-applySubmultiple :: (Fractional a) => PrefixName -> Rational -> Unit 'Metric d a -> Unit 'NonMetric d a
-applySubmultiple p x u = mkUnitQ (applyPrefix p (name u)) x u
+applyPrefix :: (Fractional a) => Prefix -> Unit 'Metric d a -> Unit 'NonMetric d a
+applyPrefix p u = mkUnitQ n' x u
+  where
+    n' = N.applyPrefix p (name u)
+    x = N.scaleFactor p
 
 deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto
   :: Fractional a => Unit 'Metric d a -> Unit 'NonMetric d a
-deci  = applySubmultiple N.deci 0.1
-centi = applySubmultiple N.centi 0.01
-milli = applySubmultiple N.milli 1e-3
-micro = applySubmultiple N.micro 1e-6
-nano  = applySubmultiple N.nano 1e-9
-pico  = applySubmultiple N.pico 1e-12
-femto = applySubmultiple N.femto 1e-15
-atto  = applySubmultiple N.atto 1e-18
-zepto = applySubmultiple N.zepto 1e-21
-yocto = applySubmultiple N.yocto 1e-24
+deci  = applyPrefix N.deci
+centi = applyPrefix N.centi
+milli = applyPrefix N.milli
+micro = applyPrefix N.micro
+nano  = applyPrefix N.nano
+pico  = applyPrefix N.pico
+femto = applyPrefix N.femto
+atto  = applyPrefix N.atto
+zepto = applyPrefix N.zepto
+yocto = applyPrefix N.yocto
+
+{- $reified-prefixes 
+
+We supply an explicit representation of an SI prefix, along with a function to apply one and a 
+list of all prefixes defined by the SI.
+
+-}
 
 {- $base-units
 These are the base units from section 4.1. To avoid a

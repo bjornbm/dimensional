@@ -6,6 +6,7 @@ vNext
 * Added `unQuantity` to the Coercion module to ease unwrapping without
   introducing ambiguous type variables.
 * Added a multiplicative `Monoid` instance for `AnyQuantity`.
+* Created explicit representation of metric `Prefix`es.
 * Relocated git repository to https://github.com/bjornbm/dimensional
 
 1.0.1.0 (2015-11)

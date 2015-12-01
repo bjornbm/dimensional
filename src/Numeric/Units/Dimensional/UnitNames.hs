@@ -17,7 +17,7 @@ provided by this package, as new features using them are still being developed.
 module Numeric.Units.Dimensional.UnitNames
 (
   -- * Data Types
-  UnitName, NameAtom, PrefixName, Metricality(..),
+  UnitName, NameAtom, Prefix, PrefixName, Metricality(..),
   -- * Construction of Unit Names
   atom, applyPrefix, (*), (/), (^), product, reduce, grouped,
   -- * Standard Names
@@ -27,6 +27,9 @@ module Numeric.Units.Dimensional.UnitNames
   -- ** Names for the SI Metric Prefixes
   deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta,
   deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto,
+  siPrefixes,
+  -- * Inspecting Prefixes
+  prefixName, scaleFactor,
   -- * Convenience Type Synonyms for Unit Name Transformations
   UnitNameTransformer, UnitNameTransformer2,
   -- * Forgetting Unwanted Phantom Types
