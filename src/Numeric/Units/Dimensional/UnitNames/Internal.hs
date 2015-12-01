@@ -47,8 +47,9 @@ data UnitName (m :: Metricality) where
   Power :: UnitName 'NonMetric -> Int -> UnitName 'NonMetric
   -- A compound name formed by grouping another name, which is generally compound.
   Grouped :: UnitName 'NonMetric -> UnitName 'NonMetric
-  -- A weakened name formed by forgetting whether it could accept a metric prefix.
-  -- Differs from 'Grouped' because it is displayed without parentheses.
+  -- A weakened name formed by forgetting that it could accept a metric prefix.
+  --
+  -- Also available is the smart constructor `weaken` which accepts any `UnitName` as input.
   Weaken :: UnitName 'Metric -> UnitName 'NonMetric
   deriving (Typeable)
 
@@ -276,6 +277,9 @@ instance HasInterchangeName (UnitName m) where
   interchangeName (Quotient n1 n2) = let n' = (name . interchangeName $ n1) ++ "/" ++ (name . interchangeName $ n2)
                                          a' = max (authority . interchangeName $ n1) (authority . interchangeName $ n2)
                                       in InterchangeName { name = n', authority = a' }
+  -- TODO #109: note in this case that the UCUM is changing their grammar to not accept exponents after
+  -- as a result it will become necessary to distribute the exponentiation over the items in the base name
+  -- prior to generating the interchange name
   interchangeName (Power n x) = let n' = (name . interchangeName $ n) ++ (show x)
                                  in InterchangeName { name = n', authority = authority . interchangeName $ n }
   interchangeName (Grouped n) = let n' = "(" ++ (name . interchangeName $ n) ++ ")"
