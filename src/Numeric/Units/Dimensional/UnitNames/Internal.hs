@@ -1,5 +1,6 @@
 {-# OPTIONS_HADDOCK not-home #-}
 
+{-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
