@@ -201,7 +201,7 @@ module Numeric.Units.Dimensional
     -- * Dimensional Arithmetic
     (*~), (/~),
     (^), (^/), (**), (*), (/), (+), (-),
-    negate, abs, nroot, sqrt, cbrt,
+    negate, abs, recip, nroot, sqrt, cbrt,
     -- ** Transcendental Functions
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
     -- ** Operations on Collections
@@ -399,6 +399,10 @@ Multiplication, division and powers apply to both units and quantities.
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
 (/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
 (/) = liftD2 (Prelude./) (Prelude./) (Name./)
+
+-- | Forms the reciprocal of a 'Quantity', which has the reciprocal dimension.
+recip :: (Fractional a) => Quantity d a -> Quantity (Recip d) a
+recip = liftQ Prelude.recip
 
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
