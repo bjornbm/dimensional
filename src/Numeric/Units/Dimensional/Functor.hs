@@ -25,8 +25,10 @@ Note that, while this instance overlaps with that given for 'Dimensionless', it 
 
 Note that this is an orphan instance.
 -}
-module Numeric.Units.Dimensional.Functor where
+module Numeric.Units.Dimensional.Functor {-# DEPRECATED "This orphan instance is being eliminated in favor of a package flag, functor, which creates it as a proper instance." #-} where
 
+-- If we already have this instance, we won't declare it again.
+#if !(FUNCTOR || USE_LINEAR)
 import Numeric.Units.Dimensional
 
 -- | A 'Functor' instance for 'Dimensional'.
@@ -38,3 +40,4 @@ import Numeric.Units.Dimensional
 -- Note that this is an orphan instance.
 instance {-# OVERLAPPING #-} (KnownVariant v) => Functor (Dimensional v d) where
   fmap = dmap
+#endif

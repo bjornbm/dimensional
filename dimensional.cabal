@@ -36,6 +36,36 @@ extra-source-files:  README.md,
                      examples/README,
                      examples/GM.lhs
 
+flag functor
+  description: Provide a Functor instance for Quantity.
+  default:     False
+  manual:      True
+
+flag aeson
+  description: Provide instances for use with the aeson package.
+  default:     False
+  manual:      True
+
+flag binary
+  description: Provide instances for use with the binary package.
+  default:     False
+  manual:      True
+
+flag cereal
+  description: Provide instances for use with the cereal package.
+  default:     False
+  manual:      True
+
+flag linear
+  description: Provide instances for use with the linear package.
+  default:     False
+  manual:      True
+
+flag vector-space
+  description: Provide instances for use with the vector-space package.
+  default:     False
+  manual:      True
+
 source-repository head
   type:     git
   location: https://github.com/bjornbm/dimensional/
@@ -65,6 +95,29 @@ library
                        Numeric.Units.Dimensional.Variants
   other-modules:       Numeric.Units.Dimensional.Internal,
                        Numeric.Units.Dimensional.UnitNames.Internal
+
+  if flag(functor)
+    cpp-options:       -DFUNCTOR
+
+  if flag(aeson)
+    build-depends:     aeson >= 0.10 && < 1
+    cpp-options:       -DUSE_AESON
+
+  if flag(binary)
+    build-depends:     binary >= 0.7 && < 1
+    cpp-options:       -DUSE_BINARY
+
+  if flag(cereal)
+    build-depends:     cereal >= 0.5 && <1
+    cpp-options:       -DUSE_CEREAL
+
+  if flag(linear)
+    build-depends:     linear >= 1.19 && < 2
+    cpp-options:       -DUSE_LINEAR
+
+  if flag(vector-space)
+    build-depends:     vector-space >= 0.10 && < 1
+    cpp-options:       -DUSE_VECTOR_SPACE
 
 test-suite tests
   type:                exitcode-stdio-1.0

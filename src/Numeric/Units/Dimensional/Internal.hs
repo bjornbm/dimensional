@@ -4,6 +4,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-} -- for Vector instances only
 {-# LANGUAGE RankNTypes #-}
@@ -46,9 +47,29 @@ import qualified Data.Vector.Unboxed.Base as U
 import Prelude
   ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Functor
   , String, Maybe(..)
-  , (.), ($), (++), (+), (/)
+  , (.), ($), (++)
   , show, otherwise, undefined, error, fmap
   )
+import qualified Prelude as P
+
+-- Optional imports when certain package flags are enabled
+#if USE_AESON
+import qualified Data.Aeson
+#endif
+#if USE_BINARY
+import qualified Data.Binary
+#endif
+#if USE_CEREAL
+import qualified Data.Serialize
+#endif
+#if USE_LINEAR
+import qualified Linear.Affine
+import qualified Linear.Vector
+#endif
+#if USE_VECTOR_SPACE
+import qualified Data.AdditiveGroup
+import qualified Data.VectorSpace
+#endif
 
 -- | A unit of measurement.
 type Unit (m :: Metricality) = Dimensional ('DUnit m)
@@ -99,6 +120,48 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
   injectValue _        _ = error "Shouldn't be reachable. Needed to name a quantity."
   dmap f (Unit n e x) = Unit n e (f x)
 
+{-
+
+If the FUNCTOR flag is set or is required by another flag, we provide a Functor instance for all dimensional values.
+Regardless, we provide a functor instance for dimensionless quantities.
+
+-}
+#if FUNCTOR || USE_LINEAR
+instance (KnownVariant v) => Functor (Dimensional v d) where
+  fmap = dmap
+#else
+instance Functor (Quantity DOne) where
+  fmap = dmap
+#endif
+
+#if USE_AESON
+#endif
+
+#if USE_BINARY
+deriving instance (Data.Binary.Binary a) => Data.Binary.Binary (Quantity d a)
+#endif
+
+#if USE_CEREAL
+deriving instance (Data.Serialize.Serialize a) => Data.Serialize.Serialize (Quantity d a)
+#endif
+
+#if USE_LINEAR
+#endif
+
+#if USE_VECTOR_SPACE
+instance (Num a) => Data.AdditiveGroup.AdditiveGroup (Quantity d a) where
+  zeroV = mempty
+  (^+^) = mappend
+  negateV = liftQ P.negate
+
+instance (Num a) => Data.VectorSpace.VectorSpace (Quantity d a) where
+  type Scalar (Quantity d a) = Quantity DOne a
+  (*^) = liftQ2 (P.*)
+
+instance (Num a) => Data.VectorSpace.InnerSpace (Quantity DOne a) where
+  (<.>) = liftQ2 (P.*)
+#endif
+
 -- GHC is somewhat unclear about why, but it won't derive this instance, so we give it explicitly.
 instance (Bounded a) => Bounded (Quantity d a) where
   minBound = Quantity minBound
@@ -115,19 +178,7 @@ we will define a monoid instance that adds.
 -- | 'Quantity's of a given 'Dimension' form a 'Monoid' under addition.
 instance (Num a) => Monoid (Quantity d a) where
   mempty = Quantity 0
-  mappend = liftQ2 (+)
-
-{-
-
-= Dimensionless =
-
-For dimensionless quantities pretty much any operation is applicable.
-We provide this freedom by making 'Dimensionless' an instance of
-'Functor'.
--}
-
-instance Functor (Quantity DOne) where
-  fmap = dmap
+  mappend = liftQ2 (P.+)
 
 instance (KnownDimension d) => HasDimension (Dimensional v d a) where
   dimension _ = dimension (Proxy :: Proxy d)
@@ -197,8 +248,8 @@ instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
 
 -- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
-showIn (Unit n _ y) (Quantity x) | Name.weaken n == nOne = show (x / y)
-                                 | otherwise             = (show (x / y)) ++ " " ++ (show n)
+showIn (Unit n _ y) (Quantity x) | Name.weaken n == nOne = show (x P./ y)
+                                 | otherwise             = (show (x P./ y)) ++ " " ++ (show n)
 
 instance (KnownDimension d, Show a) => Show (Unit m d a) where
   show (Unit n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
