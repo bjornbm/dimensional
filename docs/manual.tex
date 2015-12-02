@@ -121,6 +121,24 @@ tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional
 \subsection{Interchange Names}
 \subsection{Unit Name Normal Forms}
 
+\chapter{Dimensional Vectors}
+
+It's frequently convenient to manipulate vectors of dimensional values. Because such vectors often have heterogenous
+dimensions, existing Haskell vector libraries are a poor solution. In order to retain dimensional typing in these situations,
+\thispackage{} offers a standard representation for dimensional vectors, however it does not include a full-featured system for
+dimensional linear algebra. A package using \thispackage{} and \packagename{hmatrix} to do so is under early-stage development.
+
+
+
+\chapter{Dynamic Dimensions}
+
+Statically tracked dimensions are wonderful and vastly simplify development of code that works with quantities of specific
+dimensions. However there are times when we might wish to manipulate quantities or units of unknown dimensions. This can be
+especially useful when parsing user input.
+
+The \submodule{Dynamic} module provides a number of features for manipulating quantities or units with dimensions that are only
+known dynamically.
+
 \chapter{Fixed Point Dimensional Arithmetic}
 
 \prerelease{}
