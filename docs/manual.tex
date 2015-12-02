@@ -16,6 +16,7 @@
 \newcommand{\typename}[1]{\textit{#1}}
 \newcommand{\modulename}[1]{\textit{#1}}
 \newcommand{\submodule}[1]{\modulename{Numeric.Units.Dimensional.{#1}}}
+\newcommand{\flag}[1]{\textbf{#1}}
 \newcommand{\prerelease}{\begin{tcolorbox}
 The functionality discussed in this section has not yet been released.
 \end{tcolorbox}}
@@ -195,9 +196,33 @@ sin :: (KnownExactPi s1, KnownExactPi s2 Integral a) => SQuantity s1 DOne a -> S
 
 \prerelease{}
 
+\section{\packagename{aeson} for JSON Serialization}
+
+\prerelease{}
+
+Users of the \packagename{aeson} package can find \classname{ToJSON}
+and \classname{FromJson} instances for \typename{Quantity} and for certain ancillary types by
+enabling the \flag{aeson} flag when installing \thispackage{}.
+
 \section{\packagename{attoparsec} for Unit and Quantity Parsing}
 
 \prerelease{}
+
+\section{\packagename{binary} for Binary Serialization}
+
+\prerelease{}
+
+Users of the \packagename{binary} package can find \classname{Binary}
+instances for \typename{Quantity} and for certain ancillary types by
+enabling the \flag{binary} flag when installing \thispackage{}.
+
+\section{\packagename{cereal} for Binary Serialization}
+
+\prerelease{}
+
+Users of the \packagename{cereal} package can find \classname{Serialize}
+instances for \typename{Quantity} and for certain ancillary types by
+enabling the \flag{cereal} flag when installing \thispackage{}.
 
 \section{\packagename{HaTeX} for \LaTeX{} Generation}
 
@@ -224,7 +249,13 @@ Explain here how to use that facility.
 
 \prerelease{}
 
-Todo: create instances for linear's type classes, recognizing that they require the nasty Functor orphan instance.
+Users of the \packagename{linear} package can find appropriate instances of
+the \classname{Additive} and \classname{Affine} classes, along with an
+instance of \classname{Metric} for dimensionless quantities, by enabling the \flag{linear}
+package flag when installing \thispackage{}.
+
+The \flag{linear} flag implies the \flag{functor} flag and will result in generation of a \classname{Functor}
+instance for dimensional values.
 
 \section{\packagename{parsec} for Unit and Quantity Parsing}
 
@@ -247,8 +278,8 @@ allowing \typename{Quantity}s to be stored in unboxed vectors for improved perfo
 
 Users of the \packagename{vector-space} package can find appropriate instances of
 the \classname{AdditiveGroup} and \classname{VectorSpace} classes, along with an
-instance of \classname{InnerSpace} for dimensionless quantities, in the
-\submodule{VectorSpace} module of the \experimentalpackage{} package.
+instance of \classname{InnerSpace} for dimensionless quantities, by enabling the \flag{vector-space}
+package flag when installing \thispackage{}.
 
 \chapter{Libraries Using \thispackage}
 
