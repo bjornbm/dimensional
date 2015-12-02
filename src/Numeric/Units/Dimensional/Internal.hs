@@ -135,6 +135,9 @@ instance Functor (Quantity DOne) where
 #endif
 
 #if USE_AESON
+deriving instance (Data.Aeson.ToJSON a) => Data.Aeson.ToJSON (Quantity d a)
+
+deriving instance (Data.Aeson.FromJSON a) => Data.Aeson.FromJSON (Quantity d a)
 #endif
 
 #if USE_BINARY
