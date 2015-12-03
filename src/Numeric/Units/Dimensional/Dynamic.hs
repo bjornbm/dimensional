@@ -42,6 +42,7 @@ import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), recip)
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
+import Numeric.Units.Dimensional.Variants (Variant(..))
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 
@@ -50,11 +51,11 @@ import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 class DynamicQuantity (q :: * -> *) where
   -- | Converts a 'Quantity' of statically known 'Dimension' into an dynamic quantity
   -- such as an 'AnyQuantity' or a 'DynQuantity'.
-  demoteQuantity :: (KnownDimension d) => Quantity d a -> q a
+  demoteQuantity :: (KnownDimension d) => Dimensional 'DQuantity d a -> q a -- GHC 7.8 doesn't expand associated type synonyms in instance signatures, see Trac 9582
   -- | Converts an dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
   -- 'Quantity' of statically known 'Dimension', or 'Nothing' if the dynamic quantity
   -- does not represent a 'Quantity' of that dimension.
-  promoteQuantity :: (KnownDimension d) => q a -> Maybe (Quantity d a)
+  promoteQuantity :: (KnownDimension d) => q a -> Maybe (Dimensional 'DQuantity d a)
 
 -- | A 'Quantity' whose 'Dimension' is only known dynamically.
 data AnyQuantity a = AnyQuantity Dimension' a
@@ -72,11 +73,10 @@ instance HasDimension (AnyQuantity a) where
 instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic instance
 
 instance DynamicQuantity AnyQuantity where
-  -- these kind signatures are required by GHC 7.8
-  demoteQuantity :: forall (d :: Dimension) a.KnownDimension d => Quantity d a -> AnyQuantity a
+  demoteQuantity :: forall d a.KnownDimension d => Dimensional 'DQuantity d a -> AnyQuantity a
   demoteQuantity (Quantity val) = AnyQuantity dim val
     where dim = dimension (Proxy :: Proxy d)
-  promoteQuantity :: forall (d :: Dimension) a.KnownDimension d => AnyQuantity a -> Maybe (Quantity d a)
+  promoteQuantity :: forall d a.KnownDimension d => AnyQuantity a -> Maybe (Dimensional 'DQuantity d a)
   promoteQuantity (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
                                         | otherwise   = Nothing
     where
