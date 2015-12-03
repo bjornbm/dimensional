@@ -14,7 +14,6 @@ Defines types for manipulation of units and quantities without phantom types for
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -42,7 +41,6 @@ import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), recip)
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
-import Numeric.Units.Dimensional.Variants (Variant(..))
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 
@@ -51,11 +49,11 @@ import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 class DynamicQuantity (q :: * -> *) where
   -- | Converts a 'Quantity' of statically known 'Dimension' into an dynamic quantity
   -- such as an 'AnyQuantity' or a 'DynQuantity'.
-  demoteQuantity :: (KnownDimension d) => Dimensional 'DQuantity d a -> q a -- GHC 7.8 doesn't expand associated type synonyms in instance signatures, see Trac 9582
+  demoteQuantity :: (KnownDimension d) => Quantity d a -> q a -- GHC 7.8 doesn't expand associated type synonyms in instance signatures, see Trac 9582
   -- | Converts an dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
   -- 'Quantity' of statically known 'Dimension', or 'Nothing' if the dynamic quantity
   -- does not represent a 'Quantity' of that dimension.
-  promoteQuantity :: (KnownDimension d) => q a -> Maybe (Dimensional 'DQuantity d a)
+  promoteQuantity :: (KnownDimension d) => q a -> Maybe (Quantity d a)
 
 -- | A 'Quantity' whose 'Dimension' is only known dynamically.
 data AnyQuantity a = AnyQuantity Dimension' a
@@ -73,14 +71,21 @@ instance HasDimension (AnyQuantity a) where
 instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic instance
 
 instance DynamicQuantity AnyQuantity where
-  demoteQuantity :: forall a (d :: Dimension).KnownDimension d => Dimensional 'DQuantity d a -> AnyQuantity a
-  demoteQuantity (Quantity val) = AnyQuantity dim val
-    where dim = dimension (Proxy :: Proxy d)
-  promoteQuantity :: forall a (d :: Dimension).KnownDimension d => AnyQuantity a -> Maybe (Dimensional 'DQuantity d a)
-  promoteQuantity (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
-                                        | otherwise   = Nothing
-    where
-      dim' = dimension (Proxy :: Proxy d)
+  demoteQuantity = demoteAnyQuantity
+  promoteQuantity = promoteAnyQuantity
+
+-- These implementations are not provided directly inside the instance because they require ScopedTypeVariables
+-- Placing the signatures inside the instance requires InstanceSigs, which interacts poorly with associated type families
+-- like Dimensional in GHC 7.8.
+demoteAnyQuantity :: forall a (d :: Dimension).KnownDimension d => Quantity d a -> AnyQuantity a
+demoteAnyQuantity (Quantity val) = AnyQuantity dim val
+  where dim = dimension (Proxy :: Proxy d)
+
+promoteAnyQuantity :: forall a (d :: Dimension).KnownDimension d => AnyQuantity a -> Maybe (Quantity d a)
+promoteAnyQuantity (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
+                                         | otherwise   = Nothing
+  where
+    dim' = dimension (Proxy :: Proxy d)
 
 -- | 'AnyQuantity's form a 'Monoid' under multiplication, but not under addition because
 -- they may not be added together if their dimensions do not match.
