@@ -21,7 +21,7 @@ data InterchangeNameAuthority = UCUM -- ^ The interchange name originated with t
 
 instance NFData InterchangeNameAuthority where -- instance is derived from Generic instance
 
-data InterchangeName = InterchangeName { name :: String, authority :: InterchangeNameAuthority }
+data InterchangeName = InterchangeName { name :: String, authority :: InterchangeNameAuthority, isAtomic :: Bool }
   deriving (Eq, Ord, Data, Typeable, Generic)
 
 instance NFData InterchangeName where -- instance is derived from Generic instance

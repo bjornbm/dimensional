@@ -27,7 +27,8 @@ import Data.Foldable (Foldable, toList)
 import Data.Ord
 import GHC.Generics hiding (Prefix)
 import Numeric.Units.Dimensional.Dimensions.TermLevel (Dimension', asList, HasDimension(..))
-import Numeric.Units.Dimensional.UnitNames.InterchangeNames
+import Numeric.Units.Dimensional.UnitNames.InterchangeNames hiding (isAtomic)
+import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
 import Numeric.Units.Dimensional.Variants (Metricality(..))
 import Prelude hiding ((*), (/), (^), product)
 import qualified Prelude as P
@@ -287,47 +288,47 @@ instance HasInterchangeName (NameAtom m) where
   interchangeName = _interchangeName
 
 instance HasInterchangeName (UnitName m) where
-  interchangeName One = InterchangeName { name = "1", authority = UCUM }
+  interchangeName One = InterchangeName { name = "1", authority = UCUM, I.isAtomic = True }
   interchangeName (MetricAtomic a) = interchangeName a
   interchangeName (Atomic a) = interchangeName a
   interchangeName (Prefixed p n) = let n' = (name . interchangeName $ p) ++ (name . interchangeName $ n)
                                        a' = max (authority . interchangeName $ p) (authority . interchangeName $ n)
-                                    in InterchangeName { name = n', authority = a' }
+                                    in InterchangeName { name = n', authority = a', I.isAtomic = False }
   interchangeName (Product n1 n2) = let n' = (name . interchangeName $ n1) ++ "." ++ (name . interchangeName $ n2)
                                         a' = max (authority . interchangeName $ n1) (authority . interchangeName $ n2)
-                                     in InterchangeName { name = n', authority = a' }
+                                     in InterchangeName { name = n', authority = a', I.isAtomic = False }
   interchangeName (Quotient n1 n2) = let n' = (name . interchangeName $ n1) ++ "/" ++ (name . interchangeName $ n2)
                                          a' = max (authority . interchangeName $ n1) (authority . interchangeName $ n2)
-                                      in InterchangeName { name = n', authority = a' }
+                                      in InterchangeName { name = n', authority = a', I.isAtomic = False }
   -- TODO #109: note in this case that the UCUM is changing their grammar to not accept exponents after
   -- as a result it will become necessary to distribute the exponentiation over the items in the base name
   -- prior to generating the interchange name
   interchangeName (Power n x) = let n' = (name . interchangeName $ n) ++ (show x)
-                                 in InterchangeName { name = n', authority = authority . interchangeName $ n }
+                                 in InterchangeName { name = n', authority = authority . interchangeName $ n, I.isAtomic = False }
   interchangeName (Grouped n) = let n' = "(" ++ (name . interchangeName $ n) ++ ")"
-                                 in InterchangeName { name = n', authority = authority . interchangeName $ n }
+                                 in InterchangeName { name = n', authority = authority . interchangeName $ n, I.isAtomic = False }
   interchangeName (Weaken n) = interchangeName n
 
 prefix :: String -> String -> String -> Rational -> Prefix
 prefix i a f q = Prefix n q
   where
-    n = NameAtom (InterchangeName i UCUM) a f
+    n = NameAtom (InterchangeName i UCUM True) a f
 
 ucumMetric :: String -> String -> String -> UnitName 'Metric
-ucumMetric i a f = MetricAtomic $ NameAtom (InterchangeName i UCUM) a f
+ucumMetric i a f = MetricAtomic $ NameAtom (InterchangeName i UCUM True) a f
 
 ucum :: String -> String -> String -> UnitName 'NonMetric
-ucum i a f = Atomic $ NameAtom (InterchangeName i UCUM) a f
+ucum i a f = Atomic $ NameAtom (InterchangeName i UCUM True) a f
 
 dimensionalAtom :: String -> String -> String -> UnitName 'NonMetric
-dimensionalAtom i a f = Atomic $ NameAtom (InterchangeName i DimensionalLibrary) a f
+dimensionalAtom i a f = Atomic $ NameAtom (InterchangeName i DimensionalLibrary True) a f
 
 -- | Constructs an atomic name for a custom unit.
 atom :: String -- ^ Interchange name
      -> String -- ^ Abbreviated name in international English
      -> String -- ^ Full name in international English
      -> UnitName 'NonMetric
-atom i a f = Atomic $ NameAtom (InterchangeName i Custom) a f
+atom i a f = Atomic $ NameAtom (InterchangeName i Custom True) a f
 
 -- | The type of a unit name transformation that may be associated with an operation that takes a single unit as input.
 type UnitNameTransformer = (forall m.UnitName m -> UnitName 'NonMetric)
