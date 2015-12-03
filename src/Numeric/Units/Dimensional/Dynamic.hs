@@ -72,10 +72,10 @@ instance HasDimension (AnyQuantity a) where
 instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic instance
 
 instance DynamicQuantity AnyQuantity where
-  demoteQuantity :: forall d a.(KnownDimension d) => Quantity d a -> AnyQuantity a
+  demoteQuantity :: forall a d.(KnownDimension d) => Quantity d a -> AnyQuantity a
   demoteQuantity (Quantity val) = AnyQuantity dim val
     where dim = dimension (Proxy :: Proxy d)
-  promoteQuantity :: forall d a.(KnownDimension d) => AnyQuantity a -> Maybe (Quantity d a)
+  promoteQuantity :: forall a d.(KnownDimension d) => AnyQuantity a -> Maybe (Quantity d a)
   promoteQuantity (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
                                         | otherwise   = Nothing
     where
