@@ -37,7 +37,7 @@ import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, even, fmap, otherwise)
+import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), recip)
 import Numeric.Units.Dimensional.Coercion
@@ -73,10 +73,10 @@ instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic 
 
 instance DynamicQuantity AnyQuantity where
   -- these kind signatures are required by GHC 7.8
-  demoteQuantity :: forall a (d :: Dimension).(KnownDimension d) => Quantity d a -> AnyQuantity a
+  demoteQuantity :: forall (d :: Dimension) a.KnownDimension d => Quantity d a -> AnyQuantity a
   demoteQuantity (Quantity val) = AnyQuantity dim val
     where dim = dimension (Proxy :: Proxy d)
-  promoteQuantity :: forall a (d :: Dimension).(KnownDimension d) => AnyQuantity a -> Maybe (Quantity d a)
+  promoteQuantity :: forall (d :: Dimension) a.KnownDimension d => AnyQuantity a -> Maybe (Quantity d a)
   promoteQuantity (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
                                         | otherwise   = Nothing
     where
@@ -153,6 +153,7 @@ div2 d | all even ds = Just . fromList . fmap (`div` 2) $ ds
   where
     ds = D.asList d
     fromList [l, m, t, i, th, n, j] = Dim' l m t i th n j
+    fromList _ = error "Should be unreachable, there are 7 base dimensions."
 
 -- Applies Just to the result of a two argument function.
 always :: (a -> a -> a) -> a -> a -> Maybe a
