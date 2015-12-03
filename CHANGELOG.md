@@ -2,10 +2,14 @@ vNext
 -----
 * Breaking: Changed Numeric.Units.Dimensional.Prelude to export a dimensionally
   typed `recip` instead of the one from `Prelude`.
+* Breaking: Changed the `HasDimension` typeclass to require an instance of the new
+  `HasDynamicDimension` typeclass.
 * Added `Data`, `Generic`, `Typeable` and `NFData` instances for many ancillary types.
 * Added `unQuantity` to the Coercion module to ease unwrapping without
   introducing ambiguous type variables.
-* Added a multiplicative `Monoid` instance for `AnyQuantity`.
+* Added a multiplicative `Monoid` instance for `AnyQuantity` and for `AnyUnit`.
+* Added the `DynQuantity` type to represent possibly valid quantities of statically
+  unknown dimension, suitable for performing arithmetic with such quantities.
 * Relocated git repository to https://github.com/bjornbm/dimensional
 
 1.0.1.0 (2015-11)
