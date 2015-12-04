@@ -63,7 +63,6 @@ instance (Show a) => Show (AnyQuantity a) where
   show (AnyQuantity d a) = (show a) ++ " " ++ (show . baseUnitName $ d)
 
 instance D.HasDynamicDimension (AnyQuantity a) where
-  dynamicDimension = Just . dimension
 
 instance HasDimension (AnyQuantity a) where
   dimension (AnyQuantity d _) = d
@@ -200,7 +199,6 @@ instance Show AnyUnit where
   show (AnyUnit _ n e) = "1 " ++ (show n) ++ " =def= " ++ (show e) ++ " of the SI base unit"
 
 instance D.HasDynamicDimension AnyUnit where
-  dynamicDimension = Just . dimension
 
 instance HasDimension AnyUnit where
   dimension (AnyUnit d _ _) = d

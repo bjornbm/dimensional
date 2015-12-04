@@ -1,6 +1,7 @@
 {-# OPTIONS_HADDOCK not-home, show-extensions #-}
 
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -58,7 +59,11 @@ instance Monoid Dimension' where
 class HasDynamicDimension a where
   -- | Gets the 'Dimension'' of a dynamic dimensional value, or 'Nothing' if it does not represent
   -- a dimensional value of any 'Dimension'.
+  --
+  -- A default implementation is available for types that are also in the `HasDimension` typeclass.
   dynamicDimension :: a -> Maybe Dimension'
+  default dynamicDimension :: (HasDimension a) => a -> Maybe Dimension'
+  dynamicDimension = Just . dimension
 
 -- | Dimensional values inhabit this class, which allows access to a term-level representation of their dimension.
 class HasDynamicDimension a => HasDimension a where 
@@ -66,7 +71,6 @@ class HasDynamicDimension a => HasDimension a where
   dimension :: a -> Dimension'
 
 instance HasDynamicDimension Dimension' where
-  dynamicDimension = Just . dimension
 
 instance HasDimension Dimension' where
   dimension = id
