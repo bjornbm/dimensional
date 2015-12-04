@@ -24,6 +24,7 @@ module Numeric.Units.Dimensional.Dynamic
   AnyQuantity
 , DynQuantity
 , DynamicQuantity(..)
+, HasDynamicDimension(..)
   -- * Dynamic Units
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
@@ -42,6 +43,7 @@ import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
 import qualified Numeric.Units.Dimensional.UnitNames as N
+import Numeric.Units.Dimensional.Dimensions.TermLevel (HasDynamicDimension(..))
 import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 
 -- | The class of types that can be used to model 'Quantity's whose 'Dimension's are
@@ -62,7 +64,7 @@ data AnyQuantity a = AnyQuantity Dimension' a
 instance (Show a) => Show (AnyQuantity a) where
   show (AnyQuantity d a) = (show a) ++ " " ++ (show . baseUnitName $ d)
 
-instance D.HasDynamicDimension (AnyQuantity a) where
+instance HasDynamicDimension (AnyQuantity a) where
 
 instance HasDimension (AnyQuantity a) where
   dimension (AnyQuantity d _) = d
@@ -108,8 +110,8 @@ instance DynamicQuantity DynQuantity where
   promoteQuantity (DynQuantity (Just x)) = promoteQuantity x
   promoteQuantity _                      = Nothing
 
-instance D.HasDynamicDimension (DynQuantity a) where
-  dynamicDimension (DynQuantity (Just x)) = D.dynamicDimension x
+instance HasDynamicDimension (DynQuantity a) where
+  dynamicDimension (DynQuantity (Just x)) = dynamicDimension x
   dynamicDimension _                      = Nothing
 
 instance Num a => Num (DynQuantity a) where
@@ -198,7 +200,7 @@ data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
 instance Show AnyUnit where
   show (AnyUnit _ n e) = "1 " ++ (show n) ++ " =def= " ++ (show e) ++ " of the SI base unit"
 
-instance D.HasDynamicDimension AnyUnit where
+instance HasDynamicDimension AnyUnit where
 
 instance HasDimension AnyUnit where
   dimension (AnyUnit d _ _) = d
