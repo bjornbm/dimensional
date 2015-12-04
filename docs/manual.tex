@@ -4,7 +4,7 @@
 \usepackage{listings}
 \usepackage[letterpaper, margin=1in]{geometry}
 \usepackage{hyperref}
-\usepackage{tcolorbox}
+\usepackage{framed}
 \hypersetup{
     colorlinks=false,
 }
@@ -17,9 +17,9 @@
 \newcommand{\modulename}[1]{\textit{#1}}
 \newcommand{\submodule}[1]{\modulename{Numeric.Units.Dimensional.{#1}}}
 \newcommand{\flag}[1]{\textbf{#1}}
-\newcommand{\prerelease}{\begin{tcolorbox}
+\newcommand{\prerelease}{\begin{framed}
 The functionality discussed in this section has not yet been released.
-\end{tcolorbox}}
+\end{framed}}
 
 \lstset{language=haskell,
 numberstyle=\footnotesize,
@@ -93,7 +93,9 @@ g = 6.67384e-11 *~ (newton * (meter / kilo gram)^pos2)
 
 -- You can easily declare functions that are polymorphic in the
 -- numeric representation type.
-gravitationalFieldStrength :: (Fractional a) => Mass a -> Length a -> Acceleration a
+gravitationalFieldStrength :: (Fractional a) => Mass a 
+                                             -> Length a
+                                             -> Acceleration a
 gravitationalFieldStrength m r = g * m / r^pos2
   -- Exponentiation of quantities uses the same proxies as does
   -- exponentiation of units.
@@ -129,7 +131,6 @@ dimensions, existing Haskell vector libraries are a poor solution. In order to r
 dimensional linear algebra. A package using \thispackage{} and \packagename{hmatrix} to do so is under early-stage development.
 
 
-
 \chapter{Dynamic Dimensions}
 
 Statically tracked dimensions are wonderful and vastly simplify development of code that works with quantities of specific
@@ -138,6 +139,21 @@ especially useful when parsing user input.
 
 The \submodule{Dynamic} module provides a number of features for manipulating quantities or units with dimensions that are only
 known dynamically.
+
+\section{Dynamic Quantities}
+
+The \typename{AnyQuantity} type represents a quantity whose dimension is only known dynamically. You might wish to use this
+type to, for example, read dimensional values from a configuration file:
+
+\begin{lstlisting}
+-- In a context where parseQuantity :: Text -> AnyQuantity Scientific
+
+readMaximumSpeed :: Text -> Maybe (Velocity Double)
+readMaximumSpeed config = changeRep . promoteQuantity . parseQuantity
+\end{lstlisting}
+
+
+
 
 \chapter{Fixed Point Dimensional Arithmetic}
 
@@ -255,7 +271,8 @@ Haskell code through the Jupyter project.
 
 Instances of \classname{IHaskellDisplay} for \typename{Quantity} and \typename{Unit}
 allow attractive \LaTeX{}-style display of dimensional values in your notebooks. These
-instances can be found in the \submodule{IHaskell} module of the \experimentalpackage{}
+instances can be found in the \\
+\submodule{IHaskell} module of the \experimentalpackage{}
 package.
 
 \section{\packagename{lens}}
@@ -274,10 +291,6 @@ package flag when installing \thispackage{}.
 
 The \flag{linear} flag implies the \flag{functor} flag and will result in generation of a \classname{Functor}
 instance for dimensional values.
-
-\section{\packagename{parsec} for Unit and Quantity Parsing}
-
-\prerelease{}
 
 \section{\packagename{time} for Times and Dates}
 
