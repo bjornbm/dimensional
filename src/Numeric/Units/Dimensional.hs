@@ -224,7 +224,10 @@ module Numeric.Units.Dimensional
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
     -- $functor
-    KnownVariant(dmap), changeRep, changeRepApproximate
+    KnownVariant(dmap), changeRep, changeRepApproximate,
+    -- * Lenses
+    -- $lenses
+    asLens
   )
   where
 
@@ -648,6 +651,15 @@ changeRep = dmap realToFrac
 -- | Convenient conversion from exactly represented values while retaining dimensional information.
 changeRepApproximate :: (KnownVariant v, Floating b) => Dimensional v d ExactPi -> Dimensional v d b
 changeRepApproximate = dmap approximateValue
+
+-- | Converts a 'Unit' into a lens from 'Quantity's to values.
+--
+-- This is compatible with the lens package.
+asLens :: (Fractional a) => Unit m d a 
+                         -> (forall f.Functor f => (a -> f a)
+                                                -> Quantity d a
+                                                -> f (Quantity d a))
+asLens u f q = fmap (\v' -> v' *~ u) (f (q /~ u))
 
 {- $dimension-terms
 To facilitate parsing and pretty-printing functions that may wish to operate on term-level representations of dimension,
