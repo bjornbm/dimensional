@@ -130,7 +130,6 @@ instance Functor (Quantity DOne) where
   fmap = dmap
 
 instance (KnownDimension d) => HasDynamicDimension (Dimensional v d a) where
-  dynamicDimension = Just . dimension
 
 instance (KnownDimension d) => HasDimension (Dimensional v d a) where
   dimension _ = dimension (Proxy :: Proxy d)

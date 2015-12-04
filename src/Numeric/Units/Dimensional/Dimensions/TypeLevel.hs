@@ -136,7 +136,6 @@ instance ( KnownTypeInt l
          , KnownTypeInt j
          ) => HasDynamicDimension (Proxy ('Dim l m t i th n j))
   where
-    dynamicDimension = Just . dimension
 
 instance ( KnownTypeInt l
          , KnownTypeInt m
