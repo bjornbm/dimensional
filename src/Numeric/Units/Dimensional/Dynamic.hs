@@ -28,7 +28,7 @@ module Numeric.Units.Dimensional.Dynamic
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
   -- ** Arithmetic on Dynamic Units
-, (*), (/), (^), recip
+, (*), (/), (^), recip, applyPrefix
 ) where
 
 import Control.DeepSeq
@@ -36,7 +36,7 @@ import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise)
+import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise, return)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
@@ -251,3 +251,10 @@ recip (AnyUnit d n e) = AnyUnit (D.recip d) (N.nOne N./ n) (P.recip e)
 -- | Raises a dynamic unit to an integer power.
 (^) :: (P.Integral a) => AnyUnit -> a -> AnyUnit
 (AnyUnit d n e) ^ x = AnyUnit (d D.^ P.fromIntegral x) (n N.^ P.fromIntegral x) (e P.^ x)
+
+applyPrefix :: N.Prefix -> AnyUnit -> Maybe AnyUnit
+applyPrefix p (AnyUnit d n e) = do
+                                  n' <- N.strengthen n
+                                  let n'' = N.applyPrefix p n'
+                                  let e' = (P.fromRational $ N.scaleFactor p) P.* e
+                                  return $ AnyUnit d n'' e'
