@@ -62,7 +62,8 @@ data AnyQuantity a = AnyQuantity Dimension' a
   deriving (Eq, Data, Generic, Generic1, Typeable)
 
 instance (Show a) => Show (AnyQuantity a) where
-  show (AnyQuantity d a) = (show a) ++ " " ++ (show . baseUnitName $ d)
+  show (AnyQuantity d a) | d == D.dOne = show a
+                         | otherwise   = (show a) ++ " " ++ (show . baseUnitName $ d)
 
 instance HasDynamicDimension (AnyQuantity a) where
 
