@@ -64,9 +64,10 @@ where
 import Data.Ratio
 import Numeric.Units.Dimensional
 import Numeric.Units.Dimensional.Quantities
-import Numeric.Units.Dimensional.UnitNames (Prefix, siPrefixes, nMeter, nGram, nSecond, nAmpere, nKelvin, nMole, nCandela)
+import Numeric.Units.Dimensional.UnitNames (Prefix, siPrefixes)
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.UnitNames.Internal (ucum, ucumMetric)
+import qualified Numeric.Units.Dimensional.UnitNames.Internal as I
 import Numeric.NumType.DK.Integers ( pos3 )
 import Prelude ( Eq(..), ($), Num, Fractional, Floating, otherwise, error)
 import qualified Prelude
@@ -92,17 +93,17 @@ applyMultiple p u | denominator x == 1 = mkUnitZ n' (numerator x) u
 
 deka, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta
   :: Num a => Unit 'Metric d a -> Unit 'NonMetric d a
-deka  = applyMultiple N.deka -- International English.
+deka  = applyMultiple I.deka -- International English.
 deca  = deka      -- American English.
-hecto = applyMultiple N.hecto
-kilo  = applyMultiple N.kilo
-mega  = applyMultiple N.mega
-giga  = applyMultiple N.giga
-tera  = applyMultiple N.tera
-peta  = applyMultiple N.peta
-exa   = applyMultiple N.exa
-zetta = applyMultiple N.zetta
-yotta = applyMultiple N.yotta
+hecto = applyMultiple I.hecto
+kilo  = applyMultiple I.kilo
+mega  = applyMultiple I.mega
+giga  = applyMultiple I.giga
+tera  = applyMultiple I.tera
+peta  = applyMultiple I.peta
+exa   = applyMultiple I.exa
+zetta = applyMultiple I.zetta
+yotta = applyMultiple I.yotta
 
 {- $submultiples
 Then the submultiples.
@@ -116,16 +117,16 @@ applyPrefix p u = mkUnitQ n' x u
 
 deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto
   :: Fractional a => Unit 'Metric d a -> Unit 'NonMetric d a
-deci  = applyPrefix N.deci
-centi = applyPrefix N.centi
-milli = applyPrefix N.milli
-micro = applyPrefix N.micro
-nano  = applyPrefix N.nano
-pico  = applyPrefix N.pico
-femto = applyPrefix N.femto
-atto  = applyPrefix N.atto
-zepto = applyPrefix N.zepto
-yocto = applyPrefix N.yocto
+deci  = applyPrefix I.deci
+centi = applyPrefix I.centi
+milli = applyPrefix I.milli
+micro = applyPrefix I.micro
+nano  = applyPrefix I.nano
+pico  = applyPrefix I.pico
+femto = applyPrefix I.femto
+atto  = applyPrefix I.atto
+zepto = applyPrefix I.zepto
+yocto = applyPrefix I.yocto
 
 {- $reified-prefixes 
 
@@ -145,7 +146,7 @@ We define the SI base units in the order of table 1.
 -}
 
 metre, meter :: Num a => Unit 'Metric DLength a
-metre = mkUnitZ nMeter 1 siUnit -- International English.
+metre = mkUnitZ I.nMeter 1 siUnit -- International English.
 meter = metre         -- American English.
 
 {-
@@ -157,17 +158,17 @@ The drawback is that we are forced to use 'Fractional'.
 -}
 
 gram    :: Fractional a => Unit 'Metric DMass a
-gram    = mkUnitQ nGram 1e-3 siUnit
+gram    = mkUnitQ I.nGram 1e-3 siUnit
 second  :: Num a => Unit 'Metric DTime a
-second  = mkUnitZ nSecond 1 siUnit
+second  = mkUnitZ I.nSecond 1 siUnit
 ampere  :: Num a => Unit 'Metric DElectricCurrent a
-ampere  = mkUnitZ nAmpere 1 siUnit
+ampere  = mkUnitZ I.nAmpere 1 siUnit
 kelvin  :: Num a => Unit 'Metric DThermodynamicTemperature a
-kelvin  = mkUnitZ nKelvin 1 siUnit
+kelvin  = mkUnitZ I.nKelvin 1 siUnit
 mole    :: Num a => Unit 'Metric DAmountOfSubstance a
-mole    = mkUnitZ nMole 1 siUnit
+mole    = mkUnitZ I.nMole 1 siUnit
 candela :: Num a => Unit 'Metric DLuminousIntensity a
-candela = mkUnitZ nCandela 1 siUnit
+candela = mkUnitZ I.nCandela 1 siUnit
 
 {- $derived-units
 From Table 3, SI derived units with special names and symbols, including the
