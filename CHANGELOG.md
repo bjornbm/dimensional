@@ -4,6 +4,8 @@ vNext
   typed `recip` instead of the one from `Prelude`.
 * Breaking: Changed the `HasDimension` typeclass to require an instance of the new
   `HasDynamicDimension` typeclass.
+* Breaking: Added operators for `AnyUnit` to the Numeric.Units.Dimensional.Dynamic
+  module which may cause name collisions.
 * Added `Data`, `Generic`, `Typeable` and `NFData` instances for many ancillary types.
 * Added `unQuantity` to the Coercion module to ease unwrapping without
   introducing ambiguous type variables.

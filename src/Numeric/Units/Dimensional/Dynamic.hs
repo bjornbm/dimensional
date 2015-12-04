@@ -28,7 +28,7 @@ module Numeric.Units.Dimensional.Dynamic
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
   -- ** Arithmetic on Dynamic Units
-, (*), (/), recip
+, (*), (/), (^), recip
 ) where
 
 import Control.DeepSeq
@@ -38,7 +38,7 @@ import Data.Monoid (Monoid(..))
 import GHC.Generics
 import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise)
 import qualified Prelude as P
-import Numeric.Units.Dimensional hiding ((*), (/), recip)
+import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
 import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
@@ -247,3 +247,7 @@ recip (AnyUnit d n e) = AnyUnit (D.recip d) (N.nOne N./ n) (P.recip e)
 -- | Forms the quotient of two dynamic units.
 (/) :: AnyUnit -> AnyUnit -> AnyUnit
 (AnyUnit d1 n1 e1) / (AnyUnit d2 n2 e2) = AnyUnit (d1 D./ d2) (n1 N./ n2) (e1 P./ e2)
+
+-- | Raises a dynamic unit to an integer power.
+(^) :: (P.Integral a) => AnyUnit -> a -> AnyUnit
+(AnyUnit d n e) ^ x = AnyUnit (d D.^ P.fromIntegral x) (n N.^ P.fromIntegral x) (e P.^ x)
