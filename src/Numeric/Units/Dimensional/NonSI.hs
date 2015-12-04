@@ -124,7 +124,7 @@ The slug is an alternative unit of mass defined in terms of the pound-force.
 -}
 
 slug :: Fractional a => Unit 'NonMetric DMass a
-slug = poundForce * (second^pos2) / foot
+slug = mkUnitQ (dimensionalAtom "slug" "slug" "slug") 1 $ poundForce * (second^pos2) / foot
 
 {-
 
