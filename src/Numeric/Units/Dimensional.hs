@@ -652,9 +652,12 @@ changeRep = dmap realToFrac
 changeRepApproximate :: (KnownVariant v, Floating b) => Dimensional v d ExactPi -> Dimensional v d b
 changeRepApproximate = dmap approximateValue
 
+{- $lenses
+These functions are compatible with the lens library.
+
+-}
+
 -- | Converts a 'Unit' into a lens from 'Quantity's to values.
---
--- This is compatible with the lens package.
 asLens :: (Fractional a) => Unit m d a 
                          -> (forall f.Functor f => (a -> f a)
                                                 -> Quantity d a
