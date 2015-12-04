@@ -253,6 +253,8 @@ recip (AnyUnit d n e) = AnyUnit (D.recip d) (N.nOne N./ n) (P.recip e)
 (^) :: (P.Integral a) => AnyUnit -> a -> AnyUnit
 (AnyUnit d n e) ^ x = AnyUnit (d D.^ P.fromIntegral x) (n N.^ P.fromIntegral x) (e P.^ x)
 
+-- | Applies a prefix to a dynamic unit.
+-- Returns 'Nothing' if the 'Unit' was 'NonMetric' and thus could not accept a prefix.
 applyPrefix :: N.Prefix -> AnyUnit -> Maybe AnyUnit
 applyPrefix p (AnyUnit d n e) = do
                                   n' <- N.strengthen n
