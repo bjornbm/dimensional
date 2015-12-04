@@ -134,6 +134,16 @@ instance ( KnownTypeInt l
          , KnownTypeInt th
          , KnownTypeInt n
          , KnownTypeInt j
+         ) => HasDynamicDimension (Proxy ('Dim l m t i th n j))
+  where
+
+instance ( KnownTypeInt l
+         , KnownTypeInt m
+         , KnownTypeInt t
+         , KnownTypeInt i
+         , KnownTypeInt th
+         , KnownTypeInt n
+         , KnownTypeInt j
          ) => HasDimension (Proxy ('Dim l m t i th n j))
   where 
     dimension _ = Dim'
