@@ -140,12 +140,11 @@ known dynamically.
 
 \section{Dynamic Quantities}
 
-The `AnyQuantity` type represents a quantity whose dimension is only known dynamically. You might wish to use this
-type to, for example, read dimensional values from a configuration file:
+The `AnyQuantity` type represents a quantity whose dimension is only known dynamically. One use of this
+type, for example, is to read dimensional values from a configuration file. In a context where
+`parseQuantity :: Text -> AnyQuantity Scientific` one might write:
 
 \begin{lstlisting}
--- In a context where parseQuantity :: Text -> AnyQuantity Scientific
-
 readMaximumSpeed :: Text -> Maybe (Velocity Double)
 readMaximumSpeed config = fmap changeRep . promoteQuantity . parseQuantity
 \end{lstlisting}
@@ -188,6 +187,21 @@ it to a `Metric` unit.
 Arithmetic operations `*`, `/`, `^`, and `recip` are provided for manipulating `AnyUnit`s. There is no need for an analogue
 of `DynQuantity` for these operations, because they are all total. An `applyPrefix :: Prefix -> AnyUnit -> Maybe AnyUnit`
 function is available for dynamically applying metric prefixes to units, it will return `Nothing` if the unit was not `Metric`.
+
+\prerelease{}
+
+Dynamic analogues of `*~` and `/~` allow the use of dynamic units to convert between raw values and dynamic quantities, as:
+
+\begin{lstlisting}
+(*~) :: (Floating a, DynamicQuantity q) =>   a -> AnyUnit -> q a
+(/~) :: (Floating a, DynamicQuantity q) => q a -> AnyUnit -> Maybe a
+\end{lstlisting}
+
+Note that `/~` will return `Nothing` if the dimensions of the supplied dynamic quantity do not match those of the
+dynamic dimension. The `Floating` context is required for both operations because the conversion factor of the
+dynamic unit may involve $ \pi $.
+
+
 
 \chapter{Fixed Point Dimensional Arithmetic}
 
