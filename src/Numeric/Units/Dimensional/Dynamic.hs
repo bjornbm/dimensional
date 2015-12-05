@@ -102,7 +102,7 @@ instance Num a => Monoid (AnyQuantity a) where
 -- for the common numeric classes. It's therefore useful for manipulating, and not merely storing,
 -- quantities of unknown dimension.
 data DynQuantity a = GoodQuantity (AnyQuantity a) | BadQuantity
-  deriving (Eq, Data, Generic, Generic1, Typeable, Show)
+  deriving (Data, Generic, Generic1, Typeable, Show)
 
 instance Eq a => Eq (DynQuantity a) where
   GoodQuantity x == GoodQuantity y = x == y
