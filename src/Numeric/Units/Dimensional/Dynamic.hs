@@ -38,7 +38,7 @@ import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise, return)
+import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (>>=), (&&), (++), all, const, div, error, even, fmap, otherwise, return)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
@@ -109,12 +109,10 @@ instance NFData a => NFData (DynQuantity a) -- instance is derived from Generic 
 
 instance DynamicQuantity DynQuantity where
   demoteQuantity = DynQuantity . Just . demoteQuantity
-  promoteQuantity (DynQuantity (Just x)) = promoteQuantity x
-  promoteQuantity _                      = Nothing
+  promoteQuantity (DynQuantity q) = q >>= promoteQuantity
 
 instance HasDynamicDimension (DynQuantity a) where
-  dynamicDimension (DynQuantity (Just x)) = dynamicDimension x
-  dynamicDimension _                      = Nothing
+  dynamicDimension (DynQuantity q) = q >>= dynamicDimension
 
 instance Num a => Num (DynQuantity a) where
   (+) = liftDQ2 matching (P.+)
