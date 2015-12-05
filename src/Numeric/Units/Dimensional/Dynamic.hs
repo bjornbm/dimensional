@@ -106,7 +106,7 @@ data DynQuantity a = GoodQuantity (AnyQuantity a) | BadQuantity
 
 instance Eq a => Eq (DynQuantity a) where
   GoodQuantity x == GoodQuantity y = x == y
-  _ == _ = False
+  _ == _ = P.False
 
 instance NFData a => NFData (DynQuantity a) -- instance is derived from Generic instance
 
