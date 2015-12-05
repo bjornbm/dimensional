@@ -154,10 +154,40 @@ Quantities can be demoted to dynamic quantities, and dynamic quantities can be p
 using functions from the `DynamicQuantity` class:
 
 \begin{lstlisting}
-
+class DynamicQuantity (q :: * -> *) where
+  demoteQuantity  :: (KnownDimension d) => Quantity d a -> q a
+  promoteQuantity :: (KnownDimension d) => q a -> Maybe (Quantity d a)
 \end{lstlisting}
 
+This class is provided because, in addition to `AnyQuantity`, there is also a more general type, `DynQuantity`.
+While an `AnyQuantity a` value definitely represents a `Quantity` of some dimension, a `DynQuantity a` value may not.
+This is a useful property because it admits a complete and well-behaved `Num` instance for `DynQuantity` which allows
+arithmetic to be performed with dynamic quantities which is nonetheless dimensionally verified at runtime. For example,
+the result of `demoteQuantity (3 *~ meter) + demoteQuantity (47 *~ second)` cannot be successfully promoted to a `Quantity`
+of any dimension.
 
+\section{Dynamic Units}
+
+It is also occasionally convenient to manipulate units with unknown dimensions. The `AnyUnit` type provides
+an analogue of `AnyQuantity` for `Unit`s.
+
+Similar promotion and demotion functions are available:
+
+\begin{lstlisting}
+demoteUnit  :: (KnownDimension d) => Unit m d a -> AnyUnit
+promoteUnit :: (KnownDimension d) => AnyUnit
+                                  -> Maybe (Unit 'NonMetric d ExactPi)
+\end{lstlisting}
+
+Because all `Unit m d a` values carry their conversion factor represented as an `ExactPi` value alongside their value in
+the type `a`, it's not necessary for `AnyUnit` to carry a type parameter. When promoting an `AnyUnit` we always represent
+the result using `ExactPi`, if you desire a different representation you can use `changeRepApproximate` to obtain one.
+Similarly, while the result of promotion is always tagged as `NonMetric`, you can use `strengthen` to attempt to convert
+it to a `Metric` unit.
+
+Arithmetic operations `*`, `/`, `^`, and `recip` are provided for manipulating `AnyUnit`s. There is no need for an analogue
+of `DynQuantity` for these operations, because they are all total. An `applyPrefix :: Prefix -> AnyUnit -> Maybe AnyUnit`
+function is available for dynamically applying metric prefixes to units, it will return `Nothing` if the unit was not `Metric`.
 
 \chapter{Fixed Point Dimensional Arithmetic}
 
