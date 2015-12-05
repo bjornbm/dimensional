@@ -12,10 +12,7 @@
 \newcommand{\packagename}[1]{\textit{#1}}
 \newcommand{\thispackage}{\packagename{dimensional}}
 \newcommand{\experimentalpackage}{\packagename{dimensional-dk-experimental}}
-\newcommand{\classname}[1]{\textit{#1}}
-\newcommand{\typename}[1]{\textit{#1}}
-\newcommand{\modulename}[1]{\textit{#1}}
-\newcommand{\submodule}[1]{\modulename{Numeric.Units.Dimensional.{#1}}}
+\newcommand{\submodule}[1]{`Numeric.Units.Dimensional.{#1}`}
 \newcommand{\flag}[1]{\textbf{#1}}
 \newcommand{\prerelease}{\begin{framed}
 The functionality discussed in this section has not yet been released.
@@ -25,10 +22,11 @@ The functionality discussed in this section has not yet been released.
 numberstyle=\footnotesize,
 basicstyle=\ttfamily\footnotesize,
 breaklines=true}
+\lstMakeShortInline[columns=fixed]`
 
 \title{
 	{Writing Physical Computations in Haskell with \thispackage}\\
-	{\small{Version 1.0}}
+	{\small{Version 1.1}}
 }
 \author{Björn Buckwalter and Douglas McClean}
 \date{\today}
@@ -112,7 +110,7 @@ The \thispackage{} package is provided under a BSD 3-clause license.
 
 Contributions to \thispackage{} development, in the form of bug reports,
 feature requests, or pull requests, are welcome. The source code repository and issue
-tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional-dk}.
+tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional}.
 
 \chapter{Dimensional Arithmetic}
 
@@ -142,16 +140,22 @@ known dynamically.
 
 \section{Dynamic Quantities}
 
-The \typename{AnyQuantity} type represents a quantity whose dimension is only known dynamically. You might wish to use this
+The `AnyQuantity` type represents a quantity whose dimension is only known dynamically. You might wish to use this
 type to, for example, read dimensional values from a configuration file:
 
 \begin{lstlisting}
 -- In a context where parseQuantity :: Text -> AnyQuantity Scientific
 
 readMaximumSpeed :: Text -> Maybe (Velocity Double)
-readMaximumSpeed config = changeRep . promoteQuantity . parseQuantity
+readMaximumSpeed config = fmap changeRep . promoteQuantity . parseQuantity
 \end{lstlisting}
 
+Quantities can be demoted to dynamic quantities, and dynamic quantities can be promoted back into quantities,
+using functions from the `DynamicQuantity` class:
+
+\begin{lstlisting}
+
+\end{lstlisting}
 
 
 
@@ -163,21 +167,21 @@ Although floating point arithmetic is fast and convenient for many applications,
 support for performing fixed point computations with dimensional values.
 
 Using the \packagename{exact-pi} package's support for type-level positive rationals extended with an exact representation
-of $ \pi $, \thispackage{} statically encodes the scale factor between the least significant bit of the chosen \classname{Integral}
+of $ \pi $, \thispackage{} statically encodes the scale factor between the least significant bit of the chosen `Integral`
 representation and the coherent SI unit of the quantity's dimension. This allows fixed point representations to be
 treated uniformly and correctly by arithmetic operations without requiring the programmer to appropriately scale the results
 before storing them.
 
-The familiar \typename{Quantity} type is an alias for \typename{SQuantity One} (where \typename{One}) is the \packagename{exact-pi}
-package's representation of the number 1. While it is possible to use \typename{SQuantity} with other scaling factors and a
+The familiar `Quantity` type is an alias for `SQuantity One` (where `One`) is the \packagename{exact-pi}
+package's representation of the number 1. While it is possible to use `SQuantity` with other scaling factors and a
 floating point or exact rational representation type, it is rarely necessary to do so because the range of common floating
 point representations can comfortably encode both very large and very small physical quantities directly represented in the
 coherent SI unit of their dimension.
 
-Where \typename{SQuantity} becomes more directly useful, and where special fixed point support is required, is when an
-\classname{Integral} representation type is desired. For example, an embedded system may wish to encode the estimated
+Where `SQuantity` becomes more directly useful, and where special fixed point support is required, is when an
+`Integral` representation type is desired. For example, an embedded system may wish to encode the estimated
 velocity of a vehicle as a 16-bit signed integer with a minimum increment of \SI{1}{\centi\meter\per\second}. It is common
-to represent such a value by a variable of type \typename{Int16} and an accompanying comment or naming convention indicating
+to represent such a value by a variable of type `Int16` and an accompanying comment or naming convention indicating
 the dimension and scale factor, but \thispackage{} provides a more expressive type, which can be written in one of several ways.
 
 Without using Template Haskell, one could write:
@@ -208,15 +212,15 @@ TODO: give an example where the scale isn't an exact unit, other examples of acc
 
 TODO: give examples of performing arithmetic with such values
 
-The transcendental functions from \modulename{Numeric.Units.Dimensional} have types like:
+The transcendental functions from `Numeric.Units.Dimensional` have types like:
 
 \begin{lstlisting}
 sin :: Floating a => Dimensionless a -> Dimensionless a
 \end{lstlisting}
 
-However when using fixed point values, we wish to use representation types which lack \classname{Floating} instances. Accordingly,
-the \modulename{Numeric.Units.Dimensional.FixedPoint} module provides transcendental functions with types like the one given below.
-Note that as is often the case in the fixed point module, in order to provide maximal flexibilty and preserve precision of
+However when using fixed point values, we wish to use representation types which lack `Floating` instances. Accordingly,
+the \submodule{FixedPoint} module provides transcendental functions with types like the one given below.
+Note that as is often the case in the fixed point module, in order to provide maximal flexibility and preserve precision of
 intermediate results, the result type of the operation is not fully determined by the types of its operand and instead is
 determined from context.
 
@@ -234,8 +238,8 @@ sin :: (KnownExactPi s1, KnownExactPi s2 Integral a) => SQuantity s1 DOne a -> S
 
 \prerelease{}
 
-Users of the \packagename{aeson} package can find \classname{ToJSON}
-and \classname{FromJson} instances for \typename{Quantity} and for certain ancillary types by
+Users of the \packagename{aeson} package can find `ToJSON`
+and `FromJson` instances for `Quantity` and for certain ancillary types by
 enabling the \flag{aeson} flag when installing \thispackage{}.
 
 \section{\packagename{attoparsec} for Unit and Quantity Parsing}
@@ -246,16 +250,16 @@ enabling the \flag{aeson} flag when installing \thispackage{}.
 
 \prerelease{}
 
-Users of the \packagename{binary} package can find \classname{Binary}
-instances for \typename{Quantity} and for certain ancillary types by
+Users of the \packagename{binary} package can find `Binary`
+instances for `Quantity` and for certain ancillary types by
 enabling the \flag{binary} flag when installing \thispackage{}.
 
 \section{\packagename{cereal} for Binary Serialization}
 
 \prerelease{}
 
-Users of the \packagename{cereal} package can find \classname{Serialize}
-instances for \typename{Quantity} and for certain ancillary types by
+Users of the \packagename{cereal} package can find `Serialize`
+instances for `Quantity` and for certain ancillary types by
 enabling the \flag{cereal} flag when installing \thispackage{}.
 
 \section{\packagename{HaTeX} for \LaTeX{} Generation}
@@ -269,7 +273,7 @@ enabling the \flag{cereal} flag when installing \thispackage{}.
 The IHaskell project provides support for interactive notebook documents containing
 Haskell code through the Jupyter project.
 
-Instances of \classname{IHaskellDisplay} for \typename{Quantity} and \typename{Unit}
+Instances of `IHaskellDisplay` for `Quantity` and `Unit`
 allow attractive \LaTeX{}-style display of dimensional values in your notebooks. These
 instances can be found in the \\
 \submodule{IHaskell} module of the \experimentalpackage{}
@@ -285,31 +289,31 @@ Explain here how to use that facility.
 \prerelease{}
 
 Users of the \packagename{linear} package can find appropriate instances of
-the \classname{Additive} and \classname{Affine} classes, along with an
-instance of \classname{Metric} for dimensionless quantities, by enabling the \flag{linear}
+the `Additive` and `Affine` classes, along with an
+instance of `Metric` for dimensionless quantities, by enabling the \flag{linear}
 package flag when installing \thispackage{}.
 
-The \flag{linear} flag implies the \flag{functor} flag and will result in generation of a \classname{Functor}
+The \flag{linear} flag implies the \flag{functor} flag and will result in generation of a `Functor`
 instance for dimensional values.
 
 \section{\packagename{time} for Times and Dates}
 
 Users of the \packagename{time} package can find functions and lenses for converting
-between the \typename{DiffTime} representation and \thispackage{}'s \typename{Time} representation in the
+between the `DiffTime` representation and \thispackage{}'s `Time` representation in the
 \submodule{Time} module of the \experimentalpackage{} package.
 
 \section{\packagename{vector} for Boxed and Unboxed Arrays}
 
-The \thispackage{} package provides instances of the \typename{Vector} and \typename{MVector} data families and the \classname{Unbox} class
-allowing \typename{Quantity}s to be stored in unboxed vectors for improved performance and reduced storage overhead.
+The \thispackage{} package provides instances of the `Vector` and `MVector` data families and the `Unbox` class
+allowing `Quantity`s to be stored in unboxed vectors for improved performance and reduced storage overhead.
 
 \section{\packagename{vector-space} for Linear Algebra}
 
 \prerelease{}
 
 Users of the \packagename{vector-space} package can find appropriate instances of
-the \classname{AdditiveGroup} and \classname{VectorSpace} classes, along with an
-instance of \classname{InnerSpace} for dimensionless quantities, by enabling the \flag{vector-space}
+the `AdditiveGroup` and `VectorSpace` classes, along with an
+instance of `InnerSpace` for dimensionless quantities, by enabling the \flag{vector-space}
 package flag when installing \thispackage{}.
 
 \chapter{Libraries Using \thispackage}
@@ -327,7 +331,7 @@ altitude in the Earth's atmosphere.
 The \packagename{igrf} package provides a dimensionally-typed implementation of the International Geomagnetic
 Reference Field, including parsing of model text files in the format released by the International Association of
 Geomagnetism and Aeronomy and the United States National Oceanographic and Atmospheric Administration. The
-package also directly includes the model coeffecients for the most recent model releases.
+package also directly includes the model coefficients for the most recent model releases.
 
 \chapter{Included Dimensions and Units}
 
