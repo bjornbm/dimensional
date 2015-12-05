@@ -51,7 +51,7 @@ import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 class DynamicQuantity (q :: * -> *) where
   -- | Converts a 'Quantity' of statically known 'Dimension' into an dynamic quantity
   -- such as an 'AnyQuantity' or a 'DynQuantity'.
-  demoteQuantity :: (KnownDimension d) => Quantity d a -> q a -- GHC 7.8 doesn't expand associated type synonyms in instance signatures, see Trac 9582
+  demoteQuantity :: (KnownDimension d) => Quantity d a -> q a
   -- | Converts an dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
   -- 'Quantity' of statically known 'Dimension', or 'Nothing' if the dynamic quantity
   -- does not represent a 'Quantity' of that dimension.
