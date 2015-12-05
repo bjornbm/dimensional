@@ -227,6 +227,8 @@ demoteUnit' = demoteUnit
 -- | Converts an 'AnyUnit' into a 'Unit' of statically known 'Dimension', or 'Nothing' if the dimension does not match.
 --
 -- The result is represented in 'ExactPi', conversion to other representations is possible using 'changeRepApproximate'.
+--
+-- The result is always tagged as 'NonMetric', conversion to a 'Metric' unit can be attempted using 'strengthen'.
 promoteUnit :: forall d.(KnownDimension d) => AnyUnit -> Maybe (Unit 'NonMetric d ExactPi)
 promoteUnit (AnyUnit dim n e) | dim == dim' = Just $ mkUnitR n e siUnit
                               | otherwise   = Nothing
