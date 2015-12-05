@@ -38,7 +38,7 @@ import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (>>=), (&&), (++), all, const, div, error, even, fmap, otherwise, return)
+import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (>>=), (&&), (++), all, const, div, error, even, fmap, id, otherwise, return)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
@@ -117,15 +117,15 @@ instance HasDynamicDimension (DynQuantity a) where
 instance Num a => Num (DynQuantity a) where
   (+) = liftDQ2 matching (P.+)
   (-) = liftDQ2 matching (P.-)
-  (*) = liftDQ2 (always (D.*)) (P.*)
-  negate = liftDQ Just (P.negate)
-  abs = liftDQ Just (P.abs)
-  signum = liftDQ (const $ Just D.dOne) (P.signum)
+  (*) = liftDQ2 (valid2 (D.*)) (P.*)
+  negate = liftDQ (valid id) (P.negate)
+  abs = liftDQ (valid id) (P.abs)
+  signum = liftDQ (valid $ const D.dOne) (P.signum)
   fromInteger = demoteQuantity . (*~ one) . P.fromInteger
 
 instance Fractional a => Fractional (DynQuantity a) where
-  (/) = liftDQ2 (always (D./)) (P./)
-  recip = liftDQ (Just . D.recip) (P.recip)
+  (/) = liftDQ2 (valid2 (D./)) (P./)
+  recip = liftDQ (valid D.recip) (P.recip)
   fromRational = demoteQuantity . (*~ one) . P.fromRational
 
 instance Floating a => Floating (DynQuantity a) where
@@ -161,9 +161,13 @@ div2 d | all even ds = Just . fromList . fmap (`div` 2) $ ds
     fromList [l, m, t, i, th, n, j] = Dim' l m t i th n j
     fromList _ = error "Should be unreachable, there are 7 base dimensions."
 
--- Applies Just to the result of a two argument function.
-always :: (a -> a -> a) -> a -> a -> Maybe a
-always f x y = Just $ f x y
+-- Transforms an item in a way which is always valid
+valid :: (a -> a) -> a -> Maybe a
+valid = (Just .)
+
+-- Transforms two items in a way which is always valid
+valid2 :: (a -> a -> a) -> a -> a -> Maybe a
+valid2 f x y = Just $ f x y
 
 -- If three items match, then Just that item, otherwise Nothing.
 matching3 :: Eq a => a -> a -> a -> Maybe a
