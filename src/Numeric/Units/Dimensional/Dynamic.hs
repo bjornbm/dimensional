@@ -104,6 +104,10 @@ instance Num a => Monoid (AnyQuantity a) where
 data DynQuantity a = GoodQuantity (AnyQuantity a) | BadQuantity
   deriving (Eq, Data, Generic, Generic1, Typeable, Show)
 
+instance Eq a => Eq (DynQuantity a) where
+  GoodQuantity x == GoodQuantity y = x == y
+  _ == _ = False
+
 instance NFData a => NFData (DynQuantity a) -- instance is derived from Generic instance
 
 instance DynamicQuantity DynQuantity where
