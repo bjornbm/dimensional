@@ -33,11 +33,12 @@ module Numeric.Units.Dimensional.Dynamic
 ) where
 
 import Control.DeepSeq
+import Data.Coerce
 import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise)
+import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise, return)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
@@ -130,7 +131,7 @@ instance Fractional a => Fractional (DynQuantity a) where
   fromRational = demoteQuantity . (*~ one) . P.fromRational
 
 instance Floating a => Floating (DynQuantity a) where
-  pi = DynQuantity . Just $ AnyQuantity D.dOne P.pi
+  pi = demoteQuantity $ P.pi *~ one
   exp = liftDimensionless P.exp
   log = liftDimensionless P.log
   sqrt = liftDQ div2 (P.sqrt)
@@ -184,15 +185,24 @@ liftDimensionless = liftDQ (matching D.dOne)
 liftDQ :: (Dimension' -> Maybe Dimension')
        -> (a -> a)
        -> DynQuantity a -> DynQuantity a
-liftDQ fd fv (DynQuantity (Just (AnyQuantity d v))) | Just d' <- fd d = DynQuantity . Just $ AnyQuantity d' (fv v)
-liftDQ _ _ _ = DynQuantity Nothing
+liftDQ fd fv = coerce $ liftDQ'
+  where
+    liftDQ' q = do
+                  (AnyQuantity d v) <- q
+                  d' <- fd d
+                  return $ AnyQuantity d' (fv v)
 
 -- Lifts a function on values into a function on DynQuantitys.
 liftDQ2 :: (Dimension' -> Dimension' -> Maybe Dimension')
         -> (a -> a -> a)
         -> DynQuantity a -> DynQuantity a -> DynQuantity a
-liftDQ2 fd fv (DynQuantity (Just (AnyQuantity d1 v1))) (DynQuantity (Just (AnyQuantity d2 v2))) | Just d' <- fd d1 d2 = DynQuantity . Just $ AnyQuantity d' (fv v1 v2)
-liftDQ2 _ _ _ _ = DynQuantity Nothing
+liftDQ2 fd fv = coerce $ liftDQ2'
+  where
+    liftDQ2' q1 q2 = do
+                       (AnyQuantity d1 v1) <- q1
+                       (AnyQuantity d2 v2) <- q2
+                       d' <- fd d1 d2
+                       return $ AnyQuantity d' (fv v1 v2)
 
 -- | A 'Unit' whose 'Dimension' is only known dynamically.
 data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
