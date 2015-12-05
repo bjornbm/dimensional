@@ -183,24 +183,24 @@ liftDimensionless = liftDQ (matching D.dOne)
 liftDQ :: (Dimension' -> Maybe Dimension')
        -> (a -> a)
        -> DynQuantity a -> DynQuantity a
-liftDQ fd fv = coerce $ liftDQ'
+liftDQ fd fv = coerce f
   where
-    liftDQ' q = do
-                  (AnyQuantity d v) <- q
-                  d' <- fd d
-                  return $ AnyQuantity d' (fv v)
+    f q = do
+            (AnyQuantity d v) <- q
+            d' <- fd d
+            return $ AnyQuantity d' (fv v)
 
 -- Lifts a function on values into a function on DynQuantitys.
 liftDQ2 :: (Dimension' -> Dimension' -> Maybe Dimension')
         -> (a -> a -> a)
         -> DynQuantity a -> DynQuantity a -> DynQuantity a
-liftDQ2 fd fv = coerce $ liftDQ2'
+liftDQ2 fd fv = coerce f
   where
-    liftDQ2' q1 q2 = do
-                       (AnyQuantity d1 v1) <- q1
-                       (AnyQuantity d2 v2) <- q2
-                       d' <- fd d1 d2
-                       return $ AnyQuantity d' (fv v1 v2)
+    f q1 q2 = do
+                (AnyQuantity d1 v1) <- q1
+                (AnyQuantity d2 v2) <- q2
+                d' <- fd d1 d2
+                return $ AnyQuantity d' (fv v1 v2)
 
 -- | A 'Unit' whose 'Dimension' is only known dynamically.
 data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
