@@ -1,12 +1,12 @@
 name:                dimensional
-version:             1.0.0.0
+version:             1.0.1.0
 license:             BSD3
 license-file:        LICENSE
 copyright:           Bjorn Buckwalter 2006-2015
 author:              Bjorn Buckwalter
 maintainer:          bjorn@buckwalter.se
 stability:           experimental
-homepage:            https://github.com/bjornbm/dimensional-dk/
+homepage:            https://github.com/bjornbm/dimensional/
 category:            Math, Physics
 synopsis:            Statically checked physical dimensions,
                      using Type Families and Data Kinds.
@@ -38,18 +38,19 @@ extra-source-files:  README.md,
 
 source-repository head
   type:     git
-  location: https://github.com/bjornbm/dimensional-dk/
+  location: https://github.com/bjornbm/dimensional/
 
 library
   build-depends:       base >= 4.7 && < 5,
                        deepseq >= 1.3,
-                       exact-pi >= 0.2.1.1 && < 0.3,
+                       exact-pi >= 0.2.1.1 && < 0.5,
                        numtype-dk >= 0.5 && < 1.1,
                        vector >= 0.10
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall
   exposed-modules:     Numeric.Units.Dimensional,
+                       Numeric.Units.Dimensional.Coercion,
                        Numeric.Units.Dimensional.Prelude,
                        Numeric.Units.Dimensional.Quantities,
                        Numeric.Units.Dimensional.SIUnits,
@@ -62,7 +63,8 @@ library
                        Numeric.Units.Dimensional.UnitNames,
                        Numeric.Units.Dimensional.UnitNames.InterchangeNames,
                        Numeric.Units.Dimensional.Variants
-  other-modules:       Numeric.Units.Dimensional.UnitNames.Internal
+  other-modules:       Numeric.Units.Dimensional.Internal,
+                       Numeric.Units.Dimensional.UnitNames.Internal
 
 test-suite tests
   type:                exitcode-stdio-1.0

@@ -14,6 +14,7 @@
 module Numeric.Units.Dimensional.UnitNames.Internal
 where
 
+import Control.DeepSeq
 import Control.Monad (join)
 import Data.Data
 #if MIN_VERSION_base(4, 8, 0)
@@ -46,12 +47,26 @@ data UnitName (m :: Metricality) where
   Power :: UnitName 'NonMetric -> Int -> UnitName 'NonMetric
   -- A compound name formed by grouping another name, which is generally compound.
   Grouped :: UnitName 'NonMetric -> UnitName 'NonMetric
-  -- A weakened name formed by forgetting whether it could accept a metric prefix.
-  -- Differs from 'Grouped' because it is displayed without parentheses.
+  -- A weakened name formed by forgetting that it could accept a metric prefix.
+  --
+  -- Also available is the smart constructor `weaken` which accepts any `UnitName` as input.
   Weaken :: UnitName 'Metric -> UnitName 'NonMetric
   deriving (Typeable)
 
 deriving instance Eq (UnitName m)
+
+-- As it is for a GADT, this instance cannot be derived or use the generic default implementation
+instance NFData (UnitName m) where
+  rnf n = case n of
+    One -> ()
+    MetricAtomic a -> rnf a
+    Atomic a -> rnf a
+    Prefixed p n' -> rnf p `seq` rnf n'
+    Product n1 n2 -> rnf n1 `seq` rnf n2
+    Quotient n1 n2 -> rnf n1 `seq` rnf n2
+    Power n' e -> rnf n' `seq` rnf e
+    Grouped n' -> rnf n'
+    Weaken n' -> rnf n'
 
 instance Show (UnitName m) where
   show One = "1"
@@ -104,6 +119,8 @@ reduce' n = n
 data NameAtomType = UnitAtom Metricality
                   | PrefixAtom
   deriving (Eq, Ord, Data, Typeable, Generic)
+
+instance NFData NameAtomType where -- instance is derived from Generic instance
 
 -- | The name of a metric prefix.
 type PrefixName = NameAtom 'PrefixAtom
@@ -242,6 +259,8 @@ data NameAtom (m :: NameAtomType)
   }
   deriving (Eq, Ord, Data, Typeable, Generic)
 
+instance NFData (NameAtom m) where -- instance is derived from Generic instance
+
 instance HasInterchangeName (NameAtom m) where
   interchangeName = _interchangeName
 
@@ -258,6 +277,9 @@ instance HasInterchangeName (UnitName m) where
   interchangeName (Quotient n1 n2) = let n' = (name . interchangeName $ n1) ++ "/" ++ (name . interchangeName $ n2)
                                          a' = max (authority . interchangeName $ n1) (authority . interchangeName $ n2)
                                       in InterchangeName { name = n', authority = a' }
+  -- TODO #109: note in this case that the UCUM is changing their grammar to not accept exponents after
+  -- as a result it will become necessary to distribute the exponentiation over the items in the base name
+  -- prior to generating the interchange name
   interchangeName (Power n x) = let n' = (name . interchangeName $ n) ++ (show x)
                                  in InterchangeName { name = n', authority = authority . interchangeName $ n }
   interchangeName (Grouped n) = let n' = "(" ++ (name . interchangeName $ n) ++ ")"

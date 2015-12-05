@@ -1,5 +1,28 @@
+vNext
+-----
+* Breaking: Changed Numeric.Units.Dimensional.Prelude to export a dimensionally
+  typed `recip` instead of the one from `Prelude`.
+* Breaking: Changed the `HasDimension` typeclass to require an instance of the new
+  `HasDynamicDimension` typeclass.
+* Breaking: Added operators for `AnyUnit` to the Numeric.Units.Dimensional.Dynamic
+  module which may cause name collisions.
+* Added `Data`, `Generic`, `Typeable` and `NFData` instances for many ancillary types.
+* Added `unQuantity` to the Coercion module to ease unwrapping without
+  introducing ambiguous type variables.
+* Added a multiplicative `Monoid` instance for `AnyQuantity` and for `AnyUnit`.
+* Added the `DynQuantity` type to represent possibly valid quantities of statically
+  unknown dimension, suitable for performing arithmetic with such quantities.
+* Relocated git repository to https://github.com/bjornbm/dimensional
+
+1.0.1.0 (2015-11)
+-----------------
+* Added Numeric.Units.Dimensional.Coercion module.
+* Bumped exact-pi dependency to < 0.5.
+* Restored changelog.
+* Addressed issues with documentation.
+
 1.0.0.0 (2015-11)
-------------------
+-----------------
 * Changed to DataKinds and ClosedTypeFamilies encoding of dimensions.
 * Added names and exact values to `Unit`s.
 * Added `AnyUnit` and `AnyQuantity` for quantities whose dimension is statically unknown.
@@ -63,14 +86,14 @@
 
 
 0.10.1 (2011-08)
-------------------
+----------------
 GHC 7.2.1 compatibility fix:
 
 *  Increased CGS context-stack to 30.
 
 
 0.10 (2011-05)
--------------
+--------------
 See the [announcement][2].
 
 [2]: http://flygdynamikern.blogspot.se/2011/05/announce-dimensional-010.html

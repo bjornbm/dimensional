@@ -65,7 +65,7 @@ import Numeric.Units.Dimensional.UnitNames (PrefixName, applyPrefix, nMeter, nGr
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.UnitNames.Internal (ucum, ucumMetric)
 import Numeric.NumType.DK.Integers ( pos3 )
-import Prelude ( ($), Num, Fractional, Floating, Integer, Rational, recip)
+import Prelude ( ($), Num, Fractional, Floating, Integer, Rational)
 import qualified Prelude
 
 {- $multiples
@@ -258,8 +258,8 @@ Since 'minute' and 'second' are already in use for time we use
 
 degree, arcminute, arcsecond :: Floating a => Unit 'NonMetric DPlaneAngle a
 degree    = mkUnitR (ucum "deg" "°" "degree")    (Prelude.pi Prelude./ 180) $ radian
-arcminute = mkUnitR (ucum "'" "'" "arcminute")   (recip 60)                 $ degreeOfArc
-arcsecond = mkUnitR (ucum "''" "''" "arcsecond") (recip 60)                 $ minuteOfArc
+arcminute = mkUnitR (ucum "'" "'" "arcminute")   (Prelude.recip 60)         $ degreeOfArc
+arcsecond = mkUnitR (ucum "''" "''" "arcsecond") (Prelude.recip 60)         $ minuteOfArc
 
 {- $arc-units-alternate
 Alternate (longer) forms of the above. In particular 'degreeOfArc'

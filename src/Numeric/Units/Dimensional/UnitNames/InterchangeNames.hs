@@ -9,6 +9,7 @@ module Numeric.Units.Dimensional.UnitNames.InterchangeNames
 )
 where
 
+import Control.DeepSeq
 import Data.Data
 import GHC.Generics
 
@@ -18,8 +19,12 @@ data InterchangeNameAuthority = UCUM -- ^ The interchange name originated with t
                               | Custom -- ^ The interchange name originated with a user of the dimensional library.
   deriving (Eq, Ord, Show, Data, Typeable, Generic)
 
+instance NFData InterchangeNameAuthority where -- instance is derived from Generic instance
+
 data InterchangeName = InterchangeName { name :: String, authority :: InterchangeNameAuthority }
   deriving (Eq, Ord, Data, Typeable, Generic)
+
+instance NFData InterchangeName where -- instance is derived from Generic instance
 
 instance Show InterchangeName where
   show n = name n ++ " (Issued by " ++ show (authority n) ++ ")"
