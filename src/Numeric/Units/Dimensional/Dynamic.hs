@@ -38,7 +38,7 @@ import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (>>=), (&&), (++), all, const, div, error, even, fmap, otherwise, return)
+import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (>>=), (&&), (++), all, const, div, error, even, fmap, otherwise, return)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
@@ -129,7 +129,7 @@ instance Fractional a => Fractional (DynQuantity a) where
   fromRational = demoteQuantity . (*~ one) . P.fromRational
 
 instance Floating a => Floating (DynQuantity a) where
-  pi = demoteQuantity $ P.pi *~ one
+  pi = demoteQuantity pi
   exp = liftDimensionless P.exp
   log = liftDimensionless P.log
   sqrt = liftDQ div2 (P.sqrt)
