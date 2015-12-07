@@ -1,6 +1,7 @@
 {-# OPTIONS_HADDOCK not-home, show-extensions #-}
 
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 
@@ -21,7 +22,7 @@ module Numeric.Units.Dimensional.Dimensions.TermLevel
   -- * Type
   Dimension'(..),
   -- * Access to Dimension of Dimensional Values
-  HasDimension(..),
+  HasDimension(..), HasDynamicDimension(..),
   -- * Dimension Arithmetic
   (*), (/), (^), recip,
   -- * Synonyms for Base Dimensions
@@ -36,7 +37,7 @@ import Control.DeepSeq
 import Data.Data
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (id, (+), (-), Int, Show, Eq, Ord)
+import Prelude (id, (+), (-), (.), Int, Show, Eq, Ord, Maybe(..))
 import qualified Prelude as P
 
 -- | A physical dimension, encoded as 7 integers, representing a factorization of the dimension into the
@@ -53,10 +54,23 @@ instance Monoid Dimension' where
   mempty = dOne
   mappend = (*)
 
+-- | Dimensional values, or those that are only possibly dimensional, inhabit this class,
+-- which allows access to a term-level representation of their dimension.
+class HasDynamicDimension a where
+  -- | Gets the 'Dimension'' of a dynamic dimensional value, or 'Nothing' if it does not represent
+  -- a dimensional value of any 'Dimension'.
+  --
+  -- A default implementation is available for types that are also in the `HasDimension` typeclass.
+  dynamicDimension :: a -> Maybe Dimension'
+  default dynamicDimension :: (HasDimension a) => a -> Maybe Dimension'
+  dynamicDimension = Just . dimension
+
 -- | Dimensional values inhabit this class, which allows access to a term-level representation of their dimension.
-class HasDimension a where 
+class HasDynamicDimension a => HasDimension a where 
   -- | Obtains a term-level representation of a value's dimension.
   dimension :: a -> Dimension'
+
+instance HasDynamicDimension Dimension' where
 
 instance HasDimension Dimension' where
   dimension = id

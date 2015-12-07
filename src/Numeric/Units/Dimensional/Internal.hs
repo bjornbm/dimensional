@@ -183,6 +183,8 @@ instance (Num a) => Monoid (Quantity d a) where
   mempty = Quantity 0
   mappend = liftQ2 (P.+)
 
+instance (KnownDimension d) => HasDynamicDimension (Dimensional v d a) where
+
 instance (KnownDimension d) => HasDimension (Dimensional v d a) where
   dimension _ = dimension (Proxy :: Proxy d)
 
