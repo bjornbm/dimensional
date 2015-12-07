@@ -16,24 +16,24 @@ Defines types for manipulation of units and quantities without phantom types for
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Numeric.Units.Dimensional.Dynamic
 (
   -- * Dynamic Quantities
   AnyQuantity
-, DynQuantity
+, DynQuantity(..)
 , DynamicQuantity(..)
 , HasDynamicDimension(..)
   -- * Dynamic Units
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
   -- ** Arithmetic on Dynamic Units
-, (*), (/), (^), recip
+, (*), (/), (^), recip, applyPrefix
 ) where
 
 import Control.DeepSeq
-import Data.Coerce
 import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
@@ -43,6 +43,7 @@ import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
+import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.Dimensions.TermLevel (HasDynamicDimension(..))
 import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
@@ -102,8 +103,15 @@ instance Num a => Monoid (AnyQuantity a) where
 -- not be a 'Quantity' of any 'Dimension' whatsoever, but in exchange it gains instances
 -- for the common numeric classes. It's therefore useful for manipulating, and not merely storing,
 -- quantities of unknown dimension.
+--
+-- Note that the 'Eq' instance for 'DynQuantity' equates all representations of an invalid value.
 newtype DynQuantity a = DynQuantity (Maybe (AnyQuantity a))
   deriving (Eq, Data, Generic, Generic1, Typeable, Show)
+
+-- Matches a DynQuantity that does represent a value.
+pattern Good d a = DynQuantity (Just (AnyQuantity d a))
+-- Matches a DynQuantity that does not represent a value of any dimension.
+pattern Bad = DynQuantity Nothing
 
 instance NFData a => NFData (DynQuantity a) -- instance is derived from Generic instance
 
@@ -187,24 +195,15 @@ liftDimensionless = liftDQ (matching D.dOne)
 liftDQ :: (Dimension' -> Maybe Dimension')
        -> (a -> a)
        -> DynQuantity a -> DynQuantity a
-liftDQ fd fv = coerce f
-  where
-    f q = do
-            (AnyQuantity d v) <- q
-            d' <- fd d
-            return $ AnyQuantity d' (fv v)
+liftDQ fd fv (Good d v) | Just d' <- fd d = Good d' (fv v)
+liftDQ _  _  _                            = Bad
 
 -- Lifts a function on values into a function on DynQuantitys.
 liftDQ2 :: (Dimension' -> Dimension' -> Maybe Dimension')
         -> (a -> a -> a)
         -> DynQuantity a -> DynQuantity a -> DynQuantity a
-liftDQ2 fd fv = coerce f
-  where
-    f q1 q2 = do
-                (AnyQuantity d1 v1) <- q1
-                (AnyQuantity d2 v2) <- q2
-                d' <- fd d1 d2
-                return $ AnyQuantity d' (fv v1 v2)
+liftDQ2 fd fv (Good d1 v1) (Good d2 v2) | Just d' <- fd d1 d2 = Good d' (fv v1 v2)
+liftDQ2 _  _  _            _                                  = Bad
 
 -- | A 'Unit' whose 'Dimension' is only known dynamically.
 data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
@@ -217,6 +216,9 @@ instance HasDynamicDimension AnyUnit where
 
 instance HasDimension AnyUnit where
   dimension (AnyUnit d _ _) = d
+
+instance I.HasInterchangeName AnyUnit where
+  interchangeName (AnyUnit _ n _) = I.interchangeName n
 
 -- | 'AnyUnit's form a 'Monoid' under multiplication.
 instance Monoid AnyUnit where
@@ -262,3 +264,12 @@ recip (AnyUnit d n e) = AnyUnit (D.recip d) (N.nOne N./ n) (P.recip e)
 -- | Raises a dynamic unit to an integer power.
 (^) :: (P.Integral a) => AnyUnit -> a -> AnyUnit
 (AnyUnit d n e) ^ x = AnyUnit (d D.^ P.fromIntegral x) (n N.^ P.fromIntegral x) (e P.^ x)
+
+-- | Applies a prefix to a dynamic unit.
+-- Returns 'Nothing' if the 'Unit' was 'NonMetric' and thus could not accept a prefix.
+applyPrefix :: N.Prefix -> AnyUnit -> Maybe AnyUnit
+applyPrefix p (AnyUnit d n e) = do
+                                  n' <- N.strengthen n
+                                  let n'' = N.applyPrefix p n'
+                                  let e' = (P.fromRational $ N.scaleFactor p) P.* e
+                                  return $ AnyUnit d n'' e'
