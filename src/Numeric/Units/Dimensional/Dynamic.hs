@@ -29,7 +29,7 @@ module Numeric.Units.Dimensional.Dynamic
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
   -- ** Arithmetic on Dynamic Units
-, (*), (/), (^), recip
+, (*), (/), (^), recip, applyPrefix
 ) where
 
 import Control.DeepSeq
@@ -37,11 +37,12 @@ import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise)
+import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise, return)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
+import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.Dimensions.TermLevel (HasDynamicDimension(..))
 import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
@@ -51,7 +52,7 @@ import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 class DynamicQuantity (q :: * -> *) where
   -- | Converts a 'Quantity' of statically known 'Dimension' into an dynamic quantity
   -- such as an 'AnyQuantity' or a 'DynQuantity'.
-  demoteQuantity :: (KnownDimension d) => Quantity d a -> q a -- GHC 7.8 doesn't expand associated type synonyms in instance signatures, see Trac 9582
+  demoteQuantity :: (KnownDimension d) => Quantity d a -> q a
   -- | Converts an dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
   -- 'Quantity' of statically known 'Dimension', or 'Nothing' if the dynamic quantity
   -- does not represent a 'Quantity' of that dimension.
@@ -206,6 +207,9 @@ instance HasDynamicDimension AnyUnit where
 instance HasDimension AnyUnit where
   dimension (AnyUnit d _ _) = d
 
+instance I.HasInterchangeName AnyUnit where
+  interchangeName (AnyUnit _ n _) = I.interchangeName n
+
 -- | 'AnyUnit's form a 'Monoid' under multiplication.
 instance Monoid AnyUnit where
   mempty = demoteUnit' one
@@ -227,6 +231,8 @@ demoteUnit' = demoteUnit
 -- | Converts an 'AnyUnit' into a 'Unit' of statically known 'Dimension', or 'Nothing' if the dimension does not match.
 --
 -- The result is represented in 'ExactPi', conversion to other representations is possible using 'changeRepApproximate'.
+--
+-- The result is always tagged as 'NonMetric', conversion to a 'Metric' unit can be attempted using 'strengthen'.
 promoteUnit :: forall d.(KnownDimension d) => AnyUnit -> Maybe (Unit 'NonMetric d ExactPi)
 promoteUnit (AnyUnit dim n e) | dim == dim' = Just $ mkUnitR n e siUnit
                               | otherwise   = Nothing
@@ -248,3 +254,12 @@ recip (AnyUnit d n e) = AnyUnit (D.recip d) (N.nOne N./ n) (P.recip e)
 -- | Raises a dynamic unit to an integer power.
 (^) :: (P.Integral a) => AnyUnit -> a -> AnyUnit
 (AnyUnit d n e) ^ x = AnyUnit (d D.^ P.fromIntegral x) (n N.^ P.fromIntegral x) (e P.^ x)
+
+-- | Applies a prefix to a dynamic unit.
+-- Returns 'Nothing' if the 'Unit' was 'NonMetric' and thus could not accept a prefix.
+applyPrefix :: N.Prefix -> AnyUnit -> Maybe AnyUnit
+applyPrefix p (AnyUnit d n e) = do
+                                  n' <- N.strengthen n
+                                  let n'' = N.applyPrefix p n'
+                                  let e' = (P.fromRational $ N.scaleFactor p) P.* e
+                                  return $ AnyUnit d n'' e'
