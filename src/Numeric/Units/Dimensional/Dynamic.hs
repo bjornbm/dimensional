@@ -39,7 +39,8 @@ import Data.Monoid (Monoid(..))
 import GHC.Generics
 import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise, return)
 import qualified Prelude as P
-import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
+import Numeric.Units.Dimensional hiding ((*~), (/~), (*), (/), (^), recip)
+import qualified Numeric.Units.Dimensional as Dim
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
 import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
@@ -57,6 +58,11 @@ class DynamicQuantity (q :: * -> *) where
   -- 'Quantity' of statically known 'Dimension', or 'Nothing' if the dynamic quantity
   -- does not represent a 'Quantity' of that dimension.
   promoteQuantity :: (KnownDimension d) => q a -> Maybe (Quantity d a)
+  -- | Forms a dynamic quantity by multipliying a number and a dynamic unit.
+  (*~) :: (Floating a) => a -> AnyUnit -> q a
+  -- | Divides a dynamic quantity by a dynamic unit, obtaining the numerical value of the quantity
+  -- expressed in that unit if they are of the same physical dimension, or 'Nothing' otherwise.
+  (/~) :: (Floating a) => q a -> AnyUnit -> Maybe a
 
 -- | A 'Quantity' whose 'Dimension' is only known dynamically.
 data AnyQuantity a = AnyQuantity Dimension' a
@@ -76,6 +82,9 @@ instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic 
 instance DynamicQuantity AnyQuantity where
   demoteQuantity = demoteAnyQuantity
   promoteQuantity = promoteAnyQuantity
+  x *~ (AnyUnit d _ v) = AnyQuantity d (x P.* approximateValue v)
+  (AnyQuantity d1 v1) /~ (AnyUnit d2 _ v2) | d1 == d2  = Just (v1 P./ approximateValue v2)
+                                           | otherwise = Nothing
 
 -- These implementations are not provided directly inside the instance because they require ScopedTypeVariables
 -- Placing the signatures inside the instance requires InstanceSigs, which interacts poorly with associated type families
@@ -93,7 +102,7 @@ promoteAnyQuantity (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
 -- | 'AnyQuantity's form a 'Monoid' under multiplication, but not under addition because
 -- they may not be added together if their dimensions do not match.
 instance Num a => Monoid (AnyQuantity a) where
-  mempty = demoteQuantity (1 *~ one)
+  mempty = demoteQuantity (1 Dim.*~ one)
   mappend (AnyQuantity d1 a1) (AnyQuantity d2 a2) = AnyQuantity (d1 D.* d2) (a1 P.* a2)
 
 -- | Possibly a 'Quantity' whose 'Dimension' is only known statically.
@@ -111,6 +120,9 @@ instance DynamicQuantity DynQuantity where
   demoteQuantity = DynQuantity . Just . demoteQuantity
   promoteQuantity (DynQuantity (Just x)) = promoteQuantity x
   promoteQuantity _                      = Nothing
+  x *~ u = DynQuantity . Just $ x *~ u
+  (DynQuantity (Just v)) /~ u = v /~ u
+  _                      /~ _ = Nothing
 
 instance HasDynamicDimension (DynQuantity a) where
   dynamicDimension (DynQuantity (Just x)) = dynamicDimension x
@@ -123,12 +135,12 @@ instance Num a => Num (DynQuantity a) where
   negate = liftDQ Just (P.negate)
   abs = liftDQ Just (P.abs)
   signum = liftDQ (const $ Just D.dOne) (P.signum)
-  fromInteger = demoteQuantity . (*~ one) . P.fromInteger
+  fromInteger = demoteQuantity . (Dim.*~ one) . P.fromInteger
 
 instance Fractional a => Fractional (DynQuantity a) where
   (/) = liftDQ2 (always (D./)) (P./)
   recip = liftDQ (Just . D.recip) (P.recip)
-  fromRational = demoteQuantity . (*~ one) . P.fromRational
+  fromRational = demoteQuantity . (Dim.*~ one) . P.fromRational
 
 instance Floating a => Floating (DynQuantity a) where
   pi = DynQuantity . Just $ AnyQuantity D.dOne P.pi
@@ -151,7 +163,7 @@ instance Floating a => Floating (DynQuantity a) where
   atanh = liftDimensionless P.atanh
 
 instance Num a => Monoid (DynQuantity a) where
-  mempty = demoteQuantity (1 *~ one)
+  mempty = demoteQuantity (1 Dim.*~ one)
   mappend = (P.*)
 
 -- Divides a dimension by two, or returns Nothing if it can't be done.
