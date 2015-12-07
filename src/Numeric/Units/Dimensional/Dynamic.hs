@@ -29,7 +29,7 @@ module Numeric.Units.Dimensional.Dynamic
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
   -- ** Arithmetic on Dynamic Units
-, (*), (/), (^), recip
+, (*), (/), (^), recip, applyPrefix
 ) where
 
 import Control.DeepSeq
@@ -37,11 +37,12 @@ import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise)
+import Prelude (Eq(..), Num, Fractional, Floating(..), Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, fmap, otherwise, return)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
+import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.Dimensions.TermLevel (HasDynamicDimension(..))
 import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
@@ -206,6 +207,9 @@ instance HasDynamicDimension AnyUnit where
 instance HasDimension AnyUnit where
   dimension (AnyUnit d _ _) = d
 
+instance I.HasInterchangeName AnyUnit where
+  interchangeName (AnyUnit _ n _) = I.interchangeName n
+
 -- | 'AnyUnit's form a 'Monoid' under multiplication.
 instance Monoid AnyUnit where
   mempty = demoteUnit' one
@@ -250,3 +254,12 @@ recip (AnyUnit d n e) = AnyUnit (D.recip d) (N.nOne N./ n) (P.recip e)
 -- | Raises a dynamic unit to an integer power.
 (^) :: (P.Integral a) => AnyUnit -> a -> AnyUnit
 (AnyUnit d n e) ^ x = AnyUnit (d D.^ P.fromIntegral x) (n N.^ P.fromIntegral x) (e P.^ x)
+
+-- | Applies a prefix to a dynamic unit.
+-- Returns 'Nothing' if the 'Unit' was 'NonMetric' and thus could not accept a prefix.
+applyPrefix :: N.Prefix -> AnyUnit -> Maybe AnyUnit
+applyPrefix p (AnyUnit d n e) = do
+                                  n' <- N.strengthen n
+                                  let n'' = N.applyPrefix p n'
+                                  let e' = (P.fromRational $ N.scaleFactor p) P.* e
+                                  return $ AnyUnit d n'' e'
