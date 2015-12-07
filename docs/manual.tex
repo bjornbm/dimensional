@@ -12,7 +12,6 @@
 \newcommand{\packagename}[1]{\textit{#1}}
 \newcommand{\thispackage}{\packagename{dimensional}}
 \newcommand{\experimentalpackage}{\packagename{dimensional-dk-experimental}}
-\newcommand{\submodule}[1]{`Numeric.Units.Dimensional.{#1}`}
 \newcommand{\flag}[1]{\textbf{#1}}
 \newcommand{\prerelease}{\begin{framed}
 The functionality discussed in this section has not yet been released.
@@ -116,10 +115,98 @@ tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional
 
 \chapter{Manipulating Units}
 
+Although most dimensional arithmetic involves manipulating quantities, it is sometimes necessary
+to manipulate units themselves. It's possible to combine units by multiplying or dividing them, or to
+form new units from existing ones by applying metric prefixes.
+
+A unit of dimension `d` is represented by a value of type `Unit m d a`. Because only certain units can
+accept metric prefixes, the type parameter `m` tracks the `Metricality` of the unit. As with quantities,
+the final type parameter is the representation type, for units this is the value of the conversion factor
+from the unit to its dimension's coherent SI unit.
+
+\section{Unit Arithmetic}
+
+The `*` operator from `Numeric.Units.Dimensional` not only forms the product of two quantities, it can also
+form the product of two units. Similarly, the `/` and `^` operators works on units as well as on quantities.
+Narrowing the types to look only at how they operates on units:
+
+\begin{lstlisting}
+(*) :: (Num a) => Unit m1 d1 a -> Unit m2 d2 a -> Unit 'NonMetric (d1 * d2) a
+(/) :: (Fractional a) => Unit m1 d1 a -> Unit m2 d2 a
+                      -> Unit 'NonMetric (d1 * d2) a
+(^) :: (Fractional a, KnownTypeInt i) => Unit m d a -> Proxy i
+                                      -> Unit 'NonMetric (d ^ i) 
+\end{lstlisting}
+
+As one would expect, the dimension of a product or quotient is the product or quotient of the dimensions of the operands.
+Raising a unit to an integer power raises the dimension to the same power, which requires a `Fractional` context as the
+power may be negative.
+
+Each metric prefix defined by the SI is provided as a function with the same name as the prefix in the `Numeric.Units.Dimensional.SIUnits` module.
+The prefixes which define multiples of a unit, such as kilo and giga, have type `Num a => Unit 'Metric d a -> Unit 'NonMetric d a`.
+Those which define submultiples of a unit, such as micro and atto, require a `Fractional` context instead.
+
+A `Unit` in one representation type may be converted to another using the same functions as are provided for quantities.
+Again narrowing the types to look only at how they operates on units:
+
+\begin{lstlisting}
+changeRep :: (Real a, Fractional b)  => Unit m d a       -> Unit m d b
+changeRepApproximate :: (Floating b) => Unit m d ExactPi -> Unit m d b
+\end{lstlisting}
+
+It's also possible to form the exact version of a `Unit` using:
+
+\begin{lstlisting}
+exactify :: Unit m d a -> Unit m d ExactPi
+\end{lstlisting}
+
+Moving back and forth between `Metric` and `NonMetric` units can be accomplished when needed using:
+
+\begin{lstlisting}
+weaken     :: Unit m d a -> Unit 'NonMetric d a
+strengthen :: Unit m d a -> Maybe (Unit 'Metric d a)
+\end{lstlisting}
+
+Taken together, these operators and functions are quite flexible in allowing new units to be formed from
+the combination of existing units. Support for creating new units will be discussed in \ref{constructing-new-units} after
+the concept of unit names has been introduced.
+
 \section{Unit Names}
 
 \subsection{Interchange Names}
 \subsection{Unit Name Normal Forms}
+
+\section{Constructing New Units} \label{constructing-new-units}
+
+New units may be constructed using one of three functions, depending on whether the required conversion factor to the coherent
+SI unit of the same dimension is an integer, a rational number, or involves the mention of $ \pi $.
+
+\begin{lstlisting}
+mkUnitZ :: Num a        => UnitName m -> Integer  -> Unit m1 d a -> Unit m d a
+mkUnitQ :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
+mkUnitR :: Floating a   => UnitName m -> ExactPi  -> Unit m1 d a -> Unit m d a
+\end{lstlisting}
+
+Taking an example (already provided in the `Numeric.Units.Dimensional.NonSI` module), one might define:
+
+\begin{lstlisting}
+usGallon, usQuart :: (Fractional a) => Unit 'NonMetric DVolume a
+usGallon = mkUnitQ (ucum "[gal_us]" "gal" "gallon") 231             (cubic inch)
+usQuart  = mkUnitQ (ucum "[qt_us]"  "qt"  "quart")  (1 Prelude./ 4) usGallon
+\end{lstlisting}
+
+Each requires as arguments the name of the unit to be formed, the scale factor relating it to a unit which has already been defined,
+and that unit. In addition to the constraints verified by the type system, these functions further check that the supplied scale factor is
+strictly positive, and that when combined with the scale factor in the defining unit the scale factor of the resulting defined unit remains
+within the appropriate class of values.
+
+Note in the example that even though the `usGallon` is defined to be an integer multiple of its defining unit, the `cubic inch`, it is nevertheless
+necessary to use `mkUnitQ` instead of `mkUnitR`. This is because the `cubic inch` is not an integer multiple of the SI coherent unit of volume, the cubic meter.
+
+Users should feel free to submit pull requests to \thispackage{} for any units that are useful to their work which are not included.
+
+
+
 
 \chapter{Dimensional Vectors}
 
@@ -129,13 +216,16 @@ dimensions, existing Haskell vector libraries are a poor solution. In order to r
 dimensional linear algebra. A package using \thispackage{} and \packagename{hmatrix} to do so is under early-stage development.
 
 
+
+
+
 \chapter{Dynamic Dimensions}
 
 Statically tracked dimensions are wonderful and vastly simplify development of code that works with quantities of specific
 dimensions. However there are times when we might wish to manipulate quantities or units of unknown dimensions. This can be
 especially useful when parsing user input.
 
-The \submodule{Dynamic} module provides a number of features for manipulating quantities or units with dimensions that are only
+The `Numeric.Units.Dimensional.Dynamic` module provides a number of features for manipulating quantities or units with dimensions that are only
 known dynamically.
 
 \section{Dynamic Quantities}
@@ -263,9 +353,9 @@ sin :: Floating a => Dimensionless a -> Dimensionless a
 \end{lstlisting}
 
 However when using fixed point values, we wish to use representation types which lack `Floating` instances. Accordingly,
-the \submodule{FixedPoint} module provides transcendental functions with types like the one given below.
+the `Numeric.Units.Dimensional.FixedPoint` module provides transcendental functions with types like the one given below.
 Note that as is often the case in the fixed point module, in order to provide maximal flexibility and preserve precision of
-intermediate results, the result type of the operation is not fully determined by the types of its operand and instead is
+intermediate results, the result type of the operation is not fully determined by the type of its operand and instead is
 determined from context.
 
 \begin{lstlisting}
@@ -320,7 +410,7 @@ Haskell code through the Jupyter project.
 Instances of `IHaskellDisplay` for `Quantity` and `Unit`
 allow attractive \LaTeX{}-style display of dimensional values in your notebooks. These
 instances can be found in the \\
-\submodule{IHaskell} module of the \experimentalpackage{}
+`Numeric.Units.Dimensional.IHaskell` module of the \experimentalpackage{}
 package.
 
 \section{\packagename{lens}}
@@ -344,7 +434,7 @@ instance for dimensional values.
 
 Users of the \packagename{time} package can find functions and lenses for converting
 between the `DiffTime` representation and \thispackage{}'s `Time` representation in the
-\submodule{Time} module of the \experimentalpackage{} package.
+`Numeric.Units.Dimensional.Time` module of the \experimentalpackage{} package.
 
 \section{\packagename{vector} for Boxed and Unboxed Arrays}
 
