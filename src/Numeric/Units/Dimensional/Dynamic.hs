@@ -102,19 +102,23 @@ instance Num a => Monoid (AnyQuantity a) where
 -- not be a 'Quantity' of any 'Dimension' whatsoever, but in exchange it gains instances
 -- for the common numeric classes. It's therefore useful for manipulating, and not merely storing,
 -- quantities of unknown dimension.
-newtype DynQuantity a = DynQuantity (Maybe (AnyQuantity a))
-  deriving (Eq, Data, Generic, Generic1, Typeable, Show)
+data DynQuantity a = GoodQuantity (AnyQuantity a) | BadQuantity
+  deriving (Data, Generic, Generic1, Typeable, Show)
+
+instance Eq a => Eq (DynQuantity a) where
+  GoodQuantity x == GoodQuantity y = x == y
+  _ == _ = P.False
 
 instance NFData a => NFData (DynQuantity a) -- instance is derived from Generic instance
 
 instance DynamicQuantity DynQuantity where
-  demoteQuantity = DynQuantity . Just . demoteQuantity
-  promoteQuantity (DynQuantity (Just x)) = promoteQuantity x
-  promoteQuantity _                      = Nothing
+  demoteQuantity = GoodQuantity . demoteQuantity
+  promoteQuantity (GoodQuantity x) = promoteQuantity x
+  promoteQuantity _                = Nothing
 
 instance HasDynamicDimension (DynQuantity a) where
-  dynamicDimension (DynQuantity (Just x)) = dynamicDimension x
-  dynamicDimension _                      = Nothing
+  dynamicDimension (GoodQuantity x) = dynamicDimension x
+  dynamicDimension _                = Nothing
 
 instance Num a => Num (DynQuantity a) where
   (+) = liftDQ2 matching (P.+)
@@ -131,7 +135,7 @@ instance Fractional a => Fractional (DynQuantity a) where
   fromRational = demoteQuantity . (*~ one) . P.fromRational
 
 instance Floating a => Floating (DynQuantity a) where
-  pi = DynQuantity . Just $ AnyQuantity D.dOne P.pi
+  pi = GoodQuantity $ AnyQuantity D.dOne P.pi
   exp = liftDimensionless P.exp
   log = liftDimensionless P.log
   sqrt = liftDQ div2 (P.sqrt)
@@ -185,15 +189,15 @@ liftDimensionless = liftDQ (matching D.dOne)
 liftDQ :: (Dimension' -> Maybe Dimension')
        -> (a -> a)
        -> DynQuantity a -> DynQuantity a
-liftDQ fd fv (DynQuantity (Just (AnyQuantity d v))) | Just d' <- fd d = DynQuantity . Just $ AnyQuantity d' (fv v)
-liftDQ _ _ _ = DynQuantity Nothing
+liftDQ fd fv (GoodQuantity (AnyQuantity d v)) | Just d' <- fd d = GoodQuantity $ AnyQuantity d' (fv v)
+liftDQ _ _ _ = BadQuantity
 
 -- Lifts a function on values into a function on DynQuantitys.
 liftDQ2 :: (Dimension' -> Dimension' -> Maybe Dimension')
         -> (a -> a -> a)
         -> DynQuantity a -> DynQuantity a -> DynQuantity a
-liftDQ2 fd fv (DynQuantity (Just (AnyQuantity d1 v1))) (DynQuantity (Just (AnyQuantity d2 v2))) | Just d' <- fd d1 d2 = DynQuantity . Just $ AnyQuantity d' (fv v1 v2)
-liftDQ2 _ _ _ _ = DynQuantity Nothing
+liftDQ2 fd fv (GoodQuantity (AnyQuantity d1 v1)) (GoodQuantity (AnyQuantity d2 v2)) | Just d' <- fd d1 d2 = GoodQuantity $ AnyQuantity d' (fv v1 v2)
+liftDQ2 _ _ _ _ = BadQuantity
 
 -- | A 'Unit' whose 'Dimension' is only known dynamically.
 data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
