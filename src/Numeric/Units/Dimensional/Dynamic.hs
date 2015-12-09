@@ -23,8 +23,8 @@ module Numeric.Units.Dimensional.Dynamic
   -- * Dynamic Quantities
   AnyQuantity
 , DynQuantity
-, IsQuantity
-, DynamicQuantity(..)
+, Demoteable
+, Promoteable
 , HasDynamicDimension(..)
 , promoteQuantity, demoteQuantity
   -- * Dynamic Units
@@ -35,11 +35,12 @@ module Numeric.Units.Dimensional.Dynamic
 ) where
 
 import Control.DeepSeq
+import Control.Monad
 import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (>>=), (&&), (++), all, const, div, error, even, fmap, id, otherwise, return)
+import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, id, otherwise)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
 import Numeric.Units.Dimensional.Coercion
@@ -49,34 +50,34 @@ import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.Dimensions.TermLevel (HasDynamicDimension(..))
 import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 
--- | The class of types that can be used to model 'Quantity's whose that are certain to exist with
+-- | The class of types that can be used to model 'Quantity's that are certain to have a value with
 -- some dimension.
-class IsQuantity (q :: * -> *) where
-  toAnyQuantity :: q a -> AnyQuantity a
-  fromAnyQuantity :: AnyQuantity a -> Maybe (q a)
+class Demoteable (q :: * -> *) where
+  demoteableOut :: q a -> AnyQuantity a
+  demoteableIn :: AnyQuantity a -> Maybe (q a)
 
-instance (KnownDimension d) => IsQuantity (Quantity d) where
-  toAnyQuantity q@(Quantity x) = AnyQuantity (dimension q) x
-  fromAnyQuantity = quantityFromAnyQuantity
+instance (KnownDimension d) => Demoteable (Quantity d) where
+  demoteableOut q@(Quantity x) = AnyQuantity (dimension q) x
+  demoteableIn = demoteQ
+    where
+      -- This implementation is not provided directly inside the instance because it requires ScopedTypeVariables
+      -- Placing the signatures inside the instance requires InstanceSigs, which interacts poorly with associated type families
+      -- like Dimensional in GHC 7.8.
+      demoteQ :: forall a (d' :: Dimension).KnownDimension d' => AnyQuantity a -> Maybe (Quantity d' a)
+      demoteQ (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
+                                    | otherwise   = Nothing
+        where
+          dim' = dimension (Proxy :: Proxy d)
 
--- This implementation is not provided directly inside the instance because it requires ScopedTypeVariables
--- Placing the signatures inside the instance requires InstanceSigs, which interacts poorly with associated type families
--- like Dimensional in GHC 7.8.
-quantityFromAnyQuantity :: forall a (d :: Dimension).KnownDimension d => AnyQuantity a -> Maybe (Quantity d a)
-quantityFromAnyQuantity (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
-                                              | otherwise   = Nothing
-  where
-    dim' = dimension (Proxy :: Proxy d)
-
-instance IsQuantity AnyQuantity where
-  toAnyQuantity = id
-  fromAnyQuantity = Just
+instance Demoteable AnyQuantity where
+  demoteableOut = id
+  demoteableIn = Just
 
 -- | The class of types that can be used to model 'Quantity's whose 'Dimension's are
 -- only known dynamically.
-class DynamicQuantity (q :: * -> *) where
-  dynFromAnyQuantity :: AnyQuantity a -> q a
-  dynToAnyQuantity :: q a -> Maybe (AnyQuantity a)
+class Promoteable (q :: * -> *) where
+  promoteableIn :: AnyQuantity a -> q a
+  promoteableOut :: q a -> Maybe (AnyQuantity a)
 
 -- | A 'Quantity' whose 'Dimension' is only known dynamically.
 data AnyQuantity a = AnyQuantity Dimension' a
@@ -93,21 +94,20 @@ instance HasDimension (AnyQuantity a) where
 
 instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic instance
 
-instance DynamicQuantity AnyQuantity where
-  dynFromAnyQuantity = id
-  dynToAnyQuantity = Just
+instance Promoteable AnyQuantity where
+  promoteableIn = id
+  promoteableOut = Just
 
--- | Converts a 'Quantity' of statically known 'Dimension' into an dynamic quantity
--- such as an 'AnyQuantity' or a 'DynQuantity'.
-demoteQuantity :: (IsQuantity q, DynamicQuantity d) => q a -> d a
-demoteQuantity = dynFromAnyQuantity . toAnyQuantity
+-- | Forgets information about a 'Quantity' or 'AnyQuantity', yielding an 'AnyQuantity' or a 'DynQuantity'.
+demoteQuantity :: (Demoteable q, Promoteable d) => q a -> d a
+demoteQuantity = promoteableIn . demoteableOut
 
 -- | Converts a dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
 -- quantity which is known to have some dimension (which may be statically encoded),
 -- such as an 'AnyQuantity' or 'Quantity d', or to 'Nothing' if the dynamic quantity
--- cannot be represented in the result type.
-promoteQuantity :: (IsQuantity q, DynamicQuantity d) => d a -> Maybe (q a)
-promoteQuantity x = dynToAnyQuantity x >>= fromAnyQuantity
+-- cannot be represented in the narrower result type.
+promoteQuantity :: (Demoteable q, Promoteable d) => d a -> Maybe (q a)
+promoteQuantity = demoteableIn <=< promoteableOut
 
 -- | 'AnyQuantity's form a 'Monoid' under multiplication, but not under addition because
 -- they may not be added together if their dimensions do not match.
@@ -128,9 +128,9 @@ newtype DynQuantity a = DynQuantity (Maybe (AnyQuantity a))
 
 instance NFData a => NFData (DynQuantity a) -- instance is derived from Generic instance
 
-instance DynamicQuantity DynQuantity where
-  dynFromAnyQuantity = DynQuantity . Just
-  dynToAnyQuantity (DynQuantity q) = q
+instance Promoteable DynQuantity where
+  promoteableIn = DynQuantity . Just
+  promoteableOut (DynQuantity q) = q
 
 instance HasDynamicDimension (DynQuantity a) where
   dynamicDimension (DynQuantity q) = q >>= dynamicDimension
