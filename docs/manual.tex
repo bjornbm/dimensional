@@ -240,20 +240,20 @@ readMaximumSpeed config = fmap changeRep . promoteQuantity . parseQuantity
 \end{lstlisting}
 
 Quantities can be demoted to dynamic quantities, and dynamic quantities can be promoted back into quantities,
-using functions from the `DynamicQuantity` class:
+using the functions below:
 
 \begin{lstlisting}
-class DynamicQuantity (q :: * -> *) where
-  demoteQuantity  :: (KnownDimension d) => Quantity d a -> q a
-  promoteQuantity :: (KnownDimension d) => q a -> Maybe (Quantity d a)
+demoteQuantity  :: (Demoteable q, Promoteable d) => q a -> d a
+promoteQuantity :: (Demoteable q, Promoteable d) => d a -> Maybe (q a)
 \end{lstlisting}
 
-This class is provided because, in addition to `AnyQuantity`, there is also a more general type, `DynQuantity`.
+The `Demoteable` class includes both `Quantity d` and `AnyQuantity`, while the `Promoteable` class includes both
+`AnyQuantity` and `DynQuantity`. These classes are provided because, in addition to `AnyQuantity`, there is also a more general type, `DynQuantity`.
 While an `AnyQuantity a` value definitely represents a `Quantity` of some dimension, a `DynQuantity a` value may not.
 This is a useful property because it admits a complete and well-behaved `Num` instance for `DynQuantity` which allows
 arithmetic to be performed with dynamic quantities which is nonetheless dimensionally verified at runtime. For example,
-the result of `demoteQuantity (3 *~ meter) + demoteQuantity (47 *~ second)` cannot be successfully promoted to a `Quantity`
-of any dimension.
+the result of `demoteQuantity (3 *~ meter) + demoteQuantity (47 *~ second)` cannot be successfully promoted to an
+`AnyQuantity`, or to a `Quantity` of any dimension.
 
 \section{Dynamic Units}
 
@@ -445,9 +445,8 @@ allowing `Quantity`s to be stored in unboxed vectors for improved performance an
 
 \prerelease{}
 
-Users of the \packagename{vector-space} package can find appropriate instances of
-the `AdditiveGroup` and `VectorSpace` classes, along with an
-instance of `InnerSpace` for dimensionless quantities, by enabling the \flag{vector-space}
+Users of the \packagename{vector-space} package can find appropriate instances of the `AdditiveGroup` and \\
+`VectorSpace` classes, along with an instance of `InnerSpace` for dimensionless quantities, by enabling the \flag{vector-space}
 package flag when installing \thispackage{}.
 
 \chapter{Libraries Using \thispackage}
