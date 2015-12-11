@@ -1,5 +1,6 @@
 {-# OPTIONS_HADDOCK not-home #-}
 
+{-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -7,6 +8,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE NumDecimals #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -14,16 +16,19 @@
 module Numeric.Units.Dimensional.UnitNames.Internal
 where
 
+import Control.DeepSeq
 import Control.Monad (join)
-import Data.Data
+import Data.Data hiding (Prefix)
 #if MIN_VERSION_base(4, 8, 0)
 import Data.Foldable (toList)
 #else
 import Data.Foldable (Foldable, toList)
 #endif
-import GHC.Generics
+import Data.Ord
+import GHC.Generics hiding (Prefix)
 import Numeric.Units.Dimensional.Dimensions.TermLevel (Dimension', asList, HasDimension(..))
-import Numeric.Units.Dimensional.UnitNames.InterchangeNames
+import Numeric.Units.Dimensional.UnitNames.InterchangeNames hiding (isAtomic)
+import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
 import Numeric.Units.Dimensional.Variants (Metricality(..))
 import Prelude hiding ((*), (/), (^), product)
 import qualified Prelude as P
@@ -46,12 +51,26 @@ data UnitName (m :: Metricality) where
   Power :: UnitName 'NonMetric -> Int -> UnitName 'NonMetric
   -- A compound name formed by grouping another name, which is generally compound.
   Grouped :: UnitName 'NonMetric -> UnitName 'NonMetric
-  -- A weakened name formed by forgetting whether it could accept a metric prefix.
-  -- Differs from 'Grouped' because it is displayed without parentheses.
+  -- A weakened name formed by forgetting that it could accept a metric prefix.
+  --
+  -- Also available is the smart constructor `weaken` which accepts any `UnitName` as input.
   Weaken :: UnitName 'Metric -> UnitName 'NonMetric
   deriving (Typeable)
 
 deriving instance Eq (UnitName m)
+
+-- As it is for a GADT, this instance cannot be derived or use the generic default implementation
+instance NFData (UnitName m) where
+  rnf n = case n of
+    One -> ()
+    MetricAtomic a -> rnf a
+    Atomic a -> rnf a
+    Prefixed p n' -> rnf p `seq` rnf n'
+    Product n1 n2 -> rnf n1 `seq` rnf n2
+    Quotient n1 n2 -> rnf n1 `seq` rnf n2
+    Power n' e -> rnf n' `seq` rnf e
+    Grouped n' -> rnf n'
+    Weaken n' -> rnf n'
 
 instance Show (UnitName m) where
   show One = "1"
@@ -105,9 +124,29 @@ data NameAtomType = UnitAtom Metricality
                   | PrefixAtom
   deriving (Eq, Ord, Data, Typeable, Generic)
 
+instance NFData NameAtomType where -- instance is derived from Generic instance
+
 -- | The name of a metric prefix.
 type PrefixName = NameAtom 'PrefixAtom
 
+data Prefix = Prefix
+              {
+                -- | The name of a metric prefix.
+                prefixName :: PrefixName,
+                -- | The scale factor denoted by a metric prefix.
+                scaleFactor :: Rational
+              }
+  deriving (Eq, Data, Typeable, Generic)
+
+instance Ord Prefix where
+  compare = comparing scaleFactor
+
+instance NFData Prefix where -- instance is derived from Generic instance
+
+instance HasInterchangeName Prefix where
+  interchangeName = interchangeName . prefixName
+
+-- | The name of the unit of dimensionless values.
 nOne :: UnitName 'NonMetric
 nOne = One
 
@@ -143,32 +182,36 @@ baseUnitName d = let powers = asList $ dimension d
 baseUnitNames :: [UnitName 'NonMetric]
 baseUnitNames = [weaken nMeter, nKilogram, weaken nSecond, weaken nAmpere, weaken nKelvin, weaken nMole, weaken nCandela]
 
-deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta :: PrefixName
-deka  = prefix "da" "da" "deka"
-hecto = prefix "h" "h" "hecto"
-kilo  = prefix "k" "k" "kilo"
-mega  = prefix "M" "M" "mega"
-giga  = prefix "G" "G" "giga"
-tera  = prefix "T" "T" "tera"
-peta  = prefix "P" "P" "peta"
-exa   = prefix "E" "E" "exa"
-zetta = prefix "Z" "Z" "zetta"
-yotta = prefix "Y" "Y" "yotta"
-deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto :: PrefixName
-deci  = prefix "d" "d" "deci"
-centi = prefix "c" "c" "centi"
-milli = prefix "m" "m" "milli"
-micro = prefix "u" "μ" "micro"
-nano  = prefix "n" "n" "nano"
-pico  = prefix "p" "p" "pico"
-femto = prefix "f" "f" "femto"
-atto  = prefix "a" "a" "atto"
-zepto = prefix "z" "z" "zepto"
-yocto = prefix "y" "y" "yocto"
+deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta :: Prefix
+deka  = prefix "da" "da" "deka" 1e1
+hecto = prefix "h" "h" "hecto"  1e2
+kilo  = prefix "k" "k" "kilo"   1e3
+mega  = prefix "M" "M" "mega"   1e6
+giga  = prefix "G" "G" "giga"   1e9
+tera  = prefix "T" "T" "tera"   1e12
+peta  = prefix "P" "P" "peta"   1e15
+exa   = prefix "E" "E" "exa"    1e18
+zetta = prefix "Z" "Z" "zetta"  1e21
+yotta = prefix "Y" "Y" "yotta"  1e24
+deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto :: Prefix
+deci  = prefix "d" "d" "deci"   1e-1
+centi = prefix "c" "c" "centi"  1e-2
+milli = prefix "m" "m" "milli"  1e-3
+micro = prefix "u" "μ" "micro"  1e-6
+nano  = prefix "n" "n" "nano"   1e-9
+pico  = prefix "p" "p" "pico"   1e-12
+femto = prefix "f" "f" "femto"  1e-15
+atto  = prefix "a" "a" "atto"   1e-18
+zepto = prefix "z" "z" "zepto"  1e-21
+yocto = prefix "y" "y" "yocto"  1e-24
+
+-- | A list of all 'Prefix'es defined by the SI.
+siPrefixes :: [Prefix]
+siPrefixes = [yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta]
 
 -- | Forms a 'UnitName' from a 'Metric' name by applying a metric prefix.
-applyPrefix :: PrefixName -> UnitName 'Metric -> UnitName 'NonMetric
-applyPrefix = Prefixed
+applyPrefix :: Prefix -> UnitName 'Metric -> UnitName 'NonMetric
+applyPrefix = Prefixed . prefixName
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -213,7 +256,7 @@ strengthen n@(MetricAtomic _) = Just n
 strengthen (Weaken n) = strengthen n
 strengthen _ = Nothing
 
--- | Convert a 'UnitName' of one 'Metricality' into a name of the other metricality by
+-- | Convert a 'UnitName' of one 'Metricality' into a name of another metricality by
 -- strengthening or weakening if neccessary. Because it may not be possible to strengthen,
 -- the result is returned in a 'Maybe' wrapper.
 relax :: forall m1 m2.(Typeable m1, Typeable m2) => UnitName m1 -> Maybe (UnitName m2)
@@ -242,46 +285,53 @@ data NameAtom (m :: NameAtomType)
   }
   deriving (Eq, Ord, Data, Typeable, Generic)
 
+instance NFData (NameAtom m) where -- instance is derived from Generic instance
+
 instance HasInterchangeName (NameAtom m) where
   interchangeName = _interchangeName
 
 instance HasInterchangeName (UnitName m) where
-  interchangeName One = InterchangeName { name = "1", authority = UCUM }
+  interchangeName One = InterchangeName { name = "1", authority = UCUM, I.isAtomic = True }
   interchangeName (MetricAtomic a) = interchangeName a
   interchangeName (Atomic a) = interchangeName a
   interchangeName (Prefixed p n) = let n' = (name . interchangeName $ p) ++ (name . interchangeName $ n)
                                        a' = max (authority . interchangeName $ p) (authority . interchangeName $ n)
-                                    in InterchangeName { name = n', authority = a' }
+                                    in InterchangeName { name = n', authority = a', I.isAtomic = False }
   interchangeName (Product n1 n2) = let n' = (name . interchangeName $ n1) ++ "." ++ (name . interchangeName $ n2)
                                         a' = max (authority . interchangeName $ n1) (authority . interchangeName $ n2)
-                                     in InterchangeName { name = n', authority = a' }
+                                     in InterchangeName { name = n', authority = a', I.isAtomic = False }
   interchangeName (Quotient n1 n2) = let n' = (name . interchangeName $ n1) ++ "/" ++ (name . interchangeName $ n2)
                                          a' = max (authority . interchangeName $ n1) (authority . interchangeName $ n2)
-                                      in InterchangeName { name = n', authority = a' }
+                                      in InterchangeName { name = n', authority = a', I.isAtomic = False }
+  -- TODO #109: note in this case that the UCUM is changing their grammar to not accept exponents after
+  -- as a result it will become necessary to distribute the exponentiation over the items in the base name
+  -- prior to generating the interchange name
   interchangeName (Power n x) = let n' = (name . interchangeName $ n) ++ (show x)
-                                 in InterchangeName { name = n', authority = authority . interchangeName $ n }
+                                 in InterchangeName { name = n', authority = authority . interchangeName $ n, I.isAtomic = False }
   interchangeName (Grouped n) = let n' = "(" ++ (name . interchangeName $ n) ++ ")"
-                                 in InterchangeName { name = n', authority = authority . interchangeName $ n }
+                                 in InterchangeName { name = n', authority = authority . interchangeName $ n, I.isAtomic = False }
   interchangeName (Weaken n) = interchangeName n
 
-prefix :: String -> String -> String -> PrefixName
-prefix i a f = NameAtom (InterchangeName i UCUM) a f
+prefix :: String -> String -> String -> Rational -> Prefix
+prefix i a f q = Prefix n q
+  where
+    n = NameAtom (InterchangeName i UCUM True) a f
 
 ucumMetric :: String -> String -> String -> UnitName 'Metric
-ucumMetric i a f = MetricAtomic $ NameAtom (InterchangeName i UCUM) a f
+ucumMetric i a f = MetricAtomic $ NameAtom (InterchangeName i UCUM True) a f
 
 ucum :: String -> String -> String -> UnitName 'NonMetric
-ucum i a f = Atomic $ NameAtom (InterchangeName i UCUM) a f
+ucum i a f = Atomic $ NameAtom (InterchangeName i UCUM True) a f
 
 dimensionalAtom :: String -> String -> String -> UnitName 'NonMetric
-dimensionalAtom i a f = Atomic $ NameAtom (InterchangeName i DimensionalLibrary) a f
+dimensionalAtom i a f = Atomic $ NameAtom (InterchangeName i DimensionalLibrary True) a f
 
 -- | Constructs an atomic name for a custom unit.
 atom :: String -- ^ Interchange name
      -> String -- ^ Abbreviated name in international English
      -> String -- ^ Full name in international English
      -> UnitName 'NonMetric
-atom i a f = Atomic $ NameAtom (InterchangeName i Custom) a f
+atom i a f = Atomic $ NameAtom (InterchangeName i Custom True) a f
 
 -- | The type of a unit name transformation that may be associated with an operation that takes a single unit as input.
 type UnitNameTransformer = (forall m.UnitName m -> UnitName 'NonMetric)

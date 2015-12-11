@@ -62,19 +62,10 @@ type Quantity = SQuantity E.One
 -- The name is an abbreviation for scaled quantity.
 type SQuantity s = Dimensional ('DQuantity s)
 
--- | A physical quantity or unit.
+-- | A KnownVariant is one whose term-level 'Dimensional' values we can represent with an associated data family instance
+-- and manipulate with certain functions, not all of which are exported from the package.
 --
--- We call this data type 'Dimensional' to capture the notion that the
--- units and quantities it represents have physical dimensions.
--- 
--- The type variable 'a' is the only non-phantom type variable and
--- represents the numerical value of a quantity or the scale (w.r.t.
--- SI units) of a unit. For SI units the scale will always be 1. For
--- non-SI units the scale is the ratio of the unit to the SI unit with
--- the same physical dimension.
---
--- Since 'a' is the only non-phantom type we were able to define
--- 'Dimensional' as a newtype, avoiding boxing at runtime.
+-- Each validly constructed type of kind 'Variant' has a 'KnownVariant' instance.
 class KnownVariant (v :: Variant) where
   -- | A dimensional value, either a 'Quantity' or a 'Unit', parameterized by its 'Dimension' and representation.
   data Dimensional v :: Dimension -> * -> *
@@ -147,6 +138,8 @@ We provide this freedom by making 'Dimensionless' an instance of
 
 instance (E.KnownExactPi s) => Functor (SQuantity s DOne) where
   fmap = dmap
+
+instance (KnownDimension d) => HasDynamicDimension (Dimensional v d a) where
 
 instance (KnownDimension d) => HasDimension (Dimensional v d a) where
   dimension _ = dimension (Proxy :: Proxy d)

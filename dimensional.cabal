@@ -6,7 +6,7 @@ copyright:           Bjorn Buckwalter 2006-2015
 author:              Bjorn Buckwalter
 maintainer:          bjorn@buckwalter.se
 stability:           experimental
-homepage:            https://github.com/bjornbm/dimensional-dk/
+homepage:            https://github.com/bjornbm/dimensional/
 category:            Math, Physics
 synopsis:            Statically checked physical dimensions,
                      using Type Families and Data Kinds.
@@ -38,7 +38,7 @@ extra-source-files:  README.md,
 
 source-repository head
   type:     git
-  location: https://github.com/bjornbm/dimensional-dk/
+  location: https://github.com/bjornbm/dimensional/
 
 library
   build-depends:       base >= 4.7 && < 5,

@@ -201,7 +201,7 @@ module Numeric.Units.Dimensional
     -- * Dimensional Arithmetic
     (*~), (/~),
     (^), (^/), (**), (*), (/), (+), (-),
-    negate, abs, nroot, sqrt, cbrt,
+    negate, abs, recip, nroot, sqrt, cbrt,
     -- ** Transcendental Functions
     exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
     -- ** Operations on Collections
@@ -224,7 +224,10 @@ module Numeric.Units.Dimensional
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
     -- $functor
-    KnownVariant(dmap), changeRep, changeRepRound, changeRepApproximate
+    KnownVariant(dmap), changeRep, changeRepRound, changeRepApproximate,
+    -- * Lenses
+    -- $lenses
+    asLens
   )
   where
 
@@ -401,6 +404,10 @@ Multiplication, division and powers apply to both units and quantities.
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
 (/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
 (/) = liftD2 (Prelude./) (Prelude./) (Name./)
+
+-- | Forms the reciprocal of a 'Quantity', which has the reciprocal dimension.
+recip :: (Fractional a) => Quantity d a -> Quantity (Recip d) a
+recip = liftQ Prelude.recip
 
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
@@ -670,6 +677,18 @@ changeRepRound = liftD (Prelude.* s) (round . (Prelude.* s')) Name.weaken
 -- | Convenient conversion from exactly represented values while retaining dimensional information.
 changeRepApproximate :: (KnownVariant v, Floating b) => Dimensional v d ExactPi -> Dimensional v d b
 changeRepApproximate = dmap approximateValue
+
+{- $lenses
+These functions are compatible with the lens library.
+
+-}
+
+-- | Converts a 'Unit' into a lens from 'Quantity's to values.
+asLens :: (Fractional a) => Unit m d a 
+                         -> (forall f.Functor f => (a -> f a)
+                                                -> Quantity d a
+                                                -> f (Quantity d a))
+asLens u f q = fmap (\v' -> v' *~ u) (f (q /~ u))
 
 {- $dimension-terms
 To facilitate parsing and pretty-printing functions that may wish to operate on term-level representations of dimension,
