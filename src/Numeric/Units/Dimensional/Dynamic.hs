@@ -27,6 +27,7 @@ module Numeric.Units.Dimensional.Dynamic
 , Promoteable
 , HasDynamicDimension(..)
 , promoteQuantity, demoteQuantity
+, (*~), (/~)
   -- * Dynamic Units
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
@@ -42,7 +43,8 @@ import Data.Monoid (Monoid(..))
 import GHC.Generics
 import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, id, otherwise)
 import qualified Prelude as P
-import Numeric.Units.Dimensional hiding ((*), (/), (^), recip)
+import Numeric.Units.Dimensional hiding ((*~), (/~), (*), (/), (^), recip)
+import qualified Numeric.Units.Dimensional as Dim
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
 import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
@@ -114,7 +116,7 @@ instance Demoteable AnyQuantity where
 -- | 'AnyQuantity's form a 'Monoid' under multiplication, but not under addition because
 -- they may not be added together if their dimensions do not match.
 instance Num a => Monoid (AnyQuantity a) where
-  mempty = demoteQuantity (1 *~ one)
+  mempty = demoteQuantity (1 Dim.*~ one)
   mappend (AnyQuantity d1 a1) (AnyQuantity d2 a2) = AnyQuantity (d1 D.* d2) (a1 P.* a2)
 
 
@@ -145,12 +147,12 @@ instance Num a => Num (DynQuantity a) where
   negate = liftDQ (valid id) (P.negate)
   abs = liftDQ (valid id) (P.abs)
   signum = liftDQ (valid $ const D.dOne) (P.signum)
-  fromInteger = demoteQuantity . (*~ one) . P.fromInteger
+  fromInteger = demoteQuantity . (Dim.*~ one) . P.fromInteger
 
 instance Fractional a => Fractional (DynQuantity a) where
   (/) = liftDQ2 (valid2 (D./)) (P./)
   recip = liftDQ (valid D.recip) (P.recip)
-  fromRational = demoteQuantity . (*~ one) . P.fromRational
+  fromRational = demoteQuantity . (Dim.*~ one) . P.fromRational
 
 instance Floating a => Floating (DynQuantity a) where
   pi = demoteQuantity pi
@@ -182,7 +184,7 @@ instance Floating a => Floating (DynQuantity a) where
   atanh = liftDimensionless P.atanh
 
 instance Num a => Monoid (DynQuantity a) where
-  mempty = demoteQuantity (1 *~ one)
+  mempty = demoteQuantity (1 Dim.*~ one)
   mappend = (P.*)
 
 -- Lifts a function which is only valid on dimensionless quantities into a function on DynQuantitys.
@@ -302,3 +304,16 @@ applyPrefix p (AnyUnit d n e) = do
                                   let n'' = N.applyPrefix p n'
                                   let e' = (P.fromRational $ N.scaleFactor p) P.* e
                                   return $ AnyUnit d n'' e'
+
+-- | Forms a dynamic quantity by multipliying a number and a dynamic unit.
+(*~) :: (Floating a, Promoteable q) => a -> AnyUnit -> q a
+x *~ (AnyUnit d _ e) = promoteableIn $ AnyQuantity d (x P.* approximateValue e)
+
+-- | Divides a dynamic quantity by a dynamic unit, obtaining the numerical value of the quantity
+-- expressed in that unit if they are of the same physical dimension, or 'Nothing' otherwise.
+(/~) :: (Floating a, Promoteable q) => q a -> AnyUnit -> Maybe a
+x /~ (AnyUnit d _ e) = do
+                         (AnyQuantity d' x') <- promoteableOut x
+                         if (d == d')
+                           then Just $ x' P./ approximateValue e
+                           else Nothing
