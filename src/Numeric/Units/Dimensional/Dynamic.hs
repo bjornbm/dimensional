@@ -118,8 +118,7 @@ instance Num a => Monoid (AnyQuantity a) where
   mappend (AnyQuantity d1 a1) (AnyQuantity d2 a2) = AnyQuantity (d1 D.* d2) (a1 P.* a2)
 
 
-
--- | Possibly a 'Quantity' whose 'Dimension' is only known statically.
+-- | Possibly a 'Quantity' whose 'Dimension' is only known dynamically.
 --
 -- By modeling the absence of a value, this type differs from 'AnyQuantity' in that it may
 -- not be a 'Quantity' of any 'Dimension' whatsoever, but in exchange it gains instances
