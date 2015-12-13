@@ -56,6 +56,23 @@ class Demoteable (q :: * -> *) where
   demoteableOut :: q a -> AnyQuantity a
   demoteableIn :: AnyQuantity a -> Maybe (q a)
 
+-- | The class of types that can be used to model 'Quantity's whose 'Dimension's are
+-- only known dynamically.
+class Promoteable (q :: * -> *) where
+  promoteableIn :: AnyQuantity a -> q a
+  promoteableOut :: q a -> Maybe (AnyQuantity a)
+
+-- | Forgets information about a 'Quantity' or 'AnyQuantity', yielding an 'AnyQuantity' or a 'DynQuantity'.
+demoteQuantity :: (Demoteable q, Promoteable d) => q a -> d a
+demoteQuantity = promoteableIn . demoteableOut
+
+-- | Converts a dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
+-- quantity which is known to have some dimension (which may be statically encoded),
+-- such as an 'AnyQuantity' or 'Quantity d', or to 'Nothing' if the dynamic quantity
+-- cannot be represented in the narrower result type.
+promoteQuantity :: (Demoteable q, Promoteable d) => d a -> Maybe (q a)
+promoteQuantity = demoteableIn <=< promoteableOut
+
 instance (KnownDimension d) => Demoteable (Quantity d) where
   demoteableOut q@(Quantity x) = AnyQuantity (dimension q) x
   demoteableIn = demoteQ
@@ -69,15 +86,7 @@ instance (KnownDimension d) => Demoteable (Quantity d) where
         where
           dim' = dimension (Proxy :: Proxy d)
 
-instance Demoteable AnyQuantity where
-  demoteableOut = id
-  demoteableIn = Just
 
--- | The class of types that can be used to model 'Quantity's whose 'Dimension's are
--- only known dynamically.
-class Promoteable (q :: * -> *) where
-  promoteableIn :: AnyQuantity a -> q a
-  promoteableOut :: q a -> Maybe (AnyQuantity a)
 
 -- | A 'Quantity' whose 'Dimension' is only known dynamically.
 data AnyQuantity a = AnyQuantity Dimension' a
@@ -98,22 +107,17 @@ instance Promoteable AnyQuantity where
   promoteableIn = id
   promoteableOut = Just
 
--- | Forgets information about a 'Quantity' or 'AnyQuantity', yielding an 'AnyQuantity' or a 'DynQuantity'.
-demoteQuantity :: (Demoteable q, Promoteable d) => q a -> d a
-demoteQuantity = promoteableIn . demoteableOut
-
--- | Converts a dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
--- quantity which is known to have some dimension (which may be statically encoded),
--- such as an 'AnyQuantity' or 'Quantity d', or to 'Nothing' if the dynamic quantity
--- cannot be represented in the narrower result type.
-promoteQuantity :: (Demoteable q, Promoteable d) => d a -> Maybe (q a)
-promoteQuantity = demoteableIn <=< promoteableOut
+instance Demoteable AnyQuantity where
+  demoteableOut = id
+  demoteableIn = Just
 
 -- | 'AnyQuantity's form a 'Monoid' under multiplication, but not under addition because
 -- they may not be added together if their dimensions do not match.
 instance Num a => Monoid (AnyQuantity a) where
   mempty = demoteQuantity (1 *~ one)
   mappend (AnyQuantity d1 a1) (AnyQuantity d2 a2) = AnyQuantity (d1 D.* d2) (a1 P.* a2)
+
+
 
 -- | Possibly a 'Quantity' whose 'Dimension' is only known statically.
 --
@@ -154,6 +158,15 @@ instance Floating a => Floating (DynQuantity a) where
   exp = liftDimensionless P.exp
   log = liftDimensionless P.log
   sqrt = liftDQ div2 (P.sqrt)
+    where
+      -- Divides a dimension by two, or returns Nothing if it can't be done.
+      div2 :: Dimension' -> Maybe Dimension'
+      div2 d | all even ds = Just . fromList . fmap (`div` 2) $ ds
+             | otherwise   = Nothing
+        where
+          ds = D.asList d
+          fromList [l, m, t, i, th, n, j] = Dim' l m t i th n j
+          fromList _ = error "Should be unreachable, there are 7 base dimensions."
   (**) = liftDQ2 (matching3 D.dOne) (P.**)
   logBase = liftDQ2 (matching3 D.dOne) (P.logBase)
   sin = liftDimensionless P.sin
@@ -172,33 +185,6 @@ instance Floating a => Floating (DynQuantity a) where
 instance Num a => Monoid (DynQuantity a) where
   mempty = demoteQuantity (1 *~ one)
   mappend = (P.*)
-
--- Divides a dimension by two, or returns Nothing if it can't be done.
-div2 :: Dimension' -> Maybe Dimension'
-div2 d | all even ds = Just . fromList . fmap (`div` 2) $ ds
-       | otherwise   = Nothing
-  where
-    ds = D.asList d
-    fromList [l, m, t, i, th, n, j] = Dim' l m t i th n j
-    fromList _ = error "Should be unreachable, there are 7 base dimensions."
-
--- Transforms an item in a way which is always valid
-valid :: (a -> a) -> a -> Maybe a
-valid = (Just .)
-
--- Transforms two items in a way which is always valid
-valid2 :: (a -> a -> a) -> a -> a -> Maybe a
-valid2 f x y = Just $ f x y
-
--- If three items match, then Just that item, otherwise Nothing.
-matching3 :: Eq a => a -> a -> a -> Maybe a
-matching3 x y z | x == y && x == z = Just x
-                | otherwise        = Nothing
-
--- If two items match, then Just that item, otherwise Nothing.
-matching :: Eq a => a -> a -> Maybe a
-matching x y | x == y    = Just x
-             | otherwise = Nothing
 
 -- Lifts a function which is only valid on dimensionless quantities into a function on DynQuantitys.
 liftDimensionless :: (a -> a) -> DynQuantity a -> DynQuantity a
@@ -228,6 +214,26 @@ liftDQ2 fd fv = coerce f
                 d' <- fd d1 d2
                 let v' = fv v1 v2
                 return $ AnyQuantity d' v'
+
+-- Transforms an item in a way which is always valid
+valid :: (a -> a) -> a -> Maybe a
+valid = (Just .)
+
+-- Transforms two items in a way which is always valid
+valid2 :: (a -> a -> a) -> a -> a -> Maybe a
+valid2 f x y = Just $ f x y
+
+-- If two items match, then Just that item, otherwise Nothing.
+matching :: Eq a => a -> a -> Maybe a
+matching x y | x == y    = Just x
+             | otherwise = Nothing
+
+-- If three items match, then Just that item, otherwise Nothing.
+matching3 :: Eq a => a -> a -> a -> Maybe a
+matching3 x y z | x == y && x == z = Just x
+                | otherwise        = Nothing
+
+
 
 -- | A 'Unit' whose 'Dimension' is only known dynamically.
 data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
