@@ -410,13 +410,7 @@ enabling the \flag{aeson} flag when installing \thispackage{}.
 
 \prerelease{}
 
-Users of the \packagename{attoparsec} package can find parsers recognizing
-unit names (both in natural language and in the UCUM interchange format) and
-quantities in the \packagename{dimensional-attoparsec} package.
-
-These parsers are also used by the \packagename{dimensional-th} package to provide
-Template Haskell quasi-quotations for quantities and for fixed-point types, as
-discussed in \ref{fixed-point-th}.
+Support for \packagename{attoparsec} is provided through the \packagename{parsers} package, see \ref{parsers-support}.
 
 \section{\packagename{binary} for Binary Serialization}
 
@@ -467,6 +461,24 @@ package flag when installing \thispackage{}.
 
 The \flag{linear} flag implies the \flag{functor} flag and will result in generation of a `Functor`
 instance for dimensional values.
+
+\section{\packagename{parsec} for Unit and Quantity Parsing}
+
+\prerelease{}
+
+Support for \packagename{parsec} is provided through the \packagename{parsers} package, see \ref{parsers-support}.
+
+\section{\packagename{parsers} for Unit and Quantity Parsing} \label{parsers-support}
+
+\prerelease{}
+
+Users of the \packagename{parsers} package can find parsers recognizing
+unit names (both in natural language and in the UCUM interchange format) and
+quantities in the \packagename{dimensional-parsers} package.
+
+These parsers are also used by the \packagename{dimensional-th} package to provide
+Template Haskell quasi-quotations for quantities and for fixed-point types, as
+discussed in \ref{fixed-point-th}.
 
 \section{\packagename{time} for Times and Dates}
 
