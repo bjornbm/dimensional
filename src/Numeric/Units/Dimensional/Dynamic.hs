@@ -259,7 +259,7 @@ instance Monoid AnyUnit where
 
 -- | The dynamic SI coherent unit of a given dimension.
 siUnit :: Dimension' -> AnyUnit
-siUnit d = AnyUnit d (N.baseUnitName d) 1
+siUnit d = AnyUnit d (baseUnitName d) 1
 
 -- | Converts a 'Unit' of statically known 'Dimension' into an 'AnyUnit'.
 demoteUnit :: forall m d a.(KnownDimension d) => Unit m d a -> AnyUnit
