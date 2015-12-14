@@ -31,6 +31,7 @@ module Numeric.Units.Dimensional.Dynamic
   -- * Dynamic Units
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
+, siUnit
   -- ** Arithmetic on Dynamic Units
 , (*), (/), (^), recip, applyPrefix
 ) where
@@ -43,7 +44,7 @@ import Data.Monoid (Monoid(..))
 import GHC.Generics
 import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, id, otherwise)
 import qualified Prelude as P
-import Numeric.Units.Dimensional hiding ((*~), (/~), (*), (/), (^), recip)
+import Numeric.Units.Dimensional hiding ((*~), (/~), (*), (/), (^), recip, siUnit)
 import qualified Numeric.Units.Dimensional as Dim
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
@@ -256,6 +257,10 @@ instance Monoid AnyUnit where
   mempty = demoteUnit' one
   mappend = (Numeric.Units.Dimensional.Dynamic.*)
 
+-- | The dynamic SI coherent unit of a given dimension.
+siUnit :: Dimension' -> AnyUnit
+siUnit d = AnyUnit d (N.baseUnitName d) 1
+
 -- | Converts a 'Unit' of statically known 'Dimension' into an 'AnyUnit'.
 demoteUnit :: forall m d a.(KnownDimension d) => Unit m d a -> AnyUnit
 demoteUnit u = AnyUnit dim (name $ weaken u) (exactValue u)
@@ -275,7 +280,7 @@ demoteUnit' = demoteUnit
 --
 -- The result is always tagged as 'NonMetric', conversion to a 'Metric' unit can be attempted using 'strengthen'.
 promoteUnit :: forall d.(KnownDimension d) => AnyUnit -> Maybe (Unit 'NonMetric d ExactPi)
-promoteUnit (AnyUnit dim n e) | dim == dim' = Just $ mkUnitR n e siUnit
+promoteUnit (AnyUnit dim n e) | dim == dim' = Just $ mkUnitR n e Dim.siUnit
                               | otherwise   = Nothing
   where
     dim' = dimension (Proxy :: Proxy d)
