@@ -6,6 +6,8 @@ vNext
   `HasDynamicDimension` typeclass.
 * Breaking: Added operators for `AnyUnit` to the Numeric.Units.Dimensional.Dynamic
   module which may cause name collisions.
+* Breaking: Added dynamic versions of `(*~)`, `(/~)`, and `siUnit` to the Numeric.Units.Dimensional.Dynamic
+  module which may cause name collisions.
 * Breaking: Removed exports of `nMeter`, `nSecond`, `kilo`, etc from Numeric.Units.Dimensional.UnitNames.
   Access these instead by inspecting the relevant units or prefixes.
 * Added `Data`, `Generic`, `Typeable` and `NFData` instances for many ancillary types.
