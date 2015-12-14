@@ -68,7 +68,7 @@ import Data.Ratio
 import qualified GHC.TypeLits as N
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.Internal
-import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
+import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), recip, negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
 import qualified Prelude as P
 
 -- | A dimensionless number with `n` fractional bits, using a representation of type `a`.
@@ -202,7 +202,7 @@ liftDimensionlessPeriodicVia p f proxy | Just p'' <- p', p'' /= 0 = (liftDimensi
                                        | otherwise = liftDimensionlessVia f proxy
   where
     p' :: Maybe a
-    p' = fmap fromInteger . toExactInteger . recip . (P./ p) . E.exactPiVal $ (Proxy :: Proxy s1)
+    p' = fmap fromInteger . toExactInteger . P.recip . (P./ p) . E.exactPiVal $ (Proxy :: Proxy s1)
 
 -- | The constant for zero is polymorphic, allowing
 -- it to express zero 'Length' or 'Capacitance' or 'Velocity' etc, in addition

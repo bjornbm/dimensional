@@ -54,8 +54,6 @@ data Variant = DQuantity E.ExactPi' -- ^ The value is a quantity, stored as an `
              | DUnit Metricality  -- ^ The value is a unit, possibly a 'Metric' unit.
   deriving (Typeable, Generic)
 
-instance NFData Variant where -- instance is derived from Generic instance
-
 {-
 We will reuse the operators and function names from the Prelude.
 To prevent unpleasant surprises we give operators the same fixity
