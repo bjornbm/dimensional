@@ -131,7 +131,9 @@ type PrefixName = NameAtom 'PrefixAtom
 
 data Prefix = Prefix
               {
+                -- | The name of a metric prefix.
                 prefixName :: PrefixName,
+                -- | The scale factor denoted by a metric prefix.
                 scaleFactor :: Rational
               }
   deriving (Eq, Data, Typeable, Generic)
@@ -144,6 +146,7 @@ instance NFData Prefix where -- instance is derived from Generic instance
 instance HasInterchangeName Prefix where
   interchangeName = interchangeName . prefixName
 
+-- | The name of the unit of dimensionless values.
 nOne :: UnitName 'NonMetric
 nOne = One
 
@@ -253,7 +256,7 @@ strengthen n@(MetricAtomic _) = Just n
 strengthen (Weaken n) = strengthen n
 strengthen _ = Nothing
 
--- | Convert a 'UnitName' of one 'Metricality' into a name of the other metricality by
+-- | Convert a 'UnitName' of one 'Metricality' into a name of another metricality by
 -- strengthening or weakening if neccessary. Because it may not be possible to strengthen,
 -- the result is returned in a 'Maybe' wrapper.
 relax :: forall m1 m2.(Typeable m1, Typeable m2) => UnitName m1 -> Maybe (UnitName m2)
