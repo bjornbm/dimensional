@@ -386,7 +386,7 @@ and a representation of type `a`. For example, `Q 15 Int16` is the type of value
 Similarly, `Q 12 Natural` is the type of values with no sign bit, as many integer bits as needed, and $ 12 $ fractional bits.
 
 Fixed-point single turn angles can be convenient because hardware-supported modular addition and subtraction can be used to maintain the
-single turn invariant. Signed versions of such types, representing angles such that $ -\pi \leq \alpha < \pi $, are available as `Angle8`, `Angle16`,
+single turn invariant. Signed versions of such types, representing angles in the interval $ [-\pi, \pi) $, are available as `Angle8`, `Angle16`,
 and `Angle32`.
 
 
