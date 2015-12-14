@@ -278,13 +278,11 @@ Arithmetic operations `*`, `/`, `^`, and `recip` are provided for manipulating `
 of `DynQuantity` for these operations, because they are all total. An `applyPrefix :: Prefix -> AnyUnit -> Maybe AnyUnit`
 function is available for dynamically applying metric prefixes to units, it will return `Nothing` if the unit was not `Metric`.
 
-\prerelease{}
-
 Dynamic analogues of `*~` and `/~` allow the use of dynamic units to convert between raw values and dynamic quantities, as:
 
 \begin{lstlisting}
-(*~) :: (Floating a, DynamicQuantity q) =>   a -> AnyUnit -> q a
-(/~) :: (Floating a, DynamicQuantity q) => q a -> AnyUnit -> Maybe a
+(*~) :: (Floating a, Promoteable q) =>   a -> AnyUnit -> q a
+(/~) :: (Floating a, Promoteable q) => q a -> AnyUnit -> Maybe a
 \end{lstlisting}
 
 Note that `/~` will return `Nothing` if the dimensions of the supplied dynamic quantity do not match those of the
@@ -306,8 +304,10 @@ representation and the coherent SI unit of the quantity's dimension. This allows
 treated uniformly and correctly by arithmetic operations without requiring the programmer to appropriately scale the results
 before storing them.
 
+\section{Describing Fixed-Point Quantity Types}
+
 The familiar `Quantity` type is an alias for `SQuantity One` (where `One`) is the \packagename{exact-pi}
-package's representation of the number 1. While it is possible to use `SQuantity` with other scaling factors and a
+package's representation of the number $ 1 $. While it is possible to use `SQuantity` with other scaling factors and a
 floating point or exact rational representation type, it is rarely necessary to do so because the range of common floating
 point representations can comfortably encode both very large and very small physical quantities directly represented in the
 coherent SI unit of their dimension.
@@ -318,6 +318,8 @@ velocity of a vehicle as a 16-bit signed integer with a minimum increment of \SI
 to represent such a value by a variable of type `Int16` and an accompanying comment or naming convention indicating
 the dimension and scale factor, but \thispackage{} provides a more expressive type, which can be written in one of several ways.
 
+\subsection{Without Template Haskell}
+
 Without using Template Haskell, one could write:
 
 \begin{lstlisting}
@@ -327,6 +329,8 @@ import Data.Int
 
 type VehicleSpeed = SQuantity (E.One E./ (E.ExactNatural 100)) DLength Int16
 \end{lstlisting}
+
+\subsection{With Template Haskell} \label{fixed-point-th}
 
 With Template Haskell either of the following simpler forms is equivalent to the one given above:
 
@@ -344,7 +348,11 @@ only remained to specify the representation type.
 
 TODO: give an example where the scale isn't an exact unit, other examples of accepted syntax for quasiquoter
 
+\section{Fixed-Point Arithmetic}
+
 TODO: give examples of performing arithmetic with such values
+
+\subsection{Transcendental Functions}
 
 The transcendental functions from `Numeric.Units.Dimensional` have types like:
 
@@ -379,6 +387,14 @@ enabling the \flag{aeson} flag when installing \thispackage{}.
 \section{\packagename{attoparsec} for Unit and Quantity Parsing}
 
 \prerelease{}
+
+Users of the \packagename{attoparsec} package can find parsers recognizing
+unit names (both in natural language and in the UCUM interchange format) and
+quantities in the \packagename{dimensional-attoparsec} package.
+
+These parsers are also used by the \packagename{dimensional-th} package to provide
+Template Haskell quasi-quotations for quantities and for fixed-point types, as
+discussed in \ref{fixed-point-th}.
 
 \section{\packagename{binary} for Binary Serialization}
 
