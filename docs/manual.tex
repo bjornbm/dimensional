@@ -332,14 +332,15 @@ type VehicleSpeed = SQuantity (E.One E./ (E.ExactNatural 100)) DLength Int16
 
 \subsection{With Template Haskell} \label{fixed-point-th}
 
-With Template Haskell either of the following simpler forms is equivalent to the one given above:
+With Template Haskell and the \packagename{dimensional-th} package, either of the following simpler forms is equivalent to the one given above:
 
 \begin{lstlisting}
 import Numeric.Units.Dimensional.FixedPoint.Prelude
 import Numeric.Units.Dimensional.TH
 import Data.Int
+import qualified Prelude as P
 
-type VehicleSpeed1 = SQuantity [exact| 1/100 |] DLength Int16
+type VehicleSpeed1 = SQuantity $(exactPiType $ 1 P./ 100) DLength Int16
 type VehicleSpeed2 = [fixed| cm / s |] Int16
 \end{lstlisting}
 
@@ -351,6 +352,14 @@ TODO: give an example where the scale isn't an exact unit, other examples of acc
 \section{Fixed-Point Arithmetic}
 
 TODO: give examples of performing arithmetic with such values
+
+\subsection{Constructing Fixed-Point Values}
+
+In addition to fixed-point analogues of the `*~` and `/~` operators, the `Numeric.Units.Dimensional.FixedPoint`
+module also provides access to the least positive representable value in any fixed-point quantity type `epsilon :: (Integral a) => SQuantity s d a`.
+
+By importing the `Numeric.Units.Dimensional.Coercion` function, users can also gain access to the `Quantity` newtype constructor
+and the ability to `coerce` between raw values and quantities, including fixed-point quantities.
 
 \subsection{Transcendental Functions}
 
@@ -369,6 +378,19 @@ determined from context.
 \begin{lstlisting}
 sin :: (KnownExactPi s1, KnownExactPi s2 Integral a) => SQuantity s1 DOne a -> SQuantity s2 DOne a
 \end{lstlisting}
+
+\section{Common Fixed-Point Types}
+
+Also provided are aliases for some commonly used fixed-point types. `Q n a` represents a dimensionless value stored with `n` fractional bits
+and a representation of type `a`. For example, `Q 15 Int16` is the type of values with $ 1 $ sign bit, no integer bits, and $ 15 $ fractional bits.
+Similarly, `Q 12 Natural` is the type of values with no sign bit, as many integer bits as needed, and $ 12 $ fractional bits.
+
+Fixed-point single turn angles can be convenient because hardware-supported modular addition and subtraction can be used to maintain the
+single turn invariant. Signed versions of such types, representing angles such that $ -\pi \leq \alpha < \pi $, are available as `Angle8`, `Angle16`,
+and `Angle32`.
+
+
+
 
 \chapter{Interoperating with Other Packages}
 
