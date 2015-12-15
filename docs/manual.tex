@@ -250,7 +250,7 @@ promoteQuantity :: (Demoteable q, Promoteable d) => d a -> Maybe (q a)
 The `Demoteable` class includes both `Quantity d` and `AnyQuantity`, while the `Promoteable` class includes both
 `AnyQuantity` and `DynQuantity`. These classes are provided because, in addition to `AnyQuantity`, there is also a more general type, `DynQuantity`.
 While an `AnyQuantity a` value definitely represents a `Quantity` of some dimension, a `DynQuantity a` value may not.
-This is a useful property because it admits a complete and well-behaved `Num` instance for `DynQuantity` which allows
+This is a useful property because it admits complete and well-behaved `Num`, `Fractional`, and `Floating` instances for `DynQuantity`. This allows
 arithmetic to be performed with dynamic quantities which is nonetheless dimensionally verified at runtime. For example,
 the result of `demoteQuantity (3 *~ meter) + demoteQuantity (47 *~ second)` cannot be successfully promoted to an
 `AnyQuantity`, or to a `Quantity` of any dimension.
