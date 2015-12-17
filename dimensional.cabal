@@ -7,6 +7,7 @@ author:              Bjorn Buckwalter
 maintainer:          bjorn@buckwalter.se
 stability:           experimental
 homepage:            https://github.com/bjornbm/dimensional/
+bug-reports:         https://github.com/bjornbm/dimensional/issues/
 category:            Math, Physics
 synopsis:            Statically checked physical dimensions,
                      using Type Families and Data Kinds.
