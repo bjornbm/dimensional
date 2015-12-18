@@ -223,26 +223,28 @@ _7 = (7 :: P.Double) *~ one
 _8 = (8 :: P.Double) *~ one
 _9 = (9 :: P.Double) *~ one
 
-pi :: (Integral a, E.MinCtxt s P.Double) => SQuantity s DOne a
-pi = (P.pi :: P.Double) *~ one
+pi :: (Integral a, E.KnownExactPi s) => SQuantity s DOne a
+pi = rescale (epsilon :: SQuantity E.Pi DOne Integer)
 
 -- | Twice 'pi'.
 --
 -- For background on 'tau' see http://tauday.com/tau-manifesto (but also
 -- feel free to review http://www.thepimanifesto.com).
-tau :: (Integral a, E.MinCtxt s P.Double) => SQuantity s DOne a
-tau = (2 P.* P.pi :: P.Double) *~ one
+tau :: (Integral a, E.KnownExactPi s) => SQuantity s DOne a
+tau = rescale (epsilon :: SQuantity (E.ExactNatural 2 E.* E.Pi) DOne Integer)
 
 -- | The least positive representable value in a given fixed-point scaled quantity type.
 epsilon :: (Integral a) => SQuantity s d a
 epsilon = Quantity 1
 
 -- | Rescales a fixed point quantity, accomodating changes both in its scale factor and its representation type.
+--
+-- Note that this uses an arbitrary precision representation of 'pi', which may be quite slow.
 rescale :: forall a b d s1 s2.(Integral a, Integral b, E.KnownExactPi s1, E.KnownExactPi s2) => SQuantity s1 d a -> SQuantity s2 d b
 rescale | Just s' <- toExactInteger s           = viaInteger (P.* s')
         | Just s' <- toExactInteger (P.recip s) = viaInteger (`P.quot` s')
         | Just q  <- toExactRational s          = viaInteger $ timesRational q
-        | otherwise                             = viaInteger $ \x -> fixedPoint (fmap (($ x) . timesRational) (rationalApproximations s)) -- "Not implemented, exact rescale by irrational scaling factor."
+        | otherwise                             = viaInteger $ \x -> fixedPoint (fmap (($ x) . timesRational) (rationalApproximations s))
   where
     s = (s1' P./ s2')
     s1' = E.exactPiVal (Proxy :: Proxy s1)
@@ -262,9 +264,9 @@ rescaleFinite = rescale -- It should be possible to do this more quickly, since 
 rescaleVia :: forall a b c d s1 s2.(Integral a, RealFrac b, Floating b, Integral c, E.KnownExactPi s1, E.KnownExactPi s2) => Proxy b -> SQuantity s1 d a -> SQuantity s2 d c
 rescaleVia _ = viaFloating (P.* s)
   where
-    s = (s1' P./ s2') :: b
-    s1' = approximateValue . E.exactPiVal $ (Proxy :: Proxy s1)
-    s2' = approximateValue . E.exactPiVal $ (Proxy :: Proxy s2)
+    s = approximateValue (s1' P./ s2') :: b
+    s1' = E.exactPiVal $ (Proxy :: Proxy s1)
+    s2' = E.exactPiVal $ (Proxy :: Proxy s2)
 
 -- | Approximately rescales a fixed point quantity, accomodating changes both in its scale factor and its representation type.
 --
