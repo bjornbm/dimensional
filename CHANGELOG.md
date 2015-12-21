@@ -1,12 +1,16 @@
+1.0.1.1 (2015-11)
+-----------------
+* Improved example in readme.
+
 1.0.1.0 (2015-11)
-------------------
+-----------------
 * Added Numeric.Units.Dimensional.Coercion module.
 * Bumped exact-pi dependency to < 0.5.
 * Restored changelog.
 * Addressed issues with documentation.
 
 1.0.0.0 (2015-11)
-------------------
+-----------------
 * Changed to DataKinds and ClosedTypeFamilies encoding of dimensions.
 * Added names and exact values to `Unit`s.
 * Added `AnyUnit` and `AnyQuantity` for quantities whose dimension is statically unknown.
@@ -70,14 +74,14 @@
 
 
 0.10.1 (2011-08)
-------------------
+----------------
 GHC 7.2.1 compatibility fix:
 
 *  Increased CGS context-stack to 30.
 
 
 0.10 (2011-05)
--------------
+--------------
 See the [announcement][2].
 
 [2]: http://flygdynamikern.blogspot.se/2011/05/announce-dimensional-010.html
