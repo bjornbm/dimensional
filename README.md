@@ -21,27 +21,46 @@ Similarly, the `Quantity d a` type represents a quantity with dimension `d`, who
 `Length Double` to mean `Quantity DLength Double`. A complete list of available aliases is given in the haddock documentation for the
 `Numeric.Units.Dimensional.Quantities`.
 
+In the example below, we will solve a simple word problem.
+
+A car travels at 60 kilometers per hour for one mile, at 50 kph for one mile,
+at 40 kph for one mile, and at 30 kph for one mile. How many minutes does the journey take?
+What is the average speed of the car? How many seconds does the journey take, rounded up to the next whole second?
+
 ```haskell
 {-# LANGUAGE NoImplicitPrelude #-}
 
+module ReadmeExample where
+
 import Numeric.Units.Dimensional.Prelude
-import Numeric.Units.Dimensional.NonSI (gee)
+import Numeric.Units.Dimensional.NonSI (mile)
 
-radiusOfEarth :: Length Double
-radiusOfEarth = 6371 *~ kilo meter
+leg :: Length Double
+leg = 1 *~ mile -- *~ combines a raw number and a unit to form a quantity
 
-massOfEarth :: Mass Double
-massOfEarth = 5.97e24 *~ kilo gram
+speeds :: [Velocity Double]
+speeds = [60, 50, 40, 30] *~~ (kilo meter / hour)
+  -- *~~ does the same thing for a whole Functor at once
+  -- Parentheses are required around unit expressions that are comingled with *~, /~, *~~, or /~~ operations
 
-g :: GravitationalParameter Double
-g = 6.67384e-11 *~ (meter^pos3 * (kilo gram)^neg1 * second^neg2)
+timeOfJourney :: Time Double
+timeOfJourney = sum $ fmap (leg /) speeds
+  -- We can use dimensional versions of ordinary functions like / and sum to combine quantities
 
-gravitationalFieldStrength :: Mass a -> Length a -> Acceleration a
-gravitationalFieldStrength m r = g * m / r^pos2
+averageSpeed :: Velocity Double
+averageSpeed = _4 * leg / timeOfJourney
+  -- _4 is an alias for the dimensionless number 4
 
-approximateAccelerationDueToGravityOnEarth = gravitationalFieldStrength massOfEarth radiusOfEarth
+wholeSeconds :: Integer
+wholeSeconds = ceiling $ timeOfJourney /~ second
+  -- /~ lets us recover a raw number from a quantity and a unit in which it should be expressed
 
-differenceFromStandardValue = approximateAccelerationDueToGravityOnEarth /~ gee
+main :: IO ()
+main = do
+         putStrLn $ "Length of journey is: " ++ showIn minute timeOfJourney
+         putStrLn $ "Average speed is: " ++ showIn (mile / hour) averageSpeed
+         putStrLn $ "If we don't want to be explicit about units, the show instance uses the SI basis: " ++ show averageSpeed
+         putStrLn $ "The journey requires " ++ show wholeSeconds ++ " seconds, rounded up to the nearest second."
 ```
 
 ## Contributing
