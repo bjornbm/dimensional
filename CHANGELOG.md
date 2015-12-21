@@ -19,6 +19,10 @@ vNext
   unknown dimension, suitable for performing arithmetic with such quantities.
 * Relocated git repository to https://github.com/bjornbm/dimensional
 
+1.0.1.1 (2015-11)
+-----------------
+* Improved example in readme.
+
 1.0.1.0 (2015-11)
 -----------------
 * Added Numeric.Units.Dimensional.Coercion module.
