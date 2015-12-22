@@ -19,6 +19,7 @@ module Numeric.Units.Dimensional.Prelude
     , module Numeric.Units.Dimensional.Quantities
     , module Numeric.Units.Dimensional.SIUnits
     , module Numeric.NumType.DK.Integers
+    , module Control.Category
     , module Data.Foldable
     , module Prelude
     ) where
@@ -35,6 +36,9 @@ import Numeric.NumType.DK.Integers
     ( neg5, neg4, neg3, neg2, neg1, zero, pos1, pos2, pos3, pos4, pos5
     )  -- Used in exponents.
 
+import Control.Category
+    ( Category(..) )
+
 import Data.Foldable
     ( product, minimum, maximum )
 
@@ -44,4 +48,5 @@ import Prelude hiding
     , sin, cos, tan, asin, acos, atan, atan2
     , sinh, cosh, tanh, asinh, acosh, atanh
     , sum, product, minimum, maximum
+    , id, (.)
     )  -- Hide definitions overridden by 'Numeric.Dimensional'.
