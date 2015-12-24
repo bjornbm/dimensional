@@ -149,6 +149,18 @@ deriving instance (Data.Serialize.Serialize a) => Data.Serialize.Serialize (Quan
 #endif
 
 #if USE_LINEAR
+instance Linear.Vector.Additive (Quantity d) where
+  zero = mempty
+  (^+^) = liftQ2 (P.+)
+  (^-^) = liftQ2 (P.-)
+  liftU2 = liftQ2
+  liftI2 f (Quantity x) (Quantity y) = Quantity $ f x y
+
+instance Linear.Affine.Affine (Quantity d) where
+  type Diff (Quantity d) = Quantity d
+  (.-.) = (Linear.Vector.^-^)
+  (.+^) = (Linear.Vector.^+^)
+  (.-^) = (Linear.Vector.^-^)
 #endif
 
 #if USE_VECTOR_SPACE
