@@ -12,6 +12,12 @@ vNext
   module which may cause name collisions.
 * Breaking: Removed exports of `nMeter`, `nSecond`, `kilo`, etc from Numeric.Units.Dimensional.UnitNames.
   Access these instead by inspecting the relevant units or prefixes.
+* Deprecated: The `Numeric.Units.Dimensional.Functor` module and the orphan instance
+  it provides were deprecated in favor of a package flag, `functor`, which provides the
+  same instance but doesn't orphan it.
+* Added package flags `aeson`, `binary`, `cereal`, `linear`, and `vector-space` enabling
+  optional dependencies on the packages of the same names to provide instances of widely
+  used classes from those packages.
 * Added `Data`, `Generic`, `Typeable` and `NFData` instances for many ancillary types.
 * Added `unQuantity` to the Coercion module to ease unwrapping without
   introducing ambiguous type variables.

@@ -25,7 +25,7 @@ Note that, while this instance overlaps with that given for 'Dimensionless', it 
 
 Note that this is an orphan instance.
 -}
-module Numeric.Units.Dimensional.Functor {-# DEPRECATED "This orphan instance is being eliminated in favor of a package flag, functor, which creates it as a proper instance." #-} where
+module Numeric.Units.Dimensional.Functor {-# DEPRECATED "This orphan instance is being eliminated, along with the module packaging it, in favor of a package flag, functor, which creates it as a proper instance." #-} where
 
 -- If we already have this instance, we won't declare it again.
 #if !(FUNCTOR || USE_LINEAR)
