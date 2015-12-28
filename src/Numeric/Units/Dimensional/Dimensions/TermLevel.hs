@@ -1,9 +1,12 @@
 {-# OPTIONS_HADDOCK not-home, show-extensions #-}
 
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 {- |
    Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
@@ -40,6 +43,17 @@ import GHC.Generics
 import Prelude (id, (+), (-), (.), Int, Show, Eq, Ord, Maybe(..))
 import qualified Prelude as P
 
+-- Optional imports when certain package flags are enabled
+#if USE_AESON
+import qualified Data.Aeson
+#endif
+#if USE_BINARY
+import qualified Data.Binary
+#endif
+#if USE_CEREAL
+import qualified Data.Serialize
+#endif
+
 -- | A physical dimension, encoded as 7 integers, representing a factorization of the dimension into the
 -- 7 SI base dimensions. By convention they are stored in the same order as 
 -- in the 'Numeric.Units.Dimensional.Dimensions.TypeLevel.Dimension' data kind.
@@ -53,6 +67,20 @@ instance NFData Dimension' where
 instance Monoid Dimension' where
   mempty = dOne
   mappend = (*)
+
+#if USE_AESON
+deriving instance Data.Aeson.ToJSON Dimension'
+
+deriving instance Data.Aeson.FromJSON Dimension'
+#endif
+
+#if USE_BINARY
+deriving instance Data.Binary.Binary Dimension'
+#endif
+
+#if USE_CEREAL
+deriving instance Data.Serialize.Serialize Dimension'
+#endif
 
 -- | Dimensional values, or those that are only possibly dimensional, inhabit this class,
 -- which allows access to a term-level representation of their dimension.
