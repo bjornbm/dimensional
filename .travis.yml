@@ -40,6 +40,8 @@ matrix:
     - env: CABALVER=1.22 GHCVER=7.10.3 FLAGS="functor aeson binary cereal linear vector-space"
       compiler: ": #GHC 7.10.3"
       addons: {apt: {packages: [cabal-install-1.22,ghc-7.10.3], sources: [hvr-ghc]}}
+  allow_failures:
+    - env: CABALVER=1.22 GHCVER=7.10.3 FLAGS="functor aeson binary cereal linear vector-space"
 
 before_install:
  - unset CC
@@ -55,7 +57,7 @@ install:
    fi
  - travis_retry cabal update -v
  - sed -i 's/^jobs:/-- jobs:/' ${HOME}/.cabal/config
- - cabal install --only-dependencies --enable-tests --enable-benchmarks --flags $FLAGS --allow-newer=binary --dry -v > installplan.txt
+ - cabal install --only-dependencies --enable-tests --enable-benchmarks --flags $FLAGS --dry -v > installplan.txt
  - sed -i -e '1,/^Resolving /d' installplan.txt; cat installplan.txt
 
 # check whether current requested install-plan matches cached package-db snapshot
@@ -69,7 +71,7 @@ install:
      echo "cabal build-cache MISS";
      rm -rf $HOME/.cabsnap;
      mkdir -p $HOME/.ghc $HOME/.cabal/lib $HOME/.cabal/share $HOME/.cabal/bin;
-     cabal install --only-dependencies --enable-tests --enable-benchmarks --flags $FLAGS --allow-newer=binary;
+     cabal install --only-dependencies --enable-tests --enable-benchmarks --flags $FLAGS;
    fi
 
 # snapshot package-db on cache miss
