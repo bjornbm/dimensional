@@ -3,10 +3,8 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE StandaloneDeriving #-}
 
 {- |
    Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
@@ -69,17 +67,21 @@ instance Monoid Dimension' where
   mappend = (*)
 
 #if USE_AESON
-deriving instance Data.Aeson.ToJSON Dimension'
+-- This instance only needs a body because an incorrect MINIMAL pragma in aeson-0.10 leads to
+-- a warning if you omit it.
+instance Data.Aeson.ToJSON Dimension' where
+  toJSON = Data.Aeson.genericToJSON Data.Aeson.defaultOptions
+  toEncoding = Data.Aeson.genericToEncoding Data.Aeson.defaultOptions
 
-deriving instance Data.Aeson.FromJSON Dimension'
+instance Data.Aeson.FromJSON Dimension'
 #endif
 
 #if USE_BINARY
-deriving instance Data.Binary.Binary Dimension'
+instance Data.Binary.Binary Dimension'
 #endif
 
 #if USE_CEREAL
-deriving instance Data.Serialize.Serialize Dimension'
+instance Data.Serialize.Serialize Dimension'
 #endif
 
 -- | Dimensional values, or those that are only possibly dimensional, inhabit this class,

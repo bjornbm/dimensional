@@ -11,7 +11,6 @@ Defines types for manipulation of units and quantities without phantom types for
 
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -20,7 +19,6 @@ Defines types for manipulation of units and quantities without phantom types for
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving #-}
 
 module Numeric.Units.Dimensional.Dynamic
 (
@@ -149,11 +147,11 @@ instance (Data.Aeson.FromJSON a) => Data.Aeson.FromJSON (AnyQuantity a) where
 #endif
 
 #if USE_BINARY
-deriving instance (Data.Binary.Binary a) => Data.Binary.Binary (AnyQuantity a)
+instance (Data.Binary.Binary a) => Data.Binary.Binary (AnyQuantity a)
 #endif
 
 #if USE_CEREAL
-deriving instance (Data.Serialize.Serialize a) => Data.Serialize.Serialize (AnyQuantity a)
+instance (Data.Serialize.Serialize a) => Data.Serialize.Serialize (AnyQuantity a)
 #endif
 
 -- | Possibly a 'Quantity' whose 'Dimension' is only known dynamically.
@@ -224,17 +222,19 @@ instance Num a => Monoid (DynQuantity a) where
   mappend = (P.*)
 
 #if USE_AESON
-deriving instance (Data.Aeson.ToJSON a) => Data.Aeson.ToJSON (DynQuantity a)
+instance (Data.Aeson.ToJSON a) => Data.Aeson.ToJSON (DynQuantity a) where
+  toJSON = Data.Aeson.genericToJSON Data.Aeson.defaultOptions
+  toEncoding = Data.Aeson.genericToEncoding Data.Aeson.defaultOptions
 
-deriving instance (Data.Aeson.FromJSON a) => Data.Aeson.FromJSON (DynQuantity a)
+instance (Data.Aeson.FromJSON a) => Data.Aeson.FromJSON (DynQuantity a)
 #endif
 
 #if USE_BINARY
-deriving instance (Data.Binary.Binary a) => Data.Binary.Binary (DynQuantity a)
+instance (Data.Binary.Binary a) => Data.Binary.Binary (DynQuantity a)
 #endif
 
 #if USE_CEREAL
-deriving instance (Data.Serialize.Serialize a) => Data.Serialize.Serialize (DynQuantity a)
+instance (Data.Serialize.Serialize a) => Data.Serialize.Serialize (DynQuantity a)
 #endif
 
 -- Lifts a function which is only valid on dimensionless quantities into a function on DynQuantitys.
