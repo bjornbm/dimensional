@@ -222,6 +222,8 @@ instance Num a => Monoid (DynQuantity a) where
   mappend = (P.*)
 
 #if USE_AESON
+-- This instance only needs a body because an incorrect MINIMAL pragma in aeson-0.10 leads to
+-- a warning if you omit it.
 instance (Data.Aeson.ToJSON a) => Data.Aeson.ToJSON (DynQuantity a) where
   toJSON = Data.Aeson.genericToJSON Data.Aeson.defaultOptions
   toEncoding = Data.Aeson.genericToEncoding Data.Aeson.defaultOptions
