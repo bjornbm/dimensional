@@ -113,6 +113,162 @@ tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional
 
 \chapter{Dimensional Arithmetic}
 
+The `Numeric.Units.Dimensional` module exports a number of arithmetic operators with names matching those
+exported by the `Prelude`, but with types that are restricted to allow them only to be used in dimensionally-correct
+calculations.
+
+\section{Creating Quantities}
+
+
+\section{Arithmetic}
+
+\subsection{On Quantities Only}
+
+The `negate` and `abs` unary functions are simple. They are valid for quantities of all dimensions, and preserve the
+dimension of their input. They thus each have type `Num a => Quantity d a -> Quantity d a`.
+
+Similarly, the `+` and `-` binary operators are valid only when the dimensions of the operands match, and preserve that
+dimension as the dimension of the result. They thus have type `Num a => Quantity d a -> Quantity d a -> Quantity d a`.
+
+The `sum` function operates on `Foldable` collections of quantities of uniform dimension, and returns a quantity of
+the same dimension. It thus have type `Num a, Foldable f => f (Quantity d a) -> Quantity d a`. We provide a `mean` function
+which does the same but requires a `Fractional a` context in place of the `Num a` context.
+
+Most of the `Floating` functions (namely `exp`, `log`, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sinh`, `cosh`, `tanh`, `asinh`, `acosh`, and `atanh`)
+require dimensionless arguments and produce dimensionless results, and thus the dimensional versions have type `Floating a => Dimensionless a -> Dimensionless a`.
+The `**` operator and `logBase` function are similar but have two dimensionless arguments and type `Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a`.
+
+The `recip` function forms a quantity whose dimension is the reciprocal of the dimension of the input quantity, and thus it has type
+`(Fractional a) => Quantity d a -> Quantity (Recip d) a`.
+
+\subsection{On Quantities and Units}
+
+Multiplication, division, exponentiation, and roots are more complicated for two reasons. First, and unavoidably, the dimensions of their results are computed
+from the dimension(s) of their input(s) in a non-trivial way. Second, to avoid excessive namespace pollution, the `Numeric.Units.Dimensional` module provides
+one set of such operators which works for both quantities and units. Because the resulting types are daunting they will each be shown in full, explained in prose,
+and shown as specialized to apply only to quantities and as specialized to apply only to units.
+
+\subsubsection{Multiplication}
+
+The `*` operator has the following type:
+
+\begin{lstlisting}
+(*) :: (KnownVariant v1, KnownVariant v2,
+        KnownVariant (v1 V.* v2), Num a) => Dimensional v1 d1 a
+                                         -> Dimensional v2 d2 a
+                                         -> Dimensional (v1 V.* v2) (d1 * d2) a
+\end{lstlisting}
+
+Here `v1` and `v2` are the `Variant`s of the input `Dimensional` quantities. A `Variant` is the lifted version of the
+following datatype:
+
+\begin{lstlisting}
+data Variant = DQuantity
+             | DUnit Metricality
+\end{lstlisting}
+
+The `V.*` type family from `Numeric.Units.Dimensional.Variants` forms the product of variants. The product of two quantities is a quantity.
+The product of two units is a `NonMetric` unit. The product of a unit with a quantity, or vice versa, is not defined. All `Variant`s are
+instances of the `KnownVariant` class, but the constraint appears in the context because the implementation requires breaking parametricity and
+needs access to an appropriate dictionary in order to do so.
+
+The `d1` and `d2` type variables describe the dimensions of the two input operands. The `*` type family from `Numeric.Units.Dimensional.Dimensions.TypeLevel`
+forms the product of two dimensions.
+
+The numerical representation type is named `a`.
+
+We are now equipped to read the full type. It says that, for multiplication, we can take the product of any two dimensional values whose
+variants are known and have a product. The numerical representation types must match, and that type must be an instance of `Num`. The result is a dimensional value
+whose variant is the product of the inputs' variants, whose dimension is the product of the inputs' dimensions, and whose numerical representation
+type is that of the inputs.
+
+Specialized to operate on quantities, the type of multiplication is much less intimidating:
+
+\begin{lstlisting}
+(*) :: (Num a) => Quantity d1 a -> Quantity d2 a -> Quantity (d1 * d2) a
+\end{lstlisting}
+
+Specialized to operate on units it's only slightly more involved. The `Typeable` contexts arise because they are
+required to ensure that an appropriate `KnownVariant` instance will exist. Again, `Typeable` isntances exist for all
+possible concrete values of `m1` and `m2`, but the context is required for implementation reasons.
+
+\begin{lstlisting}
+(*) :: (Typeable m1, Typeable m2, Num a) => Unit m1 d1 a
+                                         -> Unit m2 d2 a
+                                         -> Unit 'NonMetric (d1 * d2) a
+\end{lstlisting}
+
+\subsubsection{Division}
+
+The `/` operator has the following type, very similar to that of multiplication:
+
+\begin{lstlisting}
+(/) :: (KnownVariant v1, KnownVariant v2,
+        KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a
+                                                -> Dimensional v2 d2 a
+                                                -> Dimensional (v1 V.* v2) (d1 / d2) a
+\end{lstlisting}
+
+The type variables have the same names and interpretations. Note that the type of the result still mentions the
+`V.*` type family for combining `Variant`s and not a `V./` type family. This is because the rules for combining variants
+under division are the same as those for multiplication (or actually, any binary operation), and thus it is not necessary
+to introduce an additional type family.
+
+This type says that, for division, we can take the quotient of any two dimensional values whose variants are known and have a product.
+The numerical representation types must match, and that type must be an instance of `Fractional`. The result is a dimensional value
+whose variant is the product of the inputs' variants, whose dimension is the quotient of the inputs' dimensions, and whose numerical representation
+type is that of the inputs.
+
+Specialized to operate on quantities or on units, the type of division is again less intimidating:
+
+\begin{lstlisting}
+(/) :: (Fractional a) => Quantity d1 a -> Quantity d2 a -> Quantity (d1 / d2) a
+(/) :: (Typeable m1, Typeable m2, Fractional a) => Unit m1 d1 a
+                                                -> Unit m2 d2 a
+                                                -> Unit 'NonMetric (d1 / d2) a
+\end{lstlisting}
+
+\subsubsection{Exponentiation}
+
+The `^` operator has type:
+
+\begin{lstlisting}
+(^) :: (Fractional a, KnownTypeInt i,
+        KnownVariant v, KnownVariant (Weaken v)) => Dimensional v d a
+                                                 -> Proxy i
+                                                 -> Dimensional (Weaken v) (d ^ i) a
+\end{lstlisting}
+
+The type variable `v` is the `Variant` of the input, which must be an instance of `KnownVariant` as before. Again, the type variable `a` is
+the numerical representation type of the input and of the output, which must be an instance of `Fractional`.
+
+The type variable `i` is of kind `TypeInt` from `Numeric.NumType.DK.Integers`. It is a type-level representation of the integer power to which
+the input should be raised. The caller indicates this type by providing a `Proxy` to it in the second argument. It must be a `KnownTypeInt` because
+again the implementation must break parametricity with respect to this type, namely by obtaining a term-level representation of the same integer.
+
+The `Weaken` type family from `Numeric.Units.Dimensional.Variants` converts quantities to quantities, and converts all units to `NonMetric` units.
+
+This type says that, for exponentiation, we can raise a dimensional value of any known variant and of any dimension to any known integer exponent.
+The numerical representation type of the input must be an instance of `Fractional`. The result is a dimensional value whose variant is the weakening
+of the input variant, whose dimension is the dimension of the input raised to the specified power, and whose representation type is that of the input.
+
+Specialized to operate on quantities, the type of exponentiation is:
+
+\begin{lstlisting}
+(^) :: (Fractional a, KnownTypeInt i) => Quantity d a
+                                      -> Proxy i
+                                      -> Quantity (d ^ i) a
+\end{lstlisting}
+
+Specialized to operate on units it again requires a `Typeable` context and is:
+
+\begin{lstlisting}
+(^) :: (Fractional a, KnownTypeInt i, Typeable m) => Unit m d a
+                                                  -> Proxy i
+                                                  -> Unit 'NonMetric (d ^ i) a
+\end{lstlisting}
+
+
 \chapter{Manipulating Units}
 
 Although most dimensional arithmetic involves manipulating quantities, it is sometimes necessary
