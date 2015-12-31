@@ -64,6 +64,7 @@ import qualified Data.Serialize
 #endif
 #if USE_LINEAR
 import qualified Linear.Affine
+import qualified Linear.Metric
 import qualified Linear.Vector
 #endif
 #if USE_VECTOR_SPACE
@@ -155,6 +156,10 @@ instance Linear.Vector.Additive (Quantity d) where
   (^-^) = liftQ2 (P.-)
   liftU2 = liftQ2
   liftI2 f (Quantity x) (Quantity y) = Quantity $ f x y
+
+instance Linear.Metric.Metric (Quantity DOne) where
+  dot (Quantity x) (Quantity y) = x P.* y
+  norm (Quantity x) = P.abs x
 
 instance Linear.Affine.Affine (Quantity d) where
   type Diff (Quantity d) = Quantity d
