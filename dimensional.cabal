@@ -1,5 +1,5 @@
 name:                dimensional
-version:             1.0.1.0
+version:             1.0.1.1
 license:             BSD3
 license-file:        LICENSE
 copyright:           Bjorn Buckwalter 2006-2015
@@ -7,6 +7,7 @@ author:              Bjorn Buckwalter
 maintainer:          bjorn@buckwalter.se
 stability:           experimental
 homepage:            https://github.com/bjornbm/dimensional/
+bug-reports:         https://github.com/bjornbm/dimensional/issues/
 category:            Math, Physics
 synopsis:            Statically checked physical dimensions,
                      using Type Families and Data Kinds.
@@ -33,7 +34,7 @@ description:
 
 extra-source-files:  README.md,
                      CHANGELOG.md,
-                     examples/README,
+                     examples/ReadmeExample.hs,
                      examples/GM.lhs
 
 source-repository head

@@ -2,6 +2,8 @@ vNext
 -----
 * Breaking: Changed Numeric.Units.Dimensional.Prelude to export a dimensionally
   typed `recip` instead of the one from `Prelude`.
+* Breaking: Changed Numeric.Units.Dimensional.Prelude to export `(.)` and `id`
+  from `Control.Category` instead of from `Prelude`.
 * Breaking: Changed the `HasDimension` typeclass to require an instance of the new
   `HasDynamicDimension` typeclass.
 * Breaking: Added operators for `AnyUnit` to the Numeric.Units.Dimensional.Dynamic
@@ -18,6 +20,10 @@ vNext
 * Added the `DynQuantity` type to represent possibly valid quantities of statically
   unknown dimension, suitable for performing arithmetic with such quantities.
 * Relocated git repository to https://github.com/bjornbm/dimensional
+
+1.0.1.1 (2015-11)
+-----------------
+* Improved example in readme.
 
 1.0.1.0 (2015-11)
 -----------------
