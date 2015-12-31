@@ -1,1 +1,9 @@
+# Treat YML files as text.
 *.yml text diff
+
+# Preserve Unix line endings on Markdown and
+# cabal files to allow preparing distributions
+# from Windows without Hackage garbling the
+# documentation.
+*.md text eol=lf
+*.cabal text eol=lf
