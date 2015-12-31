@@ -37,7 +37,7 @@ import Control.DeepSeq
 import Data.Data
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), Int, Show, Eq(..), Ord, Maybe(..))
+import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), (&&), Int, Show, Eq(..), Ord(..), Maybe(..))
 import qualified Prelude as P
 
 -- | A physical dimension, encoded as 7 integers, representing a factorization of the dimension into the
@@ -115,7 +115,7 @@ recip = (dOne /)
 
 -- | Takes the nth root of a dimension, if it exists.
 nroot :: Int -> Dimension' -> Maybe Dimension'
-nroot n d | all ((== 0) . snd) ds = fromList . fmap fst $ ds
+nroot n d | n > 0 && all ((== 0) . snd) ds = fromList . fmap fst $ ds
           | otherwise   = Nothing
   where
     ds = fmap (`divMod` n) . asList $ d
