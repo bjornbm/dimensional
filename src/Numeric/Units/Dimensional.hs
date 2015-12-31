@@ -203,7 +203,7 @@ module Numeric.Units.Dimensional
     (^), (^/), (**), (*), (/), (+), (-),
     negate, abs, recip, nroot, sqrt, cbrt,
     -- ** Transcendental Functions
-    exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
+    exp, log, logBase, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
     -- ** Operations on Collections
     -- $collections
     (*~~), (/~~), sum, mean, dimensionlessLength, nFromTo,
@@ -580,9 +580,13 @@ asinh = fmap Prelude.asinh
 acosh = fmap Prelude.acosh
 atanh = fmap Prelude.atanh
 
--- | Raises a dimensionless quantity to a floating power using 'Prelude.**'.
+-- | Raises a dimensionless quantity to a dimensionless power.
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
 (**) = liftQ2 (Prelude.**)
+
+-- | Takes the logarithm of the second argument in the base of the first.
+logBase :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
+logBase = liftQ2 Prelude.logBase
 
 -- | The standard two argument arctangent function.
 -- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
