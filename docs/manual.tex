@@ -141,6 +141,17 @@ The `**` operator and `logBase` function are similar but have two dimensionless 
 The `recip` function forms a quantity whose dimension is the reciprocal of the dimension of the input quantity, and thus it has type
 `(Fractional a) => Quantity d a -> Quantity (Recip d) a`.
 
+Taking square roots, cube roots, and general roots of quantities can be accomplished using the following functions.
+The `Root` type family from `Numeric.Units.Dimensional.Dimensions.TypeLevel` takes the root of a dimension, if it exists.
+
+\begin{lstlisting}
+sqrt  :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
+cbrt  :: Floating a => Quantity d a -> Quantity (Root d 'Pos3) a
+nroot :: (KnownTypeInt n, Floating a) => Proxy n
+                                      -> Quantity d a
+                                      -> Quantity (Root d n) a
+\end{lstlisting}
+
 \subsection{On Quantities and Units}
 
 Multiplication, division, exponentiation, and roots are more complicated for two reasons. First, and unavoidably, the dimensions of their results are computed
