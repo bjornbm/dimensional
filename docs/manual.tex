@@ -122,7 +122,7 @@ calculations.
 
 \section{Arithmetic}
 
-\subsection{On Quantities Only}
+\subsection{Addition, Subtraction, and Negation}
 
 The `negate` and `abs` unary functions are simple. They are valid for quantities of all dimensions, and preserve the
 dimension of their input. They thus each have type `Num a => Quantity d a -> Quantity d a`.
@@ -134,32 +134,12 @@ The `sum` function operates on `Foldable` collections of quantities of uniform d
 the same dimension. It thus have type `Num a, Foldable f => f (Quantity d a) -> Quantity d a`. We provide a `mean` function
 which does the same but requires a `Fractional a` context in place of the `Num a` context.
 
-Most of the `Floating` functions (namely `exp`, `log`, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sinh`, `cosh`, `tanh`, `asinh`, `acosh`, and `atanh`)
-require dimensionless arguments and produce dimensionless results, and thus the dimensional versions have type `Floating a => Dimensionless a -> Dimensionless a`.
-The `**` operator and `logBase` function are similar but have two dimensionless arguments and type `Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a`.
-
-The `recip` function forms a quantity whose dimension is the reciprocal of the dimension of the input quantity, and thus it has type
-`(Fractional a) => Quantity d a -> Quantity (Recip d) a`.
-
-Taking square roots, cube roots, and general roots of quantities can be accomplished using the following functions.
-The `Root` type family from `Numeric.Units.Dimensional.Dimensions.TypeLevel` takes the root of a dimension, if it exists.
-
-\begin{lstlisting}
-sqrt  :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
-cbrt  :: Floating a => Quantity d a -> Quantity (Root d 'Pos3) a
-nroot :: (KnownTypeInt n, Floating a) => Proxy n
-                                      -> Quantity d a
-                                      -> Quantity (Root d n) a
-\end{lstlisting}
-
-\subsection{On Quantities and Units}
+\subsection{Multiplication}
 
 Multiplication, division, exponentiation, and roots are more complicated for two reasons. First, and unavoidably, the dimensions of their results are computed
 from the dimension(s) of their input(s) in a non-trivial way. Second, to avoid excessive namespace pollution, the `Numeric.Units.Dimensional` module provides
 one set of such operators which works for both quantities and units. Because the resulting types are daunting they will each be shown in full, explained in prose,
 and shown as specialized to apply only to quantities and as specialized to apply only to units.
-
-\subsubsection{Multiplication}
 
 The `*` operator has the following type:
 
@@ -209,15 +189,16 @@ possible concrete values of `m1` and `m2`, but the context is required for imple
                                          -> Unit 'NonMetric (d1 * d2) a
 \end{lstlisting}
 
-\subsubsection{Division}
+\subsection{Division}
 
 The `/` operator has the following type, very similar to that of multiplication:
 
 \begin{lstlisting}
 (/) :: (KnownVariant v1, KnownVariant v2,
-        KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a
-                                                -> Dimensional v2 d2 a
-                                                -> Dimensional (v1 V.* v2) (d1 / d2) a
+        KnownVariant (v1 V.* v2),
+        Fractional a) => Dimensional v1 d1 a
+                      -> Dimensional v2 d2 a
+                      -> Dimensional (v1 V.* v2) (d1 / d2) a
 \end{lstlisting}
 
 The type variables have the same names and interpretations. Note that the type of the result still mentions the
@@ -239,7 +220,10 @@ Specialized to operate on quantities or on units, the type of division is again 
                                                 -> Unit 'NonMetric (d1 / d2) a
 \end{lstlisting}
 
-\subsubsection{Exponentiation}
+The `recip` function forms a quantity whose dimension is the reciprocal of the dimension of the input quantity, and thus it has type
+`(Fractional a) => Quantity d a -> Quantity (Recip d) a`.
+
+\subsection{Exponentiation}
 
 The `^` operator has type:
 
@@ -278,6 +262,29 @@ Specialized to operate on units it again requires a `Typeable` context and is:
                                                   -> Proxy i
                                                   -> Unit 'NonMetric (d ^ i) a
 \end{lstlisting}
+
+\subsection{Roots}
+
+Taking square roots, cube roots, and general roots of quantities can be accomplished using the following functions.
+The `Root` type family from `Numeric.Units.Dimensional.Dimensions.TypeLevel` takes the root of a dimension, if it exists.
+
+\begin{lstlisting}
+sqrt  :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
+cbrt  :: Floating a => Quantity d a -> Quantity (Root d 'Pos3) a
+nroot :: (KnownTypeInt n, Floating a) => Proxy n
+                                      -> Quantity d a
+                                      -> Quantity (Root d n) a
+\end{lstlisting}
+
+\subsection{Transcendental Functions}
+
+Most of the `Floating` functions (namely `exp`, `log`, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sinh`, `cosh`, `tanh`, `asinh`, `acosh`, and `atanh`)
+require dimensionless arguments and produce dimensionless results, and thus the dimensional versions have type `Floating a => Dimensionless a -> Dimensionless a`.
+The `**` operator and `logBase` function are similar but have two dimensionless arguments and type `Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a`.
+
+
+
+
 
 
 \chapter{Manipulating Units}
