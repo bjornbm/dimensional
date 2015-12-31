@@ -24,7 +24,7 @@ module Numeric.Units.Dimensional.Dimensions.TermLevel
   -- * Access to Dimension of Dimensional Values
   HasDimension(..), HasDynamicDimension(..),
   -- * Dimension Arithmetic
-  (*), (/), (^), recip,
+  (*), (/), (^), recip, nroot,
   -- * Synonyms for Base Dimensions
   dOne,
   dLength, dMass, dTime, dElectricCurrent, dThermodynamicTemperature, dAmountOfSubstance, dLuminousIntensity,
@@ -37,7 +37,7 @@ import Control.DeepSeq
 import Data.Data
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (id, (+), (-), (.), Int, Show, Eq, Ord, Maybe(..))
+import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), Int, Show, Eq(..), Ord, Maybe(..))
 import qualified Prelude as P
 
 -- | A physical dimension, encoded as 7 integers, representing a factorization of the dimension into the
@@ -113,7 +113,18 @@ infixl 7  *, /
 recip :: Dimension' -> Dimension'
 recip = (dOne /)
 
+-- | Takes the nth root of a dimension, if it exists.
+nroot :: Int -> Dimension' -> Maybe Dimension'
+nroot n d | all ((== 0) . snd) ds = fromList . fmap fst $ ds
+          | otherwise   = Nothing
+  where
+    ds = fmap (`divMod` n) . asList $ d
+
 -- | Converts a dimension to a list of 7 integers, representing the exponent associated with each
 -- of the 7 SI base dimensions in the standard order.
 asList :: Dimension' -> [Int]
 asList (Dim' l m t i th n j) = [l, m, t, i, th, n, j]
+
+fromList :: [Int] -> Maybe Dimension' 
+fromList [l, m, t, i, th, n, j] = Just $ Dim' l m t i th n j
+fromList _ = Nothing
