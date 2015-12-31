@@ -266,7 +266,7 @@ Specialized to operate on units it again requires a `Typeable` context and is:
 \subsection{Roots}
 
 Taking square roots, cube roots, and general roots of quantities can be accomplished using the following functions.
-The `Root` type family from `Numeric.Units.Dimensional.Dimensions.TypeLevel` takes the root of a dimension, if it exists.
+The `Root` type family from `Numeric.Units.Dimensional.Dimensions` takes the root of a dimension, if it exists.
 
 \begin{lstlisting}
 sqrt  :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
@@ -384,6 +384,8 @@ Users should feel free to submit pull requests to \thispackage{} for any units t
 
 \chapter{Dimensional Vectors}
 
+\prerelease{}
+
 It's frequently convenient to manipulate vectors of dimensional values. Because such vectors often have heterogenous
 dimensions, existing Haskell vector libraries are a poor solution. In order to retain dimensional typing in these situations,
 \thispackage{} offers a standard representation for dimensional vectors, however it does not include a full-featured system for
@@ -401,6 +403,20 @@ especially useful when parsing user input.
 
 The `Numeric.Units.Dimensional.Dynamic` module provides a number of features for manipulating quantities or units with dimensions that are only
 known dynamically.
+
+\section{Dimensions}
+
+Just like the `Dimension` kind provides a type-level representation of dimensions, the `Dimension'` type from `Numeric.Units.Dimensional.Dimensions`
+provides a term-level representation of dimensions.
+
+You can access the term-level dimension of almost anything (like a `Quantity`, `Unit`, or \\
+`AnyQuantity`) using the `dimension` function from the `HasDimension` class. For things
+which may or may not have a dimension (like a `DynQuantity`), there's also the `dynamicDimension`
+function from the `HasDynamicDimension` class.
+
+Arithmetic on term-level dimensions can be performed using the `*`, `/`, `^`, `recip`, and `nroot` functions from `Numeric.Units.Dimensional.Dimensions.TermLevel`.
+
+The dimension of dimensionless values is `dOne`, and `Dimension'` values form a `Monoid` under multiplication.
 
 \section{Dynamic Quantities}
 
