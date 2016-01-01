@@ -111,14 +111,18 @@ tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional
 
 \chapter{Dimensional Arithmetic}
 
-The `Numeric.Units.Dimensional` module exports a number of arithmetic operators with names matching those
-exported by the `Prelude`, but with types that are restricted to allow them only to be used in dimensionally-correct
-calculations.
+\section{Concepts}
+
+Explain quantities, units, `Quantity`s, and `Unit`s.
 
 \section{Creating Quantities}
 
 
 \section{Arithmetic}
+
+The `Numeric.Units.Dimensional` module exports a number of arithmetic operators with names matching those
+exported by the `Prelude`, but with types that are restricted to allow them only to be used in dimensionally-correct
+calculations.
 
 \subsection{Addition, Subtraction, and Negation}
 
@@ -279,7 +283,6 @@ nroot :: (KnownTypeInt n, Floating a) => Proxy n
 Most of the `Floating` functions (namely `exp`, `log`, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sinh`, `cosh`, `tanh`, `asinh`, `acosh`, and `atanh`)
 require dimensionless arguments and produce dimensionless results, and thus the dimensional versions have type `Floating a => Dimensionless a -> Dimensionless a`.
 The `**` operator and `logBase` function are similar but have two dimensionless arguments and type `Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a`.
-
 
 
 
