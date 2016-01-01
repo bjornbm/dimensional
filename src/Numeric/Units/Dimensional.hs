@@ -187,7 +187,7 @@ module Numeric.Units.Dimensional
     -- * Types
     -- $types
     Dimensional,
-    Unit, Quantity, SQuantity,
+    Unit, Quantity,
     Metricality(..),
     -- * Physical Dimensions
     -- $dimensions

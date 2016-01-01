@@ -27,13 +27,11 @@ module Numeric.Units.Dimensional.FixedPoint
   -- ** Dimension Arithmetic
   type (*), type (/), type (^), Root, Recip,
   -- ** Term Level Representation of Dimensions
-  -- $dimension-terms
   Dimension' (Dim'), HasDimension(..), KnownDimension,
   -- * Dimensional Arithmetic
   (*~), (/~),
   (*), (/), (+), (-),
   negate, abs,
-  approxProduct,
   -- ** Transcendental Functions
   -- *** Via 'Double'
   expD, logD, sinD, cosD, tanD, asinD, acosD, atanD, sinhD, coshD, tanhD, asinhD, acoshD, atanhD, atan2D,
@@ -48,12 +46,15 @@ module Numeric.Units.Dimensional.FixedPoint
   -- * Quantity Synonyms
   Dimensionless, Length, Mass, Time, ElectricCurrent, ThermodynamicTemperature, AmountOfSubstance, LuminousIntensity,
   -- * Constants
-  _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau, epsilon,
+  _0, epsilon,
+  -- $possibly-imprecise-constants
+  _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,
   -- * Constructing Units
   siUnit, one, mkUnitR, mkUnitQ, mkUnitZ,
   -- * Unit Metadata
   name, exactValue, weaken, strengthen, exactify,
   -- * Commonly Used Type Synonyms
+  -- $synonyms
   type Q, type Angle8, type Angle16, type Angle32
 )
 where
@@ -71,40 +72,26 @@ import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), recip, negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
 import qualified Prelude as P
 
--- | A dimensionless number with `n` fractional bits, using a representation of type `a`.
-type Q n a = SQuantity (E.One E./ (E.ExactNatural (2 N.^ n))) DOne a
+{- $types
 
--- | A single-turn angle represented as a signed 8-bit integer.
-type Angle8  = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 7)))  DPlaneAngle Int8
+We provide access to the same 'Dimensional', 'Unit', and 'Quantity' types as are exposed by "Numeric.Units.Dimensional", but additionally
+offer the 'SQuantity' type to represent scaled quantities. Fixed-point quantities are quantities backed by integers, it is frequently
+necessary to scale those integers into a range appropriate for the physical problem at hand.
 
--- | A single-turn angle represented as a signed 16-bit integer.
-type Angle16 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 15))) DPlaneAngle Int16
-
--- | A single-turn angle represented as a signed 32-bit integer.
-type Angle32 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 31))) DPlaneAngle Int32
+-}
 
 {-
+
+Arithmetic Operators and Functions
+
 We will reuse the operators and function names from the Prelude.
 To prevent unpleasant surprises we give operators the same fixity
 as the Prelude.
+
 -}
 
 --infixr 8  ^, ^/, **
 infixl 6  +, -
-
-approxProduct :: forall s1 s2 s3 d1 d2 a.(Integral a, E.KnownExactPi s1, E.KnownExactPi s2, E.KnownExactPi s3) => SQuantity s1 d1 a -> SQuantity s2 d2 a -> SQuantity s3 (d1 * d2) a
-approxProduct (Quantity x) (Quantity y) | rs == 1   = Quantity $ x P.* y
-                                        | rs > 1    = Quantity $ (x P.* y) `P.quot` (r s)
-                                        | otherwise = Quantity $ (x P.* y) P.* (r $ P.recip s)
-                                        -- TODO: handle the case where x is near 1 and we need to do both a multiply and a divide
-  where
-    r :: (Double -> a)
-    r = round
-    rs = r s
-    s = approximateValue $ s3' P./ (s1' P.* s2')
-    s1' = E.exactPiVal (Proxy :: Proxy s1)
-    s2' = E.exactPiVal (Proxy :: Proxy s2)
-    s3' = E.exactPiVal (Proxy :: Proxy s3)
 
 -- | Adds two possibly scaled 'SQuantity's, preserving any scale factor.
 --
@@ -164,6 +151,8 @@ asinhD = asinhVia (Proxy :: Proxy P.Double)
 acoshD = acoshVia (Proxy :: Proxy P.Double)
 atanhD = atanhVia (Proxy :: Proxy P.Double)
 
+-- | The standard two argument arctangent function.
+-- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
 atan2D :: (Real a, Integral a, Integral b, E.MinCtxt s1 Double, E.MinCtxt s2 Double, E.MinCtxt s3 Double) => SQuantity s1 DOne a -> SQuantity s2 DOne a -> SQuantity s3 DOne b
 atan2D = atan2Via (Proxy :: Proxy P.Double)
 
@@ -204,38 +193,32 @@ liftDimensionlessPeriodicVia p f proxy | Just p'' <- p', p'' /= 0 = (liftDimensi
     p' :: Maybe a
     p' = fmap fromInteger . toExactInteger . P.recip . (P./ p) . E.exactPiVal $ (Proxy :: Proxy s1)
 
--- | The constant for zero is polymorphic, allowing
--- it to express zero 'Length' or 'Capacitance' or 'Velocity' etc, in addition
--- to the 'Dimensionless' value zero.
-_0 :: Num a => SQuantity s d a
-_0 = Quantity 0
+{-
+We give '*~' and '/~' the same fixity as '*' and '/' defined below.
+Note that this necessitates the use of parenthesis when composing
+units using '*' and '/', e.g. "1 *~ (meter / second)".
+-}
 
--- Note that these constants may not be exactly representable with certain scale factors.
--- Note that multiplication by the scale factor is done with 'P.Double' precision and then rounded.
-_1, _2, _3, _4, _5, _6, _7, _8, _9 :: (Integral a, E.MinCtxt s P.Double) => SQuantity s DOne a
-_1 = (1 :: P.Double) *~ one
-_2 = (2 :: P.Double) *~ one
-_3 = (3 :: P.Double) *~ one
-_4 = (4 :: P.Double) *~ one
-_5 = (5 :: P.Double) *~ one
-_6 = (6 :: P.Double) *~ one
-_7 = (7 :: P.Double) *~ one
-_8 = (8 :: P.Double) *~ one
-_9 = (9 :: P.Double) *~ one
+infixl 7  *~, /~
 
-pi :: (Integral a, E.KnownExactPi s) => SQuantity s DOne a
-pi = rescale (epsilon :: SQuantity E.Pi DOne Integer)
+-- | Forms a possibly scaled 'SQuantity' by multipliying a number and a unit.
+(*~) :: forall s m d a b.(RealFrac a, Integral b, E.MinCtxt s a) => a -> Unit m d a -> SQuantity s d b
+x *~ (Unit _ _ y) = Quantity . round $ (x P.* y P./ s)
+  where
+    s = E.injMin (Proxy :: Proxy s)
 
--- | Twice 'pi'.
---
--- For background on 'tau' see http://tauday.com/tau-manifesto (but also
--- feel free to review http://www.thepimanifesto.com).
-tau :: (Integral a, E.KnownExactPi s) => SQuantity s DOne a
-tau = rescale (epsilon :: SQuantity (E.ExactNatural 2 E.* E.Pi) DOne Integer)
+-- | Divides a possibly scaled 'SQuantity' by a 'Unit' of the same physical dimension, obtaining the
+-- numerical value of the quantity expressed in that unit.
+(/~) :: forall s m d a b.(Real a, Fractional b,  E.MinCtxt s b) => SQuantity s d a -> Unit m d b -> b
+(Quantity x) /~ (Unit _ _ y) = ((realToFrac x) P.* s P./ y)
+  where
+    s = E.injMin (Proxy :: Proxy s)
 
--- | The least positive representable value in a given fixed-point scaled quantity type.
-epsilon :: (Integral a) => SQuantity s d a
-epsilon = Quantity 1
+{-
+
+Rescaling Operations
+
+-}
 
 -- | Rescales a fixed point quantity, accomodating changes both in its scale factor and its representation type.
 --
@@ -289,22 +272,62 @@ fixedPoint (x1:x2:xs) | x1 == x2  = x1
                       | otherwise = fixedPoint (x2:xs)
 
 {-
-We give '*~' and '/~' the same fixity as '*' and '/' defined below.
-Note that this necessitates the use of parenthesis when composing
-units using '*' and '/', e.g. "1 *~ (meter / second)".
+
+Useful Constant Values
+
 -}
 
-infixl 7  *~, /~
+{- $possibly-imprecise-constants
 
--- | Forms a possibly scaled 'SQuantity' by multipliying a number and a unit.
-(*~) :: forall s m d a b.(RealFrac a, Integral b, E.MinCtxt s a) => a -> Unit m d a -> SQuantity s d b
-x *~ (Unit _ _ y) = Quantity . round $ (x P.* y P./ s)
-  where
-    s = E.injMin (Proxy :: Proxy s)
+Note that, other than '_0' and 'epsilon', these constants may not be exactly representable with certain scale factors.
 
--- | Divides a possibly scaled 'SQuantity' by a 'Unit' of the same physical dimension, obtaining the
--- numerical value of the quantity expressed in that unit.
-(/~) :: forall s m d a b.(Real a, Fractional b,  E.MinCtxt s b) => SQuantity s d a -> Unit m d b -> b
-(Quantity x) /~ (Unit _ _ y) = ((realToFrac x) P.* s P./ y)
-  where
-    s = E.injMin (Proxy :: Proxy s)
+-}
+
+-- | The constant for zero is polymorphic, allowing
+-- it to express zero 'Length' or 'Capacitance' or 'Velocity' etc, in addition
+-- to the 'Dimensionless' value zero.
+_0 :: Num a => SQuantity s d a
+_0 = Quantity 0
+
+_1, _2, _3, _4, _5, _6, _7, _8, _9 :: (Integral a, E.KnownExactPi s) => SQuantity s DOne a
+_1 = rescale (epsilon :: SQuantity E.One DOne Integer)
+_2 = rescale (epsilon :: SQuantity (E.ExactNatural 2) DOne Integer)
+_3 = rescale (epsilon :: SQuantity (E.ExactNatural 3) DOne Integer)
+_4 = rescale (epsilon :: SQuantity (E.ExactNatural 4) DOne Integer)
+_5 = rescale (epsilon :: SQuantity (E.ExactNatural 5) DOne Integer)
+_6 = rescale (epsilon :: SQuantity (E.ExactNatural 6) DOne Integer)
+_7 = rescale (epsilon :: SQuantity (E.ExactNatural 7) DOne Integer)
+_8 = rescale (epsilon :: SQuantity (E.ExactNatural 8) DOne Integer)
+_9 = rescale (epsilon :: SQuantity (E.ExactNatural 9) DOne Integer)
+
+pi :: (Integral a, E.KnownExactPi s) => SQuantity s DOne a
+pi = rescale (epsilon :: SQuantity E.Pi DOne Integer)
+
+-- | Twice 'pi'.
+--
+-- For background on 'tau' see http://tauday.com/tau-manifesto (but also
+-- feel free to review http://www.thepimanifesto.com).
+tau :: (Integral a, E.KnownExactPi s) => SQuantity s DOne a
+tau = rescale (epsilon :: SQuantity (E.ExactNatural 2 E.* E.Pi) DOne Integer)
+
+-- | The least positive representable value in a given fixed-point scaled quantity type.
+epsilon :: (Integral a) => SQuantity s d a
+epsilon = Quantity 1
+
+{- $synonyms
+
+These type synonyms for commonly used fixed-point types are provided for convenience.
+
+-}
+
+-- | A dimensionless number with `n` fractional bits, using a representation of type `a`.
+type Q n a = SQuantity (E.One E./ (E.ExactNatural (2 N.^ n))) DOne a
+
+-- | A single-turn angle represented as a signed 8-bit integer.
+type Angle8  = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 7)))  DPlaneAngle Int8
+
+-- | A single-turn angle represented as a signed 16-bit integer.
+type Angle16 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 15))) DPlaneAngle Int16
+
+-- | A single-turn angle represented as a signed 32-bit integer.
+type Angle32 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 31))) DPlaneAngle Int32
