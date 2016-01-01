@@ -1,6 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
@@ -69,7 +70,9 @@ import Data.Ratio
 import qualified GHC.TypeLits as N
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.Internal
-import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), recip, negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau,)
+import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), recip, negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau, changeRep)
+import Numeric.Units.Dimensional.Variants hiding (type (*))
+import qualified Numeric.Units.Dimensional.UnitNames as Name
 import qualified Prelude as P
 
 {- $types
@@ -270,6 +273,40 @@ fixedPoint []                     = error "Fixed point of empty list."
 fixedPoint [x]                    = x
 fixedPoint (x1:x2:xs) | x1 == x2  = x1
                       | otherwise = fixedPoint (x2:xs)
+
+{-
+
+Changes of Representation
+
+-}
+
+-- | Convenient conversion between numerical types while retaining dimensional information.
+changeRep :: forall v1 v2 d a b.
+            (KnownVariant v1, KnownVariant v2, 
+             CompatibleVariants v1 v2,
+             E.MinCtxt (ScaleFactor v1 E./ ScaleFactor v2) b,
+             Real a, Fractional b) 
+          => Dimensional v1 d a -> Dimensional v2 d b
+changeRep = liftD (P.* s) ((P.* s') . realToFrac) Name.weaken
+  where
+    p :: Proxy (ScaleFactor v1 E./ ScaleFactor v2)
+    p = Proxy
+    s = E.exactPiVal p
+    s' = E.injMin p
+
+-- | Convenient conversion to types with `Integral` representations using `round`.
+changeRepRound :: forall v1 v2 d a b.
+                 (KnownVariant v1, KnownVariant v2, 
+                  CompatibleVariants v1 v2,
+                  E.MinCtxt (ScaleFactor v1 E./ ScaleFactor v2) a,
+                  RealFrac a, Integral b) 
+               => Dimensional v1 d a -> Dimensional v2 d b
+changeRepRound = liftD (P.* s) (round . (P.* s')) Name.weaken
+  where
+    p :: Proxy (ScaleFactor v1 E./ ScaleFactor v2)
+    p = Proxy
+    s = E.exactPiVal p
+    s' = E.injMin p
 
 {-
 

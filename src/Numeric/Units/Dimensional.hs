@@ -224,7 +224,7 @@ module Numeric.Units.Dimensional
     showIn,
     -- * On 'Functor', and Conversion Between Number Representations
     -- $functor
-    KnownVariant(dmap), changeRep, changeRepRound, changeRepApproximate,
+    KnownVariant(dmap), changeRep, changeRepApproximate,
     -- * Lenses
     -- $lenses
     asLens
@@ -235,7 +235,6 @@ import Prelude
   ( Eq(..), Num, Fractional, Floating, Real, RealFloat, Functor, fmap
   , (.), flip, (++), fromIntegral, fromInteger, fromRational, error, max, succ
   , Int, Integer, Integral, ($), uncurry, realToFrac, otherwise
-  , RealFrac, round
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
@@ -245,7 +244,6 @@ import Numeric.NumType.DK.Integers
   )
 import Data.Data
 import Data.ExactPi
-import qualified Data.ExactPi.TypeLevel as E
 import Data.Foldable (Foldable(foldr, foldl'))
 import Data.Maybe
 import Data.Ratio
@@ -646,33 +644,9 @@ If you feel your work requires this instance, it is provided as an orphan in "Nu
 
 -}
 
--- | Convenient conversion between numerical types while retaining dimensional information.
-changeRep :: forall v1 v2 d a b.
-            (KnownVariant v1, KnownVariant v2, 
-             CompatibleVariants v1 v2,
-             E.MinCtxt (ScaleFactor v1 E./ ScaleFactor v2) b,
-             Real a, Fractional b) 
-          => Dimensional v1 d a -> Dimensional v2 d b
-changeRep = liftD (Prelude.* s) ((Prelude.* s') . realToFrac) Name.weaken
-  where
-    p :: Proxy (ScaleFactor v1 E./ ScaleFactor v2)
-    p = Proxy
-    s = E.exactPiVal p
-    s' = E.injMin p
-
--- | Convenient conversion to types with `Integral` representations using `round`.
-changeRepRound :: forall v1 v2 d a b.
-                 (KnownVariant v1, KnownVariant v2, 
-                  CompatibleVariants v1 v2,
-                  E.MinCtxt (ScaleFactor v1 E./ ScaleFactor v2) a,
-                  RealFrac a, Integral b) 
-               => Dimensional v1 d a -> Dimensional v2 d b
-changeRepRound = liftD (Prelude.* s) (round . (Prelude.* s')) Name.weaken
-  where
-    p :: Proxy (ScaleFactor v1 E./ ScaleFactor v2)
-    p = Proxy
-    s = E.exactPiVal p
-    s' = E.injMin p
+ -- | Convenient conversion between numerical types while retaining dimensional information.
+changeRep :: (KnownVariant v, Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
+changeRep = dmap realToFrac
 
 -- | Convenient conversion from exactly represented values while retaining dimensional information.
 changeRepApproximate :: (KnownVariant v, Floating b) => Dimensional v d ExactPi -> Dimensional v d b
