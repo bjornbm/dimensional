@@ -644,7 +644,7 @@ If you feel your work requires this instance, it is provided as an orphan in "Nu
 
 -}
 
- -- | Convenient conversion between numerical types while retaining dimensional information.
+-- | Convenient conversion between numerical types while retaining dimensional information.
 changeRep :: (KnownVariant v, Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
 changeRep = dmap realToFrac
 
