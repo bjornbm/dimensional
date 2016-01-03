@@ -1,7 +1,7 @@
 vNext
 -----
-* Breaking: Changed Numeric.Units.Dimensional.Prelude to export a dimensionally
-  typed `recip` instead of the one from `Prelude`.
+* Breaking: Changed Numeric.Units.Dimensional.Prelude to export dimensionally
+  typed `recip` and `logBase` instead of the ones from `Prelude`.
 * Breaking: Changed Numeric.Units.Dimensional.Prelude to export `(.)` and `id`
   from `Control.Category` instead of from `Prelude`.
 * Breaking: Changed the `HasDimension` typeclass to require an instance of the new
