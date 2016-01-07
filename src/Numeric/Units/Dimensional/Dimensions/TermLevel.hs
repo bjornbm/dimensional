@@ -115,9 +115,11 @@ recip = (dOne /)
 
 -- | Takes the nth root of a dimension, if it exists.
 --
--- n must be positive.
+-- n must not be zero.
+--
+-- prop> nroot (negate n) d == nroot n (recip d)
 nroot :: Int -> Dimension' -> Maybe Dimension'
-nroot n d | n > 0 && all ((== 0) . snd) ds = fromList . fmap fst $ ds
+nroot n d | n /= 0 && all ((== 0) . snd) ds = fromList . fmap fst $ ds
           | otherwise                      = Nothing
   where
     ds = fmap (`divMod` n) . asList $ d
