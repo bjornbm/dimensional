@@ -40,6 +40,12 @@ import GHC.Generics
 import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), (&&), Int, Show, Eq(..), Ord(..), Maybe(..))
 import qualified Prelude as P
 
+-- $setup
+-- >>> import Prelude (negate)
+-- >>> import Control.Applicative
+-- >>> import Test.QuickCheck.Arbitrary
+-- >>> instance Arbitrary Dimension' where arbitrary = Dim' <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
+
 -- | A physical dimension, encoded as 7 integers, representing a factorization of the dimension into the
 -- 7 SI base dimensions. By convention they are stored in the same order as 
 -- in the 'Numeric.Units.Dimensional.Dimensions.TypeLevel.Dimension' data kind.
