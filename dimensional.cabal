@@ -63,7 +63,8 @@ library
                        Numeric.Units.Dimensional.Functor,
                        Numeric.Units.Dimensional.UnitNames,
                        Numeric.Units.Dimensional.UnitNames.InterchangeNames,
-                       Numeric.Units.Dimensional.Variants
+                       Numeric.Units.Dimensional.Variants,
+                       Numeric.Units.Dimensional.Float
   other-modules:       Numeric.Units.Dimensional.Internal,
                        Numeric.Units.Dimensional.UnitNames.Internal
 
