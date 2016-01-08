@@ -457,6 +457,8 @@ for units as well as quantities.
 -- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
 -- also reexported by "Numeric.Units.Dimensional.Prelude".
 --
+-- n must not be zero. Negative roots are defined such that @nroot (Proxy :: Proxy (Negate n)) x == nroot (Proxy :: Proxy n) (recip x)@.
+--
 -- Also available in operator form, see '^/'.
 nroot :: (KnownTypeInt n, Floating a)
       => Proxy n -> Quantity d a -> Quantity (Root d n) a
