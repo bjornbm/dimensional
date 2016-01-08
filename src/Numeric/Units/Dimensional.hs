@@ -473,7 +473,7 @@ We provide short-hands for the square and cubic roots.
 --
 -- The 'Root' type family will prevent application where the supplied quantity does not have a square dimension.
 --
--- prop> x >= _0 ==> sqrt (x :: Quantity DArea Double) == nroot pos2 x
+-- prop> (x :: Area Double) >= _0 ==> sqrt x == nroot pos2 x
 sqrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
 sqrt = nroot pos2
 
@@ -481,7 +481,7 @@ sqrt = nroot pos2
 --
 -- The 'Root' type family will prevent application where the supplied quantity does not have a cubic dimension.
 --
--- prop> x >= _0 ==> cbrt (x :: Quantity DVolume Double) == nroot pos3 x
+-- prop> (x :: Volume Double) >= _0 ==> cbrt x == nroot pos3 x
 cbrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos3) a
 cbrt = nroot pos3
 
