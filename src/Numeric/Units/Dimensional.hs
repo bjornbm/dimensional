@@ -102,28 +102,28 @@ we will get from GHC when performing invalid arithmetic. In the
 best case GHC will be able to use the type synonyms we have defined
 in its error messages.
 
->>> let x = 1 *~ meter + 1 *~ second
-...
-    Couldn't match type 'Numeric.NumType.DK.Integers.Zero
-                   with 'Numeric.NumType.DK.Integers.Pos1
-    Expected type: Unit 'Metric DLength a
-      Actual type: Unit 'Metric DTime a
-    In the second argument of `(*~)', namely `second'
-    In the second argument of `(+)', namely `1 *~ second'
+> let x = 1 *~ meter + 1 *~ second
+>
+> Couldn't match type 'Numeric.NumType.DK.Integers.Zero
+>                with 'Numeric.NumType.DK.Integers.Pos1
+> Expected type: Unit 'Metric DLength a
+>   Actual type: Unit 'Metric DTime a
+> In the second argument of `(*~)', namely `second'
+> In the second argument of `(+)', namely `1 *~ second'
 
 In other cases the error messages aren't very friendly.
 
->>> let x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
-...
-    Couldn't match type 'Numeric.NumType.DK.Integers.Zero
-                   with 'Numeric.NumType.DK.Integers.Neg1
-    Expected type: Quantity DMass a
-      Actual type: Dimensional
-                     ('DQuantity V.* 'DQuantity) (DLength / DTime) a
-    In the first argument of `(+)', namely `1 *~ meter / (1 *~ second)'
-    In the expression: 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
-    In an equation for `x':
-        x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+> let x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+>
+> Couldn't match type 'Numeric.NumType.DK.Integers.Zero
+>                with 'Numeric.NumType.DK.Integers.Neg1
+> Expected type: Quantity DMass a
+>   Actual type: Dimensional
+>                  ('DQuantity V.* 'DQuantity) (DLength / DTime) a
+> In the first argument of `(+)', namely `1 *~ meter / (1 *~ second)'
+> In the expression: 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+> In an equation for `x':
+>       x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
 
 It is the author's experience that the usefullness of the compiler
 error messages is more often than not limited to pinpointing the
