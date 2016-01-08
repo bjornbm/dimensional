@@ -31,8 +31,17 @@ isDenormalized :: RealFloat a => Quantity d a -> Bool
 isDenormalized = P.isDenormalized . unQuantity
 
 -- | 'True' if the representation of the argument is a number and is not infinite.
+--
+-- >>> isFiniteNumber (_1 / _0)
+-- False
+--
+-- >>> isFiniteNumber (_0 / _0)
+-- False
+--
+-- >>> isFiniteNumber (_3 / _2)
+-- True
 isFiniteNumber :: RealFloat a => Quantity d a -> Bool
-isFiniteNumber = not . liftA2 (&&) isNaN isInfinite
+isFiniteNumber = not . liftA2 (||) isNaN isInfinite
 
 -- | 'True' if the representation of the argument is an IEEE infinity or negative infinity.
 isInfinite :: RealFloat a => Quantity d a -> Bool
