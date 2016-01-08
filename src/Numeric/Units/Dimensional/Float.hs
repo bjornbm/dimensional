@@ -57,6 +57,10 @@ isNegativeZero = P.isNegativeZero . unQuantity
 
 -- | Multiplies a floating-point quantity by an integer power of the radix of the representation type.
 --
--- Use 'P.floatRadix' to determine the radix. 
+-- Use 'P.floatRadix' to determine the radix.
+--
+-- >>> let x = 3.7 *~ meter
+-- >>> scaleFloat 3 x == _8 * x
+-- True
 scaleFloat :: RealFloat a => Int -> Quantity d a -> Quantity d a
 scaleFloat x = Quantity . P.scaleFloat x . unQuantity

@@ -18,6 +18,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
+
 {- |
    Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
    License    : BSD3
@@ -96,49 +97,33 @@ function for calculating the escape velocity of a celestial body
 >       two = 2 *~ one
 >       g = 6.6720e-11 *~ (newton * meter ^ pos2 / kilo gram ^ pos2)
 
-The following is an example GHC session where the above function
-is used to calculate the escape velocity of Earth in kilometer per
-second.
-
->>> :set +t
->>> let me = 5.9742e24 *~ kilo gram -- Mass of Earth.
-me :: Quantity DMass GHC.Float.Double
->>> let re = 6372.792 *~ kilo meter -- Mean radius of Earth.
-re :: Quantity DLength GHC.Float.Double
->>> let ve = escapeVelocity me re   -- Escape velocity of Earth.
-ve :: Velocity GHC.Float.Double
->>> ve /~ (kilo meter / second)
-11.184537332296259
-it :: GHC.Float.Double
-
 For completeness we should also show an example of the error messages
 we will get from GHC when performing invalid arithmetic. In the
 best case GHC will be able to use the type synonyms we have defined
 in its error messages.
 
->>> x = 1 *~ meter + 1 *~ second
-Couldn't match type 'Numeric.NumType.DK.Integers.Zero
-               with 'Numeric.NumType.DK.Integers.Pos1
-  Expected type: Unit 'Metric DLength a
-    Actual type: Unit 'Metric DTime a
-  In the second argument of `(*~)', namely `second'
-  In the second argument of `(+)', namely `1 *~ second'
+>>> let x = 1 *~ meter + 1 *~ second
+...
+    Couldn't match type 'Numeric.NumType.DK.Integers.Zero
+                   with 'Numeric.NumType.DK.Integers.Pos1
+    Expected type: Unit 'Metric DLength a
+      Actual type: Unit 'Metric DTime a
+    In the second argument of `(*~)', namely `second'
+    In the second argument of `(+)', namely `1 *~ second'
 
 In other cases the error messages aren't very friendly.
 
->>> x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
-Couldn't match type 'Numeric.NumType.DK.Integers.Zero
-               with 'Numeric.NumType.DK.Integers.Neg1
-  Expected type: Quantity DMass a
-    Actual type: Dimensional
-                   ('Numeric.Units.Dimensional.Variants.DQuantity
-                    Numeric.Units.Dimensional.Variants.* 'Numeric.Units.Dimensional.Variants.DQuantity)
-                   (DLength / DTime)
-                   a
-  In the first argument of `(+)', namely `1 *~ meter / (1 *~ second)'
-  In the expression: 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
-  In an equation for `x':
-      x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+>>> let x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+...
+    Couldn't match type 'Numeric.NumType.DK.Integers.Zero
+                   with 'Numeric.NumType.DK.Integers.Neg1
+    Expected type: Quantity DMass a
+      Actual type: Dimensional
+                     ('DQuantity V.* 'DQuantity) (DLength / DTime) a
+    In the first argument of `(+)', namely `1 *~ meter / (1 *~ second)'
+    In the expression: 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+    In an equation for `x':
+        x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
 
 It is the author's experience that the usefullness of the compiler
 error messages is more often than not limited to pinpointing the
@@ -253,6 +238,14 @@ import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, streng
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.Variants hiding (type (*))
 import qualified Numeric.Units.Dimensional.Variants as V
+
+-- $setup
+-- >>> :set -XFlexibleInstances
+-- >>> :set -XNoImplicitPrelude
+-- >>> import Test.QuickCheck.Arbitrary
+-- >>> import Numeric.Units.Dimensional.Prelude
+-- >>> import Numeric.Units.Dimensional.Float
+-- >>> instance Arbitrary a => Arbitrary (Quantity d a) where arbitrary = fmap Quantity arbitrary
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -478,7 +471,7 @@ We provide short-hands for the square and cubic roots.
 --
 -- The 'Root' type family will prevent application where the supplied quantity does not have a square dimension.
 --
--- prop> sqrt x == nroot pos2 x
+-- prop> x >= _0 ==> sqrt (x :: Quantity DArea Double) == nroot pos2 x
 sqrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
 sqrt = nroot pos2
 
@@ -486,7 +479,7 @@ sqrt = nroot pos2
 --
 -- The 'Root' type family will prevent application where the supplied quantity does not have a cubic dimension.
 --
--- prop> cbrt x == nroot pos3 x
+-- prop> x >= _0 ==> cbrt (x :: Quantity DVolume Double) == nroot pos3 x
 cbrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos3) a
 cbrt = nroot pos3
 

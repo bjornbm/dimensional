@@ -80,6 +80,18 @@ test-suite tests
                        HUnit,
                        base
 
+test-suite doctests
+  type:                exitcode-stdio-1.0
+  ghc-options:         -threaded
+  main-is:             DocTests.hs
+  hs-source-dirs:      tests
+  build-depends:       dimensional,
+                       doctest,
+                       Glob,
+                       QuickCheck,
+                       template-haskell,
+                       base
+
 benchmark simple
   type:                exitcode-stdio-1.0
   hs-source-dirs:      benchmarks
