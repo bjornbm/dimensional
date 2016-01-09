@@ -20,6 +20,8 @@ vNext
 * Added the `DynQuantity` type to represent possibly valid quantities of statically
   unknown dimension, suitable for performing arithmetic with such quantities.
 * Added `nroot` function for term-level dimensions.
+* Added the Numeric.Units.Dimensional.Float module with convenient wrappers around functions
+  from RealFloat for inspecting floating point quantities.
 * Relocated git repository to https://github.com/bjornbm/dimensional
 
 1.0.1.1 (2015-11)
