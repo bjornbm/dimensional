@@ -125,7 +125,7 @@ In other cases the error messages aren't very friendly.
 > In an equation for `x':
 >       x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
 
-It is the author's experience that the usefullness of the compiler
+It is the author's experience that the usefulness of the compiler
 error messages is more often than not limited to pinpointing the
 location of errors.
 
@@ -168,7 +168,7 @@ particularly noteworthy.
 -}
 
 module Numeric.Units.Dimensional
-  ( 
+  (
     -- * Types
     -- $types
     Dimensional,
@@ -403,7 +403,7 @@ recip = liftQ Prelude.recip
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
 -- Because the power chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
--- of the exponent in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- of the exponent in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ...
 -- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
 -- also reexported by "Numeric.Units.Dimensional.Prelude".
 --
@@ -449,11 +449,11 @@ for units as well as quantities.
 -}
 
 -- | Computes the nth root of a 'Quantity' using 'Prelude.**'.
--- 
+--
 -- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
 --
 -- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
--- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ...
 -- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
 -- also reexported by "Numeric.Units.Dimensional.Prelude".
 --
@@ -491,11 +491,11 @@ prefer such.
 -}
 
 -- | Computes the nth root of a 'Quantity' using 'Prelude.**'.
--- 
+--
 -- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
 --
 -- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
--- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ...
 -- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
 -- also reexported by "Numeric.Units.Dimensional.Prelude".
 --
@@ -541,7 +541,7 @@ dimensionlessLength x = (fromIntegral $ length x) *~ one
     -- Once base-4.6. compatibility is abandoned this where clause can
     -- be deleted (and imports adjusted).
     length :: Foldable t => t a -> Int
-    length = foldl' (\c _ -> c Prelude.+ 1) 0 
+    length = foldl' (\c _ -> c Prelude.+ 1) 0
 
 -- | Returns a list of quantities between given bounds.
 nFromTo :: (Fractional a, Integral b) => Quantity d a -- ^ The initial value.
@@ -592,7 +592,7 @@ atan2 = liftQ2 Prelude.atan2
 The only unit we will define in this module is 'one'.
 -}
 
--- | The unit 'one' has dimension 'DOne' and is the base unit of dimensionless values. 
+-- | The unit 'one' has dimension 'DOne' and is the base unit of dimensionless values.
 --
 -- As detailed in 7.10 "Values of quantities expressed simply as numbers:
 -- the unit one, symbol 1" of <#note1 [1]> the unit one generally does not
@@ -657,7 +657,7 @@ These functions are compatible with the lens library.
 -}
 
 -- | Converts a 'Unit' into a lens from 'Quantity's to values.
-asLens :: (Fractional a) => Unit m d a 
+asLens :: (Fractional a) => Unit m d a
                          -> (forall f.Functor f => (a -> f a)
                                                 -> Quantity d a
                                                 -> f (Quantity d a))
@@ -670,13 +670,13 @@ we provide a means for converting from type-level dimensions to term-level dimen
 -}
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
--- 
+--
 -- Use this variant when the scale factor of the resulting unit is irrational or 'Approximate'. See 'mkUnitQ' for when it is rational
 -- and 'mkUnitZ' for when it is an integer.
 --
 -- Note that supplying zero as a definining quantity is invalid, as the library relies
 -- upon units forming a group under multiplication.
--- 
+--
 -- Supplying negative defining quantities is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
 mkUnitR :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
@@ -692,9 +692,9 @@ mkUnitR n s' (Unit _ s x) | isExactZero s = error "Supplying zero as a conversio
 mkUnitQ :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
 mkUnitQ n s' (Unit _ s _) | s' == 0                       = error "Supplying zero as a conversion factor is not valid."
                           | Just q <- toExactRational s'' = Unit n s'' (fromRational q)
-                          | otherwise                     = error "The resulting conversion factor is not an exact rational." 
+                          | otherwise                     = error "The resulting conversion factor is not an exact rational."
   where
-    s'' = fromRational s' Prelude.* s                               
+    s'' = fromRational s' Prelude.* s
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 --
