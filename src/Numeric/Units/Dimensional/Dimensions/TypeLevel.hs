@@ -111,9 +111,7 @@ type family (d::Dimension) ^ (x::TypeInt) where
     = 'Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
 
 -- | Roots of dimensions corresponds to division of the base dimensions'
--- exponents by the order(?) of the root.
--- 
--- See 'sqrt', 'cbrt', and 'nroot' for the corresponding term-level operations.
+-- exponents by the order of the root.
 type family Root (d::Dimension) (x::TypeInt) where
   Root DOne x = DOne
   Root d 'Pos1 = d
