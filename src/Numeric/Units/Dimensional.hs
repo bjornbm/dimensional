@@ -566,6 +566,19 @@ dimensionlessLength :: (Num a, Foldable f) => f b -> Dimensionless a
 dimensionlessLength x = (fromIntegral $ length x) *~ one
 
 -- | Returns a list of quantities between given bounds.
+--
+-- prop> n <= 0 ==> nFromTo (x :: Mass Double) (y :: Mass Double) n == [x, y]
+--
+-- prop> (x :: Length Double) <= (y :: Length Double) ==> all (\z -> x <= z && z <= y) (nFromTo x y n)
+--
+-- >>> nFromTo _0 _3 2
+-- [0.0,1.0,2.0,3.0]
+--
+-- >>> nFromTo _1 _0 7
+-- [1.0,0.875,0.75,0.625,0.5,0.375,0.25,0.125,0.0]
+--
+-- >>> nFromTo _0 _1 (-5)
+-- [0.0,1.0]
 nFromTo :: (Fractional a, Integral b) => Quantity d a -- ^ The initial value.
                                       -> Quantity d a -- ^ The final value.
                                       -> b -- ^ The number of intermediate values. If less than one, no intermediate values will result.
