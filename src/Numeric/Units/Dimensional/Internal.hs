@@ -50,6 +50,10 @@ import Prelude
   , show, otherwise, undefined, error, fmap
   )
 
+-- $setup
+-- >>> :set -XNoImplicitPrelude
+-- >>> import Numeric.Units.Dimensional.Prelude
+
 -- | A unit of measurement.
 type Unit (m :: Metricality) = Dimensional ('DUnit m)
 
@@ -198,6 +202,9 @@ instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
   show = showIn siUnit
 
 -- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
+--
+-- >>> showIn watt $ (37 *~ volt) * (4 *~ ampere)
+-- "148.0 W"
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
 showIn (Unit n _ y) (Quantity x) | Name.weaken n == nOne = show (x / y)
                                  | otherwise             = (show (x / y)) ++ " " ++ (show n)

@@ -245,6 +245,7 @@ import qualified Numeric.Units.Dimensional.Variants as V
 -- >>> import Test.QuickCheck.Arbitrary
 -- >>> import Numeric.Units.Dimensional.Prelude
 -- >>> import Numeric.Units.Dimensional.Float
+-- >>> import Numeric.Units.Dimensional.NonSI
 -- >>> instance Arbitrary a => Arbitrary (Quantity d a) where arbitrary = fmap Quantity arbitrary
 
 {-
@@ -523,10 +524,19 @@ xs /~~ u = fmap (/~ u) xs
 infixl 7  *~~, /~~
 
 -- | The sum of all elements in a list.
+--
+-- >>> sum ([] :: [Mass Double])
+-- 0.0 kg
+--
+-- >>> sum [12.4 *~ meter, 1 *~ foot]
+-- 12.7048 m
 sum :: (Num a, Foldable f) => f (Quantity d a) -> Quantity d a
 sum = foldr (+) _0
 
 -- | The arithmetic mean of all elements in a list.
+--
+-- >>> mean [pi, _7]
+-- 5.070796326794897
 mean :: (Fractional a, Foldable f) => f (Quantity d a) -> Quantity d a
 mean = uncurry (/) . foldr accumulate (_0, _0)
   where
@@ -534,6 +544,9 @@ mean = uncurry (/) . foldr accumulate (_0, _0)
 
 -- | The length of the foldable data structure as a 'Dimensionless'.
 -- This can be useful for purposes of e.g. calculating averages.
+--
+-- >>> dimensionlessLength [_0, pi, _7]
+-- 3.0
 dimensionlessLength :: (Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a
 dimensionlessLength x = (fromIntegral $ length x) *~ one
   where
@@ -608,9 +621,9 @@ good measure.
 
 -}
 
--- | The constant for zero is polymorphic, allowing
--- it to express zero 'Length' or 'Capacitance' or 'Velocity' etc, in addition
--- to the 'Dimensionless' value zero.
+-- | The constant for zero is polymorphic, allowing it to express zero 'Length' or
+-- 'Numeric.Units.Dimensional.Quantities.Capacitance' or 'Numeric.Units.Dimensional.Quantities.Velocity' etc,
+-- in addition to the 'Dimensionless' value zero.
 _0 :: Num a => Quantity d a
 _0 = Quantity 0
 
