@@ -398,6 +398,9 @@ Multiplication, division and powers apply to both units and quantities.
 (/) = liftD2 (Prelude./) (Prelude./) (Name./)
 
 -- | Forms the reciprocal of a 'Quantity', which has the reciprocal dimension.
+--
+-- >>> recip $ 47 *~ hertz
+-- 2.127659574468085e-2 s
 recip :: (Fractional a) => Quantity d a -> Quantity (Recip d) a
 recip = liftQ Prelude.recip
 
