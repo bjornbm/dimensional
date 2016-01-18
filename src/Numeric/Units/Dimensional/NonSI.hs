@@ -115,27 +115,60 @@ poundMass, ounce :: Fractional a => Unit 'NonMetric DMass a
 poundMass = mkUnitQ (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
 ounce     = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
 
+-- | The pound-force is equal to the gravitational force exerted on a mass
+-- of one avoirdupois pound on the surface of Earth.
+--
+-- This definition is based on standard gravity (the 'gee') and the
+-- international avoirdupois 'poundMass'.
+--
+-- See <https://en.wikipedia.org/wiki/Pound_%28force%29 here> for further information.
+--
+-- >>> 1 *~ poundForce
+-- 4.4482216152605 m kg s^-2
+--
+-- >>> 1 *~ poundForce :: Force Rational
+-- 8896443230521 % 2000000000000 m kg s^-2
 poundForce :: Fractional a => Unit 'NonMetric DForce a
-poundForce = mkUnitQ (ucum "[lbf_av]" "lbf" "pound force") 1 $ poundMass * gee  -- 4.4482 N
+poundForce = mkUnitQ (ucum "[lbf_av]" "lbf" "pound force") 1 $ poundMass * gee
 
+-- | One mechanical horsepower is by definition the power necessary
+-- to apply a force of 550 'poundForce' through a distance of one 'foot'
+-- per 'second'.
+--
+-- See <https://en.wikipedia.org/wiki/Horsepower#Mechanical_horsepower here> for further information.
+--
+-- >>> 1 *~ horsepower
+-- 745.6998715822702 m^2 kg s^-3
+--
+-- >>> 1 *~ horsepower :: Power Rational
+-- 37284993579113511 % 50000000000000 m^2 kg s^-3
 horsepower :: Fractional a => Unit 'NonMetric DPower a
 horsepower = mkUnitQ (ucum "[HP]" "hp" "horsepower") 550 $ foot * poundForce / second
 
-{-
-
-The slug is an alternative unit of mass defined in terms of the pound-force.
-
--}
-
+-- | The slug is a unit of mass associated with Imperial units and United States customary units.
+-- It is a mass that accelerates by 1 foot per second per second when a force of one pound is exerted on it.
+--
+-- This definition is based on standard gravity (the 'gee'), the international 'foot', and the international avoirdupois 'poundMass'.
+--
+-- See <https://en.wikipedia.org/wiki/Slug_%28mass%29 here> for further information.
+--
+-- >>> 1 *~ slug
+-- 14.593902937206364 kg 
+--
+-- >>> 1 *~ slug :: Mass Rational
+-- 8896443230521 % 609600000000 kg
 slug :: Fractional a => Unit 'NonMetric DMass a
 slug = mkUnitQ (dimensionalAtom "slug" "slug" "slug") 1 $ poundForce * (second^pos2) / foot
 
-{-
-
-Pounds of force per square inch.
-
--}
-
+-- | One psi is a pressure of one 'poundForce' per 'square' 'inch' of area.
+--
+-- See <https://en.wikipedia.org/wiki/Pounds_per_square_inch here> for further information.
+--
+-- >>> 1 *~ psi
+-- 6894.757293168362 m^-1 kg s^-2
+--
+-- >>> 1 *~ psi :: Pressure Rational
+-- 8896443230521 % 1290320000 m^-1 kg s^-2
 psi :: Fractional a => Unit 'NonMetric DPressure a
 psi = mkUnitQ (ucum "[psi]" "psi" "pound per square inch") 1 $ poundForce / inch ^ pos2
 
