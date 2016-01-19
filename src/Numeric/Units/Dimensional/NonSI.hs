@@ -221,6 +221,12 @@ We include some of the common ones here. 'psi' was defined earlier.
 -- From Wikipedia:
 --
 --  It is about equal to the atmospheric pressure on Earth at sea level.
+--
+-- >>> 1 *~ bar
+-- 100000.0 m^-1 kg s^-2
+--
+-- >>> 1 *~ bar :: Pressure Rational
+-- 100000 % 1 m^-1 kg s^-2
 bar :: (Num a) => Unit 'Metric DPressure a
 bar = mkUnitZ (ucumMetric "bar" "bar" "bar") 1e5 $ pascal
 
@@ -231,6 +237,11 @@ bar = mkUnitZ (ucumMetric "bar" "bar" "bar") 1e5 $ pascal
 --  The standard atmosphere (atm) is an established constant. It is
 --  approximately equal to typical air pressure at earth mean sea
 --  level.
+--
+-- >>> 1 *~ atmosphere
+-- 101325.0 m^-1 kg s^-2
+-- >>> 1 *~ atmosphere :: Pressure Rational
+-- 101325 % 1 m^-1 kg s^-2
 atmosphere :: (Num a) => Unit 'NonMetric DPressure a
 atmosphere = mkUnitZ (ucum "atm" "atm" "standard atmosphere") 101325 $ pascal
 
@@ -240,6 +251,11 @@ atmosphere = mkUnitZ (ucum "atm" "atm" "standard atmosphere") 101325 $ pascal
 --
 --  A technical atmosphere (symbol: at) is a non-SI unit of pressure equal
 --  to one kilogram-force per square centimeter.
+--
+-- >>> 1 *~ technicalAtmosphere
+-- 98066.5 m^-1 kg s^-2
+-- >>> 1 *~ technicalAtmosphere :: Pressure Rational
+-- 196133 % 2 m^-1 kg s^-2
 technicalAtmosphere :: (Fractional a) => Unit 'NonMetric DPressure a
 technicalAtmosphere = mkUnitQ (ucum "att" "at" "technical atmosphere") 1 $ kilo gram * gee * centi meter ^ neg2
 
@@ -250,7 +266,7 @@ technicalAtmosphere = mkUnitQ (ucum "att" "at" "technical atmosphere") 1 $ kilo 
 --  The pressure exerted at the base of a column of fluid exactly 1 mm high,
 --  when the density of the fluid is exactly 13.5951 g/cm^3, at a place
 --  where the acceleration of gravity is exactly 9.80665 m/s^2.
-
+--
 -- The chosen fluid density approximately corresponds to that of mercury
 -- at 0 deg. Under most conditions, 1 mmHg is approximately equal to 1 'torr'.
 mmHg :: (Floating a) => Unit 'NonMetric DPressure a
