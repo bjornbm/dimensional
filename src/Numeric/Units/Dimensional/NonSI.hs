@@ -240,6 +240,7 @@ bar = mkUnitZ (ucumMetric "bar" "bar" "bar") 1e5 $ pascal
 --
 -- >>> 1 *~ atmosphere
 -- 101325.0 m^-1 kg s^-2
+--
 -- >>> 1 *~ atmosphere :: Pressure Rational
 -- 101325 % 1 m^-1 kg s^-2
 atmosphere :: (Num a) => Unit 'NonMetric DPressure a
@@ -254,6 +255,7 @@ atmosphere = mkUnitZ (ucum "atm" "atm" "standard atmosphere") 101325 $ pascal
 --
 -- >>> 1 *~ technicalAtmosphere
 -- 98066.5 m^-1 kg s^-2
+--
 -- >>> 1 *~ technicalAtmosphere :: Pressure Rational
 -- 196133 % 2 m^-1 kg s^-2
 technicalAtmosphere :: (Fractional a) => Unit 'NonMetric DPressure a
