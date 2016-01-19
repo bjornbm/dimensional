@@ -87,8 +87,10 @@ had a combined uncertainty of 0.0000010e-27 kg.
 
 electronVolt :: Floating a => Unit 'Metric DEnergy a
 electronVolt = mkUnitR (ucumMetric "eV" "eV" "electron volt") (Approximate 1.60217733e-19) $ joule
+
 unifiedAtomicMassUnit :: Floating a => Unit 'Metric DMass a
 unifiedAtomicMassUnit = mkUnitR (ucumMetric "u" "u" "atomic mass unit") (Approximate 1.6605402e-27) $ kilo gram
+
 dalton :: Floating a => Unit 'Metric DMass a
 dalton = mkUnitR (ucumMetric "eV" "Da" "Dalton") 1 $ unifiedAtomicMassUnit
 
@@ -107,13 +109,20 @@ gee = mkUnitQ (ucumMetric "[g]" "g" "gee") 9.80665 $ meter / second ^ pos2
 Some US customary (that is, inch-pound) units.
 -}
 
-inch, foot, mil :: Fractional a => Unit 'NonMetric DLength a
+inch :: Fractional a => Unit 'NonMetric DLength a
 inch = mkUnitQ (ucum "[in_i]" "in" "inch") 2.54 $ centi meter
-foot = mkUnitQ (ucum "[ft_i]" "ft" "foot") 12 $ inch     -- 0.3048 m
-mil  = mkUnitQ (ucum "[mil_i]" "mil" "mil") 0.001 $ inch
-poundMass, ounce :: Fractional a => Unit 'NonMetric DMass a
+
+foot :: Fractional a => Unit 'NonMetric DLength a
+foot = mkUnitQ (ucum "[ft_i]" "ft" "foot") 12 $ inch
+
+mil :: Fractional a => Unit 'NonMetric DLength a
+mil = mkUnitQ (ucum "[mil_i]" "mil" "mil") 0.001 $ inch
+
+poundMass :: Fractional a => Unit 'NonMetric DMass a
 poundMass = mkUnitQ (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
-ounce     = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
+
+ounce :: Fractional a => Unit 'NonMetric DMass a
+ounce = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
 
 -- | The pound-force is equal to the gravitational force exerted on a mass
 -- of one avoirdupois pound on the surface of Earth.
@@ -178,19 +187,27 @@ psi = mkUnitQ (ucum "[psi]" "psi" "pound per square inch") 1 $ poundForce / inch
 
 -}
 
-yard, mile :: (Fractional a) => Unit 'NonMetric DLength a
+yard :: (Fractional a) => Unit 'NonMetric DLength a
 yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 3 $ foot
+
+mile :: (Fractional a) => Unit 'NonMetric DLength a
 mile = mkUnitQ (ucum "[mi_i]" "mi" "mile") 5280 $ foot
+
 nauticalMile :: (Num a) => Unit 'NonMetric DLength a
 nauticalMile = mkUnitZ (ucum "[nmi_i]" "NM" "nautical mile") 1852 $ meter
+
 knot :: (Fractional a) => Unit 'NonMetric DVelocity a
 knot = mkUnitQ (ucum "[kt_i]" "kt" "knot") 1 $ nauticalMile / hour
+
 revolution :: (Floating a) => Unit 'NonMetric DOne a
 revolution = mkUnitR (dimensionalAtom "rev" "rev" "revolution") (2 Prelude.* Prelude.pi) $ radian
+
 solid :: (Floating a) => Unit 'NonMetric DOne a
 solid = mkUnitR (dimensionalAtom "solid" "solid" "solid") (4 Prelude.* Prelude.pi) $ steradian
+
 teaspoon :: (Fractional a) => Unit 'NonMetric DVolume a
 teaspoon = mkUnitQ (ucum "[tsp_m]" "tsp" "teaspoon") 5 $ milli liter
+
 acre :: (Fractional a) => Unit 'NonMetric DArea a
 acre = mkUnitQ (ucum "[acr_us]" "ac" "acre") 43560 $ square foot
 
@@ -207,8 +224,10 @@ constraint, and also provide a Julian century.
 
 -}
 
-year, century :: Num a => Unit 'NonMetric DTime a
+year :: Num a => Unit 'NonMetric DTime a
 year    = mkUnitZ (ucum "a_j" "a" "mean Julian year") 31557600 $ second
+
+century :: Num a => Unit 'NonMetric DTime a
 century = mkUnitZ (dimensionalAtom "c_j" "cen" "mean Julian century") 100 $ year
 
 {- $pressure-units
@@ -329,25 +348,43 @@ degreeRankine = mkUnitQ (ucum "[degR]" "°R" "degree Rankine") 1 $ degreeFahrenh
 Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki/Cup_(unit)#Imperial_cup.
 -}
 
-imperialGallon, imperialQuart, imperialPint, imperialCup,
-                imperialGill, imperialFluidOunce
-                :: (Fractional a) => Unit 'NonMetric DVolume a
-imperialGallon     = mkUnitQ (ucum "[gal_br]" "gal" "gallon")         4.54609          $ liter
-imperialQuart      = mkUnitQ (ucum "[qt_br]" "qt" "quart")            (1 Prelude./ 4)  $ imperialGallon
-imperialPint       = mkUnitQ (ucum "[pt_br]" "pt" "pint")             (1 Prelude./ 8)  $ imperialGallon
-imperialCup        = mkUnitQ (dimensionalAtom "[cup_br]" "cup" "cup") 0.5              $ imperialPint
-imperialGill       = mkUnitQ (ucum "[gil_br]" "gill" "gill")          (1 Prelude./ 4)  $ imperialPint
-imperialFluidOunce = mkUnitQ (ucum "[foz_br]" "fl oz" "fluid ounce")  (1 Prelude./ 20) $ imperialPint
+imperialGallon :: (Fractional a) => Unit 'NonMetric DVolume a
+imperialGallon = mkUnitQ (ucum "[gal_br]" "gal" "gallon") 4.54609 $ liter
+
+imperialQuart :: (Fractional a) => Unit 'NonMetric DVolume a
+imperialQuart = mkUnitQ (ucum "[qt_br]" "qt" "quart") (1 Prelude./ 4) $ imperialGallon
+
+imperialPint :: (Fractional a) => Unit 'NonMetric DVolume a
+imperialPint = mkUnitQ (ucum "[pt_br]" "pt" "pint") (1 Prelude./ 8) $ imperialGallon
+
+imperialCup :: (Fractional a) => Unit 'NonMetric DVolume a
+imperialCup = mkUnitQ (dimensionalAtom "[cup_br]" "cup" "cup") 0.5 $ imperialPint
+
+imperialGill :: (Fractional a) => Unit 'NonMetric DVolume a
+imperialGill = mkUnitQ (ucum "[gil_br]" "gill" "gill") (1 Prelude./ 4) $ imperialPint
+
+imperialFluidOunce :: (Fractional a) => Unit 'NonMetric DVolume a
+imperialFluidOunce = mkUnitQ (ucum "[foz_br]" "fl oz" "fluid ounce") (1 Prelude./ 20) $ imperialPint
 
 {- $us-customary-volumes
 Per http://www.nist.gov/pml/wmd/pubs/upload/2012-hb44-final.pdf page 452 and http://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume
 Note that there exist rarely-used "dry" variants of units with overlapping names.
 -}
 
-usGallon, usQuart, usPint, usCup, usGill, usFluidOunce :: (Fractional a) => Unit 'NonMetric DVolume a
-usGallon     = mkUnitQ (ucum "[gal_us]" "gal" "gallon")        231              $ (cubic inch)
-usQuart      = mkUnitQ (ucum "[qt_us]" "qt" "quart")           (1 Prelude./ 4)  $ usGallon
-usPint       = mkUnitQ (ucum "[pt_us]" "pt" "pint")            (1 Prelude./ 8)  $ usGallon
-usCup        = mkUnitQ (ucum "[cup_us]" "cup" "cup")           (1 Prelude./ 2)  $ usPint
-usGill       = mkUnitQ (ucum "[gil_us]" "gill" "gill")         (1 Prelude./ 4)  $ usPint
+usGallon :: (Fractional a) => Unit 'NonMetric DVolume a
+usGallon = mkUnitQ (ucum "[gal_us]" "gal" "gallon") 231 $ (cubic inch)
+
+usQuart :: (Fractional a) => Unit 'NonMetric DVolume a
+usQuart = mkUnitQ (ucum "[qt_us]" "qt" "quart") (1 Prelude./ 4) $ usGallon
+
+usPint :: (Fractional a) => Unit 'NonMetric DVolume a
+usPint = mkUnitQ (ucum "[pt_us]" "pt" "pint") (1 Prelude./ 8) $ usGallon
+
+usCup :: (Fractional a) => Unit 'NonMetric DVolume a
+usCup = mkUnitQ (ucum "[cup_us]" "cup" "cup") (1 Prelude./ 2) $ usPint
+
+usGill :: (Fractional a) => Unit 'NonMetric DVolume a
+usGill = mkUnitQ (ucum "[gil_us]" "gill" "gill") (1 Prelude./ 4) $ usPint
+
+usFluidOunce :: (Fractional a) => Unit 'NonMetric DVolume a
 usFluidOunce = mkUnitQ (ucum "[foz_us]" "fl oz" "fluid ounce") (1 Prelude./ 16) $ usPint -- sic, does not match factor used in imperial system
