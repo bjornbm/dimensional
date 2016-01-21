@@ -193,9 +193,29 @@ yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 3 $ foot
 mile :: (Fractional a) => Unit 'NonMetric DLength a
 mile = mkUnitQ (ucum "[mi_i]" "mi" "mile") 5280 $ foot
 
+-- | One nautical mile is a unit of length, set by international agreement as being exactly 1,852 meters.
+--
+-- Historically, it was defined as the distance spanned by one minute of arc along a meridian of the Earth.
+--
+-- See <https://en.wikipedia.org/wiki/Nautical_mile here> for further information.
+--
+-- >>> 1 *~ nauticalMile
+-- 1852.0 m
+--
+-- >>> 1 *~ nauticalMile :: Length Rational
+-- 1852 % 1 m
 nauticalMile :: (Num a) => Unit 'NonMetric DLength a
 nauticalMile = mkUnitZ (ucum "[nmi_i]" "NM" "nautical mile") 1852 $ meter
 
+-- | One knot is a velocity equal to one 'nauticalMile' per 'hour'.
+--
+-- See <https://en.wikipedia.org/wiki/Knot_%28unit%29 here> for further information.
+--
+-- >>> 1 *~ knot
+-- 0.5144444444444445 m s^-1
+--
+-- >>> 1 *~ knot :: Velocity Rational
+-- 463 % 900 m s^-1
 knot :: (Fractional a) => Unit 'NonMetric DVelocity a
 knot = mkUnitQ (ucum "[kt_i]" "kt" "knot") 1 $ nauticalMile / hour
 
