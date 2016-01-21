@@ -27,7 +27,7 @@ module Numeric.Units.Dimensional.Dimensions.TypeLevel
   -- * Kind of Type-Level Dimensions
   type Dimension(..),
   -- * Dimension Arithmetic
-  type (*), type (/), type (^), type Recip, type Root,
+  type (*), type (/), type (^), type Recip, type Root, type Sqrt, type Cbrt,
   -- * Synonyms for Base Dimensions
   DOne,
   DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
@@ -38,7 +38,7 @@ where
 
 import Data.Proxy
 import Numeric.NumType.DK.Integers
-  ( TypeInt (Zero, Pos1), (+)(), (-)()
+  ( TypeInt (Zero, Pos1, Pos2, Pos3), (+)(), (-)()
   , KnownTypeInt, toNum
   )
 import qualified Numeric.NumType.DK.Integers as N
@@ -117,6 +117,12 @@ type family Root (d::Dimension) (x::TypeInt) where
   Root d 'Pos1 = d
   Root ('Dim l  m  t  i  th  n  j) x
     = 'Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
+
+-- | Square root is a special case of 'Root' with order 2.
+type Sqrt d = Root d 'Pos2
+
+-- | Cubic root is a special case of 'Root' with order 3.
+type Cbrt d = Root d 'Pos3
 
 -- | A KnownDimension is one for which we can construct a term-level representation.
 -- Each validly constructed type of kind 'Dimension' has a 'KnownDimension' instance.

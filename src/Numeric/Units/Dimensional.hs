@@ -179,7 +179,7 @@ module Numeric.Units.Dimensional
     Dimension (Dim),
     -- ** Dimension Arithmetic
     -- $dimension-arithmetic
-    type (*), type (/), type (^), Root, Recip,
+    type (*), type (/), type (^), Root, Sqrt, Cbrt, Recip,
     -- ** Term Level Representation of Dimensions
     -- $dimension-terms
     Dimension' (Dim'), HasDimension(..), KnownDimension,
@@ -223,8 +223,7 @@ import Prelude
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
-  ( TypeInt (Pos2, Pos3)
-  , pos2, pos3
+  ( pos2, pos3
   , KnownTypeInt, toNum
   )
 import Data.Data
@@ -474,7 +473,7 @@ We provide short-hands for the square and cubic roots.
 -- The 'Root' type family will prevent application where the supplied quantity does not have a square dimension.
 --
 -- prop> (x :: Area Double) >= _0 ==> sqrt x == nroot pos2 x
-sqrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
+sqrt :: Floating a => Quantity d a -> Quantity (Sqrt d) a
 sqrt = nroot pos2
 
 -- | Computes the cube root of a 'Quantity' using 'Prelude.**'.
@@ -482,7 +481,7 @@ sqrt = nroot pos2
 -- The 'Root' type family will prevent application where the supplied quantity does not have a cubic dimension.
 --
 -- prop> (x :: Volume Double) >= _0 ==> cbrt x == nroot pos3 x
-cbrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos3) a
+cbrt :: Floating a => Quantity d a -> Quantity (Cbrt d) a
 cbrt = nroot pos3
 
 {-

@@ -1,5 +1,6 @@
 vNext
 -----
+* Breaking: Added `Sqrt` and `Cbrt` type synonyms.
 * Breaking: Changed Numeric.Units.Dimensional.Prelude to export dimensionally
   typed `recip` and `logBase` instead of the ones from `Prelude`.
 * Breaking: Changed Numeric.Units.Dimensional.Prelude to export `(.)` and `id`
