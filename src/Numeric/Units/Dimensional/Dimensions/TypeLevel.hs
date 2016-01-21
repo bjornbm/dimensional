@@ -44,7 +44,7 @@ import Numeric.NumType.DK.Integers
 import qualified Numeric.NumType.DK.Integers as N
 import Numeric.Units.Dimensional.Dimensions.TermLevel
 
--- | Represents a physical dimension in the basis of the 7 SI base dimensions, 
+-- | Represents a physical dimension in the basis of the 7 SI base dimensions,
 -- where the respective dimensions are represented by type variables
 -- using the following convention:
 --
@@ -100,7 +100,7 @@ type Recip (d :: Dimension) = DOne / d
 
 -- | Powers of dimensions corresponds to multiplication of the base
 -- dimensions' exponents by the exponent.
--- 
+--
 -- We limit ourselves to integer powers of Dimensionals as fractional
 -- powers make little physical sense.
 type family (d::Dimension) ^ (x::TypeInt) where
@@ -143,7 +143,7 @@ instance ( KnownTypeInt l
          , KnownTypeInt n
          , KnownTypeInt j
          ) => HasDimension (Proxy ('Dim l m t i th n j))
-  where 
+  where
     dimension _ = Dim'
                 (toNum (Proxy :: Proxy l))
                 (toNum (Proxy :: Proxy m))
