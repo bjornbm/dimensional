@@ -13,6 +13,10 @@ vNext
   module which may cause name collisions.
 * Breaking: Removed exports of `nMeter`, `nSecond`, `kilo`, etc from Numeric.Units.Dimensional.UnitNames.
   Access these instead by inspecting the relevant units or prefixes.
+* Breaking: Generalized the type of `dimensionlessLength` from
+  `(Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a)` to
+  `(Num a, Foldable f) => f b -> Dimensionless a`. This provides a weaker constraint on the type `a`
+  and may result in ambiguous types in code that depends on the former less general type.
 * Added `Data`, `Generic`, `Typeable` and `NFData` instances for many ancillary types.
 * Added `unQuantity` to the Coercion module to ease unwrapping without
   introducing ambiguous type variables.
