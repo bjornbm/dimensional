@@ -1,5 +1,7 @@
 vNext
 -----
+* Breaking: Renamed `Root` type family to `NRoot`. Added `Sqrt` and `Cbrt` type
+  synonyms. Added `sqrt` and `cbrt` for term level dimensions.
 * Breaking: Changed Numeric.Units.Dimensional.Prelude to export dimensionally
   typed `recip` and `logBase` instead of the ones from `Prelude`.
 * Breaking: Changed Numeric.Units.Dimensional.Prelude to export `(.)` and `id`

@@ -34,7 +34,7 @@ a conversion function similar to for degrees Celsius.
 
 -}
 
-module Numeric.Units.Dimensional.NonSI 
+module Numeric.Units.Dimensional.NonSI
 (
   -- * Units Defined By Experiment
   -- $values-obtained-experimentally
@@ -355,7 +355,7 @@ rad = mkUnitQ (ucumMetric "RAD" "RAD" "RAD") 1 $ centi gray
 stokes :: (Fractional a) => Unit 'Metric DKinematicViscosity a
 stokes = mkUnitQ (ucumMetric "St" "St" "Stokes") 1 $ centi meter ^ pos2 / second
 
-{- $temperature 
+{- $temperature
 These units of temperature are relative. For absolute temperatures, see 'Numeric.Units.Dimensional.SIUnits.fromDegreeCelsiusAbsolute'.
 -}
 degreeFahrenheit :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
