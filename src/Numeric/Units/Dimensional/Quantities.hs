@@ -28,7 +28,7 @@ dimensionality type synonyms are provided for each quantity type.
 
 -}
 
-module Numeric.Units.Dimensional.Quantities 
+module Numeric.Units.Dimensional.Quantities
 (
   -- * Quantities from the NIST Guide
   -- $nist-guide

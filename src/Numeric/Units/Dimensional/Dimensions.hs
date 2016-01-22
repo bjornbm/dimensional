@@ -6,7 +6,7 @@
    Stability  : Stable
    Portability: GHC only
 
-Provides both term-level and type-level representations for physical dimensions in 
+Provides both term-level and type-level representations for physical dimensions in
 a single import for convenience.
 
 Presuming that users intend to work primarily with type level dimensions, this module hides
@@ -21,5 +21,5 @@ module Numeric.Units.Dimensional.Dimensions
 )
 where
 
-import Numeric.Units.Dimensional.Dimensions.TermLevel hiding ((*), (/), (^), recip, dLength, dMass, dTime, dElectricCurrent, dThermodynamicTemperature, dAmountOfSubstance, dLuminousIntensity)
+import Numeric.Units.Dimensional.Dimensions.TermLevel hiding ((*), (/), (^), recip, nroot, sqrt, cbrt, dLength, dMass, dTime, dElectricCurrent, dThermodynamicTemperature, dAmountOfSubstance, dLuminousIntensity)
 import Numeric.Units.Dimensional.Dimensions.TypeLevel

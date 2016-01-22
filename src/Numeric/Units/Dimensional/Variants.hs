@@ -68,7 +68,7 @@ infixl 7  *
 -- The product of quantities is a quantity.
 type family (v1 :: Variant) * (v2 :: Variant) :: Variant where
   'DUnit m1  * 'DUnit m2  = 'DUnit 'NonMetric
-  'DQuantity * 'DQuantity = 'DQuantity 
+  'DQuantity * 'DQuantity = 'DQuantity
 
 -- | Weakens a 'Variant' by forgetting possibly uninteresting type-level information.
 type family Weaken (v :: Variant) :: Variant where

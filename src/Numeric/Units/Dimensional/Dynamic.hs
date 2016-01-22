@@ -44,9 +44,9 @@ import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (&&), (++), all, const, div, error, even, id, otherwise)
+import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (&&), (++), const, id, otherwise)
 import qualified Prelude as P
-import Numeric.Units.Dimensional hiding ((*~), (/~), (*), (/), (^), recip, siUnit)
+import Numeric.Units.Dimensional hiding ((*~), (/~), (*), (/), (^), recip, nroot, siUnit)
 import qualified Numeric.Units.Dimensional as Dim
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
@@ -178,32 +178,23 @@ instance Num a => Num (DynQuantity a) where
   (+) = liftDQ2 matching (P.+)
   (-) = liftDQ2 matching (P.-)
   (*) = liftDQ2 (valid2 (D.*)) (P.*)
-  negate = liftDQ (valid id) (P.negate)
-  abs = liftDQ (valid id) (P.abs)
-  signum = liftDQ (valid $ const D.dOne) (P.signum)
+  negate = liftDQ (valid id) P.negate
+  abs = liftDQ (valid id) P.abs
+  signum = liftDQ (valid $ const D.dOne) P.signum
   fromInteger = demoteQuantity . (Dim.*~ one) . P.fromInteger
 
 instance Fractional a => Fractional (DynQuantity a) where
   (/) = liftDQ2 (valid2 (D./)) (P./)
-  recip = liftDQ (valid D.recip) (P.recip)
+  recip = liftDQ (valid D.recip) P.recip
   fromRational = demoteQuantity . (Dim.*~ one) . P.fromRational
 
 instance Floating a => Floating (DynQuantity a) where
   pi = demoteQuantity pi
   exp = liftDimensionless P.exp
   log = liftDimensionless P.log
-  sqrt = liftDQ div2 (P.sqrt)
-    where
-      -- Divides a dimension by two, or returns Nothing if it can't be done.
-      div2 :: Dimension' -> Maybe Dimension'
-      div2 d | all even ds = Just . fromList . fmap (`div` 2) $ ds
-             | otherwise   = Nothing
-        where
-          ds = D.asList d
-          fromList [l, m, t, i, th, n, j] = Dim' l m t i th n j
-          fromList _ = error "Should be unreachable, there are 7 base dimensions."
+  sqrt = liftDQ (D.nroot 2) P.sqrt
   (**) = liftDQ2 (matching3 D.dOne) (P.**)
-  logBase = liftDQ2 (matching3 D.dOne) (P.logBase)
+  logBase = liftDQ2 (matching3 D.dOne) P.logBase
   sin = liftDimensionless P.sin
   cos = liftDimensionless P.cos
   tan = liftDimensionless P.tan

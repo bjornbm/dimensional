@@ -44,7 +44,7 @@ import Data.Foldable
 
 import Prelude hiding
     ( (+), (-), (*), (/), (^), (**)
-    , abs, negate, recip, pi, exp, log, sqrt
+    , abs, negate, recip, pi, exp, log, logBase, sqrt
     , sin, cos, tan, asin, acos, atan, atan2
     , sinh, cosh, tanh, asinh, acosh, atanh
     , sum, product, minimum, maximum

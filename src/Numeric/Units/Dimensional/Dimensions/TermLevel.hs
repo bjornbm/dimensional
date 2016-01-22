@@ -25,7 +25,7 @@ module Numeric.Units.Dimensional.Dimensions.TermLevel
   -- * Access to Dimension of Dimensional Values
   HasDimension(..), HasDynamicDimension(..),
   -- * Dimension Arithmetic
-  (*), (/), (^), recip,
+  (*), (/), (^), recip, nroot, sqrt, cbrt,
   -- * Synonyms for Base Dimensions
   dOne,
   dLength, dMass, dTime, dElectricCurrent, dThermodynamicTemperature, dAmountOfSubstance, dLuminousIntensity,
@@ -38,7 +38,7 @@ import Control.DeepSeq
 import Data.Data
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (id, (+), (-), (.), Int, Show, Eq, Ord, Maybe(..))
+import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), (&&), Int, Show, Eq(..), Ord(..), Maybe(..))
 import qualified Prelude as P
 
 -- Optional imports when certain package flags are enabled
@@ -52,10 +52,16 @@ import qualified Data.Binary
 import qualified Data.Serialize
 #endif
 
+-- $setup
+-- >>> import Prelude (negate)
+-- >>> import Control.Applicative
+-- >>> import Test.QuickCheck.Arbitrary
+-- >>> instance Arbitrary Dimension' where arbitrary = Dim' <$> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary <*> arbitrary
+
 -- | A physical dimension, encoded as 7 integers, representing a factorization of the dimension into the
--- 7 SI base dimensions. By convention they are stored in the same order as 
+-- 7 SI base dimensions. By convention they are stored in the same order as
 -- in the 'Numeric.Units.Dimensional.Dimensions.TypeLevel.Dimension' data kind.
-data Dimension' = Dim' !Int !Int !Int !Int !Int !Int !Int 
+data Dimension' = Dim' !Int !Int !Int !Int !Int !Int !Int
   deriving (Show, Eq, Ord, Data, Generic, Typeable)
 
 instance NFData Dimension' where
@@ -96,7 +102,7 @@ class HasDynamicDimension a where
   dynamicDimension = Just . dimension
 
 -- | Dimensional values inhabit this class, which allows access to a term-level representation of their dimension.
-class HasDynamicDimension a => HasDimension a where 
+class HasDynamicDimension a => HasDimension a where
   -- | Obtains a term-level representation of a value's dimension.
   dimension :: a -> Dimension'
 
@@ -143,7 +149,34 @@ infixl 7  *, /
 recip :: Dimension' -> Dimension'
 recip = (dOne /)
 
+-- | Takes the nth root of a dimension, if it exists.
+--
+-- n must not be zero.
+--
+-- prop> nroot (negate n) d == nroot n (recip d)
+nroot :: Int -> Dimension' -> Maybe Dimension'
+nroot n d | n /= 0 && all ((== 0) . snd) ds = fromList . fmap fst $ ds
+          | otherwise                      = Nothing
+  where
+    ds = fmap (`divMod` n) . asList $ d
+
+-- | Takes the square root of a dimension, if it exists.
+--
+-- prop> sqrt d == nroot 2 d
+sqrt :: Dimension' -> Maybe Dimension'
+sqrt = nroot 2
+
+-- | Takes the cube root of a dimension, if it exists.
+--
+-- prop> cbrt d == nroot 3 d
+cbrt :: Dimension' -> Maybe Dimension'
+cbrt = nroot 3
+
 -- | Converts a dimension to a list of 7 integers, representing the exponent associated with each
 -- of the 7 SI base dimensions in the standard order.
 asList :: Dimension' -> [Int]
 asList (Dim' l m t i th n j) = [l, m, t, i, th, n, j]
+
+fromList :: [Int] -> Maybe Dimension'
+fromList [l, m, t, i, th, n, j] = Just $ Dim' l m t i th n j
+fromList _ = Nothing
