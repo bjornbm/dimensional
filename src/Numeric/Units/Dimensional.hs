@@ -18,6 +18,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
+
 {- |
    Copyright  : Copyright (C) 2006-2015 Bjorn Buckwalter
    License    : BSD3
@@ -96,51 +97,35 @@ function for calculating the escape velocity of a celestial body
 >       two = 2 *~ one
 >       g = 6.6720e-11 *~ (newton * meter ^ pos2 / kilo gram ^ pos2)
 
-The following is an example GHC session where the above function
-is used to calculate the escape velocity of Earth in kilometer per
-second.
-
->>> :set +t
->>> let me = 5.9742e24 *~ kilo gram -- Mass of Earth.
-me :: Quantity DMass GHC.Float.Double
->>> let re = 6372.792 *~ kilo meter -- Mean radius of Earth.
-re :: Quantity DLength GHC.Float.Double
->>> let ve = escapeVelocity me re   -- Escape velocity of Earth.
-ve :: Velocity GHC.Float.Double
->>> ve /~ (kilo meter / second)
-11.184537332296259
-it :: GHC.Float.Double
-
 For completeness we should also show an example of the error messages
 we will get from GHC when performing invalid arithmetic. In the
 best case GHC will be able to use the type synonyms we have defined
 in its error messages.
 
->>> x = 1 *~ meter + 1 *~ second
-Couldn't match type 'Numeric.NumType.DK.Integers.Zero
-               with 'Numeric.NumType.DK.Integers.Pos1
-  Expected type: Unit 'Metric DLength a
-    Actual type: Unit 'Metric DTime a
-  In the second argument of `(*~)', namely `second'
-  In the second argument of `(+)', namely `1 *~ second'
+> let x = 1 *~ meter + 1 *~ second
+>
+> Couldn't match type 'Numeric.NumType.DK.Integers.Zero
+>                with 'Numeric.NumType.DK.Integers.Pos1
+> Expected type: Unit 'Metric DLength a
+>   Actual type: Unit 'Metric DTime a
+> In the second argument of `(*~)', namely `second'
+> In the second argument of `(+)', namely `1 *~ second'
 
 In other cases the error messages aren't very friendly.
 
->>> x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
-Couldn't match type 'Numeric.NumType.DK.Integers.Zero
-               with 'Numeric.NumType.DK.Integers.Neg1
-  Expected type: Quantity DMass a
-    Actual type: Dimensional
-                   ('Numeric.Units.Dimensional.Variants.DQuantity
-                    Numeric.Units.Dimensional.Variants.* 'Numeric.Units.Dimensional.Variants.DQuantity)
-                   (DLength / DTime)
-                   a
-  In the first argument of `(+)', namely `1 *~ meter / (1 *~ second)'
-  In the expression: 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
-  In an equation for `x':
-      x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+> let x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+>
+> Couldn't match type 'Numeric.NumType.DK.Integers.Zero
+>                with 'Numeric.NumType.DK.Integers.Neg1
+> Expected type: Quantity DMass a
+>   Actual type: Dimensional
+>                  ('DQuantity V.* 'DQuantity) (DLength / DTime) a
+> In the first argument of `(+)', namely `1 *~ meter / (1 *~ second)'
+> In the expression: 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
+> In an equation for `x':
+>       x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
 
-It is the author's experience that the usefullness of the compiler
+It is the author's experience that the usefulness of the compiler
 error messages is more often than not limited to pinpointing the
 location of errors.
 
@@ -183,7 +168,7 @@ particularly noteworthy.
 -}
 
 module Numeric.Units.Dimensional
-  ( 
+  (
     -- * Types
     -- $types
     Dimensional,
@@ -203,7 +188,7 @@ module Numeric.Units.Dimensional
     (^), (^/), (**), (*), (/), (+), (-),
     negate, abs, recip, nroot, sqrt, cbrt,
     -- ** Transcendental Functions
-    exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
+    exp, log, logBase, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
     -- ** Operations on Collections
     -- $collections
     (*~~), (/~~), sum, mean, dimensionlessLength, nFromTo,
@@ -244,7 +229,7 @@ import Numeric.NumType.DK.Integers
   )
 import Data.Data
 import Data.ExactPi
-import Data.Foldable (Foldable(foldr, foldl'))
+import Data.Foldable (Foldable(foldr))
 import Data.Maybe
 import Data.Ratio
 import Numeric.Units.Dimensional.Dimensions
@@ -253,6 +238,26 @@ import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, streng
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.Variants hiding (type (*))
 import qualified Numeric.Units.Dimensional.Variants as V
+
+-- Provide a version of length which is compatible with base-4.8's version.
+-- Where 4.8 is available we use that version as it may have performance advantages.
+-- Where it is not available we implement it in terms of foldl'.
+#if MIN_VERSION_base(4,8,0)
+import Data.Foldable (Foldable(length))
+#else
+import Data.Foldable (Foldable(foldl'))
+
+length :: Foldable t => t a -> Int
+length = foldl' (\c _ -> c Prelude.+ 1) 0
+#endif
+
+-- $setup
+-- >>> :set -XFlexibleInstances
+-- >>> :set -XNoImplicitPrelude
+-- >>> import Test.QuickCheck.Arbitrary
+-- >>> import Numeric.Units.Dimensional.Prelude
+-- >>> import Numeric.Units.Dimensional.Float
+-- >>> instance Arbitrary a => Arbitrary (Quantity d a) where arbitrary = fmap Quantity arbitrary
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -410,7 +415,7 @@ recip = liftQ Prelude.recip
 -- | Raises a 'Quantity' or 'Unit' to an integer power.
 --
 -- Because the power chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
--- of the exponent in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- of the exponent in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ...
 -- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
 -- also reexported by "Numeric.Units.Dimensional.Prelude".
 --
@@ -456,13 +461,15 @@ for units as well as quantities.
 -}
 
 -- | Computes the nth root of a 'Quantity' using 'Prelude.**'.
--- 
+--
 -- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
 --
 -- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
--- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ...
 -- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
 -- also reexported by "Numeric.Units.Dimensional.Prelude".
+--
+-- n must not be zero. Negative roots are defined such that @nroot (Proxy :: Proxy (Negate n)) x == nroot (Proxy :: Proxy n) (recip x)@.
 --
 -- Also available in operator form, see '^/'.
 nroot :: (KnownTypeInt n, Floating a)
@@ -478,7 +485,7 @@ We provide short-hands for the square and cubic roots.
 --
 -- The 'Root' type family will prevent application where the supplied quantity does not have a square dimension.
 --
--- prop> sqrt x == nroot pos2 x
+-- prop> (x :: Area Double) >= _0 ==> sqrt x == nroot pos2 x
 sqrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
 sqrt = nroot pos2
 
@@ -486,7 +493,7 @@ sqrt = nroot pos2
 --
 -- The 'Root' type family will prevent application where the supplied quantity does not have a cubic dimension.
 --
--- prop> cbrt x == nroot pos3 x
+-- prop> (x :: Volume Double) >= _0 ==> cbrt x == nroot pos3 x
 cbrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos3) a
 cbrt = nroot pos3
 
@@ -496,11 +503,11 @@ prefer such.
 -}
 
 -- | Computes the nth root of a 'Quantity' using 'Prelude.**'.
--- 
+--
 -- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
 --
 -- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
--- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ... 
+-- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ...
 -- are supplied by the "Numeric.NumType.DK.Integers" module. The most commonly used ones are
 -- also reexported by "Numeric.Units.Dimensional.Prelude".
 --
@@ -539,14 +546,11 @@ mean = uncurry (/) . foldr accumulate (_0, _0)
 
 -- | The length of the foldable data structure as a 'Dimensionless'.
 -- This can be useful for purposes of e.g. calculating averages.
-dimensionlessLength :: (Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a
+--
+-- >>> dimensionlessLength ["foo", "bar"]
+-- 2.0
+dimensionlessLength :: (Num a, Foldable f) => f b -> Dimensionless a
 dimensionlessLength x = (fromIntegral $ length x) *~ one
-  where
-    -- As in base-4.8 Data.Foldable for GHC 7.8 (base-4.6) compatibility.
-    -- Once base-4.6. compatibility is abandoned this where clause can
-    -- be deleted (and imports adjusted).
-    length :: Foldable t => t a -> Int
-    length = foldl' (\c _ -> c Prelude.+ 1) 0 
 
 -- | Returns a list of quantities between given bounds.
 nFromTo :: (Fractional a, Integral b) => Quantity d a -- ^ The initial value.
@@ -580,9 +584,13 @@ asinh = fmap Prelude.asinh
 acosh = fmap Prelude.acosh
 atanh = fmap Prelude.atanh
 
--- | Raises a dimensionless quantity to a floating power using 'Prelude.**'.
+-- | Raises a dimensionless quantity to a dimensionless power.
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
 (**) = liftQ2 (Prelude.**)
+
+-- | Takes the logarithm of the second argument in the base of the first.
+logBase :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
+logBase = liftQ2 Prelude.logBase
 
 -- | The standard two argument arctangent function.
 -- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
@@ -593,7 +601,7 @@ atan2 = liftQ2 Prelude.atan2
 The only unit we will define in this module is 'one'.
 -}
 
--- | The unit 'one' has dimension 'DOne' and is the base unit of dimensionless values. 
+-- | The unit 'one' has dimension 'DOne' and is the base unit of dimensionless values.
 --
 -- As detailed in 7.10 "Values of quantities expressed simply as numbers:
 -- the unit one, symbol 1" of <#note1 [1]> the unit one generally does not
@@ -658,7 +666,7 @@ These functions are compatible with the lens library.
 -}
 
 -- | Converts a 'Unit' into a lens from 'Quantity's to values.
-asLens :: (Fractional a) => Unit m d a 
+asLens :: (Fractional a) => Unit m d a
                          -> (forall f.Functor f => (a -> f a)
                                                 -> Quantity d a
                                                 -> f (Quantity d a))
@@ -671,13 +679,13 @@ we provide a means for converting from type-level dimensions to term-level dimen
 -}
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
--- 
+--
 -- Use this variant when the scale factor of the resulting unit is irrational or 'Approximate'. See 'mkUnitQ' for when it is rational
 -- and 'mkUnitZ' for when it is an integer.
 --
 -- Note that supplying zero as a definining quantity is invalid, as the library relies
 -- upon units forming a group under multiplication.
--- 
+--
 -- Supplying negative defining quantities is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
 mkUnitR :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
@@ -693,9 +701,9 @@ mkUnitR n s' (Unit _ s x) | isExactZero s = error "Supplying zero as a conversio
 mkUnitQ :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
 mkUnitQ n s' (Unit _ s _) | s' == 0                       = error "Supplying zero as a conversion factor is not valid."
                           | Just q <- toExactRational s'' = Unit n s'' (fromRational q)
-                          | otherwise                     = error "The resulting conversion factor is not an exact rational." 
+                          | otherwise                     = error "The resulting conversion factor is not an exact rational."
   where
-    s'' = fromRational s' Prelude.* s                               
+    s'' = fromRational s' Prelude.* s
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 --

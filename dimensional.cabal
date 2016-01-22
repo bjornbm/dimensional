@@ -63,7 +63,8 @@ library
                        Numeric.Units.Dimensional.Functor,
                        Numeric.Units.Dimensional.UnitNames,
                        Numeric.Units.Dimensional.UnitNames.InterchangeNames,
-                       Numeric.Units.Dimensional.Variants
+                       Numeric.Units.Dimensional.Variants,
+                       Numeric.Units.Dimensional.Float
   other-modules:       Numeric.Units.Dimensional.Internal,
                        Numeric.Units.Dimensional.UnitNames.Internal
 
@@ -77,6 +78,19 @@ test-suite tests
   ghc-options:         -Wall
   build-depends:       dimensional,
                        HUnit,
+                       base
+
+test-suite doctests
+  type:                exitcode-stdio-1.0
+  ghc-options:         -threaded
+  main-is:             DocTests.hs
+  hs-source-dirs:      tests
+  default-language:    Haskell2010
+  build-depends:       dimensional,
+                       doctest,
+                       Glob,
+                       QuickCheck,
+                       template-haskell,
                        base
 
 benchmark simple

@@ -44,7 +44,8 @@ module Numeric.Units.Dimensional.NonSI
   gee,
   -- * Inch-pound Units
   -- $inch-pound-units
-  inch, foot, mil, poundMass, ounce, poundForce, slug, psi, yard, mile, nauticalMile, knot,
+  inch, foot, mil, poundMass, ounce, poundForce, horsepower,
+  slug, psi, yard, mile, nauticalMile, knot,
   revolution, solid, teaspoon, acre,
   -- * Years
   -- $year
@@ -116,6 +117,9 @@ ounce     = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
 
 poundForce :: Fractional a => Unit 'NonMetric DForce a
 poundForce = mkUnitQ (ucum "[lbf_av]" "lbf" "pound force") 1 $ poundMass * gee  -- 4.4482 N
+
+horsepower :: Fractional a => Unit 'NonMetric DPower a
+horsepower = mkUnitQ (ucum "[HP]" "hp" "horsepower") 550 $ foot * poundForce / second
 
 {-
 
