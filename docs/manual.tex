@@ -142,7 +142,7 @@ similarly to `negate` and `abs`, preserve that dimension as the dimension of the
 They thus have type `Num a => Quantity d a -> Quantity d a -> Quantity d a`.
 
 The `sum` function operates on `Foldable` collections of quantities of uniform dimension, and returns a quantity of
-the same dimension. It thus have type `Num a, Foldable f => f (Quantity d a) -> Quantity d a`. We provide a `mean` function
+the same dimension. It thus has type `Num a, Foldable f => f (Quantity d a) -> Quantity d a`. We provide a `mean` function
 which does the same but requires a `Fractional a` context in place of the `Num a` context.
 
 \subsection{Multiplication}
