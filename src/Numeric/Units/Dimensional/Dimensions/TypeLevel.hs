@@ -121,7 +121,7 @@ type family NRoot (d::Dimension) (x::TypeInt) where
 -- | Square root is a special case of 'NRoot' with order 2.
 type Sqrt d = NRoot d 'Pos2
 
--- | Cubic root is a special case of 'NRoot' with order 3.
+-- | Cube root is a special case of 'NRoot' with order 3.
 type Cbrt d = NRoot d 'Pos3
 
 -- | A KnownDimension is one for which we can construct a term-level representation.
