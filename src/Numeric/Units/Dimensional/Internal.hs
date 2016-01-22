@@ -62,11 +62,6 @@ import qualified Data.Binary
 #if USE_CEREAL
 import qualified Data.Serialize
 #endif
-#if USE_LINEAR
-import qualified Linear.Affine
-import qualified Linear.Metric
-import qualified Linear.Vector
-#endif
 #if USE_VECTOR_SPACE
 import qualified Data.AdditiveGroup
 import qualified Data.VectorSpace
@@ -121,19 +116,8 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
   injectValue _        _ = error "Shouldn't be reachable. Needed to name a quantity."
   dmap f (Unit n e x) = Unit n e (f x)
 
-{-
-
-If the FUNCTOR flag is set or is required by another flag, we provide a Functor instance for all dimensional values.
-Regardless, we provide a functor instance for dimensionless quantities.
-
--}
-#if FUNCTOR || USE_LINEAR
-instance (KnownVariant v) => Functor (Dimensional v d) where
-  fmap = dmap
-#else
 instance Functor (Quantity DOne) where
   fmap = dmap
-#endif
 
 #if USE_AESON
 deriving instance (Data.Aeson.ToJSON a) => Data.Aeson.ToJSON (Quantity d a)
@@ -147,25 +131,6 @@ deriving instance (Data.Binary.Binary a) => Data.Binary.Binary (Quantity d a)
 
 #if USE_CEREAL
 deriving instance (Data.Serialize.Serialize a) => Data.Serialize.Serialize (Quantity d a)
-#endif
-
-#if USE_LINEAR
-instance Linear.Vector.Additive (Quantity d) where
-  zero = mempty
-  (^+^) = liftQ2 (P.+)
-  (^-^) = liftQ2 (P.-)
-  liftU2 = liftQ2
-  liftI2 f (Quantity x) (Quantity y) = Quantity $ f x y
-
-instance Linear.Metric.Metric (Quantity DOne) where
-  dot (Quantity x) (Quantity y) = x P.* y
-  norm (Quantity x) = P.abs x
-
-instance Linear.Affine.Affine (Quantity d) where
-  type Diff (Quantity d) = Quantity d
-  (.-.) = (Linear.Vector.^-^)
-  (.+^) = (Linear.Vector.^+^)
-  (.-^) = (Linear.Vector.^-^)
 #endif
 
 #if USE_VECTOR_SPACE
