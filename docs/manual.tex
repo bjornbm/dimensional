@@ -228,7 +228,7 @@ Specialized to operate on quantities, the type of division is again less intimid
 (/) :: (Fractional a) => Quantity d1 a -> Quantity d2 a -> Quantity (d1 / d2) a
 \end{lstlisting}
 
-Ditto for units:
+Similarly for units:
 
 \begin{lstlisting}
 (/) :: (Typeable m1, Typeable m2, Fractional a) => Unit m1 d1 a
