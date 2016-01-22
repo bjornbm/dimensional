@@ -310,7 +310,7 @@ Narrowing the types to look only at how they operates on units:
 (/) :: (Fractional a) => Unit m1 d1 a -> Unit m2 d2 a
                       -> Unit 'NonMetric (d1 * d2) a
 (^) :: (Fractional a, KnownTypeInt i) => Unit m d a -> Proxy i
-                                      -> Unit 'NonMetric (d ^ i) 
+                                      -> Unit 'NonMetric (d ^ i)
 \end{lstlisting}
 
 As one would expect, the dimension of a product or quotient is the product or quotient of the dimensions of the operands.
