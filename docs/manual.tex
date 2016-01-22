@@ -41,10 +41,8 @@ breaklines=true}
 
 The \thispackage{} library provides data types for performing arithmetic with physical
 quantities. Information about the physical dimensions of each quantity is embedded in
-its type.
-
-This allows the compiler to statically verify that no dimensional mistakes have been
-made in a calculation. It also facilitates interconversion between quantities expressed
+its type. This allows the compiler to statically verify that no dimensional mistakes have
+been made in a calculation. It also facilitates conversion between quantities expressed
 in different units and provides documentation of the dimension and units of each physical
 quantity a program manipulates.
 
@@ -58,6 +56,8 @@ cabal install dimensional
 \end{lstlisting}
 
 Historical versions and Haddock documentation are available at \url{http://hackage.haskell.org/package/dimensional}.
+
+% TODO \thispackage{} is also available through Stackage.
 
 \section{\thispackage{} in Five Minutes}
 
@@ -109,6 +109,14 @@ Contributions to \thispackage{} development, in the form of bug reports,
 feature requests, or pull requests, are welcome. The source code repository and issue
 tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional}.
 
+% TODO Easiest way to contribute: new units.
+
+% TODO Feature requests go into issue tracker?
+
+% TODO Style guide for pull requests? Documentation and/or test requirements?
+
+% TODO Recommended toolset for contributing: stack + git + github? Anything other than stack required for testing? HLint?
+
 \chapter{Dimensional Arithmetic}
 
 \section{Concepts}
@@ -129,8 +137,9 @@ calculations.
 The `negate` and `abs` unary functions are simple. They are valid for quantities of all dimensions, and preserve the
 dimension of their input. They thus each have type `Num a => Quantity d a -> Quantity d a`.
 
-Similarly, the `+` and `-` binary operators are valid only when the dimensions of the operands match, and preserve that
-dimension as the dimension of the result. They thus have type `Num a => Quantity d a -> Quantity d a -> Quantity d a`.
+The `+` and `-` binary operators are valid only when the dimensions of the operands match, and,
+similarly to `negate` and `abs`, preserve that dimension as the dimension of the result.
+They thus have type `Num a => Quantity d a -> Quantity d a -> Quantity d a`.
 
 The `sum` function operates on `Foldable` collections of quantities of uniform dimension, and returns a quantity of
 the same dimension. It thus have type `Num a, Foldable f => f (Quantity d a) -> Quantity d a`. We provide a `mean` function
@@ -143,7 +152,7 @@ from the dimension(s) of their input(s) in a non-trivial way. Second, to avoid e
 one set of such operators which works for both quantities and units. Because the resulting types are daunting they will each be shown in full, explained in prose,
 and shown as specialized to apply only to quantities and as specialized to apply only to units.
 
-The `*` operator has the following type:
+The multiplication operator `*` has the following type:
 
 \begin{lstlisting}
 (*) :: (KnownVariant v1, KnownVariant v2,
@@ -182,7 +191,7 @@ Specialized to operate on quantities, the type of multiplication is much less in
 \end{lstlisting}
 
 Specialized to operate on units it's only slightly more involved. The `Typeable` contexts arise because they are
-required to ensure that an appropriate `KnownVariant` instance will exist. Again, `Typeable` isntances exist for all
+required to ensure that an appropriate `KnownVariant` instance will exist. Again, `Typeable` instances exist for all
 possible concrete values of `m1` and `m2`, but the context is required for implementation reasons.
 
 \begin{lstlisting}
@@ -193,7 +202,7 @@ possible concrete values of `m1` and `m2`, but the context is required for imple
 
 \subsection{Division}
 
-The `/` operator has the following type, very similar to that of multiplication:
+The division operator `/` has the following type, very similar to that of multiplication:
 
 \begin{lstlisting}
 (/) :: (KnownVariant v1, KnownVariant v2,
@@ -205,7 +214,7 @@ The `/` operator has the following type, very similar to that of multiplication:
 
 The type variables have the same names and interpretations. Note that the type of the result still mentions the
 `V.*` type family for combining `Variant`s and not a `V./` type family. This is because the rules for combining variants
-under division are the same as those for multiplication (or actually, any binary operation), and thus it is not necessary
+under division are the same as those for multiplication (or, actually, any binary operation), and thus it is not necessary
 to introduce an additional type family.
 
 This type says that, for division, we can take the quotient of any two dimensional values whose variants are known and have a product.
@@ -213,21 +222,26 @@ The numerical representation types must match, and that type must be an instance
 whose variant is the product of the inputs' variants, whose dimension is the quotient of the inputs' dimensions, and whose numerical representation
 type is that of the inputs.
 
-Specialized to operate on quantities or on units, the type of division is again less intimidating:
+Specialized to operate on quantities, the type of division is again less intimidating:
 
 \begin{lstlisting}
 (/) :: (Fractional a) => Quantity d1 a -> Quantity d2 a -> Quantity (d1 / d2) a
+\end{lstlisting}
+
+Ditto for units:
+
+\begin{lstlisting}
 (/) :: (Typeable m1, Typeable m2, Fractional a) => Unit m1 d1 a
                                                 -> Unit m2 d2 a
                                                 -> Unit 'NonMetric (d1 / d2) a
 \end{lstlisting}
 
 The `recip` function forms a quantity whose dimension is the reciprocal of the dimension of the input quantity, and thus it has type
-`(Fractional a) => Quantity d a -> Quantity (Recip d) a`.
+`(Fractional a) => Quantity d a -> Quantity (Recip d) a`, where `Recip d` = `DOne / d`. % = `d ^ 'neg1`
 
 \subsection{Exponentiation}
 
-The `^` operator has type:
+The exponentiation operator `^` has type:
 
 \begin{lstlisting}
 (^) :: (Fractional a, KnownTypeInt i,
@@ -268,14 +282,15 @@ Specialized to operate on units it again requires a `Typeable` context and is:
 \subsection{Roots}
 
 Taking square roots, cube roots, and general roots of quantities can be accomplished using the following functions.
-The `Root` type family from `Numeric.Units.Dimensional.Dimensions` takes the root of a dimension, if it exists.
+The `NRoot` type family from `Numeric.Units.Dimensional.Dimensions` takes the nth root of a dimension, if it exists.
+`Sqrt` and `Cbrt` are type synonyms for the square and cube roots, respectively, of a dimension.
 
 \begin{lstlisting}
-sqrt  :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
-cbrt  :: Floating a => Quantity d a -> Quantity (Root d 'Pos3) a
+sqrt  :: Floating a => Quantity d a -> Quantity (Sqrt d) a
+cbrt  :: Floating a => Quantity d a -> Quantity (Cbrt d) a
 nroot :: (KnownTypeInt n, Floating a) => Proxy n
                                       -> Quantity d a
-                                      -> Quantity (Root d n) a
+                                      -> Quantity (NRoot d n) a
 \end{lstlisting}
 
 \subsection{Transcendental Functions}
