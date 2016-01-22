@@ -179,7 +179,7 @@ module Numeric.Units.Dimensional
     Dimension (Dim),
     -- ** Dimension Arithmetic
     -- $dimension-arithmetic
-    type (*), type (/), type (^), Root, Sqrt, Cbrt, Recip,
+    type (*), type (/), type (^), NRoot, Sqrt, Cbrt, Recip,
     -- ** Term Level Representation of Dimensions
     -- $dimension-terms
     Dimension' (Dim'), HasDimension(..), KnownDimension,
@@ -461,7 +461,7 @@ for units as well as quantities.
 
 -- | Computes the nth root of a 'Quantity' using 'Prelude.**'.
 --
--- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
+-- The 'NRoot' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
 --
 -- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
 -- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ...
@@ -472,7 +472,7 @@ for units as well as quantities.
 --
 -- Also available in operator form, see '^/'.
 nroot :: (KnownTypeInt n, Floating a)
-      => Proxy n -> Quantity d a -> Quantity (Root d n) a
+      => Proxy n -> Quantity d a -> Quantity (NRoot d n) a
 nroot n = let n' = 1 Prelude./ toNum n
            in liftQ (Prelude.** n')
 
@@ -482,7 +482,7 @@ We provide short-hands for the square and cubic roots.
 
 -- | Computes the square root of a 'Quantity' using 'Prelude.**'.
 --
--- The 'Root' type family will prevent application where the supplied quantity does not have a square dimension.
+-- The 'NRoot' type family will prevent application where the supplied quantity does not have a square dimension.
 --
 -- prop> (x :: Area Double) >= _0 ==> sqrt x == nroot pos2 x
 sqrt :: Floating a => Quantity d a -> Quantity (Sqrt d) a
@@ -490,7 +490,7 @@ sqrt = nroot pos2
 
 -- | Computes the cube root of a 'Quantity' using 'Prelude.**'.
 --
--- The 'Root' type family will prevent application where the supplied quantity does not have a cubic dimension.
+-- The 'NRoot' type family will prevent application where the supplied quantity does not have a cubic dimension.
 --
 -- prop> (x :: Volume Double) >= _0 ==> cbrt x == nroot pos3 x
 cbrt :: Floating a => Quantity d a -> Quantity (Cbrt d) a
@@ -503,7 +503,7 @@ prefer such.
 
 -- | Computes the nth root of a 'Quantity' using 'Prelude.**'.
 --
--- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
+-- The 'NRoot' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
 --
 -- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
 -- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ...
@@ -512,7 +512,7 @@ prefer such.
 --
 -- Also available in prefix form, see 'nroot'.
 (^/) :: (KnownTypeInt n, Floating a)
-     => Quantity d a -> Proxy n -> Quantity (Root d n) a
+     => Quantity d a -> Proxy n -> Quantity (NRoot d n) a
 (^/) = flip nroot
 
 {- $collections
