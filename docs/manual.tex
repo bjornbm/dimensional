@@ -651,18 +651,6 @@ package.
 Todo: Without taking a dependency on lens, offer a declaration that can convert a unit into a lens from quantities to numeric values.
 Explain here how to use that facility.
 
-\section{\packagename{linear} for Linear Algebra}
-
-\prerelease{}
-
-Users of the \packagename{linear} package can find appropriate instances of
-the `Additive` and `Affine` classes, along with an
-instance of `Metric` for dimensionless quantities, by enabling the \flag{linear}
-package flag when installing \thispackage{}.
-
-The \flag{linear} flag implies the \flag{functor} flag and will result in generation of a `Functor`
-instance for dimensional values.
-
 \section{\packagename{parsec} for Unit and Quantity Parsing}
 
 Support for \packagename{parsec} is provided through the \packagename{parsers} package, see \ref{parsers-support}.
