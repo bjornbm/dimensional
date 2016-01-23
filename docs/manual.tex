@@ -57,7 +57,8 @@ cabal install dimensional
 
 Historical versions and Haddock documentation are available at \url{http://hackage.haskell.org/package/dimensional}.
 
-% TODO \thispackage{} is also available through Stackage.
+Since the release of LTS Haskell 4, \thispackage{} has also been available through Stackage. Stackage
+distributes curated sets of packages which are known to compile together. For more information see \url{https://www.stackage.org/}.
 
 \section{\thispackage{} in Five Minutes}
 
@@ -123,6 +124,8 @@ tracker are both hosted by GitHub at \url{https://github.com/bjornbm/dimensional
 
 Explain quantities, units, `Quantity`s, and `Unit`s.
 
+% TODO This is also probably the place to give a brief intro to what is a dimension, what is the SI, etc? Or should that be it's own chapter?
+
 \section{Creating Quantities}
 
 
@@ -134,7 +137,7 @@ calculations.
 
 \subsection{Addition, Subtraction, and Negation}
 
-The `negate` and `abs` unary functions are simple. They are valid for quantities of all dimensions, and preserve the
+The `negate` and `abs` unary functions are straightforward. They are valid for quantities of all dimensions, and preserve the
 dimension of their input. They thus each have type `Num a => Quantity d a -> Quantity d a`.
 
 The `+` and `-` binary operators are valid only when the dimensions of the operands match, and,
@@ -191,7 +194,7 @@ Specialized to operate on quantities, the type of multiplication is much less in
 \end{lstlisting}
 
 Specialized to operate on units it's only slightly more involved. The `Typeable` contexts arise because they are
-required to ensure that an appropriate `KnownVariant` instance will exist. Again, `Typeable` instances exist for all
+required to ensure that an appropriate `KnownVariant` instance will exist. `Typeable` instances exist for all
 possible concrete values of `m1` and `m2`, but the context is required for implementation reasons.
 
 \begin{lstlisting}
