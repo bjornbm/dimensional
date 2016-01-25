@@ -236,7 +236,7 @@ import Numeric.Units.Dimensional.Dimensions
 import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
-import Numeric.Units.Dimensional.Variants hiding (type (*))
+import Numeric.Units.Dimensional.Variants hiding (type (*), type (/))
 import qualified Numeric.Units.Dimensional.Variants as V
 
 -- Provide a version of length which is compatible with base-4.8's version.
@@ -405,7 +405,7 @@ Multiplication, division and powers apply to both units and quantities.
 --
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
-(/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
+(/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V./ v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V./ v2) (d1 / d2) a
 (/) = liftD2 (Prelude./) (Prelude./) (Name./)
 
 -- | Forms the reciprocal of a 'Quantity', which has the reciprocal dimension.

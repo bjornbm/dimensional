@@ -24,7 +24,7 @@ module Numeric.Units.Dimensional.Variants
 (
   type Variant(..),
   Metricality(..),
-  type (*), type Weaken,
+  type (*), type (/), type Weaken,
   type CompatibleVariants
 )
 where
@@ -68,8 +68,12 @@ infixl 7  *
 --
 -- The product of quantities is a quantity.
 type family (v1 :: Variant) * (v2 :: Variant) :: Variant where
-  'DUnit m1  * 'DUnit m2  = 'DUnit 'NonMetric
+  'DUnit m1 * 'DUnit m2 = 'DUnit 'NonMetric
   'DQuantity s1 * 'DQuantity s2 = 'DQuantity (s1 E.* s2)
+
+type family (v1 :: Variant) / (v2 :: Variant) :: Variant where
+  'DUnit m1 / 'DUnit m2 = 'DUnit 'NonMetric
+  'DQuantity s1 / 'DQuantity s2 = 'DQuantity (s1 E./ s2)
 
 -- | Weakens a 'Variant' by forgetting possibly uninteresting type-level information.
 type family Weaken (v :: Variant) :: Variant where

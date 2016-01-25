@@ -36,8 +36,7 @@ import Foreign.Ptr (Ptr, castPtr)
 import Foreign.Storable (Storable(..))
 import GHC.Generics
 import Numeric.Units.Dimensional.Dimensions
-import Numeric.Units.Dimensional.Variants hiding (type (*))
-import qualified Numeric.Units.Dimensional.Variants as V
+import Numeric.Units.Dimensional.Variants
 import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.UnitNames.InterchangeNames (HasInterchangeName(..))
@@ -227,7 +226,7 @@ liftQ :: (a -> a) -> SQuantity s1 d1 a -> SQuantity s2 d2 a
 liftQ = coerce
 
 -- Combines two dimensional values using a binary operation on values, possibly yielding a Unit.
-liftD2 :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2)) => (ExactPi -> ExactPi -> ExactPi) -> (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) d3 a
+liftD2 :: (KnownVariant v1, KnownVariant v2, KnownVariant v3) => (ExactPi -> ExactPi -> ExactPi) -> (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional v3 d3 a
 liftD2 fe f nt x1 x2 = let (x1', e1') = extractValue x1
                            (x2', e2') = extractValue x2
                            n1 = extractName x1

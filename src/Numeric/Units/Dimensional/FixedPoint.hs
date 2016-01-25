@@ -71,7 +71,7 @@ import qualified GHC.TypeLits as N
 import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.Prelude hiding ((*~), (/~), (+), (-), recip, negate, abs, (*~~), (/~~), sum, mean, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, pi, tau, changeRep)
-import Numeric.Units.Dimensional.Variants hiding (type (*))
+import Numeric.Units.Dimensional.Variants hiding (type (*), type (/))
 import qualified Numeric.Units.Dimensional.UnitNames as Name
 import qualified Prelude as P
 
