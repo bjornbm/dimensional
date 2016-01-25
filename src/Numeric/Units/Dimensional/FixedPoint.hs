@@ -26,7 +26,7 @@ module Numeric.Units.Dimensional.FixedPoint
   -- * Physical Dimensions
   Dimension (Dim),
   -- ** Dimension Arithmetic
-  type (*), type (/), type (^), Root, Recip,
+  type (*), type (/), type (^), NRoot, Recip,
   -- ** Term Level Representation of Dimensions
   Dimension' (Dim'), HasDimension(..), KnownDimension,
   -- * Dimensional Arithmetic

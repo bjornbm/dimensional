@@ -25,7 +25,7 @@ referenced are from <#note1 [1]> unless otherwise specified.
 
 -}
 
-module Numeric.Units.Dimensional.SIUnits 
+module Numeric.Units.Dimensional.SIUnits
 (
   -- * SI Base Units
   -- $base-units
@@ -41,7 +41,7 @@ module Numeric.Units.Dimensional.SIUnits
   becquerel, gray, sievert, katal,
   -- * Units Accepted for Use with the SI
   -- $accepted-units
-  minute, hour, day, 
+  minute, hour, day,
   hectare, litre, liter, tonne, metricTon,
   -- ** Units of Plane Angle
   -- $arc-units
@@ -128,9 +128,9 @@ atto  = applyPrefix I.atto
 zepto = applyPrefix I.zepto
 yocto = applyPrefix I.yocto
 
-{- $reified-prefixes 
+{- $reified-prefixes
 
-We supply an explicit representation of an SI prefix, along with a function to apply one and a 
+We supply an explicit representation of an SI prefix, along with a function to apply one and a
 list of all prefixes defined by the SI.
 
 -}

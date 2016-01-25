@@ -27,7 +27,7 @@ module Numeric.Units.Dimensional.Dimensions.TypeLevel
   -- * Kind of Type-Level Dimensions
   type Dimension(..),
   -- * Dimension Arithmetic
-  type (*), type (/), type (^), type Recip, type Root,
+  type (*), type (/), type (^), type Recip, type NRoot, type Sqrt, type Cbrt,
   -- * Synonyms for Base Dimensions
   DOne,
   DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
@@ -38,13 +38,13 @@ where
 
 import Data.Proxy
 import Numeric.NumType.DK.Integers
-  ( TypeInt (Zero, Pos1), (+)(), (-)()
+  ( TypeInt (Zero, Pos1, Pos2, Pos3), (+)(), (-)()
   , KnownTypeInt, toNum
   )
 import qualified Numeric.NumType.DK.Integers as N
 import Numeric.Units.Dimensional.Dimensions.TermLevel
 
--- | Represents a physical dimension in the basis of the 7 SI base dimensions, 
+-- | Represents a physical dimension in the basis of the 7 SI base dimensions,
 -- where the respective dimensions are represented by type variables
 -- using the following convention:
 --
@@ -100,7 +100,7 @@ type Recip (d :: Dimension) = DOne / d
 
 -- | Powers of dimensions corresponds to multiplication of the base
 -- dimensions' exponents by the exponent.
--- 
+--
 -- We limit ourselves to integer powers of Dimensionals as fractional
 -- powers make little physical sense.
 type family (d::Dimension) ^ (x::TypeInt) where
@@ -112,11 +112,17 @@ type family (d::Dimension) ^ (x::TypeInt) where
 
 -- | Roots of dimensions corresponds to division of the base dimensions'
 -- exponents by the order of the root.
-type family Root (d::Dimension) (x::TypeInt) where
-  Root DOne x = DOne
-  Root d 'Pos1 = d
-  Root ('Dim l  m  t  i  th  n  j) x
+type family NRoot (d::Dimension) (x::TypeInt) where
+  NRoot DOne x = DOne
+  NRoot d 'Pos1 = d
+  NRoot ('Dim l  m  t  i  th  n  j) x
     = 'Dim (l N./ x) (m N./ x) (t N./ x) (i N./ x) (th N./ x) (n N./ x) (j N./ x)
+
+-- | Square root is a special case of 'NRoot' with order 2.
+type Sqrt d = NRoot d 'Pos2
+
+-- | Cube root is a special case of 'NRoot' with order 3.
+type Cbrt d = NRoot d 'Pos3
 
 -- | A KnownDimension is one for which we can construct a term-level representation.
 -- Each validly constructed type of kind 'Dimension' has a 'KnownDimension' instance.
@@ -143,7 +149,7 @@ instance ( KnownTypeInt l
          , KnownTypeInt n
          , KnownTypeInt j
          ) => HasDimension (Proxy ('Dim l m t i th n j))
-  where 
+  where
     dimension _ = Dim'
                 (toNum (Proxy :: Proxy l))
                 (toNum (Proxy :: Proxy m))

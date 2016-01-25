@@ -277,7 +277,7 @@ grouped = Grouped . weaken
 
 -- | Represents the name of an atomic unit or prefix.
 data NameAtom (m :: NameAtomType)
-  = NameAtom 
+  = NameAtom
   {
     _interchangeName :: InterchangeName, -- ^ The interchange name of the unit.
     abbreviation_en :: String, -- ^ The abbreviated name of the unit in international English
