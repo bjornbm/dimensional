@@ -360,12 +360,12 @@ inHg_UCUM = mkUnitQ (ucum "[in_i'Hg]" "in Hg" "inch of mercury") 1 $ mHg * inch 
 -- This is the value defined by NIST. For the value defined by UCUM, see 'inHg_UCUM'.
 --
 -- >>> 1 *~ inHg_NIST
--- 3.386389 m^-1 kg s^-2
+-- 3386.389 m^-1 kg s^-2
 --
 -- >>> 1 *~ inHg_NIST :: Pressure Rational
--- 3386389 % 1000000 m^-1 kg s^-2
+-- 3386389 % 1000 m^-1 kg s^-2
 inHg_NIST :: (Fractional a) => Unit 'NonMetric DPressure a
-inHg_NIST = mkUnitQ (dimensionalAtom "[in_i'Hg_NIST]" "in Hg" "inch of mercury") 3.386389 $ pascal
+inHg_NIST = mkUnitQ (dimensionalAtom "[in_i'Hg_NIST]" "in Hg" "inch of mercury") 3.386389e3 $ pascal
 
 -- | One torr (symbol: Torr) is defined as 1/760 atm, which is approximately equal to 1 'mmHg'.
 torr :: (Fractional a) => Unit 'NonMetric DPressure a
