@@ -86,10 +86,10 @@ had a combined uncertainty of 0.0000010e-27 kg.
 -}
 
 electronVolt :: Floating a => Unit 'Metric DEnergy a
-electronVolt = mkUnitR (ucumMetric "eV" "eV" "electron volt") (Approximate 1.60217733e-19) $ joule
+electronVolt = mkUnitR (ucumMetric "eV" "eV" "electron volt") 1.60217733e-19 $ joule
 
 unifiedAtomicMassUnit :: Floating a => Unit 'Metric DMass a
-unifiedAtomicMassUnit = mkUnitR (ucumMetric "u" "u" "atomic mass unit") (Approximate 1.6605402e-27) $ kilo gram
+unifiedAtomicMassUnit = mkUnitR (ucumMetric "u" "u" "atomic mass unit") 1.6605402e-27 $ kilo gram
 
 dalton :: Floating a => Unit 'Metric DMass a
 dalton = mkUnitR (ucumMetric "eV" "Da" "Dalton") 1 $ unifiedAtomicMassUnit
@@ -310,11 +310,17 @@ technicalAtmosphere = mkUnitQ (ucum "att" "at" "technical atmosphere") 1 $ kilo 
 --
 -- The chosen fluid density approximately corresponds to that of mercury
 -- at 0 deg. Under most conditions, 1 mmHg is approximately equal to 1 'torr'.
-mmHg :: (Floating a) => Unit 'NonMetric DPressure a
+--
+-- >>> 1 *~ mmHg
+-- 133.322 m^-1 kg s^-2
+--
+-- >>> 1 *~ mmHg :: Pressure Rational
+-- 66661 % 500 m^-1 kg s^-2
+mmHg :: (Fractional a) => Unit 'NonMetric DPressure a
 mmHg = milli mHg
 
-mHg :: (Floating a) => Unit 'Metric DPressure a
-mHg = mkUnitR (ucumMetric "m[Hg]" "m Hg" "meter of mercury") (Approximate 133.3220) $ kilo pascal
+mHg :: (Fractional a) => Unit 'Metric DPressure a
+mHg = mkUnitQ (ucumMetric "m[Hg]" "m Hg" "meter of mercury") 133.3220 $ kilo pascal
 
 -- | The conventional value for the pressure exerted by a 1 inch high column of mercury.
 --
@@ -322,7 +328,13 @@ mHg = mkUnitR (ucumMetric "m[Hg]" "m Hg" "meter of mercury") (Approximate 133.32
 -- meteorological or aeronautical contexts in the United States.
 --
 -- This is the value defined by UCUM. For the value defined by NIST, see 'inHg_NIST'.
-inHg :: (Floating a) => Unit 'NonMetric DPressure a
+--
+-- >>> 1 *~ inHg
+-- 3386.3788 m^-1 kg s^-2
+--
+-- >>> 1 *~ inHg :: Pressure Rational
+-- 8465947 % 2500 m^-1 kg s^-2
+inHg :: (Fractional a) => Unit 'NonMetric DPressure a
 inHg = inHg_UCUM
 
 -- | The conventional value for the pressure exerted by a 1 inch high column of mercury.
@@ -331,8 +343,14 @@ inHg = inHg_UCUM
 -- meteorological or aeronautical contexts in the United States.
 --
 -- This is the value defined by UCUM. For the value defined by NIST, see 'inHg_NIST'.
-inHg_UCUM :: (Floating a) => Unit 'NonMetric DPressure a
-inHg_UCUM = mkUnitR (ucum "[in_i'Hg]" "in Hg" "inch of mercury") 1 $ mHg * inch / meter
+--
+-- >>> 1 *~ inHg_UCUM
+-- 3386.3788 m^-1 kg s^-2
+--
+-- >>> 1 *~ inHg_UCUM :: Pressure Rational
+-- 8465947 % 2500 m^-1 kg s^-2
+inHg_UCUM :: (Fractional a) => Unit 'NonMetric DPressure a
+inHg_UCUM = mkUnitQ (ucum "[in_i'Hg]" "in Hg" "inch of mercury") 1 $ mHg * inch / meter
 
 -- | The conventional value for the pressure exerted by a 1 inch high column of mercury.
 --
@@ -340,8 +358,14 @@ inHg_UCUM = mkUnitR (ucum "[in_i'Hg]" "in Hg" "inch of mercury") 1 $ mHg * inch 
 -- meteorological or aeronautical contexts in the United States.
 --
 -- This is the value defined by NIST. For the value defined by UCUM, see 'inHg_UCUM'.
-inHg_NIST :: (Floating a) => Unit 'NonMetric DPressure a
-inHg_NIST = mkUnitR (dimensionalAtom "[in_i'Hg_NIST]" "in Hg" "inch of mercury") 3.386389 $ pascal
+--
+-- >>> 1 *~ inHg_NIST
+-- 3.386389 m^-1 kg s^-2
+--
+-- >>> 1 *~ inHg_NIST :: Pressure Rational
+-- 3386389 % 1000000 m^-1 kg s^-2
+inHg_NIST :: (Fractional a) => Unit 'NonMetric DPressure a
+inHg_NIST = mkUnitQ (dimensionalAtom "[in_i'Hg_NIST]" "in Hg" "inch of mercury") 3.386389 $ pascal
 
 -- | One torr (symbol: Torr) is defined as 1/760 atm, which is approximately equal to 1 'mmHg'.
 torr :: (Fractional a) => Unit 'NonMetric DPressure a
