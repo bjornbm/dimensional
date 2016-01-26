@@ -58,6 +58,7 @@ import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 -- Optional imports when certain package flags are enabled
 #if USE_AESON
 import qualified Data.Aeson
+import qualified Data.Aeson.Types
 import qualified Data.Monoid
 #endif
 #if USE_BINARY
@@ -137,7 +138,6 @@ instance Num a => Monoid (AnyQuantity a) where
 #if USE_AESON
 instance (Data.Aeson.ToJSON a) => Data.Aeson.ToJSON (AnyQuantity a) where
   toJSON (AnyQuantity d a) = Data.Aeson.object ["dimension" Data.Aeson..= d, "value" Data.Aeson..= a]
-  toEncoding (AnyQuantity d a) = Data.Aeson.pairs ("dimension" Data.Aeson..= d Data.Monoid.<> "value" Data.Aeson..= a)
 
 instance (Data.Aeson.FromJSON a) => Data.Aeson.FromJSON (AnyQuantity a) where
   parseJSON (Data.Aeson.Object v) = AnyQuantity P.<$>
@@ -216,8 +216,7 @@ instance Num a => Monoid (DynQuantity a) where
 -- This instance only needs a body because an incorrect MINIMAL pragma in aeson-0.10 leads to
 -- a warning if you omit it.
 instance (Data.Aeson.ToJSON a) => Data.Aeson.ToJSON (DynQuantity a) where
-  toJSON = Data.Aeson.genericToJSON Data.Aeson.defaultOptions
-  toEncoding = Data.Aeson.genericToEncoding Data.Aeson.defaultOptions
+  toJSON = Data.Aeson.genericToJSON Data.Aeson.Types.defaultOptions
 
 instance (Data.Aeson.FromJSON a) => Data.Aeson.FromJSON (DynQuantity a)
 #endif

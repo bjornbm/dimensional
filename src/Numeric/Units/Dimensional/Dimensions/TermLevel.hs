@@ -44,6 +44,7 @@ import qualified Prelude as P
 -- Optional imports when certain package flags are enabled
 #if USE_AESON
 import qualified Data.Aeson
+import qualified Data.Aeson.Types
 #endif
 #if USE_BINARY
 import qualified Data.Binary
@@ -76,8 +77,7 @@ instance Monoid Dimension' where
 -- This instance only needs a body because an incorrect MINIMAL pragma in aeson-0.10 leads to
 -- a warning if you omit it.
 instance Data.Aeson.ToJSON Dimension' where
-  toJSON = Data.Aeson.genericToJSON Data.Aeson.defaultOptions
-  toEncoding = Data.Aeson.genericToEncoding Data.Aeson.defaultOptions
+  toJSON = Data.Aeson.genericToJSON Data.Aeson.Types.defaultOptions
 
 instance Data.Aeson.FromJSON Dimension'
 #endif
