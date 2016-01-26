@@ -40,13 +40,18 @@ module Numeric.Units.Dimensional.NonSI
   -- $values-obtained-experimentally
   electronVolt, unifiedAtomicMassUnit, dalton,
   -- * Standard Gravity
-  -- $standard-gravity
   gee,
   -- * Inch-pound Units
   -- $inch-pound-units
-  inch, foot, mil, poundMass, ounce, poundForce, horsepower,
-  slug, psi, yard, mile, nauticalMile, knot,
-  revolution, solid, teaspoon, acre,
+  poundMass, ounce, poundForce, horsepower,
+  nauticalMile, knot,
+  revolution, solid,
+  slug, psi,
+  teaspoon,
+  -- ** International Foot
+  foot, inch, mil, yard, mile, acre,
+  -- ** US Survey Foot
+  usSurveyFoot, usSurveyInch, usSurveyMil, usSurveyYard, usSurveyMile, usSurveyAcre,
   -- * Years
   -- $year
   year, century,
@@ -69,7 +74,6 @@ module Numeric.Units.Dimensional.NonSI
 )
 where
 
-import Data.ExactPi
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.UnitNames.Internal (ucumMetric, ucum, dimensionalAtom)
 import qualified Prelude
@@ -94,14 +98,19 @@ unifiedAtomicMassUnit = mkUnitR (ucumMetric "u" "u" "atomic mass unit") 1.660540
 dalton :: Floating a => Unit 'Metric DMass a
 dalton = mkUnitR (ucumMetric "eV" "Da" "Dalton") 1 $ unifiedAtomicMassUnit
 
-{- $standard-gravity
-In order to relate e.g. pounds mass to pounds force we define the unit
-'gee' equal to the standard gravity g_0: the nominal acceleration of a
-body in free fall in a vacuum near the surface of the earth (note that
-local values of acceleration due to gravity will differ from the standard
-gravity). I.e. g_0 = 1 gee.
--}
-
+-- | One gee is the standard value of the acceleration due to gravity at the
+-- Earth's surface, as standardized by CIPM.
+--
+-- Note that local values of acceleration due to gravity will differ from the
+-- standard gravity.
+--
+-- See <https://en.wikipedia.org/wiki/Standard_gravity here> for further information.
+--
+-- >>> 1 *~ gee
+-- 9.80665 m s^-2
+--
+-- >>> 1 *~ gee :: Acceleration Rational
+-- 196133 % 20000 m s^-2
 gee :: Fractional a => Unit 'Metric DAcceleration a
 gee = mkUnitQ (ucumMetric "[g]" "g" "gee") 9.80665 $ meter / second ^ pos2
 
@@ -109,14 +118,179 @@ gee = mkUnitQ (ucumMetric "[g]" "g" "gee") 9.80665 $ meter / second ^ pos2
 Some US customary (that is, inch-pound) units.
 -}
 
-inch :: Fractional a => Unit 'NonMetric DLength a
-inch = mkUnitQ (ucum "[in_i]" "in" "inch") 2.54 $ centi meter
-
+-- | One international foot is one third of an international 'yard'.
+--
+-- See <https://en.wikipedia.org/wiki/Foot_%28unit%29#International_foot here> for further information.
+--
+-- >>> 1 *~ foot
+-- 0.3048 m
+--
+-- >>> 1 *~ foot :: Length Rational
+-- 381 % 1250 m
 foot :: Fractional a => Unit 'NonMetric DLength a
-foot = mkUnitQ (ucum "[ft_i]" "ft" "foot") 12 $ inch
+foot = mkUnitQ (ucum "[ft_i]" "ft" "foot") (1 Prelude./ 3) $ yard
 
+-- | One inch is one twelth of a 'foot'.
+--
+-- This inch is based on the international 'foot'.
+--
+-- See <https://en.wikipedia.org/wiki/Inch#Modern_standardisation here> for further information.
+--
+-- >>> 1 *~ inch
+-- 2.54e-2 m
+--
+-- >>> 1 *~ inch :: Length Rational
+-- 127 % 5000 m
+inch :: Fractional a => Unit 'NonMetric DLength a
+inch = mkUnitQ (ucum "[in_i]" "in" "inch") (1 Prelude./ 12) $ foot
+
+-- | One mil is one thousandth of an 'inch'.
+--
+-- This mil is based on the international 'inch'.
+--
+-- See <https://en.wikipedia.org/wiki/Thousandth_of_an_inch here> for further information.
+--
+-- >>> 1 *~ mil
+-- 2.54e-5 m
+--
+-- >>> 1 *~ mil :: Length Rational
+-- 127 % 5000000 m
 mil :: Fractional a => Unit 'NonMetric DLength a
 mil = mkUnitQ (ucum "[mil_i]" "mil" "mil") 0.001 $ inch
+
+-- | One yard, as defined by international agreement in 1959, is precisely
+-- 0.9144 'meter'.
+--
+-- See <https://en.wikipedia.org/wiki/Yard here> for further information.
+--
+-- >>> 1 *~ yard
+-- 0.9144 m
+--
+-- >>> 1 *~ yard :: Length Rational
+-- 1143 % 1250 m
+yard :: (Fractional a) => Unit 'NonMetric DLength a
+yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 0.9144 $ meter
+
+-- | One mile is 5,280 feet.
+--
+-- This mile is based on the international 'foot'.
+--
+-- See <https://en.wikipedia.org/wiki/Mile#International_mile here> for further information.
+--
+-- >>> 1 *~ mile
+-- 1609.344 m
+--
+-- >>> 1 *~ mile :: Length Rational
+-- 201168 % 125 m
+mile :: (Fractional a) => Unit 'NonMetric DLength a
+mile = mkUnitQ (ucum "[mi_i]" "mi" "mile") 5280 $ foot
+
+-- | One acre is 43,560 square feet.
+--
+-- This acre is based on the international 'foot'. For the acre based on the US Survey Foot,
+-- see 'usSurveyAcre'. While both acres are in use, the difference between them is of little consequence
+-- for most applications in which either is used.
+--
+-- See <https://en.wikipedia.org/wiki/Acre#Differences_between_international_and_US_survey_acres here> for further information.
+--
+-- >>> 1 *~ acre
+-- 4046.8564224 m^2
+--
+-- >>> 1 *~ acre :: Area Rational
+-- 316160658 % 78125 m^2
+acre :: (Fractional a) => Unit 'NonMetric DArea a
+acre = mkUnitQ (dimensionalAtom "[acr_i]" "ac" "acre") 43560 $ square foot
+
+-- | One US survey foot is 1200/3937 'meter'.
+--
+-- For the international foot, see 'foot'. Note that this is not the foot in routine use
+-- in the United States.
+--
+-- See <https://en.wikipedia.org/wiki/Foot_%28unit%29#US_survey_foot here> for further information.
+--
+-- >>> 1 *~ usSurveyFoot
+-- 0.3048006096012192 m
+--
+-- >>> 1 *~ usSurveyFoot :: Length Rational
+-- 1200 % 3937 m
+usSurveyFoot :: Fractional a => Unit 'NonMetric DLength a
+usSurveyFoot = mkUnitQ (ucum "[ft_us]" "ft" "foot") (1200 Prelude./ 3937) $ meter
+
+-- | One inch is one twelth of a foot.
+--
+-- This inch is based on the 'usSurveyFoot'. For the inch based on the international foot,
+-- see 'inch'. Note that this is not the inch in routine use in the United States.
+--
+-- See <https://en.wikipedia.org/wiki/Inch here> for further information.
+--
+-- >>> 1 *~ usSurveyInch
+-- 2.54000508001016e-2 m
+--
+-- >>> 1 *~ usSurveyInch :: Length Rational
+-- 100 % 3937 m
+usSurveyInch :: Fractional a => Unit 'NonMetric DLength a
+usSurveyInch = mkUnitQ (ucum "[in_us]" "in" "inch") (1 Prelude./ 12) $ usSurveyFoot
+
+-- | One mil is one thousandth of an inch.
+--
+-- This mil is based on the 'usSurveyInch'. For the mil based on the international inch,
+-- see 'mil'. Note that this is not the mil in routine use in the United States.
+--
+-- See <https://en.wikipedia.org/wiki/Thousandth_of_an_inch here> for further information.
+--
+-- >>> 1 *~ usSurveyMil
+-- 2.54000508001016e-5 m
+--
+-- >>> 1 *~ usSurveyMil :: Length Rational
+-- 1 % 39370 m
+usSurveyMil :: Fractional a => Unit 'NonMetric DLength a
+usSurveyMil = mkUnitQ (ucum "[mil_us]" "mil" "mil") 0.001 $ usSurveyInch
+
+-- | One yard is three feet.
+--
+-- This yard is based on the 'usSurveyFoot'. For the international yard,
+-- see 'yard'. Note that this is not the yard in routine use in the United States.
+--
+-- See <https://en.wikipedia.org/wiki/Yard here> for further information.
+--
+-- >>> 1 *~ usSurveyYard
+-- 0.9144018288036576 m
+--
+-- >>> 1 *~ usSurveyYard :: Length Rational
+-- 3600 % 3937 m
+usSurveyYard :: (Fractional a) => Unit 'NonMetric DLength a
+usSurveyYard = mkUnitQ (ucum "[yd_us]" "yd" "yard") 3 $ usSurveyFoot
+
+-- | One US survey mile is 5,280 US survey feet.
+--
+-- This mile is based on the 'usSurveyFoot'. For the mile based on the international foot,
+-- see 'mile'. Note that this is not the mile in routine use in the United States.
+--
+-- See <https://en.wikipedia.org/wiki/Mile#US_survey_mile here> for further information.
+--
+-- >>> 1 *~ usSurveyMile
+-- 1609.3472186944373 m
+--
+-- >>> 1 *~ usSurveyMile :: Length Rational
+-- 6336000 % 3937 m
+usSurveyMile :: (Fractional a) => Unit 'NonMetric DLength a
+usSurveyMile = mkUnitQ (ucum "[mi_us]" "mi" "mile") 5280 $ usSurveyFoot
+
+-- | One acre is 43,560 square feet.
+--
+-- This acre is based on the 'usSurveyFoot'. For the acre based on the international foot,
+-- see 'acre'. While both acres are in use, the difference between them is of little consequence
+-- for most applications in which either is used. This is the only acre defined by the UCUM.
+--
+-- See <https://en.wikipedia.org/wiki/Acre#Differences_between_international_and_US_survey_acres here> for further information.
+--
+-- >>> 1 *~ usSurveyAcre
+-- 4046.872609874252 m^2
+--
+-- >>> 1 *~ usSurveyAcre :: Area Rational
+-- 62726400000 % 15499969 m^2
+usSurveyAcre :: (Fractional a) => Unit 'NonMetric DArea a
+usSurveyAcre = mkUnitQ (ucum "[acr_us]" "ac" "acre") 43560 $ square usSurveyFoot
 
 poundMass :: Fractional a => Unit 'NonMetric DMass a
 poundMass = mkUnitQ (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
@@ -181,18 +355,6 @@ slug = mkUnitQ (dimensionalAtom "slug" "slug" "slug") 1 $ poundForce * (second^p
 psi :: Fractional a => Unit 'NonMetric DPressure a
 psi = mkUnitQ (ucum "[psi]" "psi" "pound per square inch") 1 $ poundForce / inch ^ pos2
 
-{-
-
-= Various other (non inch-pound) units =
-
--}
-
-yard :: (Fractional a) => Unit 'NonMetric DLength a
-yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 3 $ foot
-
-mile :: (Fractional a) => Unit 'NonMetric DLength a
-mile = mkUnitQ (ucum "[mi_i]" "mi" "mile") 5280 $ foot
-
 -- | One nautical mile is a unit of length, set by international agreement as being exactly 1,852 meters.
 --
 -- Historically, it was defined as the distance spanned by one minute of arc along a meridian of the Earth.
@@ -227,9 +389,6 @@ solid = mkUnitR (dimensionalAtom "solid" "solid" "solid") (4 Prelude.* Prelude.p
 
 teaspoon :: (Fractional a) => Unit 'NonMetric DVolume a
 teaspoon = mkUnitQ (ucum "[tsp_m]" "tsp" "teaspoon") 5 $ milli liter
-
-acre :: (Fractional a) => Unit 'NonMetric DArea a
-acre = mkUnitQ (ucum "[acr_us]" "ac" "acre") 43560 $ square foot
 
 {- $year
 
