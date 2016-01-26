@@ -19,13 +19,12 @@ addons:
 env:
 - ARGS="--resolver lts-2 --stack-yaml stack.lts2.yaml"
 - ARGS="--resolver lts-3"
-- ARGS="--resolver lts"
-- ARGS="--resolver lts" FLAGS="--flag dimensional:aeson"
-- ARGS="--resolver lts" FLAGS="--flag dimensional:binary"
-- ARGS="--resolver lts" FLAGS="--flag dimensional:cereal"
-- ARGS="--resolver lts" FLAGS="--flag dimensional:vector-space"
-- ARGS="--resolver lts" FLAGS="--flag dimensional:aeson --flag dimensional:binary --flag dimensional:cereal --flag dimensional:vector-space"
-- ARGS="--resolver nightly"
+- ARGS="--resolver lts-5"
+- ARGS="--resolver lts-5" FLAGS="--flag dimensional:aeson"
+- ARGS="--resolver lts-5" FLAGS="--flag dimensional:binary"
+- ARGS="--resolver lts-5" FLAGS="--flag dimensional:cereal"
+- ARGS="--resolver lts-5" FLAGS="--flag dimensional:vector-space"
+- ARGS="--resolver lts-5" FLAGS="--flag dimensional:aeson --flag dimensional:binary --flag dimensional:cereal --flag dimensional:vector-space"
 
 before_install:
 # Download and unpack the stack executable
