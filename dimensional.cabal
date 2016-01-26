@@ -89,7 +89,7 @@ library
                        Numeric.Units.Dimensional.UnitNames.Internal
 
   if flag(aeson)
-    build-depends:     aeson >= 0.10 && < 1
+    build-depends:     aeson >= 0.9 && < 1
     cpp-options:       -DUSE_AESON
 
   if flag(binary)
