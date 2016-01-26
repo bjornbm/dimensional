@@ -380,6 +380,10 @@ mkUnitQ :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
 mkUnitR :: Floating a   => UnitName m -> ExactPi  -> Unit m1 d a -> Unit m d a
 \end{lstlisting}
 
+Regardless of the type of the conversion factor, it must not be zero. This is because it would not be possible
+to express any quantities in a unit if that unit's conversion factor were zero. Negative conversion factors are accepted
+and handled properly, but their use is strongly discouraged as it is likely to be confusing.
+
 Taking an example (already provided in the `Numeric.Units.Dimensional.NonSI` module), one might define:
 
 \begin{lstlisting}
