@@ -27,7 +27,8 @@ vNext
   unknown dimension, suitable for performing arithmetic with such quantities.
 * Added `nroot` function for term-level dimensions.
 * Added the Numeric.Units.Dimensional.Float module with convenient wrappers around functions
-  from RealFloat for inspecting floating point quantities.
+  from RealFloat and IEEE for inspecting floating point quantities.
+* Added an `AEq` instance for `Quantity`.
 * Relocated git repository to https://github.com/bjornbm/dimensional
 
 1.0.1.1 (2015-11)
