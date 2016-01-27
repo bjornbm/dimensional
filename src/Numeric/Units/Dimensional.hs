@@ -481,7 +481,7 @@ nroot n = let n' = 1 Prelude./ toNum n
            in liftQ (Prelude.** n')
 
 {-
-We provide short-hands for the square and cubic roots.
+We provide short-hands for the square and cube roots.
 -}
 
 -- | Computes the square root of a 'Quantity' using 'Prelude.**'.

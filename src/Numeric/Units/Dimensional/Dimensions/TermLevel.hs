@@ -136,7 +136,7 @@ nroot n d | n /= 0 && all ((== 0) . snd) ds = fromList . fmap fst $ ds
 sqrt :: Dimension' -> Maybe Dimension'
 sqrt = nroot 2
 
--- | Takes the cubic root of a dimension, if it exists.
+-- | Takes the cube root of a dimension, if it exists.
 --
 -- prop> cbrt d == nroot 3 d
 cbrt :: Dimension' -> Maybe Dimension'
