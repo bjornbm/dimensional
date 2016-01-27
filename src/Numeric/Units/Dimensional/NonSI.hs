@@ -47,6 +47,7 @@ module Numeric.Units.Dimensional.NonSI
   inch, foot, mil, poundMass, ounce, poundForce, horsepower,
   slug, psi, yard, mile, nauticalMile, knot,
   revolution, solid, teaspoon, acre,
+  btu,
   -- * Years
   -- $year
   year, century,
@@ -160,6 +161,24 @@ teaspoon :: (Fractional a) => Unit 'NonMetric DVolume a
 teaspoon = mkUnitQ (ucum "[tsp_m]" "tsp" "teaspoon") 5 $ milli liter
 acre :: (Fractional a) => Unit 'NonMetric DArea a
 acre = mkUnitQ (ucum "[acr_us]" "ac" "acre") 43560 $ square foot
+
+-- | One btu is is the 'QuantityOfHeat' required to raise the temperature
+-- of 1 avoirdupois 'poundMass' of liquid water by 1 'degreeFahrenheit' at a constant pressure of one 'atmosphere'.
+--
+-- Because this value must be determined experimentally and varies with temperature, several standardized
+-- values of the btu have arisen. This is the value based on the International Steam Table calorie,
+-- defined by the Fifth International Conference on the Properties of Steam.
+--
+-- See <https://en.wikipedia.org/wiki/British_thermal_unit#Definitions here> for further information.
+--
+-- >>> 1 *~ btu
+-- 1055.05585262 m^2 kg s^-2
+--
+-- >>> 1 *~ btu :: Energy Rational
+-- 52752792631 % 50000000 m^2 kg s^-2
+btu :: Fractional a => Unit 'NonMetric DEnergy a
+btu = mkUnitQ (ucum "[Btu_IT]" "btu" "British thermal unit") 1055.05585262 $ joule
+
 
 {- $year
 
