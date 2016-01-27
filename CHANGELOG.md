@@ -28,6 +28,7 @@ vNext
 * Added `nroot` function for term-level dimensions.
 * Added the Numeric.Units.Dimensional.Float module with convenient wrappers around functions
   from RealFloat for inspecting floating point quantities.
+* Added the `btu`, a unit of energy.
 * Relocated git repository to https://github.com/bjornbm/dimensional
 
 1.0.1.1 (2015-11)
