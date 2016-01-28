@@ -588,7 +588,16 @@ inHg_NIST = mkUnitQ (dimensionalAtom "[in_i'Hg_NIST]" "in Hg" "inch of mercury")
 torr :: (Fractional a) => Unit 'NonMetric DPressure a
 torr = mkUnitQ (dimensionalAtom "Torr" "Torr" "Torr") (1 Prelude./ 760) $ atmosphere
 
-{- Radiation -}
+-- | The rad is a deprecated unit of 'AbsorbedDose', defined as
+-- 0.01 'gray'.
+--
+-- See <https://en.wikipedia.org/wiki/Rad_%28unit%29 here> for further information.
+--
+-- >>> 1 *~ rad
+-- 1.0e-2 m^2 s^-2
+--
+-- >>> 1 *~ rad :: AbsorbedDose Rational
+-- 1 % 100 m^2 s^-2
 rad :: (Fractional a) => Unit 'Metric DAbsorbedDose a
 rad = mkUnitQ (ucumMetric "RAD" "RAD" "RAD") 1 $ centi gray
 
