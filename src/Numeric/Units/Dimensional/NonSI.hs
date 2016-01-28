@@ -435,14 +435,27 @@ The IAU recommends <#note2 [2]> that:
   several kinds of day), it is best to regard a year as a julian
   year of 365.25 days (31.5576 Ms) unless otherwise specified.
 
-We define the year in terms of seconds in order to avoid a 'Fractional'
-constraint, and also provide a Julian century.
-
 -}
 
+-- | One mean Julian year is a unit of measurement of time defined as exactly 365.25 days of 86400 'second's each.
+--
+-- See <https://en.wikipedia.org/wiki/Julian_year_%28astronomy%29 here> for further information.
+--
+-- >>> 1 *~ year
+-- 3.15576e7 s
+--
+-- >>> 1 *~ year :: Time Rational
+-- 31557600 % 1 s
 year :: Num a => Unit 'NonMetric DTime a
-year    = mkUnitZ (ucum "a_j" "a" "mean Julian year") 31557600 $ second
+year = mkUnitZ (ucum "a_j" "a" "mean Julian year") 31557600 $ second
 
+-- | One mean Julain century is one hundred mean Julian 'year's.
+--
+-- >>> 1 *~ century
+-- 3.15576e9 s
+--
+-- >>> 1 *~ century :: Time Rational
+-- 3155760000 % 1 s
 century :: Num a => Unit 'NonMetric DTime a
 century = mkUnitZ (dimensionalAtom "c_j" "cen" "mean Julian century") 100 $ year
 
@@ -579,7 +592,15 @@ torr = mkUnitQ (dimensionalAtom "Torr" "Torr" "Torr") (1 Prelude./ 760) $ atmosp
 rad :: (Fractional a) => Unit 'Metric DAbsorbedDose a
 rad = mkUnitQ (ucumMetric "RAD" "RAD" "RAD") 1 $ centi gray
 
-{- Kinematic Viscosity -}
+-- | One Stokes is a unit of 'KinematicViscosity' equal to @1 cm^2 / s@.
+--
+-- See <https://en.wikipedia.org/wiki/Viscosity#Kinematic_viscosity_.CE.BD here> for further information.
+--
+-- >>> 1 *~ stokes
+-- 1.0e-4 m^2 s^-1
+--
+-- >>> 1 *~ stokes :: KinematicViscosity Rational
+-- 1 % 10000 m^2 s^-1
 stokes :: (Fractional a) => Unit 'Metric DKinematicViscosity a
 stokes = mkUnitQ (ucumMetric "St" "St" "Stokes") 1 $ centi meter ^ pos2 / second
 
