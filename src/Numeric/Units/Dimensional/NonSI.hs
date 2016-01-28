@@ -607,9 +607,34 @@ stokes = mkUnitQ (ucumMetric "St" "St" "Stokes") 1 $ centi meter ^ pos2 / second
 {- $temperature
 These units of temperature are relative. For absolute temperatures, see 'Numeric.Units.Dimensional.SIUnits.fromDegreeCelsiusAbsolute'.
 -}
+
+-- | One degree Fahrenheit is a unit of relative temperature equal to 5/9 'kelvin'.
+--
+-- Note that although the Fahrenheit scale is an absolute temperature scale, this unit is a unit of difference within
+-- that scale and measures relative temperature.
+--
+-- See <https://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions here> for further information.
+--
+-- >>> 1 *~ degreeFahrenheit
+-- 0.5555555555555556 K
+--
+-- >>> 1 *~ degreeFahrenheit :: ThermodynamicTemperature Rational
+-- 5 % 9 K
 degreeFahrenheit :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
 degreeFahrenheit = mkUnitQ (ucum "[degF]" "°F" "degree Fahrenheit") (5 Prelude./ 9) $ degreeCelsius
 
+-- | One degree Rankine is a unit of relative temperature equal to 5/9 'kelvin'.
+--
+-- Note that although the Rankine scale is an absolute temperature scale, this unit is a unit of difference within
+-- that scale and measures relative temperature.
+--
+-- See <https://en.wikipedia.org/wiki/Rankine_scale here> for further information.
+--
+-- >>> 1 *~ degreeRankine
+-- 0.5555555555555556 K
+--
+-- >>> 1 *~ degreeRankine :: ThermodynamicTemperature Rational
+-- 5 % 9 K
 degreeRankine :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
 degreeRankine = mkUnitQ (ucum "[degR]" "°R" "degree Rankine") 1 $ degreeFahrenheit
 
@@ -640,20 +665,74 @@ Per http://www.nist.gov/pml/wmd/pubs/upload/2012-hb44-final.pdf page 452 and htt
 Note that there exist rarely-used "dry" variants of units with overlapping names.
 -}
 
+-- | One US liquid gallon is a volume of 231 cubic inches.
+--
+-- See <https://en.wikipedia.org/wiki/Gallon#The_US_liquid_gallon here> for further information.
+--
+-- >>> 1 *~ usGallon
+-- 3.785411784e-3 m^3
+--
+-- >>> 1 *~ usGallon :: Volume Rational
+-- 473176473 % 125000000000 m^3
 usGallon :: (Fractional a) => Unit 'NonMetric DVolume a
 usGallon = mkUnitQ (ucum "[gal_us]" "gal" "gallon") 231 $ (cubic inch)
 
+-- | One US liquid quart is one quarter of a 'usGallon'.
+--
+-- See <https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume here> for further information.
+--
+-- >>> 1 *~ usQuart
+-- 9.46352946e-4 m^3
+--
+-- >>> 1 *~ usQuart :: Volume Rational
+-- 473176473 % 500000000000 m^3
 usQuart :: (Fractional a) => Unit 'NonMetric DVolume a
 usQuart = mkUnitQ (ucum "[qt_us]" "qt" "quart") (1 Prelude./ 4) $ usGallon
 
+-- | One US liquid pint is one half of a 'usQuart'.
+--
+-- See <https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume here> for further information.
+--
+-- >>> 1 *~ usPint
+-- 4.73176473e-4 m^3
+--
+-- >>> 1 *~ usPint :: Volume Rational
+-- 473176473 % 1000000000000 m^3
 usPint :: (Fractional a) => Unit 'NonMetric DVolume a
 usPint = mkUnitQ (ucum "[pt_us]" "pt" "pint") (1 Prelude./ 8) $ usGallon
 
+-- | One US liquid cup is one half of a 'usPint'.
+--
+-- See <https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume here> for further information.
+--
+-- >>> 1 *~ usCup
+-- 2.365882365e-4 m^3
+--
+-- >>> 1 *~ usCup :: Volume Rational
+-- 473176473 % 2000000000000 m^3
 usCup :: (Fractional a) => Unit 'NonMetric DVolume a
 usCup = mkUnitQ (ucum "[cup_us]" "cup" "cup") (1 Prelude./ 2) $ usPint
 
+-- | One US liquid gill is one half of a 'usCup'.
+--
+-- See <https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume here> for further information.
+--
+-- >>> 1 *~ usGill
+-- 1.1829411825e-4 m^3
+--
+-- >>> 1 *~ usGill :: Volume Rational
+-- 473176473 % 4000000000000 m^3
 usGill :: (Fractional a) => Unit 'NonMetric DVolume a
 usGill = mkUnitQ (ucum "[gil_us]" "gill" "gill") (1 Prelude./ 4) $ usPint
 
+-- | One US fluid ounce is 1/128 'usGallon' or 1/8 'usCup'.
+--
+-- See <https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume here> for further information.
+--
+-- >>> 1 *~ usFluidOunce
+-- 2.95735295625e-5 m^3
+--
+-- >>> 1 *~ usFluidOunce :: Volume Rational
+-- 473176473 % 16000000000000 m^3
 usFluidOunce :: (Fractional a) => Unit 'NonMetric DVolume a
 usFluidOunce = mkUnitQ (ucum "[foz_us]" "fl oz" "fluid ounce") (1 Prelude./ 16) $ usPint -- sic, does not match factor used in imperial system
