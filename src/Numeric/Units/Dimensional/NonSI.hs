@@ -642,21 +642,79 @@ degreeRankine = mkUnitQ (ucum "[degR]" "°R" "degree Rankine") 1 $ degreeFahrenh
 Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki/Cup_(unit)#Imperial_cup.
 -}
 
+-- | One imperial gallon is defined exactly in terms of the 'liter'
+-- by the Weights and Measures Act 1985.
+--
+-- See <https://en.wikipedia.org/wiki/Imperial_units#Volume here> for further information.
+--
+-- >>> 1 *~ imperialGallon
+-- 4.54609e-3 m^3
+--
+-- >>> 1 *~ imperialGallon :: Volume Rational
+-- 454609 % 100000000 m^3
 imperialGallon :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialGallon = mkUnitQ (ucum "[gal_br]" "gal" "gallon") 4.54609 $ liter
 
+-- | One imperial quart is one quarter of an 'imperialGallon'.
+--
+-- See <https://en.wikipedia.org/wiki/Imperial_units#Volume here> for further information.
+--
+-- >>> 1 *~ imperialQuart
+-- 1.1365225e-3 m^3
+--
+-- >>> 1 *~ imperialQuart :: Volume Rational
+-- 454609 % 400000000 m^3
 imperialQuart :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialQuart = mkUnitQ (ucum "[qt_br]" "qt" "quart") (1 Prelude./ 4) $ imperialGallon
 
+-- | One imperial pint is one half of an 'imperialQuart'.
+--
+-- See <https://en.wikipedia.org/wiki/Imperial_units#Volume here> for further information.
+--
+-- >>> 1 *~ imperialPint
+-- 5.6826125e-4 m^3
+--
+-- >>> 1 *~ imperialPint :: Volume Rational
+-- 454609 % 800000000 m^3
 imperialPint :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialPint = mkUnitQ (ucum "[pt_br]" "pt" "pint") (1 Prelude./ 8) $ imperialGallon
 
+-- | One imperial cup is one half of an 'imperialPint'.
+--
+-- This unit is not in common use and is does not appear in some sources
+-- describing the imperial fluid volume units.
+--
+-- See <https://en.wikipedia.org/wiki/Cup_%28unit%29#Imperial_cup here> for further information.
+--
+-- >>> 1 *~ imperialCup
+-- 2.84130625e-4 m^3
+--
+-- >>> 1 *~ imperialCup :: Volume Rational
+-- 454609 % 1600000000 m^3
 imperialCup :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialCup = mkUnitQ (dimensionalAtom "[cup_br]" "cup" "cup") 0.5 $ imperialPint
 
+-- | One imperial gill is one quarter of an 'imperialPint'.
+--
+-- See <https://en.wikipedia.org/wiki/Imperial_units#Volume here> for further information.
+--
+-- >>> 1 *~ imperialGill
+-- 1.420653125e-4 m^3
+--
+-- >>> 1 *~ imperialGill :: Volume Rational
+-- 454609 % 3200000000 m^3
 imperialGill :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialGill = mkUnitQ (ucum "[gil_br]" "gill" "gill") (1 Prelude./ 4) $ imperialPint
 
+-- | One imperial fluid ounce is one twentieth of an 'imperialPint'.
+--
+-- See <https://en.wikipedia.org/wiki/Imperial_units#Volume here> for further information.
+--
+-- >>> 1 *~ imperialFluidOunce
+-- 2.84130625e-5 m^3
+--
+-- >>> 1 *~ imperialFluidOunce :: Volume Rational
+-- 454609 % 16000000000 m^3
 imperialFluidOunce :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialFluidOunce = mkUnitQ (ucum "[foz_br]" "fl oz" "fluid ounce") (1 Prelude./ 20) $ imperialPint
 
