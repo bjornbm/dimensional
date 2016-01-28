@@ -614,11 +614,26 @@ atanh = fmap Prelude.atanh
 (**) = liftQ2 (Prelude.**)
 
 -- | Takes the logarithm of the second argument in the base of the first.
+--
+-- >>> logBase _2 _8
+-- 3.0
 logBase :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
 logBase = liftQ2 Prelude.logBase
 
 -- | The standard two argument arctangent function.
 -- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
+--
+-- >>> atan2 _0 _1
+-- 0.0
+--
+-- >>> atan2 _1 _0
+-- 1.5707963267948966
+--
+-- >>> atan2 _0 (negate _1)
+-- 3.141592653589793
+--
+-- >>> atan2 (negate _1) _0
+-- -1.5707963267948966
 atan2 :: (RealFloat a) => Quantity d a -> Quantity d a -> Dimensionless a
 atan2 = liftQ2 Prelude.atan2
 
@@ -678,6 +693,10 @@ If you feel your work requires this instance, it is provided as an orphan in "Nu
 -}
 
 -- | Convenient conversion between numerical types while retaining dimensional information.
+--
+-- >>> let x = (37 :: Rational) *~ poundMass
+-- >>> changeRep x :: Mass Double
+-- 16.78291769 kg
 changeRep :: (KnownVariant v, Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
 changeRep = dmap realToFrac
 
