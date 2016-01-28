@@ -63,6 +63,18 @@ main = do
          putStrLn $ "The journey requires " ++ show wholeSeconds ++ " seconds, rounded up to the nearest second."
 ```
 
+## Package Flags
+
+Package flags are available which enable us to provide instances for Quantity that are useful to interoperate with various popular packages without burdening all users with those
+dependencies or creating orphan instances.
+
+To install with `ToJSON` and `FromJSON` instances for `Quantity`, use:
+
+`cabal install dimensional -f aeson`
+
+Similarly the `binary`, `cereal`, and `vector-space` flags enable appropriate
+instances for use with the packages of the same names.
+
 ## Contributing
 
 For project information (issues, updates, wiki, examples) see:

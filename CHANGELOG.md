@@ -18,6 +18,9 @@ vNext
   `(Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a)` to
   `(Num a, Foldable f) => f b -> Dimensionless a`. This provides a weaker constraint on the type `a`
   and may result in ambiguous types in code that depends on the former less general type.
+* Added package flags `aeson`, `binary`, `cereal`, and `vector-space` enabling
+  optional dependencies on the packages of the same names to provide instances of widely
+  used classes from those packages.
 * Added `Data`, `Generic`, `Typeable` and `NFData` instances for many ancillary types.
 * Added `unQuantity` to the Coercion module to ease unwrapping without
   introducing ambiguous type variables.

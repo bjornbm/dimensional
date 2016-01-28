@@ -1,6 +1,7 @@
 {-# OPTIONS_HADDOCK not-home, show-extensions #-}
 
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -40,6 +41,18 @@ import GHC.Generics
 import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), (&&), Int, Show, Eq(..), Ord(..), Maybe(..))
 import qualified Prelude as P
 
+-- Optional imports when certain package flags are enabled
+#if USE_AESON
+import qualified Data.Aeson
+import qualified Data.Aeson.Types
+#endif
+#if USE_BINARY
+import qualified Data.Binary
+#endif
+#if USE_CEREAL
+import qualified Data.Serialize
+#endif
+
 -- $setup
 -- >>> import Prelude (negate)
 -- >>> import Control.Applicative
@@ -59,6 +72,23 @@ instance NFData Dimension' where
 instance Monoid Dimension' where
   mempty = dOne
   mappend = (*)
+
+#if USE_AESON
+-- This instance only needs a body because an incorrect MINIMAL pragma in aeson-0.10 leads to
+-- a warning if you omit it.
+instance Data.Aeson.ToJSON Dimension' where
+  toJSON = Data.Aeson.genericToJSON Data.Aeson.Types.defaultOptions
+
+instance Data.Aeson.FromJSON Dimension'
+#endif
+
+#if USE_BINARY
+instance Data.Binary.Binary Dimension'
+#endif
+
+#if USE_CEREAL
+instance Data.Serialize.Serialize Dimension'
+#endif
 
 -- | Dimensional values, or those that are only possibly dimensional, inhabit this class,
 -- which allows access to a term-level representation of their dimension.

@@ -9,6 +9,7 @@
 Defines types for manipulation of units and quantities without phantom types for their dimensions.
 -}
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -16,6 +17,7 @@ Defines types for manipulation of units and quantities without phantom types for
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Numeric.Units.Dimensional.Dynamic
@@ -52,6 +54,19 @@ import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.Dimensions.TermLevel (HasDynamicDimension(..))
 import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
+
+-- Optional imports when certain package flags are enabled
+#if USE_AESON
+import qualified Data.Aeson
+import qualified Data.Aeson.Types
+import qualified Data.Monoid
+#endif
+#if USE_BINARY
+import qualified Data.Binary
+#endif
+#if USE_CEREAL
+import qualified Data.Serialize
+#endif
 
 -- | The class of types that can be used to model 'Quantity's that are certain to have a value with
 -- some dimension.
@@ -120,6 +135,24 @@ instance Num a => Monoid (AnyQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
   mappend (AnyQuantity d1 a1) (AnyQuantity d2 a2) = AnyQuantity (d1 D.* d2) (a1 P.* a2)
 
+#if USE_AESON
+instance (Data.Aeson.ToJSON a) => Data.Aeson.ToJSON (AnyQuantity a) where
+  toJSON (AnyQuantity d a) = Data.Aeson.object ["dimension" Data.Aeson..= d, "value" Data.Aeson..= a]
+
+instance (Data.Aeson.FromJSON a) => Data.Aeson.FromJSON (AnyQuantity a) where
+  parseJSON (Data.Aeson.Object v) = AnyQuantity P.<$>
+                                    v Data.Aeson..: "dimension" P.<*>
+                                    v Data.Aeson..: "value"
+  parseJSON _ = Data.Monoid.mempty
+#endif
+
+#if USE_BINARY
+instance (Data.Binary.Binary a) => Data.Binary.Binary (AnyQuantity a)
+#endif
+
+#if USE_CEREAL
+instance (Data.Serialize.Serialize a) => Data.Serialize.Serialize (AnyQuantity a)
+#endif
 
 -- | Possibly a 'Quantity' whose 'Dimension' is only known dynamically.
 --
@@ -178,6 +211,23 @@ instance Floating a => Floating (DynQuantity a) where
 instance Num a => Monoid (DynQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
   mappend = (P.*)
+
+#if USE_AESON
+-- This instance only needs a body because an incorrect MINIMAL pragma in aeson-0.10 leads to
+-- a warning if you omit it.
+instance (Data.Aeson.ToJSON a) => Data.Aeson.ToJSON (DynQuantity a) where
+  toJSON = Data.Aeson.genericToJSON Data.Aeson.Types.defaultOptions
+
+instance (Data.Aeson.FromJSON a) => Data.Aeson.FromJSON (DynQuantity a)
+#endif
+
+#if USE_BINARY
+instance (Data.Binary.Binary a) => Data.Binary.Binary (DynQuantity a)
+#endif
+
+#if USE_CEREAL
+instance (Data.Serialize.Serialize a) => Data.Serialize.Serialize (DynQuantity a)
+#endif
 
 -- Lifts a function which is only valid on dimensionless quantities into a function on DynQuantitys.
 liftDimensionless :: (a -> a) -> DynQuantity a -> DynQuantity a
