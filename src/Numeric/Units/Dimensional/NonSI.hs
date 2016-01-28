@@ -292,9 +292,28 @@ usSurveyMile = mkUnitQ (ucum "[mi_us]" "mi" "mile") 5280 $ usSurveyFoot
 usSurveyAcre :: (Fractional a) => Unit 'NonMetric DArea a
 usSurveyAcre = mkUnitQ (ucum "[acr_us]" "ac" "acre") 43560 $ square usSurveyFoot
 
+-- | One avoirdupois pound is a mass, exactly defined in terms of the kilogram by the international
+-- yard and pound agreement of 1959.
+--
+-- See <https://en.wikipedia.org/wiki/Avoirdupois#Internationalization here> for further information.
+--
+-- >>> 1 *~ poundMass
+-- 0.45359237 kg
+--
+-- >>> 1 *~ poundMass :: Mass Rational
+-- 45359237 % 100000000 kg
 poundMass :: Fractional a => Unit 'NonMetric DMass a
 poundMass = mkUnitQ (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
 
+-- | One avoirdupois ounce is one sixteenth of a 'poundMass'.
+--
+-- See <https://en.wikipedia.org/wiki/Ounce#International_avoirdupois_ounce here> for further information.
+--
+-- >>> 1 *~ ounce
+-- 2.8349523125e-2 kg
+--
+-- >>> 1 *~ ounce :: Mass Rational
+-- 45359237 % 1600000000 kg
 ounce :: Fractional a => Unit 'NonMetric DMass a
 ounce = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
 
