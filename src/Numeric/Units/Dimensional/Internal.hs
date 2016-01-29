@@ -4,6 +4,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-} -- for Vector instances only
 {-# LANGUAGE RankNTypes #-}
@@ -27,6 +28,7 @@ where
 import Control.Applicative
 import Control.DeepSeq
 import Control.Monad (liftM)
+import Data.AEq (AEq)
 import Data.Coerce (coerce)
 import Data.Data
 import Data.ExactPi
@@ -75,7 +77,7 @@ deriving instance Typeable Dimensional
 
 instance KnownVariant 'DQuantity where
   newtype Dimensional 'DQuantity d a = Quantity a
-    deriving (Eq, Ord, Data, Generic, Generic1
+    deriving (Eq, Ord, AEq, Data, Generic, Generic1
 #if MIN_VERSION_base(4,8,0)
      , Typeable -- GHC 7.8 doesn't support deriving this instance
 #endif

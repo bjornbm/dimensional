@@ -45,6 +45,7 @@ library
   build-depends:       base >= 4.7 && < 5,
                        deepseq >= 1.3,
                        exact-pi >= 0.2.1.1 && < 0.5,
+                       ieee754 >= 0.7.6,
                        numtype-dk >= 0.5 && < 1.1,
                        vector >= 0.10
   hs-source-dirs:      src
