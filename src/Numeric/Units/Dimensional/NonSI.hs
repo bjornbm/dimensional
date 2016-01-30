@@ -82,6 +82,7 @@ import qualified Prelude
 -- >>> import Data.ExactPi
 -- >>> import Data.Function (on)
 -- >>> import Numeric.Units.Dimensional.Coercion
+-- >>> default (Double)
 -- >>> :{
 -- >>>   let infix 4 ===
 -- >>>       (===) = areExactlyEqual `on` unQuantity :: Quantity d ExactPi -> Quantity d ExactPi -> Bool
