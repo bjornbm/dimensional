@@ -429,6 +429,16 @@ nauticalMile = mkUnitZ (ucum "[nmi_i]" "NM" "nautical mile") 1852 $ meter
 knot :: (Fractional a) => Unit 'NonMetric DVelocity a
 knot = mkUnitQ (ucum "[kt_i]" "kt" "knot") 1 $ nauticalMile / hour
 
+-- | One revolution is an angle equal to 2 pi radians; a full circle.
+--
+-- See <https://en.wikipedia.org/wiki/Turn_%28geometry%29 here> for further information.
+--
+-- >>> 1 *~ revolution
+-- 6.283185307179586
+--
+-- prop> 1 *~ revolution === _2 * pi * (1 *~ radian)
+--
+-- prop> 1 *~ revolution === 360 *~ degree
 revolution :: (Floating a) => Unit 'NonMetric DOne a
 revolution = mkUnitR (dimensionalAtom "rev" "rev" "revolution") (2 Prelude.* Prelude.pi) $ radian
 
