@@ -355,7 +355,7 @@ horsepower = mkUnitQ (ucum "[HP]" "hp" "horsepower") 550 $ foot * poundForce / s
 -- See <https://en.wikipedia.org/wiki/Slug_%28mass%29 here> for further information.
 --
 -- >>> 1 *~ slug
--- 14.593902937206364 kg 
+-- 14.593902937206364 kg
 --
 -- >>> 1 *~ slug :: Mass Rational
 -- 8896443230521 % 609600000000 kg
@@ -449,7 +449,7 @@ The IAU recommends <#note2 [2]> that:
 year :: Num a => Unit 'NonMetric DTime a
 year = mkUnitZ (ucum "a_j" "a" "mean Julian year") 31557600 $ second
 
--- | One mean Julain century is one hundred mean Julian 'year's.
+-- | One mean Julian century is one hundred mean Julian 'year's.
 --
 -- >>> 1 *~ century
 -- 3.15576e9 s
