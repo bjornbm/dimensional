@@ -4,6 +4,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-} -- for Vector instances only
 {-# LANGUAGE RankNTypes #-}
@@ -27,6 +28,7 @@ where
 import Control.Applicative
 import Control.DeepSeq
 import Control.Monad (liftM)
+import Data.AEq (AEq)
 import Data.Coerce (coerce)
 import Data.Data
 import Data.ExactPi
@@ -49,6 +51,10 @@ import Prelude
   , (.), ($), (++), (+), (/)
   , show, otherwise, undefined, error, fmap
   )
+
+-- $setup
+-- >>> :set -XNoImplicitPrelude
+-- >>> import Numeric.Units.Dimensional.Prelude
 
 -- | A unit of measurement.
 type Unit (m :: Metricality) = Dimensional ('DUnit m)
@@ -82,7 +88,7 @@ deriving instance Typeable Dimensional
 
 instance (E.KnownExactPi s) => KnownVariant ('DQuantity s) where
   newtype Dimensional ('DQuantity s) d a = Quantity a
-    deriving (Eq, Ord, Data, Generic, Generic1
+    deriving (Eq, Ord, AEq, Data, Generic, Generic1
 #if MIN_VERSION_base(4,8,0)
      , Typeable -- GHC 7.8 doesn't support deriving this instance
 #endif
@@ -207,6 +213,9 @@ instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
   show = showIn siUnit
 
 -- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
+--
+-- >>> showIn watt $ (37 *~ volt) * (4 *~ ampere)
+-- "148.0 W"
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
 showIn (Unit n _ y) (Quantity x) | Name.weaken n == nOne = show (x / y)
                                  | otherwise             = (show (x / y)) ++ " " ++ (show n)

@@ -19,8 +19,7 @@ addons:
 env:
 - ARGS="--resolver lts-2 --stack-yaml stack.lts2.yaml"
 - ARGS="--resolver lts-3"
-- ARGS="--resolver lts"
-- ARGS="--resolver nightly"
+- ARGS="--resolver lts-5"
 
 before_install:
 # Download and unpack the stack executable
