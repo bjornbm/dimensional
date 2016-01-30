@@ -341,6 +341,8 @@ poundMass = mkUnitQ (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
 -- >>> 1 *~ ounce
 -- 2.8349523125e-2 kg
 --
+-- prop> 16 *~ ounce === 1 *~ poundMass
+--
 -- >>> 1 *~ ounce :: Mass Rational
 -- 45359237 % 1600000000 kg
 ounce :: Fractional a => Unit 'NonMetric DMass a
@@ -357,6 +359,8 @@ ounce = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
 -- >>> 1 *~ poundForce
 -- 4.4482216152605 m kg s^-2
 --
+-- prop> 1 *~ poundForce === 1 *~ poundMass * (1 *~ gee)
+--
 -- >>> 1 *~ poundForce :: Force Rational
 -- 8896443230521 % 2000000000000 m kg s^-2
 poundForce :: Fractional a => Unit 'NonMetric DForce a
@@ -370,6 +374,8 @@ poundForce = mkUnitQ (ucum "[lbf_av]" "lbf" "pound force") 1 $ poundMass * gee
 --
 -- >>> 1 *~ horsepower
 -- 745.6998715822702 m^2 kg s^-3
+--
+-- prop> 1 *~ horsepower === 550 *~ poundForce * (1 *~ foot) / (1 *~ second)
 --
 -- >>> 1 *~ horsepower :: Power Rational
 -- 37284993579113511 % 50000000000000 m^2 kg s^-3
