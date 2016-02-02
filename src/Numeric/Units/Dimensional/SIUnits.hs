@@ -308,7 +308,7 @@ For versioning purposes, those units can be found in "Numeric.Units.Dimensional.
 
 However, in 2012 the IAU redefined the astronomical unit as a conventional
 unit of length directly tied to the meter, with a length of exactly
-149,597,870,700 m and the official abbreviation of au <#note3 [3]>. We therefore include it here.
+149 597 870 700 m and the official abbreviation of au <#note3 [3]>. We therefore include it here.
 -}
 
 astronomicalUnit :: Num a => Unit 'NonMetric DLength a

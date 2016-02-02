@@ -171,7 +171,7 @@ mil = mkUnitQ (ucum "[mil_i]" "mil" "mil") 0.001 $ inch
 yard :: (Fractional a) => Unit 'NonMetric DLength a
 yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 0.9144 $ meter
 
--- | One mile is 5,280 feet.
+-- | One mile is 5 280 feet.
 --
 -- This mile is based on the international 'foot'.
 --
@@ -185,7 +185,7 @@ yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 0.9144 $ meter
 mile :: (Fractional a) => Unit 'NonMetric DLength a
 mile = mkUnitQ (ucum "[mi_i]" "mi" "mile") 5280 $ foot
 
--- | One acre is 43,560 square feet.
+-- | One acre is 43 560 square feet.
 --
 -- This acre is based on the international 'foot'. For the acre based on the US Survey Foot,
 -- see 'usSurveyAcre'. While both acres are in use, the difference between them is of little consequence
@@ -261,7 +261,7 @@ usSurveyMil = mkUnitQ (ucum "[mil_us]" "mil" "mil") 0.001 $ usSurveyInch
 usSurveyYard :: (Fractional a) => Unit 'NonMetric DLength a
 usSurveyYard = mkUnitQ (ucum "[yd_us]" "yd" "yard") 3 $ usSurveyFoot
 
--- | One US survey mile is 5,280 US survey feet.
+-- | One US survey mile is 5 280 US survey feet.
 --
 -- This mile is based on the 'usSurveyFoot'. For the mile based on the international foot,
 -- see 'mile'. Note that this is not the mile in routine use in the United States.
@@ -276,7 +276,7 @@ usSurveyYard = mkUnitQ (ucum "[yd_us]" "yd" "yard") 3 $ usSurveyFoot
 usSurveyMile :: (Fractional a) => Unit 'NonMetric DLength a
 usSurveyMile = mkUnitQ (ucum "[mi_us]" "mi" "mile") 5280 $ usSurveyFoot
 
--- | One acre is 43,560 square feet.
+-- | One acre is 43 560 square feet.
 --
 -- This acre is based on the 'usSurveyFoot'. For the acre based on the international foot,
 -- see 'acre'. While both acres are in use, the difference between them is of little consequence
@@ -374,7 +374,7 @@ slug = mkUnitQ (dimensionalAtom "slug" "slug" "slug") 1 $ poundForce * (second^p
 psi :: Fractional a => Unit 'NonMetric DPressure a
 psi = mkUnitQ (ucum "[psi]" "psi" "pound per square inch") 1 $ poundForce / inch ^ pos2
 
--- | One nautical mile is a unit of length, set by international agreement as being exactly 1,852 meters.
+-- | One nautical mile is a unit of length, set by international agreement as being exactly 1 852 meters.
 --
 -- Historically, it was defined as the distance spanned by one minute of arc along a meridian of the Earth.
 --
@@ -437,7 +437,7 @@ The IAU recommends <#note2 [2]> that:
 
 -}
 
--- | One mean Julian year is a unit of measurement of time defined as exactly 365.25 days of 86400 'second's each.
+-- | One mean Julian year is a unit of measurement of time defined as exactly 365.25 days of 86 400 'second's each.
 --
 -- See <https://en.wikipedia.org/wiki/Julian_year_%28astronomy%29 here> for further information.
 --
@@ -464,7 +464,7 @@ It seems that nearly every area of application has its own customary unit for me
 We include some of the common ones here. 'psi' was defined earlier.
 -}
 
--- | The bar is exactly 100,000 'Numeric.Units.Dimensional.SIUnits.pascal'.
+-- | The bar is exactly 100 000 'Numeric.Units.Dimensional.SIUnits.pascal'.
 --
 -- From Wikipedia:
 --
