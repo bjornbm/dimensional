@@ -18,6 +18,7 @@ where
 
 import Control.DeepSeq
 import Control.Monad (join)
+import Data.Coerce
 import Data.Data hiding (Prefix)
 #if MIN_VERSION_base(4, 8, 0)
 import Data.Foldable (toList)
@@ -82,6 +83,12 @@ instance Show (UnitName m) where
   show (Power x n) = show x ++ "^" ++ show n
   show (Grouped n) = "(" ++ show n ++ ")"
   show (Weaken n) = show n
+
+asAtomic :: UnitName m -> Maybe (NameAtom ('UnitAtom m))
+asAtomic (MetricAtomic a) = Just a
+asAtomic (Atomic a) = Just a
+asAtomic (Weaken n) = fmap coerce $ asAtomic n
+asAtomic _ = Nothing
 
 isAtomic :: UnitName m -> Bool
 isAtomic (One) = True

@@ -27,11 +27,11 @@ module Numeric.Units.Dimensional.Dynamic
 , Promoteable
 , HasDynamicDimension(..)
 , promoteQuantity, demoteQuantity
-, (*~), (/~)
+, (*~), (/~), invalidQuantity
   -- * Dynamic Units
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
-, siUnit
+, siUnit, anyUnitName
   -- ** Arithmetic on Dynamic Units
 , (*), (/), (^), recip, applyPrefix
 ) where
@@ -179,6 +179,9 @@ instance Num a => Monoid (DynQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
   mappend = (P.*)
 
+invalidQuantity :: DynQuantity a
+invalidQuantity = DynQuantity Nothing
+
 -- Lifts a function which is only valid on dimensionless quantities into a function on DynQuantitys.
 liftDimensionless :: (a -> a) -> DynQuantity a -> DynQuantity a
 liftDimensionless = liftDQ (matching D.dOne)
@@ -247,6 +250,9 @@ instance I.HasInterchangeName AnyUnit where
 instance Monoid AnyUnit where
   mempty = demoteUnit' one
   mappend = (Numeric.Units.Dimensional.Dynamic.*)
+
+anyUnitName :: AnyUnit -> UnitName 'NonMetric
+anyUnitName (AnyUnit _ n _) = n
 
 -- | The dynamic SI coherent unit of a given dimension.
 siUnit :: Dimension' -> AnyUnit
