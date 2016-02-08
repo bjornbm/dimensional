@@ -607,37 +607,59 @@ and `Angle32`.
 
 \chapter{Interoperating with Other Packages}
 
-\section{\packagename{ad} for Automatic Differentiation}
+\section{Other Packages in the \thispackage{} Ecosystem}
+
+\subsection{\packagename{dimensional-codata} for CODATA Values of Physical Constants}
+
+The Committee on Data for Science and Technology (CODATA) publishes periodic reports on the best available
+experimental values for a wide variety of physical constants. The \packagename{dimensional-codata} package
+provides some of the more commonly used ones with dimensional types.
+
+Contributions are welcome if users require constants supplied by CODATA which are not included in the library.
+
+\subsection{\packagename{dimensional-parsing} for Parsing Units and Quantities}
+
+\subsection{\packagename{dimensional-th} Template Haskell Conveniences for \thispackage{}}
+
+The \packagename{dimensional-th} package provides Template Haskell splices and quasi-quotations for use alongside \thispackage{}.
+
+These features are especially useful when working with fixed-point quantities, which can otherwise involve burdensome manual encoding
+of scaling factors as type-level numbers. See \ref{fixed-point-th} for notes on this use case.
+
+
+\section{Popular General-Purpose Packages}
+
+\subsection{\packagename{ad} for Automatic Differentiation}
 
 \prerelease{}
 
-\section{\packagename{aeson} for JSON Serialization}
+\subsection{\packagename{aeson} for JSON Serialization}
 
 Users of the \packagename{aeson} package can find `ToJSON`
 and `FromJson` instances for `Quantity` and for certain ancillary types by
 enabling the \flag{aeson} flag when installing \thispackage{}.
 
-\section{\packagename{attoparsec} for Unit and Quantity Parsing}
+\subsection{\packagename{attoparsec} for Unit and Quantity Parsing}
 
 Support for \packagename{attoparsec} is provided through the \packagename{parsers} package, see \ref{parsers-support}.
 
-\section{\packagename{binary} for Binary Serialization}
+\subsection{\packagename{binary} for Binary Serialization}
 
 Users of the \packagename{binary} package can find `Binary`
 instances for `Quantity` and for certain ancillary types by
 enabling the \flag{binary} flag when installing \thispackage{}.
 
-\section{\packagename{cereal} for Binary Serialization}
+\subsection{\packagename{cereal} for Binary Serialization}
 
 Users of the \packagename{cereal} package can find `Serialize`
 instances for `Quantity` and for certain ancillary types by
 enabling the \flag{cereal} flag when installing \thispackage{}.
 
-\section{\packagename{HaTeX} for \LaTeX{} Generation}
+\subsection{\packagename{HaTeX} for \LaTeX{} Generation}
 
 \prerelease{}
 
-\section{\packagename{ihaskell} for Interactive Notebooks}
+\subsection{\packagename{ihaskell} for Interactive Notebooks}
 
 \prerelease{}
 
@@ -650,16 +672,16 @@ instances can be found in the \\
 `Numeric.Units.Dimensional.IHaskell` module of the \experimentalpackage{}
 package.
 
-\section{\packagename{lens}}
+\subsection{\packagename{lens}}
 
 Todo: Without taking a dependency on lens, offer a declaration that can convert a unit into a lens from quantities to numeric values.
 Explain here how to use that facility.
 
-\section{\packagename{parsec} for Unit and Quantity Parsing}
+\subsection{\packagename{parsec} for Unit and Quantity Parsing}
 
 Support for \packagename{parsec} is provided through the \packagename{parsers} package, see \ref{parsers-support}.
 
-\section{\packagename{parsers} for Unit and Quantity Parsing} \label{parsers-support}
+\subsection{\packagename{parsers} for Unit and Quantity Parsing} \label{parsers-support}
 
 \prerelease{}
 
@@ -671,18 +693,18 @@ These parsers are also used by the \packagename{dimensional-th} package to provi
 Template Haskell quasi-quotations for quantities and for fixed-point types, as
 discussed in \ref{fixed-point-th}.
 
-\section{\packagename{time} for Times and Dates}
+\subsection{\packagename{time} for Times and Dates}
 
 Users of the \packagename{time} package can find functions and lenses for converting
 between the `DiffTime` representation and \thispackage{}'s `Time` representation in the
 `Numeric.Units.Dimensional.Time` module of the \experimentalpackage{} package.
 
-\section{\packagename{vector} for Boxed and Unboxed Arrays}
+\subsection{\packagename{vector} for Boxed and Unboxed Arrays}
 
 The \thispackage{} package provides instances of the `Vector` and `MVector` data families and the `Unbox` class
 allowing `Quantity`s to be stored in unboxed vectors for improved performance and reduced storage overhead.
 
-\section{\packagename{vector-space} for Linear Algebra}
+\subsection{\packagename{vector-space} for Linear Algebra}
 
 Users of the \packagename{vector-space} package can find appropriate instances of the `AdditiveGroup` and \\
 `VectorSpace` classes, along with an instance of `InnerSpace` for dimensionless quantities, by enabling the \flag{vector-space}
