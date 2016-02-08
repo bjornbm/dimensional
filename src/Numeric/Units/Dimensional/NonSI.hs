@@ -78,6 +78,16 @@ import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.UnitNames.Internal (ucumMetric, ucum, dimensionalAtom)
 import qualified Prelude
 
+-- $setup
+-- >>> import Data.ExactPi
+-- >>> import Data.Function (on)
+-- >>> import Numeric.Units.Dimensional.Coercion
+-- >>> default (Double)
+-- >>> :{
+-- >>>   let infix 4 ===
+-- >>>       (===) = areExactlyEqual `on` unQuantity :: Quantity d ExactPi -> Quantity d ExactPi -> Bool
+-- >>> :}
+
 {- $values-obtained-experimentally
 
 From Table 7, units accepted for use with the SI whose values in SI units are
@@ -125,6 +135,8 @@ Some US customary (that is, inch-pound) units.
 -- >>> 1 *~ foot
 -- 0.3048 m
 --
+-- prop> 3 *~ foot === 1 *~ yard
+--
 -- >>> 1 *~ foot :: Length Rational
 -- 381 % 1250 m
 foot :: Fractional a => Unit 'NonMetric DLength a
@@ -139,6 +151,8 @@ foot = mkUnitQ (ucum "[ft_i]" "ft" "foot") (1 Prelude./ 3) $ yard
 -- >>> 1 *~ inch
 -- 2.54e-2 m
 --
+-- prop> 12 *~ inch === 1 *~ foot
+--
 -- >>> 1 *~ inch :: Length Rational
 -- 127 % 5000 m
 inch :: Fractional a => Unit 'NonMetric DLength a
@@ -152,6 +166,8 @@ inch = mkUnitQ (ucum "[in_i]" "in" "inch") (1 Prelude./ 12) $ foot
 --
 -- >>> 1 *~ mil
 -- 2.54e-5 m
+--
+-- prop> 1000 *~ mil === 1 *~ inch
 --
 -- >>> 1 *~ mil :: Length Rational
 -- 127 % 5000000 m
@@ -171,7 +187,7 @@ mil = mkUnitQ (ucum "[mil_i]" "mil" "mil") 0.001 $ inch
 yard :: (Fractional a) => Unit 'NonMetric DLength a
 yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 0.9144 $ meter
 
--- | One mile is 5,280 feet.
+-- | One mile is 5 280 feet.
 --
 -- This mile is based on the international 'foot'.
 --
@@ -180,12 +196,14 @@ yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 0.9144 $ meter
 -- >>> 1 *~ mile
 -- 1609.344 m
 --
+-- prop> 1 *~ mile === 5280 *~ foot
+--
 -- >>> 1 *~ mile :: Length Rational
 -- 201168 % 125 m
 mile :: (Fractional a) => Unit 'NonMetric DLength a
 mile = mkUnitQ (ucum "[mi_i]" "mi" "mile") 5280 $ foot
 
--- | One acre is 43,560 square feet.
+-- | One acre is 43 560 square feet.
 --
 -- This acre is based on the international 'foot'. For the acre based on the US Survey Foot,
 -- see 'usSurveyAcre'. While both acres are in use, the difference between them is of little consequence
@@ -195,6 +213,8 @@ mile = mkUnitQ (ucum "[mi_i]" "mi" "mile") 5280 $ foot
 --
 -- >>> 1 *~ acre
 -- 4046.8564224 m^2
+--
+-- prop> 1 *~ acre === 43560 *~ foot ^ pos2
 --
 -- >>> 1 *~ acre :: Area Rational
 -- 316160658 % 78125 m^2
@@ -226,6 +246,8 @@ usSurveyFoot = mkUnitQ (ucum "[ft_us]" "ft" "foot") (1200 Prelude./ 3937) $ mete
 -- >>> 1 *~ usSurveyInch
 -- 2.54000508001016e-2 m
 --
+-- prop> 12 *~ usSurveyInch === 1 *~ usSurveyFoot
+--
 -- >>> 1 *~ usSurveyInch :: Length Rational
 -- 100 % 3937 m
 usSurveyInch :: Fractional a => Unit 'NonMetric DLength a
@@ -240,6 +262,8 @@ usSurveyInch = mkUnitQ (ucum "[in_us]" "in" "inch") (1 Prelude./ 12) $ usSurveyF
 --
 -- >>> 1 *~ usSurveyMil
 -- 2.54000508001016e-5 m
+--
+-- prop> 1000 *~ usSurveyMil === 1 *~ usSurveyInch
 --
 -- >>> 1 *~ usSurveyMil :: Length Rational
 -- 1 % 39370 m
@@ -256,12 +280,14 @@ usSurveyMil = mkUnitQ (ucum "[mil_us]" "mil" "mil") 0.001 $ usSurveyInch
 -- >>> 1 *~ usSurveyYard
 -- 0.9144018288036576 m
 --
+-- prop> 1 *~ usSurveyYard === 3 *~ usSurveyFoot
+--
 -- >>> 1 *~ usSurveyYard :: Length Rational
 -- 3600 % 3937 m
 usSurveyYard :: (Fractional a) => Unit 'NonMetric DLength a
 usSurveyYard = mkUnitQ (ucum "[yd_us]" "yd" "yard") 3 $ usSurveyFoot
 
--- | One US survey mile is 5,280 US survey feet.
+-- | One US survey mile is 5 280 US survey feet.
 --
 -- This mile is based on the 'usSurveyFoot'. For the mile based on the international foot,
 -- see 'mile'. Note that this is not the mile in routine use in the United States.
@@ -271,12 +297,14 @@ usSurveyYard = mkUnitQ (ucum "[yd_us]" "yd" "yard") 3 $ usSurveyFoot
 -- >>> 1 *~ usSurveyMile
 -- 1609.3472186944373 m
 --
+-- prop> 1 *~ usSurveyMile === 5280 *~ usSurveyFoot
+--
 -- >>> 1 *~ usSurveyMile :: Length Rational
 -- 6336000 % 3937 m
 usSurveyMile :: (Fractional a) => Unit 'NonMetric DLength a
 usSurveyMile = mkUnitQ (ucum "[mi_us]" "mi" "mile") 5280 $ usSurveyFoot
 
--- | One acre is 43,560 square feet.
+-- | One acre is 43 560 square feet.
 --
 -- This acre is based on the 'usSurveyFoot'. For the acre based on the international foot,
 -- see 'acre'. While both acres are in use, the difference between them is of little consequence
@@ -286,6 +314,8 @@ usSurveyMile = mkUnitQ (ucum "[mi_us]" "mi" "mile") 5280 $ usSurveyFoot
 --
 -- >>> 1 *~ usSurveyAcre
 -- 4046.872609874252 m^2
+--
+-- prop> 1 *~ usSurveyAcre === 43560 *~ usSurveyFoot ^ pos2
 --
 -- >>> 1 *~ usSurveyAcre :: Area Rational
 -- 62726400000 % 15499969 m^2
@@ -312,6 +342,8 @@ poundMass = mkUnitQ (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
 -- >>> 1 *~ ounce
 -- 2.8349523125e-2 kg
 --
+-- prop> 16 *~ ounce === 1 *~ poundMass
+--
 -- >>> 1 *~ ounce :: Mass Rational
 -- 45359237 % 1600000000 kg
 ounce :: Fractional a => Unit 'NonMetric DMass a
@@ -328,6 +360,8 @@ ounce = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
 -- >>> 1 *~ poundForce
 -- 4.4482216152605 m kg s^-2
 --
+-- prop> 1 *~ poundForce === 1 *~ poundMass * (1 *~ gee)
+--
 -- >>> 1 *~ poundForce :: Force Rational
 -- 8896443230521 % 2000000000000 m kg s^-2
 poundForce :: Fractional a => Unit 'NonMetric DForce a
@@ -341,6 +375,8 @@ poundForce = mkUnitQ (ucum "[lbf_av]" "lbf" "pound force") 1 $ poundMass * gee
 --
 -- >>> 1 *~ horsepower
 -- 745.6998715822702 m^2 kg s^-3
+--
+-- prop> 1 *~ horsepower === 550 *~ poundForce * (1 *~ foot) / (1 *~ second)
 --
 -- >>> 1 *~ horsepower :: Power Rational
 -- 37284993579113511 % 50000000000000 m^2 kg s^-3
@@ -374,7 +410,7 @@ slug = mkUnitQ (dimensionalAtom "slug" "slug" "slug") 1 $ poundForce * (second^p
 psi :: Fractional a => Unit 'NonMetric DPressure a
 psi = mkUnitQ (ucum "[psi]" "psi" "pound per square inch") 1 $ poundForce / inch ^ pos2
 
--- | One nautical mile is a unit of length, set by international agreement as being exactly 1,852 meters.
+-- | One nautical mile is a unit of length, set by international agreement as being exactly 1 852 meters.
 --
 -- Historically, it was defined as the distance spanned by one minute of arc along a meridian of the Earth.
 --
@@ -400,6 +436,16 @@ nauticalMile = mkUnitZ (ucum "[nmi_i]" "NM" "nautical mile") 1852 $ meter
 knot :: (Fractional a) => Unit 'NonMetric DVelocity a
 knot = mkUnitQ (ucum "[kt_i]" "kt" "knot") 1 $ nauticalMile / hour
 
+-- | One revolution is an angle equal to 2 pi radians; a full circle.
+--
+-- See <https://en.wikipedia.org/wiki/Turn_%28geometry%29 here> for further information.
+--
+-- >>> 1 *~ revolution
+-- 6.283185307179586
+--
+-- prop> 1 *~ revolution === _2 * pi * (1 *~ radian)
+--
+-- prop> 1 *~ revolution === 360 *~ degree
 revolution :: (Floating a) => Unit 'NonMetric DOne a
 revolution = mkUnitR (dimensionalAtom "rev" "rev" "revolution") (2 Prelude.* Prelude.pi) $ radian
 
@@ -437,7 +483,7 @@ The IAU recommends <#note2 [2]> that:
 
 -}
 
--- | One mean Julian year is a unit of measurement of time defined as exactly 365.25 days of 86400 'second's each.
+-- | One mean Julian year is a unit of measurement of time defined as exactly 365.25 days of 86 400 'second's each.
 --
 -- See <https://en.wikipedia.org/wiki/Julian_year_%28astronomy%29 here> for further information.
 --
@@ -464,7 +510,7 @@ It seems that nearly every area of application has its own customary unit for me
 We include some of the common ones here. 'psi' was defined earlier.
 -}
 
--- | The bar is exactly 100,000 'Numeric.Units.Dimensional.SIUnits.pascal'.
+-- | The bar is exactly 100 000 'Numeric.Units.Dimensional.SIUnits.pascal'.
 --
 -- From Wikipedia:
 --
