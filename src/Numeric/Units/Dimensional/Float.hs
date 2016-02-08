@@ -120,7 +120,7 @@ minNormal = Quantity $ F.minNormal
 maxFinite :: IEEE a => Quantity d a
 maxFinite = Quantity $ F.maxFinite
 
--- | The smallest positive value @x@ such that @1 + x@ is representable.
+-- | The smallest positive value @x@ such that @_1 + x@ is representable.
 epsilon :: IEEE a => Dimensionless a
 epsilon = Quantity $ F.epsilon
 
