@@ -31,7 +31,7 @@ testOrdering :: Test
 testOrdering = TestLabel "Test 'Ord' instance" $ TestList
     [ TestCase $ compare ((1 :: Integer) *~ one) (3 *~ one) @?= LT
     , TestCase $ compare ((1 :: Double) *~ (kilo meter)) (1 *~ meter) @?= GT
-    , TestCase $ compare ((0 :: Double) *~ second) (_0) @?= EQ 
+    , TestCase $ compare ((0 :: Double) *~ second) (_0) @?= EQ
     ]
 
 testNFromTo :: Test

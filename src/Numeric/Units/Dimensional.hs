@@ -179,7 +179,7 @@ module Numeric.Units.Dimensional
     Dimension (Dim),
     -- ** Dimension Arithmetic
     -- $dimension-arithmetic
-    type (*), type (/), type (^), Root, Recip,
+    type (*), type (/), type (^), NRoot, Sqrt, Cbrt, Recip,
     -- ** Term Level Representation of Dimensions
     -- $dimension-terms
     Dimension' (Dim'), HasDimension(..), KnownDimension,
@@ -223,8 +223,7 @@ import Prelude
   )
 import qualified Prelude
 import Numeric.NumType.DK.Integers
-  ( TypeInt (Pos2, Pos3)
-  , pos2, pos3
+  ( pos2, pos3
   , KnownTypeInt, toNum
   )
 import Data.Data
@@ -257,6 +256,7 @@ length = foldl' (\c _ -> c Prelude.+ 1) 0
 -- >>> import Test.QuickCheck.Arbitrary
 -- >>> import Numeric.Units.Dimensional.Prelude
 -- >>> import Numeric.Units.Dimensional.Float
+-- >>> import Numeric.Units.Dimensional.NonSI
 -- >>> instance Arbitrary a => Arbitrary (Quantity d a) where arbitrary = fmap Quantity arbitrary
 
 {-
@@ -409,6 +409,9 @@ Multiplication, division and powers apply to both units and quantities.
 (/) = liftD2 (Prelude./) (Prelude./) (Name./)
 
 -- | Forms the reciprocal of a 'Quantity', which has the reciprocal dimension.
+--
+-- >>> recip $ 47 *~ hertz
+-- 2.127659574468085e-2 s
 recip :: (Fractional a) => Quantity d a -> Quantity (Recip d) a
 recip = liftQ Prelude.recip
 
@@ -462,7 +465,7 @@ for units as well as quantities.
 
 -- | Computes the nth root of a 'Quantity' using 'Prelude.**'.
 --
--- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
+-- The 'NRoot' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
 --
 -- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
 -- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ...
@@ -473,28 +476,28 @@ for units as well as quantities.
 --
 -- Also available in operator form, see '^/'.
 nroot :: (KnownTypeInt n, Floating a)
-      => Proxy n -> Quantity d a -> Quantity (Root d n) a
+      => Proxy n -> Quantity d a -> Quantity (NRoot d n) a
 nroot n = let n' = 1 Prelude./ toNum n
            in liftQ (Prelude.** n')
 
 {-
-We provide short-hands for the square and cubic roots.
+We provide short-hands for the square and cube roots.
 -}
 
 -- | Computes the square root of a 'Quantity' using 'Prelude.**'.
 --
--- The 'Root' type family will prevent application where the supplied quantity does not have a square dimension.
+-- The 'NRoot' type family will prevent application where the supplied quantity does not have a square dimension.
 --
 -- prop> (x :: Area Double) >= _0 ==> sqrt x == nroot pos2 x
-sqrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos2) a
+sqrt :: Floating a => Quantity d a -> Quantity (Sqrt d) a
 sqrt = nroot pos2
 
 -- | Computes the cube root of a 'Quantity' using 'Prelude.**'.
 --
--- The 'Root' type family will prevent application where the supplied quantity does not have a cubic dimension.
+-- The 'NRoot' type family will prevent application where the supplied quantity does not have a cubic dimension.
 --
 -- prop> (x :: Volume Double) >= _0 ==> cbrt x == nroot pos3 x
-cbrt :: Floating a => Quantity d a -> Quantity (Root d 'Pos3) a
+cbrt :: Floating a => Quantity d a -> Quantity (Cbrt d) a
 cbrt = nroot pos3
 
 {-
@@ -504,7 +507,7 @@ prefer such.
 
 -- | Computes the nth root of a 'Quantity' using 'Prelude.**'.
 --
--- The 'Root' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
+-- The 'NRoot' type family will prevent application of this operator where the result would have a fractional dimension or where n is zero.
 --
 -- Because the root chosen impacts the 'Dimension' of the result, it is necessary to supply a type-level representation
 -- of the root in the form of a 'Proxy' to some 'TypeInt'. Convenience values 'pos1', 'pos2', 'neg1', ...
@@ -513,7 +516,7 @@ prefer such.
 --
 -- Also available in prefix form, see 'nroot'.
 (^/) :: (KnownTypeInt n, Floating a)
-     => Quantity d a -> Proxy n -> Quantity (Root d n) a
+     => Quantity d a -> Proxy n -> Quantity (NRoot d n) a
 (^/) = flip nroot
 
 {- $collections
@@ -535,10 +538,19 @@ xs /~~ u = fmap (/~ u) xs
 infixl 7  *~~, /~~
 
 -- | The sum of all elements in a list.
+--
+-- >>> sum ([] :: [Mass Double])
+-- 0.0 kg
+--
+-- >>> sum [12.4 *~ meter, 1 *~ foot]
+-- 12.7048 m
 sum :: (Num a, Foldable f) => f (Quantity d a) -> Quantity d a
 sum = foldr (+) _0
 
 -- | The arithmetic mean of all elements in a list.
+--
+-- >>> mean [pi, _7]
+-- 5.070796326794897
 mean :: (Fractional a, Foldable f) => f (Quantity d a) -> Quantity d a
 mean = uncurry (/) . foldr accumulate (_0, _0)
   where
@@ -553,6 +565,19 @@ dimensionlessLength :: (Num a, Foldable f) => f b -> Dimensionless a
 dimensionlessLength x = (fromIntegral $ length x) *~ one
 
 -- | Returns a list of quantities between given bounds.
+--
+-- prop> n <= 0 ==> nFromTo (x :: Mass Double) (y :: Mass Double) n == [x, y]
+--
+-- prop> (x :: Length Double) <= (y :: Length Double) ==> all (\z -> x <= z && z <= y) (nFromTo x y n)
+--
+-- >>> nFromTo _0 _3 2
+-- [0.0,1.0,2.0,3.0]
+--
+-- >>> nFromTo _1 _0 7
+-- [1.0,0.875,0.75,0.625,0.5,0.375,0.25,0.125,0.0]
+--
+-- >>> nFromTo _0 _1 (-5)
+-- [0.0,1.0]
 nFromTo :: (Fractional a, Integral b) => Quantity d a -- ^ The initial value.
                                       -> Quantity d a -- ^ The final value.
                                       -> b -- ^ The number of intermediate values. If less than one, no intermediate values will result.
@@ -589,11 +614,26 @@ atanh = fmap Prelude.atanh
 (**) = liftQ2 (Prelude.**)
 
 -- | Takes the logarithm of the second argument in the base of the first.
+--
+-- >>> logBase _2 _8
+-- 3.0
 logBase :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
 logBase = liftQ2 Prelude.logBase
 
 -- | The standard two argument arctangent function.
 -- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
+--
+-- >>> atan2 _0 _1
+-- 0.0
+--
+-- >>> atan2 _1 _0
+-- 1.5707963267948966
+--
+-- >>> atan2 _0 (negate _1)
+-- 3.141592653589793
+--
+-- >>> atan2 (negate _1) _0
+-- -1.5707963267948966
 atan2 :: (RealFloat a) => Quantity d a -> Quantity d a -> Dimensionless a
 atan2 = liftQ2 Prelude.atan2
 
@@ -617,9 +657,9 @@ good measure.
 
 -}
 
--- | The constant for zero is polymorphic, allowing
--- it to express zero 'Length' or 'Capacitance' or 'Velocity' etc, in addition
--- to the 'Dimensionless' value zero.
+-- | The constant for zero is polymorphic, allowing it to express zero 'Length' or
+-- 'Numeric.Units.Dimensional.Quantities.Capacitance' or 'Numeric.Units.Dimensional.Quantities.Velocity' etc,
+-- in addition to the 'Dimensionless' value zero.
 _0 :: Num a => Quantity d a
 _0 = Quantity 0
 
@@ -653,6 +693,10 @@ If you feel your work requires this instance, it is provided as an orphan in "Nu
 -}
 
 -- | Convenient conversion between numerical types while retaining dimensional information.
+--
+-- >>> let x = (37 :: Rational) *~ poundMass
+-- >>> changeRep x :: Mass Double
+-- 16.78291769 kg
 changeRep :: (KnownVariant v, Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
 changeRep = dmap realToFrac
 

@@ -28,7 +28,7 @@ dimensionality type synonyms are provided for each quantity type.
 
 -}
 
-module Numeric.Units.Dimensional.Quantities 
+module Numeric.Units.Dimensional.Quantities
 (
   -- * Quantities from the NIST Guide
   -- $nist-guide
@@ -414,13 +414,22 @@ to powers" of <#note1 [1]>).
 
 These definitions may seem slightly out of place but these is no
 obvious place where they should be. Here they are at least close
-to the definitions of 'DLength' and 'DVolume'.
+to the definitions of 'DArea' and 'DVolume'.
 -}
 
+-- $setup
+-- >>> import Numeric.Units.Dimensional.Prelude
+
 -- | Constructs a unit of area from a unit of length, taking the area of a square whose sides are that length.
+--
+-- >>> 64 *~ square meter == (8 *~ meter) ^ pos2
+-- True
 square :: (Fractional a, Typeable m) => Unit m DLength a -> Unit 'NonMetric DArea a
 square x = x ^ pos2
 
 -- | Constructs a unit of volume from a unit of length, taking the volume of a cube whose sides are that length.
+--
+-- >>> 64 *~ cubic meter == (4 *~ meter) ^ pos3
+-- True
 cubic  :: (Fractional a, Typeable m) => Unit m DLength a -> Unit 'NonMetric DVolume a
 cubic  x = x ^ pos3

@@ -1,5 +1,7 @@
 vNext
 -----
+* Breaking: Renamed `Root` type family to `NRoot`. Added `Sqrt` and `Cbrt` type
+  synonyms. Added `sqrt` and `cbrt` for term level dimensions.
 * Breaking: Changed Numeric.Units.Dimensional.Prelude to export dimensionally
   typed `recip` and `logBase` instead of the ones from `Prelude`.
 * Breaking: Changed Numeric.Units.Dimensional.Prelude to export `(.)` and `id`
@@ -16,6 +18,10 @@ vNext
   `(Num a, Foldable f) => f (Dimensional v d a) -> Dimensionless a)` to
   `(Num a, Foldable f) => f b -> Dimensionless a`. This provides a weaker constraint on the type `a`
   and may result in ambiguous types in code that depends on the former less general type.
+* Fixed a bug in the definition of the `inHg_NIST`.
+* Added units for the US survey foot, yard, inch, mil, and mile.
+* Clarified that the UCUM acre is based on the US survey foot.
+* Added a version of the acre based on the international foot.
 * Added `Data`, `Generic`, `Typeable` and `NFData` instances for many ancillary types.
 * Added `unQuantity` to the Coercion module to ease unwrapping without
   introducing ambiguous type variables.
@@ -25,7 +31,9 @@ vNext
   unknown dimension, suitable for performing arithmetic with such quantities.
 * Added `nroot` function for term-level dimensions.
 * Added the Numeric.Units.Dimensional.Float module with convenient wrappers around functions
-  from RealFloat for inspecting floating point quantities.
+  from RealFloat and IEEE for inspecting floating point quantities.
+* Added an `AEq` instance for `Quantity`.
+* Added the `btu`, a unit of energy.
 * Relocated git repository to https://github.com/bjornbm/dimensional
 
 1.0.1.1 (2015-11)

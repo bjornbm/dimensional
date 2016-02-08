@@ -25,7 +25,7 @@ referenced are from <#note1 [1]> unless otherwise specified.
 
 -}
 
-module Numeric.Units.Dimensional.SIUnits 
+module Numeric.Units.Dimensional.SIUnits
 (
   -- * SI Base Units
   -- $base-units
@@ -41,7 +41,7 @@ module Numeric.Units.Dimensional.SIUnits
   becquerel, gray, sievert, katal,
   -- * Units Accepted for Use with the SI
   -- $accepted-units
-  minute, hour, day, 
+  minute, hour, day,
   hectare, litre, liter, tonne, metricTon,
   -- ** Units of Plane Angle
   -- $arc-units
@@ -128,9 +128,9 @@ atto  = applyPrefix I.atto
 zepto = applyPrefix I.zepto
 yocto = applyPrefix I.yocto
 
-{- $reified-prefixes 
+{- $reified-prefixes
 
-We supply an explicit representation of an SI prefix, along with a function to apply one and a 
+We supply an explicit representation of an SI prefix, along with a function to apply one and a
 list of all prefixes defined by the SI.
 
 -}
@@ -308,7 +308,7 @@ For versioning purposes, those units can be found in "Numeric.Units.Dimensional.
 
 However, in 2012 the IAU redefined the astronomical unit as a conventional
 unit of length directly tied to the meter, with a length of exactly
-149,597,870,700 m and the official abbreviation of au <#note3 [3]>. We therefore include it here.
+149 597 870 700 m and the official abbreviation of au <#note3 [3]>. We therefore include it here.
 -}
 
 astronomicalUnit :: Num a => Unit 'NonMetric DLength a
