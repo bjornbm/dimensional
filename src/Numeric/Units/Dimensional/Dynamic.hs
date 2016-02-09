@@ -27,11 +27,11 @@ module Numeric.Units.Dimensional.Dynamic
 , Promoteable
 , HasDynamicDimension(..)
 , promoteQuantity, demoteQuantity
-, (*~), (/~)
+, (*~), (/~), invalidQuantity
   -- * Dynamic Units
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
-, siUnit
+, siUnit, anyUnitName
   -- ** Arithmetic on Dynamic Units
 , (*), (/), (^), recip, applyPrefix
 ) where
@@ -179,6 +179,9 @@ instance Num a => Monoid (DynQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
   mappend = (P.*)
 
+invalidQuantity :: DynQuantity a
+invalidQuantity = DynQuantity Nothing
+
 -- Lifts a function which is only valid on dimensionless quantities into a function on DynQuantitys.
 liftDimensionless :: (a -> a) -> DynQuantity a -> DynQuantity a
 liftDimensionless = liftDQ (matching D.dOne)
@@ -233,7 +236,7 @@ data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
   deriving (Generic, Typeable)
 
 instance Show AnyUnit where
-  show (AnyUnit _ n e) = "1 " ++ (show n) ++ " =def= " ++ (show e) ++ " of the SI base unit"
+  show (AnyUnit _ n e) = (show n) ++ " =def= " ++ (show e) ++ " of the SI base unit"
 
 instance HasDynamicDimension AnyUnit where
 
@@ -247,6 +250,9 @@ instance I.HasInterchangeName AnyUnit where
 instance Monoid AnyUnit where
   mempty = demoteUnit' one
   mappend = (Numeric.Units.Dimensional.Dynamic.*)
+
+anyUnitName :: AnyUnit -> UnitName 'NonMetric
+anyUnitName (AnyUnit _ n _) = n
 
 -- | The dynamic SI coherent unit of a given dimension.
 siUnit :: Dimension' -> AnyUnit
@@ -290,7 +296,7 @@ recip (AnyUnit d n e) = AnyUnit (D.recip d) (N.nOne N./ n) (P.recip e)
 
 -- | Raises a dynamic unit to an integer power.
 (^) :: (P.Integral a) => AnyUnit -> a -> AnyUnit
-(AnyUnit d n e) ^ x = AnyUnit (d D.^ P.fromIntegral x) (n N.^ P.fromIntegral x) (e P.^ x)
+(AnyUnit d n e) ^ x = AnyUnit (d D.^ P.fromIntegral x) (n N.^ P.fromIntegral x) (e P.^^ x)
 
 -- | Applies a prefix to a dynamic unit.
 -- Returns 'Nothing' if the 'Unit' was 'NonMetric' and thus could not accept a prefix.

@@ -27,7 +27,8 @@ module Numeric.Units.Dimensional.UnitNames
   -- * Convenience Type Synonyms for Unit Name Transformations
   UnitNameTransformer, UnitNameTransformer2,
   -- * Forgetting Unwanted Phantom Types
-  weaken, strengthen, relax
+  weaken, strengthen, relax,
+  name_en, abbreviation_en, asAtomic
 )
 where
 
