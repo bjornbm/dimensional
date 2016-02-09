@@ -236,7 +236,7 @@ data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
   deriving (Generic, Typeable)
 
 instance Show AnyUnit where
-  show (AnyUnit _ n e) = "1 " ++ (show n) ++ " =def= " ++ (show e) ++ " of the SI base unit"
+  show (AnyUnit _ n e) = (show n) ++ " =def= " ++ (show e) ++ " of the SI base unit"
 
 instance HasDynamicDimension AnyUnit where
 
@@ -296,7 +296,7 @@ recip (AnyUnit d n e) = AnyUnit (D.recip d) (N.nOne N./ n) (P.recip e)
 
 -- | Raises a dynamic unit to an integer power.
 (^) :: (P.Integral a) => AnyUnit -> a -> AnyUnit
-(AnyUnit d n e) ^ x = AnyUnit (d D.^ P.fromIntegral x) (n N.^ P.fromIntegral x) (e P.^ x)
+(AnyUnit d n e) ^ x = AnyUnit (d D.^ P.fromIntegral x) (n N.^ P.fromIntegral x) (e P.^^ x)
 
 -- | Applies a prefix to a dynamic unit.
 -- Returns 'Nothing' if the 'Unit' was 'NonMetric' and thus could not accept a prefix.
