@@ -33,6 +33,8 @@ vNext
 * Added the Numeric.Units.Dimensional.Float module with convenient wrappers around functions
   from RealFloat and IEEE for inspecting floating point quantities.
 * Added an `AEq` instance for `Quantity`.
+* Exposed the name of an 'AnyUnit' without promoting it to a 'Unit' first.
+* Exposed a way to convert atomic 'UnitName's back into 'NameAtom's.
 * Added the `btu`, a unit of energy.
 * Relocated git repository to https://github.com/bjornbm/dimensional
 
