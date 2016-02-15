@@ -186,7 +186,7 @@ module Numeric.Units.Dimensional
     -- * Dimensional Arithmetic
     (*~), (/~),
     (^), (^/), (**), (*), (/), (+), (-),
-    negate, abs, recip, nroot, sqrt, cbrt,
+    negate, abs, signum, recip, nroot, sqrt, cbrt,
     -- ** Transcendental Functions
     exp, log, logBase, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
     -- ** Operations on Collections
@@ -457,6 +457,16 @@ negate = liftQ Prelude.negate
 -- | Takes the absolute value of a 'Quantity'.
 abs :: Num a => Quantity d a -> Quantity d a
 abs = liftQ Prelude.abs
+
+-- | Takes the sign of a 'Quantity'. The functions 'abs' and 'signum'
+-- satisy the law that:
+--
+-- > abs x * signum x == x
+--
+-- The sign is either @negate _1@ (negative), @_0@ (zero),
+-- or @_1@ (positive).
+signum :: Num a => Quantity d a -> Dimensionless a
+signum = liftQ Prelude.signum
 
 {-
 Roots of arbitrary (integral) degree. Appears to occasionally be useful
