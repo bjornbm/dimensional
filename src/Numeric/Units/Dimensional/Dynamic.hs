@@ -23,8 +23,8 @@ module Numeric.Units.Dimensional.Dynamic
   -- * Dynamic Quantities
   AnyQuantity
 , DynQuantity
-, Demoteable
-, Promoteable
+, Demotable
+, Promotable
 , HasDynamicDimension(..)
 , promoteQuantity, demoteQuantity
 , (*~), (/~), invalidQuantity
@@ -55,30 +55,30 @@ import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 
 -- | The class of types that can be used to model 'Quantity's that are certain to have a value with
 -- some dimension.
-class Demoteable (q :: * -> *) where
-  demoteableOut :: q a -> AnyQuantity a
-  demoteableIn :: AnyQuantity a -> Maybe (q a)
+class Demotable (q :: * -> *) where
+  demotableOut :: q a -> AnyQuantity a
+  demotableIn :: AnyQuantity a -> Maybe (q a)
 
 -- | The class of types that can be used to model 'Quantity's whose 'Dimension's are
 -- only known dynamically.
-class Promoteable (q :: * -> *) where
-  promoteableIn :: AnyQuantity a -> q a
-  promoteableOut :: q a -> Maybe (AnyQuantity a)
+class Promotable (q :: * -> *) where
+  promotableIn :: AnyQuantity a -> q a
+  promotableOut :: q a -> Maybe (AnyQuantity a)
 
 -- | Forgets information about a 'Quantity' or 'AnyQuantity', yielding an 'AnyQuantity' or a 'DynQuantity'.
-demoteQuantity :: (Demoteable q, Promoteable d) => q a -> d a
-demoteQuantity = promoteableIn . demoteableOut
+demoteQuantity :: (Demotable q, Promotable d) => q a -> d a
+demoteQuantity = promotableIn . demotableOut
 
 -- | Converts a dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
 -- quantity which is known to have some dimension (which may be statically encoded),
 -- such as an 'AnyQuantity' or 'Quantity d', or to 'Nothing' if the dynamic quantity
 -- cannot be represented in the narrower result type.
-promoteQuantity :: (Demoteable q, Promoteable d) => d a -> Maybe (q a)
-promoteQuantity = demoteableIn <=< promoteableOut
+promoteQuantity :: (Demotable q, Promotable d) => d a -> Maybe (q a)
+promoteQuantity = demotableIn <=< promotableOut
 
-instance (KnownDimension d) => Demoteable (Quantity d) where
-  demoteableOut q@(Quantity x) = AnyQuantity (dimension q) x
-  demoteableIn = demoteQ
+instance (KnownDimension d) => Demotable (Quantity d) where
+  demotableOut q@(Quantity x) = AnyQuantity (dimension q) x
+  demotableIn = demoteQ
     where
       -- This implementation is not provided directly inside the instance because it requires ScopedTypeVariables
       -- Placing the signatures inside the instance requires InstanceSigs, which interacts poorly with associated type families
@@ -106,13 +106,13 @@ instance HasDimension (AnyQuantity a) where
 
 instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic instance
 
-instance Promoteable AnyQuantity where
-  promoteableIn = id
-  promoteableOut = Just
+instance Promotable AnyQuantity where
+  promotableIn = id
+  promotableOut = Just
 
-instance Demoteable AnyQuantity where
-  demoteableOut = id
-  demoteableIn = Just
+instance Demotable AnyQuantity where
+  demotableOut = id
+  demotableIn = Just
 
 -- | 'AnyQuantity's form a 'Monoid' under multiplication, but not under addition because
 -- they may not be added together if their dimensions do not match.
@@ -134,9 +134,9 @@ newtype DynQuantity a = DynQuantity (Maybe (AnyQuantity a))
 
 instance NFData a => NFData (DynQuantity a) -- instance is derived from Generic instance
 
-instance Promoteable DynQuantity where
-  promoteableIn = DynQuantity . Just
-  promoteableOut (DynQuantity q) = q
+instance Promotable DynQuantity where
+  promotableIn = DynQuantity . Just
+  promotableOut (DynQuantity q) = q
 
 instance HasDynamicDimension (DynQuantity a) where
   dynamicDimension (DynQuantity q) = q >>= dynamicDimension
@@ -308,14 +308,14 @@ applyPrefix p (AnyUnit d n e) = do
                                   return $ AnyUnit d n'' e'
 
 -- | Forms a dynamic quantity by multipliying a number and a dynamic unit.
-(*~) :: (Floating a, Promoteable q) => a -> AnyUnit -> q a
-x *~ (AnyUnit d _ e) = promoteableIn $ AnyQuantity d (x P.* approximateValue e)
+(*~) :: (Floating a, Promotable q) => a -> AnyUnit -> q a
+x *~ (AnyUnit d _ e) = promotableIn $ AnyQuantity d (x P.* approximateValue e)
 
 -- | Divides a dynamic quantity by a dynamic unit, obtaining the numerical value of the quantity
 -- expressed in that unit if they are of the same physical dimension, or 'Nothing' otherwise.
-(/~) :: (Floating a, Promoteable q) => q a -> AnyUnit -> Maybe a
+(/~) :: (Floating a, Promotable q) => q a -> AnyUnit -> Maybe a
 x /~ (AnyUnit d _ e) = do
-                         (AnyQuantity d' x') <- promoteableOut x
+                         (AnyQuantity d' x') <- promotableOut x
                          if (d == d')
                            then Just $ x' P./ approximateValue e
                            else Nothing
