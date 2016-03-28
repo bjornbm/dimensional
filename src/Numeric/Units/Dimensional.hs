@@ -570,7 +570,7 @@ mean = uncurry (/) . foldr accumulate (_0, _0)
 -- This can be useful for purposes of e.g. calculating averages.
 --
 -- >>> dimensionlessLength ["foo", "bar"]
--- 2.0
+-- 2
 dimensionlessLength :: (Num a, Foldable f) => f b -> Dimensionless a
 dimensionlessLength x = (fromIntegral $ length x) *~ one
 
