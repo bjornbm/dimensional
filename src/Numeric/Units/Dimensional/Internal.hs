@@ -46,11 +46,12 @@ import qualified Data.Vector.Generic.Mutable as M
 import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Unboxed.Base as U
 import Prelude
-  ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Functor
-  , String, Maybe(..)
+  ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Functor, Real(..)
+  , String, Maybe(..), Double
   , (.), ($), (++), (+), (/)
-  , show, otherwise, undefined, error, fmap
+  , show, otherwise, undefined, error, fmap, realToFrac
   )
+import qualified Prelude as P
 
 -- $setup
 -- >>> :set -XNoImplicitPrelude
@@ -209,16 +210,25 @@ We will conclude by providing a reasonable 'Show' instance for
 quantities. The SI unit of the quantity is inferred
 from its dimension.
 -}
-instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
-  show = showIn siUnit
+instance (KnownDimension d, E.KnownExactPi s, Show a, Real a) => Show (SQuantity s d a) where
+  show (Quantity x) | isExactOne s' = show x ++ showName n
+                    | otherwise = "Quantity " ++ show x ++ " {- " ++ show q ++ " -}"
+    where
+      s' = E.exactPiVal (Proxy :: Proxy s)
+      s'' = approximateValue s' :: Double
+      q = Quantity (realToFrac x P.* s'') :: Quantity d Double
+      (Unit n _ _) = siUnit :: Unit 'NonMetric d a
 
 -- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
 --
 -- >>> showIn watt $ (37 *~ volt) * (4 *~ ampere)
 -- "148.0 W"
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
-showIn (Unit n _ y) (Quantity x) | Name.weaken n == nOne = show (x / y)
-                                 | otherwise             = (show (x / y)) ++ " " ++ (show n)
+showIn (Unit n _ y) (Quantity x) = show (x / y) ++ (showName . Name.weaken $ n)
+
+showName :: UnitName 'NonMetric -> String
+showName n | n == nOne = ""
+           | otherwise = " " ++ show n
 
 instance (KnownDimension d, Show a) => Show (Unit m d a) where
   show (Unit n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
