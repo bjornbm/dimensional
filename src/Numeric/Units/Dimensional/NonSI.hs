@@ -72,7 +72,9 @@ module Numeric.Units.Dimensional.NonSI
   -- $us-customary-volumes
   usGallon, usQuart, usPint, usCup, usGill, usFluidOunce,
   -- * Atomic-Scale Units
-  angstrom
+  angstrom,
+  -- * Units from the Centimeter-Gram-Second Electrostatic System of Units
+  gauss
 )
 where
 
@@ -863,3 +865,15 @@ usFluidOunce = mkUnitQ (ucum "[foz_us]" "fl oz" "fluid ounce") (1 Prelude./ 16) 
 -- 1 % 10000000000 m
 angstrom :: (Fractional a) => Unit 'NonMetric DLength a
 angstrom = mkUnitQ (ucum "Ao" "Å" "Ångström") 0.1 $ nano meter
+
+-- | One Gauss is 1/10000 'tesla'.
+--
+-- See <https://en.wikipedia.org/wiki/Gauss_%28unit%29 here> for further information.
+--
+-- >>> 1 *~ gauss
+-- 1.0e-4 kg s^-2 A^-1
+--
+-- >>> 1 *~ gauss :: MagneticFluxDensity Rational
+-- 1 % 10000 kg s^-2 A^-1
+gauss :: (Fractional a) => Unit 'NonMetric DMagneticFluxDensity a
+gauss = mkUnitQ (ucum "G" "G" "Gauss") 1e-4 $ tesla
