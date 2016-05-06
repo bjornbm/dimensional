@@ -7,6 +7,7 @@ client code.
 
 [![Build Status](https://travis-ci.org/bjornbm/dimensional.svg?branch=master)](https://travis-ci.org/bjornbm/dimensional)
 [![Hackage Version](http://img.shields.io/hackage/v/dimensional.svg)](http://hackage.haskell.org/package/dimensional)
+[![Stackage version](https://www.stackage.org/package/dimensional/badge/lts?label=Stackage)](https://www.stackage.org/package/dimensional)
 
 ## Usage
 
