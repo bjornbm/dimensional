@@ -56,7 +56,7 @@ module Numeric.Units.Dimensional.FixedPoint
   name, exactValue, weaken, strengthen, exactify,
   -- * Commonly Used Type Synonyms
   -- $synonyms
-  type Q, type Angle8, type Angle16, type Angle32
+  type Q, type QScale, type Angle8, type Angle16, type Angle32
 )
 where
 
@@ -357,14 +357,17 @@ These type synonyms for commonly used fixed-point types are provided for conveni
 
 -}
 
+-- | A binary scale factor.
+type QScale n = (E.One E./ (E.ExactNatural (2 N.^ n)))
+
 -- | A dimensionless number with `n` fractional bits, using a representation of type `a`.
-type Q n a = SQuantity (E.One E./ (E.ExactNatural (2 N.^ n))) DOne a
+type Q n a = SQuantity (QScale n) DOne a
 
 -- | A single-turn angle represented as a signed 8-bit integer.
-type Angle8  = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 7)))  DPlaneAngle Int8
+type Angle8  = SQuantity (E.Pi E.* (QScale 7))  DPlaneAngle Int8
 
 -- | A single-turn angle represented as a signed 16-bit integer.
-type Angle16 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 15))) DPlaneAngle Int16
+type Angle16 = SQuantity (E.Pi E.* (QScale 15)) DPlaneAngle Int16
 
 -- | A single-turn angle represented as a signed 32-bit integer.
-type Angle32 = SQuantity (E.Pi E./ (E.ExactNatural (2 N.^ 31))) DPlaneAngle Int32
+type Angle32 = SQuantity (E.Pi E.* (QScale 31)) DPlaneAngle Int32
