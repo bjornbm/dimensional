@@ -38,7 +38,7 @@ where
 
 import Data.Proxy
 import Numeric.NumType.DK.Integers
-  ( TypeInt (Zero, Pos1, Pos2, Pos3), (+)(), (-)()
+  ( TypeInt (Zero, Pos1, Pos2, Pos3), type (+), type (-)
   , KnownTypeInt, toNum
   )
 import qualified Numeric.NumType.DK.Integers as N
