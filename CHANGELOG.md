@@ -36,6 +36,8 @@ vNext
 * Exposed the name of an 'AnyUnit' without promoting it to a 'Unit' first.
 * Exposed a way to convert atomic 'UnitName's back into 'NameAtom's.
 * Added the `btu`, a unit of energy.
+* Added the `gauss`, a unit of magnetic flux density.
+* Added the `angstrom`, a unit of length.
 * Relocated git repository to https://github.com/bjornbm/dimensional
 
 1.0.1.1 (2015-11)
