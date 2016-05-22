@@ -87,7 +87,7 @@ class KnownVariant (v :: Variant) where
 
 deriving instance Typeable Dimensional
 
-instance (E.KnownExactPi s) => KnownVariant ('DQuantity s) where
+instance KnownVariant ('DQuantity s) where
   newtype Dimensional ('DQuantity s) d a = Quantity a
     deriving (Eq, Ord, AEq, Data, Generic, Generic1
 #if MIN_VERSION_base(4,8,0)
@@ -142,7 +142,7 @@ We provide this freedom by making 'Dimensionless' an instance of
 'Functor'.
 -}
 
-instance (E.KnownExactPi s) => Functor (SQuantity s DOne) where
+instance Functor (SQuantity s DOne) where
   fmap = dmap
 
 instance (KnownDimension d) => HasDynamicDimension (Dimensional v d a) where
@@ -223,14 +223,14 @@ instance (KnownDimension d, E.KnownExactPi s, Show a, Real a) => Show (SQuantity
 --
 -- >>> showIn watt $ (37 *~ volt) * (4 *~ ampere)
 -- "148.0 W"
-showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
+showIn :: (Show a, Fractional a) => Unit m d a -> Quantity d a -> String
 showIn (Unit n _ y) (Quantity x) = show (x / y) ++ (showName . Name.weaken $ n)
 
 showName :: UnitName 'NonMetric -> String
 showName n | n == nOne = ""
            | otherwise = " " ++ show n
 
-instance (KnownDimension d, Show a) => Show (Unit m d a) where
+instance (Show a) => Show (Unit m d a) where
   show (Unit n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
 
 -- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.

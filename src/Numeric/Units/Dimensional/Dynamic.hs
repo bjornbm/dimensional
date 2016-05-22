@@ -87,7 +87,7 @@ instance (KnownDimension d) => Demotable (Quantity d) where
       demoteQ (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
                                     | otherwise   = Nothing
         where
-          dim' = dimension (Proxy :: Proxy d)
+          dim' = dimension (Proxy :: Proxy d')
 
 
 
