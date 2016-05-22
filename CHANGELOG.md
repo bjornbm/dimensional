@@ -40,6 +40,11 @@ vNext
 * Added the `angstrom`, a unit of length.
 * Relocated git repository to https://github.com/bjornbm/dimensional
 
+1.0.1.2 (2016-05)
+-----------------
+* Support for GHC 8.0.1-rc4, avoiding GHC Trac issue 12026.
+* Added support for stack.
+
 1.0.1.1 (2015-11)
 -----------------
 * Improved example in readme.
