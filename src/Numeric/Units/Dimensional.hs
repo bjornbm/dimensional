@@ -1,6 +1,7 @@
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 {-# LANGUAGE AutoDeriveTypeable #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -9,7 +10,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE MultiParamTypeClasses #-} -- for Vector instances only
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RoleAnnotations #-}
@@ -235,7 +235,7 @@ import Numeric.Units.Dimensional.Dimensions
 import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
-import Numeric.Units.Dimensional.Variants hiding (type (*))
+import Numeric.Units.Dimensional.Variants hiding (type (*), type (/))
 import qualified Numeric.Units.Dimensional.Variants as V
 
 -- Provide a version of length which is compatible with base-4.8's version.
@@ -312,7 +312,7 @@ exactify :: Unit m d a -> Unit m d ExactPi
 exactify (Unit n e _) = Unit n e e
 
 -- | Forms a 'Quantity' by multipliying a number and a unit.
-(*~) :: Num a => a -> Unit m d a -> Quantity d a
+(*~) :: (Num a) => a -> Unit m d a -> Quantity d a
 x *~ (Unit _ _ y) = Quantity (x Prelude.* y)
 
 -- | Divides a 'Quantity' by a 'Unit' of the same physical dimension, obtaining the
@@ -405,7 +405,7 @@ Multiplication, division and powers apply to both units and quantities.
 --
 -- The intimidating type signature captures the similarity between these operations
 -- and ensures that composite 'Unit's are 'NotPrefixable'.
-(/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) (d1 / d2) a
+(/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V./ v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V./ v2) (d1 / d2) a
 (/) = liftD2 (Prelude./) (Prelude./) (Name./)
 
 -- | Forms the reciprocal of a 'Quantity', which has the reciprocal dimension.
@@ -542,7 +542,7 @@ elements of a functor (e.g. a list).
 xs *~~ u = fmap (*~ u) xs
 
 -- | Applies '/~' to all values in a functor.
-(/~~) :: (Functor f, Fractional a) => f (Quantity d a) -> Unit m d a -> f a
+(/~~) :: forall f m d a.(Functor f, Fractional a) => f (Quantity d a) -> Unit m d a -> f a
 xs /~~ u = fmap (/~ u) xs
 
 infixl 7  *~~, /~~
@@ -570,7 +570,7 @@ mean = uncurry (/) . foldr accumulate (_0, _0)
 -- This can be useful for purposes of e.g. calculating averages.
 --
 -- >>> dimensionlessLength ["foo", "bar"]
--- 2.0
+-- 2
 dimensionlessLength :: (Num a, Foldable f) => f b -> Dimensionless a
 dimensionlessLength x = (fromIntegral $ length x) *~ one
 

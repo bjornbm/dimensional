@@ -10,7 +10,9 @@ Re-exports the raw 'Quantity' constructor from the Numeric.Units.Dimensional.Int
 for convenience in converting between raw representations and dimensional values.
 
 Note that use of these constructs requires the user to verify the dimensional safety of the conversion,
-because the coercion doesn't explicitly mention the unit of the representation.
+because the coercion doesn't explicitly mention the unit of the representation. Note also that the
+'Quantity' constructor constructs a 'Numeric.Units.Dimensional.SQuantity' which may have a scale factor
+other than 'Data.ExactPi.TypeLevel.One'.
 
 Note that the haddock documentation doesn't mention the 'Quantity' constructor because it is a part of the
 'Dimensional' associated data family, but it is exported by this module.
@@ -24,10 +26,10 @@ module Numeric.Units.Dimensional.Coercion
 where
 
 import Data.Coerce (coerce)
-import Numeric.Units.Dimensional.Internal (Quantity, Dimensional(Quantity))
+import Numeric.Units.Dimensional.Internal (SQuantity, Dimensional(Quantity))
 
--- | Unwraps a `Quantity`, yielding its underlying representation.
+-- | Unwraps a possibly-scaled `SQuantity`, yielding its underlying representation.
 --
 -- This is a type-restricted version of `coerce`.
-unQuantity :: Quantity d a -> a
+unQuantity :: SQuantity s d a -> a
 unQuantity = coerce

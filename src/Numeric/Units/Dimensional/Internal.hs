@@ -18,7 +18,7 @@ module Numeric.Units.Dimensional.Internal
 (
   KnownVariant(..),
   Dimensional(..),
-  type Unit, type Quantity,
+  type Unit, type Quantity, type SQuantity,
   siUnit, showIn,
   liftD, liftD2,
   liftQ, liftQ2
@@ -32,13 +32,13 @@ import Data.AEq (AEq)
 import Data.Coerce (coerce)
 import Data.Data
 import Data.ExactPi
+import qualified Data.ExactPi.TypeLevel as E
 import Data.Monoid (Monoid(..))
 import Foreign.Ptr (Ptr, castPtr)
 import Foreign.Storable (Storable(..))
 import GHC.Generics
 import Numeric.Units.Dimensional.Dimensions
-import Numeric.Units.Dimensional.Variants hiding (type (*))
-import qualified Numeric.Units.Dimensional.Variants as V
+import Numeric.Units.Dimensional.Variants
 import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.UnitNames.InterchangeNames (HasInterchangeName(..))
@@ -46,11 +46,12 @@ import qualified Data.Vector.Generic.Mutable as M
 import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Unboxed.Base as U
 import Prelude
-  ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Functor
-  , String, Maybe(..)
+  ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Functor, Real(..)
+  , String, Maybe(..), Double
   , (.), ($), (++), (+), (/)
-  , show, otherwise, undefined, error, fmap
+  , show, otherwise, undefined, error, fmap, realToFrac
   )
+import qualified Prelude as P
 
 -- $setup
 -- >>> :set -XNoImplicitPrelude
@@ -60,7 +61,12 @@ import Prelude
 type Unit (m :: Metricality) = Dimensional ('DUnit m)
 
 -- | A dimensional quantity.
-type Quantity = Dimensional 'DQuantity
+type Quantity = SQuantity E.One
+
+-- | A dimensional quantity, stored as an 'ExactPi'' multiple of its value in its dimension's SI coherent unit.
+--
+-- The name is an abbreviation for scaled quantity.
+type SQuantity s = Dimensional ('DQuantity s)
 
 -- | A KnownVariant is one whose term-level 'Dimensional' values we can represent with an associated data family instance
 -- and manipulate with certain functions, not all of which are exported from the package.
@@ -69,6 +75,8 @@ type Quantity = Dimensional 'DQuantity
 class KnownVariant (v :: Variant) where
   -- | A dimensional value, either a 'Quantity' or a 'Unit', parameterized by its 'Dimension' and representation.
   data Dimensional v :: Dimension -> * -> *
+  -- | A scale factor by which the numerical value of this dimensional value is implicitly multiplied.
+  type ScaleFactor v :: E.ExactPi'
   extractValue :: Dimensional v d a -> (a, Maybe ExactPi)
   extractName :: Dimensional v d a -> Maybe (UnitName 'NonMetric)
   injectValue :: (Maybe (UnitName 'NonMetric)) -> (a, Maybe ExactPi) -> Dimensional v d a
@@ -79,13 +87,14 @@ class KnownVariant (v :: Variant) where
 
 deriving instance Typeable Dimensional
 
-instance KnownVariant 'DQuantity where
-  newtype Dimensional 'DQuantity d a = Quantity a
+instance (E.KnownExactPi s) => KnownVariant ('DQuantity s) where
+  newtype Dimensional ('DQuantity s) d a = Quantity a
     deriving (Eq, Ord, AEq, Data, Generic, Generic1
 #if MIN_VERSION_base(4,8,0)
      , Typeable -- GHC 7.8 doesn't support deriving this instance
 #endif
     )
+  type (ScaleFactor ('DQuantity s)) = s
   extractValue (Quantity x) = (x, Nothing)
   extractName _ = Nothing
   injectValue _ (x, _) = Quantity x
@@ -98,6 +107,7 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
      , Typeable -- GHC 7.8 doesn't support deriving this instance
 #endif
     )
+  type (ScaleFactor ('DUnit m)) = E.One
   extractValue (Unit _ e x) = (x, Just e)
   extractName (Unit n _ _) = Just . Name.weaken $ n
   injectValue (Just n) (x, Just e) | Just n' <- relax n = Unit n' e x
@@ -106,7 +116,7 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
   dmap f (Unit n e x) = Unit n e (f x)
 
 -- GHC is somewhat unclear about why, but it won't derive this instance, so we give it explicitly.
-instance (Bounded a) => Bounded (Quantity d a) where
+instance (Bounded a) => Bounded (SQuantity s d a) where
   minBound = Quantity minBound
   maxBound = Quantity maxBound
 
@@ -119,7 +129,7 @@ we will define a monoid instance that adds.
 -}
 
 -- | 'Quantity's of a given 'Dimension' form a 'Monoid' under addition.
-instance (Num a) => Monoid (Quantity d a) where
+instance (Num a) => Monoid (SQuantity s d a) where
   mempty = Quantity 0
   mappend = liftQ2 (+)
 
@@ -132,7 +142,7 @@ We provide this freedom by making 'Dimensionless' an instance of
 'Functor'.
 -}
 
-instance Functor (Quantity DOne) where
+instance (E.KnownExactPi s) => Functor (SQuantity s DOne) where
   fmap = dmap
 
 instance (KnownDimension d) => HasDynamicDimension (Dimensional v d a) where
@@ -148,7 +158,7 @@ siUnit = Unit (baseUnitName $ dimension (Proxy :: Proxy d)) 1 1
 
 instance NFData a => NFData (Quantity d a) -- instance is derived from Generic instance
 
-instance Storable a => Storable (Quantity d a) where
+instance Storable a => Storable (SQuantity s d a) where
   sizeOf _ = sizeOf (undefined::a)
   {-# INLINE sizeOf #-}
   alignment _ = alignment (undefined::a)
@@ -161,11 +171,11 @@ instance Storable a => Storable (Quantity d a) where
 {-
 Instances for vectors of quantities.
 -}
-newtype instance U.Vector (Quantity d a)    =  V_Quantity {unVQ :: U.Vector a}
-newtype instance U.MVector s (Quantity d a) = MV_Quantity {unMVQ :: U.MVector s a}
-instance U.Unbox a => U.Unbox (Quantity d a)
+newtype instance U.Vector (SQuantity s d a)    =  V_Quantity {unVQ :: U.Vector a}
+newtype instance U.MVector v (SQuantity s d a) = MV_Quantity {unMVQ :: U.MVector v a}
+instance U.Unbox a => U.Unbox (SQuantity s d a)
 
-instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
+instance (M.MVector U.MVector a) => M.MVector U.MVector (SQuantity s d a) where
   basicLength          = M.basicLength . unMVQ
   {-# INLINE basicLength #-}
   basicUnsafeSlice m n = MV_Quantity . M.basicUnsafeSlice m n . unMVQ
@@ -183,7 +193,7 @@ instance (M.MVector U.MVector a) => M.MVector U.MVector (Quantity d a) where
   {-# INLINE basicInitialize #-}
 #endif
 
-instance (G.Vector U.Vector a) => G.Vector U.Vector (Quantity d a) where
+instance (G.Vector U.Vector a) => G.Vector U.Vector (SQuantity s d a) where
   basicUnsafeFreeze    = liftM V_Quantity  . G.basicUnsafeFreeze . unMVQ
   {-# INLINE basicUnsafeFreeze #-}
   basicUnsafeThaw      = liftM MV_Quantity . G.basicUnsafeThaw   . unVQ
@@ -200,16 +210,25 @@ We will conclude by providing a reasonable 'Show' instance for
 quantities. The SI unit of the quantity is inferred
 from its dimension.
 -}
-instance (KnownDimension d, Show a, Fractional a) => Show (Quantity d a) where
-  show = showIn siUnit
+instance (KnownDimension d, E.KnownExactPi s, Show a, Real a) => Show (SQuantity s d a) where
+  show (Quantity x) | isExactOne s' = show x ++ showName n
+                    | otherwise = "Quantity " ++ show x ++ " {- " ++ show q ++ " -}"
+    where
+      s' = E.exactPiVal (Proxy :: Proxy s)
+      s'' = approximateValue s' :: Double
+      q = Quantity (realToFrac x P.* s'') :: Quantity d Double
+      (Unit n _ _) = siUnit :: Unit 'NonMetric d a
 
 -- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
 --
 -- >>> showIn watt $ (37 *~ volt) * (4 *~ ampere)
 -- "148.0 W"
 showIn :: (KnownDimension d, Show a, Fractional a) => Unit m d a -> Quantity d a -> String
-showIn (Unit n _ y) (Quantity x) | Name.weaken n == nOne = show (x / y)
-                                 | otherwise             = (show (x / y)) ++ " " ++ (show n)
+showIn (Unit n _ y) (Quantity x) = show (x / y) ++ (showName . Name.weaken $ n)
+
+showName :: UnitName 'NonMetric -> String
+showName n | n == nOne = ""
+           | otherwise = " " ++ show n
 
 instance (KnownDimension d, Show a) => Show (Unit m d a) where
   show (Unit n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
@@ -222,11 +241,11 @@ liftD fe f nt x = let (x', e') = extractValue x
                    in injectValue n' (f x', fmap fe e')
 
 -- Operates on a dimensional value using a unary operation on values, yielding a Quantity.
-liftQ :: (a -> a) -> Quantity d1 a -> Quantity d2 a
+liftQ :: (a -> a) -> SQuantity s1 d1 a -> SQuantity s2 d2 a
 liftQ = coerce
 
 -- Combines two dimensional values using a binary operation on values, possibly yielding a Unit.
-liftD2 :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V.* v2)) => (ExactPi -> ExactPi -> ExactPi) -> (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V.* v2) d3 a
+liftD2 :: (KnownVariant v1, KnownVariant v2, KnownVariant v3) => (ExactPi -> ExactPi -> ExactPi) -> (a -> a -> a) -> UnitNameTransformer2 -> Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional v3 d3 a
 liftD2 fe f nt x1 x2 = let (x1', e1') = extractValue x1
                            (x2', e2') = extractValue x2
                            n1 = extractName x1
@@ -235,5 +254,5 @@ liftD2 fe f nt x1 x2 = let (x1', e1') = extractValue x1
                         in injectValue n' (f x1' x2', fe <$> e1' <*> e2')
 
 -- Combines two dimensional values using a binary operation on values, yielding a Quantity.
-liftQ2 :: (a -> a -> a) -> Quantity d1 a -> Quantity d2 a -> Quantity d3 a
+liftQ2 :: (a -> a -> a) -> SQuantity s1 d1 a -> SQuantity s2 d2 a -> SQuantity s3 d3 a
 liftQ2 = coerce
