@@ -20,6 +20,7 @@ env:
 - ARGS="--resolver lts-2 --stack-yaml stack.lts2.yaml"
 - ARGS="--resolver lts-3"
 - ARGS="--resolver lts-5"
+- ARGS="--resolver nightly-2016-05-21 --stack-yaml stack.ghc8.yaml"
 
 before_install:
 # Download and unpack the stack executable
