@@ -6,15 +6,9 @@ packages:
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps:
-  - array-0.5.1.1
-  - containers-0.5.7.1
-  - deepseq-1.4.2.0
   - directory-1.2.6.3
-  - filepath-1.4.1.0
-  - process-1.4.2.0
-  - transformers-0.5.2.0
-  - transformers-compat-0.5.1.4
-  - unix-2.7.2.0
+  - exact-pi-0.4.1.2
+  - numtype-dk-0.5.0.1
 
 # Override default flag values for local packages and extra-deps
 flags: {}
