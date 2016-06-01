@@ -131,14 +131,14 @@ sum :: (Num a, F.Foldable f) => f (SQuantity s d a) -> SQuantity s d a
 sum = F.foldr (+) _0
 
 -- | The arithmetic mean of all elements in a list.
-mean :: (Fractional a, F.Foldable f, E.KnownExactPi s) => f (SQuantity s d a) -> SQuantity s d a
+mean :: (Fractional a, F.Foldable f) => f (SQuantity s d a) -> SQuantity s d a
 mean = reduce . F.foldr accumulate (_0, 0 :: Int)
   where
     reduce (s, n) = dmap (P./ fromIntegral n) s
     accumulate val (accum, count) = (accum + val, count P.+ 1)
 
 expD, logD, sinD, cosD, tanD, asinD, acosD, atanD, sinhD, coshD, tanhD, asinhD, acoshD, atanhD
-  :: (Real a, Integral a, Integral b, E.MinCtxt s1 Double, E.MinCtxt s2 Double) => SQuantity s1 DOne a -> SQuantity s2 DOne b
+  :: (Integral a, Integral b, E.MinCtxt s1 Double, E.MinCtxt s2 Double) => SQuantity s1 DOne a -> SQuantity s2 DOne b
 expD = expVia (Proxy :: Proxy P.Double)
 logD = logVia (Proxy :: Proxy P.Double)
 sinD = sinVia (Proxy :: Proxy P.Double)
@@ -156,11 +156,11 @@ atanhD = atanhVia (Proxy :: Proxy P.Double)
 
 -- | The standard two argument arctangent function.
 -- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
-atan2D :: (Real a, Integral a, Integral b, E.MinCtxt s1 Double, E.MinCtxt s2 Double, E.MinCtxt s3 Double) => SQuantity s1 DOne a -> SQuantity s2 DOne a -> SQuantity s3 DOne b
+atan2D :: (Integral a, Integral b, E.MinCtxt s1 Double, E.MinCtxt s2 Double, E.MinCtxt s3 Double) => SQuantity s1 DOne a -> SQuantity s2 DOne a -> SQuantity s3 DOne b
 atan2D = atan2Via (Proxy :: Proxy P.Double)
 
 expVia, logVia, sinVia, cosVia, tanVia, asinVia, acosVia, atanVia, sinhVia, coshVia, tanhVia, asinhVia, acoshVia, atanhVia
-  :: (Real a, Integral a, RealFrac b, Floating b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
+  :: (Integral a, RealFrac b, Floating b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
 expVia = liftDimensionlessVia P.exp
 logVia = liftDimensionlessVia P.log
 sinVia = liftDimensionlessPeriodicVia (2 P.* P.pi) P.sin
@@ -178,7 +178,7 @@ atanhVia = liftDimensionlessVia P.atanh
 
 -- | The standard two argument arctangent function.
 -- Since it interprets its two arguments in comparison with one another, the input may have any dimension.
-atan2Via :: forall s1 s2 s3 a b c d.(Real a, Integral a, RealFloat b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b, E.MinCtxt s3 b, KnownDimension d) => Proxy b -> SQuantity s1 d a -> SQuantity s2 d a -> SQuantity s3 DOne c
+atan2Via :: forall s1 s2 s3 a b c d.(Integral a, RealFloat b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b, E.MinCtxt s3 b, KnownDimension d) => Proxy b -> SQuantity s1 d a -> SQuantity s2 d a -> SQuantity s3 DOne c
 atan2Via _ y x = (*~ siUnit) $ (P.atan2 :: b -> b -> b) (y /~ siUnit) (x /~ siUnit)
 
 -- | Lift a function on dimensionless values of a specified intermediate type to operate on possibly scaled dimensionless.
@@ -189,7 +189,7 @@ liftDimensionlessVia f _ = (*~ siUnit) . (f :: b -> b) . (/~ siUnit)
 --
 -- If the scale factor of the input type is an exact integer divisor of the function's period, the argument
 -- will be clamped via an integer `mod` operation prior to applying the function to avoid errors introduced by a floating point modulus.
-liftDimensionlessPeriodicVia :: forall s1 s2 a b c.(Real a, Integral a, RealFrac b, Floating b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => ExactPi -> (forall d.Floating d => d -> d) -> Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
+liftDimensionlessPeriodicVia :: forall s1 s2 a b c.(Integral a, RealFrac b, Floating b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => ExactPi -> (forall d.Floating d => d -> d) -> Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
 liftDimensionlessPeriodicVia p f proxy | Just p'' <- p', p'' /= 0 = (liftDimensionlessVia f proxy) . dmap (`mod` p'')
                                        | otherwise = liftDimensionlessVia f proxy
   where
@@ -248,7 +248,7 @@ rescaleFinite = rescale -- It should be possible to do this more quickly, since 
 --
 -- Uses approximate arithmetic by way of an intermediate `Floating` type, to which a proxy must be supplied.
 rescaleVia :: forall a b c d s1 s2.(Integral a, RealFrac b, Floating b, Integral c, E.KnownExactPi s1, E.KnownExactPi s2) => Proxy b -> SQuantity s1 d a -> SQuantity s2 d c
-rescaleVia _ = viaFloating (P.* s)
+rescaleVia _ = viaIntermediate (P.* s)
   where
     s = approximateValue (s1' P./ s2') :: b
     s1' = E.exactPiVal $ (Proxy :: Proxy s1)
@@ -265,8 +265,8 @@ viaInteger :: (Integral a, Integral b) => (P.Integer -> P.Integer) -> SQuantity 
 viaInteger f = Quantity . fromInteger . f . fromIntegral . unQuantity
 
 -- Note that this does not respect scaling factors at all.
-viaFloating :: (Integral a, RealFrac b, Floating b, Integral c) => (b -> b) -> SQuantity s1 d a -> SQuantity s2 d c
-viaFloating f = Quantity . round . f . fromIntegral . unQuantity
+viaIntermediate :: (Integral a, RealFrac b, Integral c) => (b -> b) -> SQuantity s1 d a -> SQuantity s2 d c
+viaIntermediate f = Quantity . round . f . fromIntegral . unQuantity
 
 fixedPoint :: (Eq a) => [a] -> a
 fixedPoint []                     = error "Fixed point of empty list."
