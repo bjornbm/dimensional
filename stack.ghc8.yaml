@@ -5,12 +5,10 @@ packages:
 - '.'
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
-extra-deps:
-  - exact-pi-0.4.1.2
-  - numtype-dk-0.5.0.1
+extra-deps: []
 
 # Override default flag values for local packages and extra-deps
 flags: {}
 
-resolver: nightly-2016-05-31
+resolver: nightly-2016-06-02
 compiler: ghc-8.0.1
