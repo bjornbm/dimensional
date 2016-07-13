@@ -110,7 +110,7 @@ unifiedAtomicMassUnit :: Floating a => Unit 'Metric DMass a
 unifiedAtomicMassUnit = mkUnitR (ucumMetric "u" "u" "atomic mass unit") 1.6605402e-27 $ kilo gram
 
 dalton :: Floating a => Unit 'Metric DMass a
-dalton = mkUnitR (ucumMetric "eV" "Da" "Dalton") 1 $ unifiedAtomicMassUnit
+dalton = mkUnitR (ucumMetric "u" "Da" "Dalton") 1 $ unifiedAtomicMassUnit
 
 -- | One gee is the standard value of the acceleration due to gravity at the
 -- Earth's surface, as standardized by CIPM.
