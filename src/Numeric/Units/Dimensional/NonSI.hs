@@ -43,7 +43,7 @@ module Numeric.Units.Dimensional.NonSI
   gee,
   -- * Inch-pound Units
   -- $inch-pound-units
-  poundMass, ounce, poundForce, horsepower, btu,
+  poundMass, ounce, poundForce, horsepower, btu, shortTon,
   nauticalMile, knot,
   revolution, solid,
   slug, psi,
@@ -352,6 +352,18 @@ poundMass = mkUnitQ (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
 -- 45359237 % 1600000000 kg
 ounce :: Fractional a => Unit 'NonMetric DMass a
 ounce = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
+
+-- | One short ton is two thousand 'poundMass'.
+--
+-- See <https://en.wikipedia.org/wiki/Short_ton#United_States here> for further information.
+--
+-- >>> 1 *~ shortTon
+-- 907.18474 kg
+--
+-- >>> 1 *~ shortTon :: Mass Rational
+-- 45359237 % 50000 kg
+shortTon :: Fractional a => Unit 'NonMetric DMass a
+shortTon = mkUnitQ (ucum "[ston_av]" "ton" "short ton") 2000 $ poundMass
 
 -- | The pound-force is equal to the gravitational force exerted on a mass
 -- of one avoirdupois pound on the surface of Earth.
