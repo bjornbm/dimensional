@@ -57,19 +57,22 @@ module Numeric.Units.Dimensional.SIUnits
   -- $submultiples
   deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto,
   -- $reified-prefixes
-  Prefix, applyPrefix, siPrefixes
+  Prefix, applyPrefix, applyOptionalPrefix, siPrefixes, appropriatePrefix, withAppropriatePrefix, appropriatePrefix', withAppropriatePrefix'
 )
 where
 
+import Control.Monad (join)
 import Data.Ratio
+import Data.List (sortBy, find)
+import Data.Ord (comparing, Down(..))
 import Numeric.Units.Dimensional
 import Numeric.Units.Dimensional.Quantities
-import Numeric.Units.Dimensional.UnitNames (Prefix, siPrefixes)
+import Numeric.Units.Dimensional.UnitNames (Prefix, siPrefixes, scaleExponent)
 import qualified Numeric.Units.Dimensional.UnitNames as N
 import Numeric.Units.Dimensional.UnitNames.Internal (ucum, ucumMetric)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as I
 import Numeric.NumType.DK.Integers ( pos3 )
-import Prelude ( Eq(..), ($), Num, Fractional, Floating, otherwise, error)
+import Prelude ( Eq(..), ($), (.), Num, Fractional, Floating, RealFrac(..), Maybe(..), otherwise, error, Ord(..), fst, snd, Int, Bool, fmap, mod, (&&))
 import qualified Prelude
 
 {- $multiples
@@ -109,11 +112,17 @@ yotta = applyMultiple I.yotta
 Then the submultiples.
 -}
 
+-- | Applies a 'Prefix' to a 'Metric' 'Unit', creating a 'NonMetric' unit.
 applyPrefix :: (Fractional a) => Prefix -> Unit 'Metric d a -> Unit 'NonMetric d a
 applyPrefix p u = mkUnitQ n' x u
   where
     n' = N.applyPrefix p (name u)
     x = N.scaleFactor p
+
+-- | Applies an optional 'Prefix' to a 'Metric' 'Unit', creating a 'NonMetric' unit.
+applyOptionalPrefix :: (Fractional a) => Maybe Prefix -> Unit 'Metric d a -> Unit 'NonMetric d a
+applyOptionalPrefix Nothing = weaken
+applyOptionalPrefix (Just p) = applyPrefix p
 
 deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto
   :: Fractional a => Unit 'Metric d a -> Unit 'NonMetric d a
@@ -134,6 +143,54 @@ We supply an explicit representation of an SI prefix, along with a function to a
 list of all prefixes defined by the SI.
 
 -}
+
+-- | Selects the appropriate 'Prefix' to use with a 'Metric' unit when using it to display
+-- a particular 'Quantity', or 'Nothing' if the supplied unit should be used without a prefix.
+--
+-- The appropriate prefix is defined to be the largest prefix such that the resulting value
+-- of the quantity, expressed in the prefixed unit, is greater than or equal to one.
+appropriatePrefix :: (Floating a, RealFrac a) => Unit 'Metric d a -> Quantity d a -> Maybe Prefix
+appropriatePrefix u q = selectPrefix (<= e)
+  where
+    val = q /~ u
+    e = Prelude.floor $ Prelude.logBase 10 val :: Prelude.Int
+
+-- | Selects the appropriate 'Prefix' to use with a 'Metric' unit when using it to display
+-- a particular 'Quantity', or 'Nothing' if the supplied unit should be used without a prefix.
+--
+-- The appropriate prefix is defined to be the largest prefix such that the resulting value
+-- of the quantity, expressed in the prefixed unit, is greater than or equal to one. Only those prefixes
+-- whose 'scaleExponent' is a multiple of @3@ are considered.
+appropriatePrefix' :: (Floating a, RealFrac a) => Unit 'Metric d a -> Quantity d a -> Maybe Prefix
+appropriatePrefix' u q = selectPrefix (\x -> x `mod` 3 == 0 && x <= e)
+  where
+    val = q /~ u
+    e = Prelude.floor $ Prelude.logBase 10 val :: Prelude.Int
+
+-- Selects the first prefix in the list of prefix candidates whose scale exponent matches the supplied predicate.
+selectPrefix :: (Int -> Bool) -> Maybe Prefix
+selectPrefix p = join $ fmap snd $ find (p . fst) prefixCandidates
+
+-- This is a list of candidate prefixes and the least scale exponent at which each applies.
+prefixCandidates :: [(Int, Maybe Prefix)]
+prefixCandidates = sortBy (comparing $ Down . fst) $ (0, Nothing) : fmap (\x -> (scaleExponent x, Just x)) siPrefixes
+
+-- | Constructs a version of a 'Metric' unit, by possibly applying a 'Prefix' to it, appropriate
+-- for display of a particular 'Quantity'.
+--
+-- The appropriate prefix is defined to be the largest prefix such that the resulting value
+-- of the quantity, expressed in the prefixed unit, is greater than or equal to one.
+withAppropriatePrefix :: (Floating a, RealFrac a) => Unit 'Metric d a -> Quantity d a -> Unit 'NonMetric d a
+withAppropriatePrefix u q = applyOptionalPrefix (appropriatePrefix u q) u
+
+-- | Constructs a version of a 'Metric' unit, by possibly applying a 'Prefix' to it, appropriate
+-- for display of a particular 'Quantity'.
+--
+-- The appropriate prefix is defined to be the largest prefix such that the resulting value
+-- of the quantity, expressed in the prefixed unit, is greater than or equal to one. Only those prefixes
+-- whose 'scaleExponent' is a multiple of @3@ are considered.
+withAppropriatePrefix' :: (Floating a, RealFrac a) => Unit 'Metric d a -> Quantity d a -> Unit 'NonMetric d a
+withAppropriatePrefix' u q = applyOptionalPrefix (appropriatePrefix' u q) u
 
 {- $base-units
 These are the base units from section 4.1. To avoid a

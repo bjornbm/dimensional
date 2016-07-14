@@ -141,12 +141,12 @@ data Prefix = Prefix
                 -- | The name of a metric prefix.
                 prefixName :: PrefixName,
                 -- | The scale factor denoted by a metric prefix.
-                scaleFactor :: Rational
+                scaleExponent :: Int
               }
   deriving (Eq, Data, Typeable, Generic)
 
 instance Ord Prefix where
-  compare = comparing scaleFactor
+  compare = comparing scaleExponent
 
 instance NFData Prefix where -- instance is derived from Generic instance
 
@@ -190,27 +190,27 @@ baseUnitNames :: [UnitName 'NonMetric]
 baseUnitNames = [weaken nMeter, nKilogram, weaken nSecond, weaken nAmpere, weaken nKelvin, weaken nMole, weaken nCandela]
 
 deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta :: Prefix
-deka  = prefix "da" "da" "deka" 1e1
-hecto = prefix "h" "h" "hecto"  1e2
-kilo  = prefix "k" "k" "kilo"   1e3
-mega  = prefix "M" "M" "mega"   1e6
-giga  = prefix "G" "G" "giga"   1e9
-tera  = prefix "T" "T" "tera"   1e12
-peta  = prefix "P" "P" "peta"   1e15
-exa   = prefix "E" "E" "exa"    1e18
-zetta = prefix "Z" "Z" "zetta"  1e21
-yotta = prefix "Y" "Y" "yotta"  1e24
+deka  = prefix "da" "da" "deka" 1
+hecto = prefix "h" "h" "hecto"  2
+kilo  = prefix "k" "k" "kilo"   3
+mega  = prefix "M" "M" "mega"   6
+giga  = prefix "G" "G" "giga"   9
+tera  = prefix "T" "T" "tera"   12
+peta  = prefix "P" "P" "peta"   15
+exa   = prefix "E" "E" "exa"    18
+zetta = prefix "Z" "Z" "zetta"  21
+yotta = prefix "Y" "Y" "yotta"  24
 deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto :: Prefix
-deci  = prefix "d" "d" "deci"   1e-1
-centi = prefix "c" "c" "centi"  1e-2
-milli = prefix "m" "m" "milli"  1e-3
-micro = prefix "u" "μ" "micro"  1e-6
-nano  = prefix "n" "n" "nano"   1e-9
-pico  = prefix "p" "p" "pico"   1e-12
-femto = prefix "f" "f" "femto"  1e-15
-atto  = prefix "a" "a" "atto"   1e-18
-zepto = prefix "z" "z" "zepto"  1e-21
-yocto = prefix "y" "y" "yocto"  1e-24
+deci  = prefix "d" "d" "deci"   $ -1
+centi = prefix "c" "c" "centi"  $ -2
+milli = prefix "m" "m" "milli"  $ -3
+micro = prefix "u" "μ" "micro"  $ -6
+nano  = prefix "n" "n" "nano"   $ -9
+pico  = prefix "p" "p" "pico"   $ -12
+femto = prefix "f" "f" "femto"  $ -15
+atto  = prefix "a" "a" "atto"   $ -18
+zepto = prefix "z" "z" "zepto"  $ -21
+yocto = prefix "y" "y" "yocto"  $ -24
 
 -- | A list of all 'Prefix'es defined by the SI.
 siPrefixes :: [Prefix]
@@ -319,7 +319,7 @@ instance HasInterchangeName (UnitName m) where
                                  in InterchangeName { name = n', authority = authority . interchangeName $ n, I.isAtomic = False }
   interchangeName (Weaken n) = interchangeName n
 
-prefix :: String -> String -> String -> Rational -> Prefix
+prefix :: String -> String -> String -> Int -> Prefix
 prefix i a f q = Prefix n q
   where
     n = NameAtom (InterchangeName i UCUM True) a f

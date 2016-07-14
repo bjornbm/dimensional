@@ -23,7 +23,7 @@ module Numeric.Units.Dimensional.UnitNames
   -- * Standard Names
   baseUnitName, siPrefixes, nOne,
   -- * Inspecting Prefixes
-  prefixName, scaleFactor,
+  prefixName, scaleExponent, scaleFactor,
   -- * Convenience Type Synonyms for Unit Name Transformations
   UnitNameTransformer, UnitNameTransformer2,
   -- * Forgetting Unwanted Phantom Types
@@ -35,3 +35,6 @@ where
 import Numeric.Units.Dimensional.UnitNames.Internal
 import Numeric.Units.Dimensional.Variants
 import Prelude hiding ((*), (/), (^), product)
+
+scaleFactor :: Prefix -> Rational
+scaleFactor p = 10 ^^ (scaleExponent p)
