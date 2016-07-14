@@ -37,6 +37,7 @@ vNext
 * Added an `AEq` instance for `Quantity`.
 * Exposed the name of an 'AnyUnit' without promoting it to a 'Unit' first.
 * Exposed a way to convert atomic 'UnitName's back into 'NameAtom's.
+* Added dynamic selection of metric prefixes based on the magnitude of a quantity to be displayed.
 * Added the `btu`, a unit of energy.
 * Added the `gauss`, a unit of magnetic flux density.
 * Added the `angstrom`, a unit of length.
