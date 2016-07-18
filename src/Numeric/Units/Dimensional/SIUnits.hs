@@ -62,9 +62,10 @@ module Numeric.Units.Dimensional.SIUnits
 where
 
 import Control.Monad (join)
-import Data.Ratio
 import Data.List (sortBy, find)
+import Data.Maybe (maybe)
 import Data.Ord (comparing, Down(..))
+import Data.Ratio
 import Numeric.Units.Dimensional
 import Numeric.Units.Dimensional.Quantities
 import Numeric.Units.Dimensional.UnitNames (Prefix, siPrefixes, scaleExponent)
@@ -175,7 +176,7 @@ appropriatePrefix' u q = selectPrefix (\x -> x `mod` 3 == 0 && x <= e)
 
 -- Selects the first prefix in the list of prefix candidates whose scale exponent matches the supplied predicate.
 selectPrefix :: (Int -> Bool) -> Maybe Prefix
-selectPrefix p = join $ fmap snd $ find (p . fst) prefixCandidates
+selectPrefix p = maybe (Just . Prelude.head $ siPrefixes) snd $ find (p . fst) prefixCandidates
 
 -- This is a list of candidate prefixes and the least scale exponent at which each applies.
 prefixCandidates :: [(Int, Maybe Prefix)]
