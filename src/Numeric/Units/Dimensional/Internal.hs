@@ -32,6 +32,9 @@ import Data.AEq (AEq)
 import Data.Coerce (coerce)
 import Data.Data
 import Data.ExactPi
+#if MIN_VERSION_base(4,9,0)
+import Data.Functor.Classes (Eq1(..), Ord1(..))
+#endif
 import qualified Data.ExactPi.TypeLevel as E
 import Data.Monoid (Monoid(..))
 import Foreign.Ptr (Ptr, castPtr)
@@ -119,6 +122,14 @@ instance (Typeable m) => KnownVariant ('DUnit m) where
 instance (Bounded a) => Bounded (SQuantity s d a) where
   minBound = Quantity minBound
   maxBound = Quantity maxBound
+
+#if MIN_VERSION_base(4,9,0)
+instance Eq1 (SQuantity s d) where
+  liftEq f (Quantity a) (Quantity b) = f a b
+
+instance Ord1 (SQuantity s d) where
+  liftCompare f (Quantity a) (Quantity b) = f a b
+#endif
 
 instance HasInterchangeName (Unit m d a) where
   interchangeName (Unit n _ _) = interchangeName n
