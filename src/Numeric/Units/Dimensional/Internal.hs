@@ -125,10 +125,10 @@ instance (Bounded a) => Bounded (SQuantity s d a) where
 
 #if MIN_VERSION_base(4,9,0)
 instance Eq1 (SQuantity s d) where
-  liftEq f (Quantity a) (Quantity b) = f a b
+  liftEq = coerce
 
 instance Ord1 (SQuantity s d) where
-  liftCompare f (Quantity a) (Quantity b) = f a b
+  liftCompare = coerce
 #endif
 
 instance HasInterchangeName (Unit m d a) where
