@@ -61,7 +61,6 @@ module Numeric.Units.Dimensional.SIUnits
 )
 where
 
-import Control.Monad (join)
 import Data.List (sortBy, find)
 import Data.Maybe (maybe)
 import Data.Ord (comparing, Down(..))
