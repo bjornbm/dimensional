@@ -171,7 +171,7 @@ appropriatePrefix u q = selectPrefix (<= e)
 appropriatePrefix' :: (Floating a, RealFrac a) => Unit m d a -> Quantity d a -> Maybe Prefix
 appropriatePrefix' u q = selectPrefix (\x -> x `mod` 3 == 0 && x <= e)
   where
-    val = q /~ u
+    val = abs q /~ u
     e = Prelude.floor $ Prelude.logBase 10 val :: Prelude.Int
 
 -- Selects the first prefix in the list of prefix candidates whose scale exponent matches the supplied predicate.
