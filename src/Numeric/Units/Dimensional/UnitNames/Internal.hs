@@ -139,7 +139,7 @@ type PrefixName = NameAtom 'PrefixAtom
 data Prefix = Prefix
               {
                 -- | The name of a metric prefix.
-                prefixName :: PrefixName,
+                prefixName :: Maybe PrefixName,
                 -- | The scale factor denoted by a metric prefix.
                 scaleExponent :: Int
               }
@@ -149,9 +149,6 @@ instance Ord Prefix where
   compare = comparing scaleExponent
 
 instance NFData Prefix where -- instance is derived from Generic instance
-
-instance HasInterchangeName Prefix where
-  interchangeName = interchangeName . prefixName
 
 -- | The name of the unit of dimensionless values.
 nOne :: UnitName 'NonMetric
@@ -189,6 +186,11 @@ baseUnitName d = let powers = asList $ dimension d
 baseUnitNames :: [UnitName 'NonMetric]
 baseUnitNames = [weaken nMeter, nKilogram, weaken nSecond, weaken nAmpere, weaken nKelvin, weaken nMole, weaken nCandela]
 
+-- | This is the SI 'Prefix' that is no prefix at all, and that consequently doesn't alter the value of the base unit to
+-- which it is applied.
+emptyPrefix :: Prefix
+emptyPrefix = Prefix Nothing 0
+
 deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta :: Prefix
 deka  = prefix "da" "da" "deka" 1
 hecto = prefix "h" "h" "hecto"  2
@@ -214,11 +216,13 @@ yocto = prefix "y" "y" "yocto"  $ -24
 
 -- | A list of all 'Prefix'es defined by the SI.
 siPrefixes :: [Prefix]
-siPrefixes = [yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta]
+siPrefixes = [yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, emptyPrefix, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta]
 
 -- | Forms a 'UnitName' from a 'Metric' name by applying a metric prefix.
 applyPrefix :: Prefix -> UnitName 'Metric -> UnitName 'NonMetric
-applyPrefix = Prefixed . prefixName
+applyPrefix p = case prefixName p of
+                  Just n -> Prefixed n
+                  Nothing -> Weaken
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -322,7 +326,7 @@ instance HasInterchangeName (UnitName m) where
 prefix :: String -> String -> String -> Int -> Prefix
 prefix i a f q = Prefix n q
   where
-    n = NameAtom (InterchangeName i UCUM True) a f
+    n = Just $ NameAtom (InterchangeName i UCUM True) a f
 
 ucumMetric :: String -> String -> String -> UnitName 'Metric
 ucumMetric i a f = MetricAtomic $ NameAtom (InterchangeName i UCUM True) a f
