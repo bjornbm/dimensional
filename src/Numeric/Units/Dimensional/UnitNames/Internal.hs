@@ -219,12 +219,18 @@ yocto = prefix "y" "y" "yocto"  $ -24
 
 -- | A set of 'Prefix'es which necessarily includes the 'emptyPrefix'.
 newtype PrefixSet = PrefixSet { unPrefixSet :: [Prefix] }
-  deriving (Eq, Data)
+  deriving (Eq, Data, Typeable)
 
 -- | Constructs a 'PrefixSet' from a list of 'Prefix'es by ensuring that the 'emptyPrefix' is present,
 -- removing duplicates, and sorting the prefixes.
 prefixSet :: [Prefix] -> PrefixSet
 prefixSet = PrefixSet . sortBy (comparing $ Down . scaleExponent) . nubBy ((==) `on` scaleExponent) . (emptyPrefix :)
+
+-- | Filters a 'PrefixSet', retaining only those 'Prefix'es which match a supplied predicate.
+--
+-- The 'emptyPrefix' is always retained, as it must be a member of every 'PrefixSet'.
+filterPrefixSet :: (Prefix -> Bool) -> PrefixSet -> PrefixSet
+filterPrefixSet p = prefixSet . filter p . unPrefixSet
 
 -- | Chooses a 'Prefix' from a 'PrefixSet', given a scale exponent. The resulting prefix will be that in the prefix set
 -- whose 'scaleExponent' is least, while still greater than the supplied scale exponent. If no prefix in the set has a 
@@ -242,7 +248,7 @@ siPrefixes = prefixSet [yocto, zepto, atto, femto, pico, nano, micro, milli, cen
 --
 -- A major prefix is one whose scale exponent is a multiple of three.
 majorSiPrefixes :: PrefixSet
-majorSiPrefixes = prefixSet [yocto, zepto, atto, femto, pico, nano, micro, milli, kilo, mega, giga, tera, peta, exa, zetta, yotta]
+majorSiPrefixes = filterPrefixSet ((== 0) . (`mod` 3) . scaleExponent) siPrefixes
 
 -- | Forms a 'UnitName' from a 'Metric' name by applying a metric prefix.
 applyPrefix :: Prefix -> UnitName 'Metric -> UnitName 'NonMetric

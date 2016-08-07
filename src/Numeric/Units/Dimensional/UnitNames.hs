@@ -25,7 +25,7 @@ module Numeric.Units.Dimensional.UnitNames
   -- * Inspecting Prefixes
   prefixName, scaleExponent, scaleFactor,
   -- * Sets of Prefixes
-  PrefixSet, prefixSet, unPrefixSet, selectPrefix, siPrefixes, majorSiPrefixes,
+  PrefixSet, prefixSet, unPrefixSet, filterPrefixSet, selectPrefix, siPrefixes, majorSiPrefixes,
   -- * Convenience Type Synonyms for Unit Name Transformations
   UnitNameTransformer, UnitNameTransformer2,
   -- * Forgetting Unwanted Phantom Types
