@@ -21,9 +21,11 @@ module Numeric.Units.Dimensional.UnitNames
   -- * Construction of Unit Names
   atom, applyPrefix, (*), (/), (^), product, reduce, grouped,
   -- * Standard Names
-  baseUnitName, siPrefixes, nOne,
+  baseUnitName, nOne,
   -- * Inspecting Prefixes
   prefixName, scaleExponent, scaleFactor,
+  -- * Sets of Prefixes
+  PrefixSet, prefixSet, unPrefixSet, selectPrefix, siPrefixes, majorSiPrefixes,
   -- * Convenience Type Synonyms for Unit Name Transformations
   UnitNameTransformer, UnitNameTransformer2,
   -- * Forgetting Unwanted Phantom Types

@@ -25,6 +25,9 @@ import Data.Foldable (toList)
 #else
 import Data.Foldable (Foldable, toList)
 #endif
+import Data.Function (on)
+import Data.List (sortBy, nubBy, find)
+import Data.Maybe (fromMaybe)
 import Data.Ord
 import GHC.Generics hiding (Prefix)
 import Numeric.Units.Dimensional.Dimensions.TermLevel (Dimension', asList, HasDimension(..))
@@ -214,9 +217,32 @@ atto  = prefix "a" "a" "atto"   $ -18
 zepto = prefix "z" "z" "zepto"  $ -21
 yocto = prefix "y" "y" "yocto"  $ -24
 
--- | A list of all 'Prefix'es defined by the SI.
-siPrefixes :: [Prefix]
-siPrefixes = [yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, emptyPrefix, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta]
+-- | A set of 'Prefix'es which necessarily includes the 'emptyPrefix'.
+newtype PrefixSet = PrefixSet { unPrefixSet :: [Prefix] }
+  deriving (Eq, Data)
+
+-- | Constructs a 'PrefixSet' from a list of 'Prefix'es by ensuring that the 'emptyPrefix' is present,
+-- removing duplicates, and sorting the prefixes.
+prefixSet :: [Prefix] -> PrefixSet
+prefixSet = PrefixSet . sortBy (comparing $ Down . scaleExponent) . nubBy ((==) `on` scaleExponent) . (emptyPrefix :)
+
+-- | Chooses a 'Prefix' from a 'PrefixSet', given a scale exponent. The resulting prefix will be that in the prefix set
+-- whose 'scaleExponent' is least, while still greater than the supplied scale exponent. If no prefix in the set has a 
+-- 'scaleExponent' greater than the supplied scale exponent, then the member with the least 'scaleExponent' will be returned.
+selectPrefix :: PrefixSet -> Int -> Prefix
+selectPrefix ps e = fromMaybe (Prelude.head ps') $ find ((<= e) . scaleExponent) ps'
+  where
+    ps' = unPrefixSet ps
+
+-- | The set of all 'Prefix'es defined by the SI.
+siPrefixes :: PrefixSet
+siPrefixes = prefixSet [yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta]
+
+-- | The set of all major 'Prefix'es defined by the SI.
+--
+-- A major prefix is one whose scale exponent is a multiple of three.
+majorSiPrefixes :: PrefixSet
+majorSiPrefixes = prefixSet [yocto, zepto, atto, femto, pico, nano, micro, milli, kilo, mega, giga, tera, peta, exa, zetta, yotta]
 
 -- | Forms a 'UnitName' from a 'Metric' name by applying a metric prefix.
 applyPrefix :: Prefix -> UnitName 'Metric -> UnitName 'NonMetric
