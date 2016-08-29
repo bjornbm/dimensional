@@ -15,7 +15,6 @@ Defines types for manipulation of units and quantities without phantom types for
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Numeric.Units.Dimensional.Dynamic
