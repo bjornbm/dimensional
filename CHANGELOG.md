@@ -35,6 +35,7 @@ vNext
 * Added the Numeric.Units.Dimensional.Float module with convenient wrappers around functions
   from RealFloat and IEEE for inspecting floating point quantities.
 * Added an `AEq` instance for `Quantity`.
+* Added `Eq1` and `Ord1` instances for `Quantity`.
 * Exposed the name of an 'AnyUnit' without promoting it to a 'Unit' first.
 * Exposed a way to convert atomic 'UnitName's back into 'NameAtom's.
 * Added dynamic selection of metric prefixes based on the magnitude of a quantity to be displayed.
