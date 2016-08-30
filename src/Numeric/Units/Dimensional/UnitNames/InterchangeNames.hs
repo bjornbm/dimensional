@@ -12,6 +12,7 @@ where
 import Control.DeepSeq
 import Data.Data
 import GHC.Generics
+import Prelude
 
 -- | Represents the authority which issued an interchange name for a unit.
 data InterchangeNameAuthority = UCUM -- ^ The interchange name originated with the Unified Code for Units of Measure.

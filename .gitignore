@@ -1,6 +1,7 @@
 dist
 .cabal-sandbox/
 .stack-work/
+.ghci
 cabal.sandbox.config
 *.hi
 *.o
