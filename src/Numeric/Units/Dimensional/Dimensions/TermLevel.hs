@@ -22,7 +22,7 @@ module Numeric.Units.Dimensional.Dimensions.TermLevel
   -- * Type
   Dimension'(..),
   -- * Access to Dimension of Dimensional Values
-  HasDimension(..), HasDynamicDimension(..),
+  HasDimension(..), HasDynamicDimension(..), DynamicDimension(..),
   -- * Dimension Arithmetic
   (*), (/), (^), recip, nroot, sqrt, cbrt,
   -- * Synonyms for Base Dimensions
@@ -60,6 +60,11 @@ instance Monoid Dimension' where
   mempty = dOne
   mappend = (*)
 
+-- | The Dimension of a dynamic value, which may not have any dimension at all.
+data DynamicDimension = NoDimension -- ^ The value has no valid dimension.
+                      | SomeDimension Dimension' -- ^ The value has the given dimension.
+                      | AnyDimension -- ^ The value may be interpreted as having any dimension.
+
 -- | Dimensional values, or those that are only possibly dimensional, inhabit this class,
 -- which allows access to a term-level representation of their dimension.
 class HasDynamicDimension a where
@@ -67,9 +72,9 @@ class HasDynamicDimension a where
   -- a dimensional value of any 'Dimension'.
   --
   -- A default implementation is available for types that are also in the `HasDimension` typeclass.
-  dynamicDimension :: a -> Maybe Dimension'
-  default dynamicDimension :: (HasDimension a) => a -> Maybe Dimension'
-  dynamicDimension = Just . dimension
+  dynamicDimension :: a -> DynamicDimension
+  default dynamicDimension :: (HasDimension a) => a -> DynamicDimension
+  dynamicDimension = SomeDimension . dimension
 
 -- | Dimensional values inhabit this class, which allows access to a term-level representation of their dimension.
 class HasDynamicDimension a => HasDimension a where
