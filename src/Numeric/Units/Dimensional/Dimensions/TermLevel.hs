@@ -64,6 +64,7 @@ instance Monoid Dimension' where
 data DynamicDimension = NoDimension -- ^ The value has no valid dimension.
                       | SomeDimension Dimension' -- ^ The value has the given dimension.
                       | AnyDimension -- ^ The value may be interpreted as having any dimension.
+  deriving (Eq, Ord, Show)
 
 -- | Dimensional values, or those that are only possibly dimensional, inhabit this class,
 -- which allows access to a term-level representation of their dimension.
