@@ -60,7 +60,7 @@ instance Monoid Dimension' where
   mempty = dOne
   mappend = (*)
 
--- | The Dimension of a dynamic value, which may not have any dimension at all.
+-- | The dimension of a dynamic value, which may not have any dimension at all.
 data DynamicDimension = NoDimension -- ^ The value has no valid dimension.
                       | SomeDimension Dimension' -- ^ The value has the given dimension.
                       | AnyDimension -- ^ The value may be interpreted as having any dimension.
@@ -69,7 +69,7 @@ data DynamicDimension = NoDimension -- ^ The value has no valid dimension.
 -- | Dimensional values, or those that are only possibly dimensional, inhabit this class,
 -- which allows access to a term-level representation of their dimension.
 class HasDynamicDimension a where
-  -- | Gets the 'Dimension'' of a dynamic dimensional value, or 'Nothing' if it does not represent
+  -- | Gets the 'DynamicDimension of a dynamic dimensional value, which may be 'NoDimension' if it does not represent
   -- a dimensional value of any 'Dimension'.
   --
   -- A default implementation is available for types that are also in the `HasDimension` typeclass.

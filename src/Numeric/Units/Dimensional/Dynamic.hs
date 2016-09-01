@@ -24,7 +24,7 @@ module Numeric.Units.Dimensional.Dynamic
 , DynQuantity
 , Demotable
 , Promotable
-, HasDynamicDimension(..)
+, HasDynamicDimension(..), DynamicDimension(..)
 , promoteQuantity, demoteQuantity
 , (*~), (/~), invalidQuantity, polydimensionalZero
   -- * Dynamic Units
@@ -49,7 +49,7 @@ import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
 import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
 import qualified Numeric.Units.Dimensional.UnitNames as N
-import Numeric.Units.Dimensional.Dimensions.TermLevel (HasDynamicDimension(..))
+import Numeric.Units.Dimensional.Dimensions.TermLevel (HasDynamicDimension(..), DynamicDimension(..))
 import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 
 -- | The class of types that can be used to model 'Quantity's that are certain to have a value with
@@ -68,7 +68,7 @@ demoteQuantity :: (Demotable q, Promotable d) => q a -> d a
 demoteQuantity = promotableIn . demotableOut
 
 -- | Converts a dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
--- 'Quantity d', or to 'Nothing' if the dynamic quantity cannot be represented in the
+-- 'Quantity', or to 'Nothing' if the dynamic quantity cannot be represented in the
 -- narrower result type.
 promoteQuantity :: (Promotable q, Num a, KnownDimension d) => q a -> Maybe (Quantity d a)
 promoteQuantity = promoteQ . promotableOut
