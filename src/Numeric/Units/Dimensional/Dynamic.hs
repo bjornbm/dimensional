@@ -188,6 +188,8 @@ instance Floating a => Floating (DynQuantity a) where
   acosh = liftDimensionless P.acosh
   atanh = liftDimensionless P.atanh
 
+-- | 'DynQuantity's form a 'Monoid' under multiplication, but not under addition because
+-- they may not be added together if their dimensions do not match.
 instance Num a => Monoid (DynQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
   mappend = (P.*)
@@ -246,8 +248,6 @@ matching x y | x == y    = Just x
 matching3 :: Eq a => a -> a -> a -> Maybe a
 matching3 x y z | x == y && x == z = Just x
                 | otherwise        = Nothing
-
-
 
 -- | A 'Unit' whose 'Dimension' is only known dynamically.
 data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
