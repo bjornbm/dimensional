@@ -70,17 +70,13 @@ demoteQuantity = promotableIn . demotableOut
 -- | Converts a dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
 -- 'Quantity', or to 'Nothing' if the dynamic quantity cannot be represented in the
 -- narrower result type.
-promoteQuantity :: (Promotable q, KnownDimension d) => q a -> Maybe (Quantity d a)
+promoteQuantity :: forall a d q.(Promotable q, KnownDimension d) => q a -> Maybe (Quantity d a)
 promoteQuantity = promoteQ . promotableOut
   where
-    -- This implementation is not provided directly inside the instance because it requires ScopedTypeVariables
-    -- Placing the signatures inside the instance requires InstanceSigs, which interacts poorly with associated type families
-    -- like Dimensional in GHC 7.8.
-    promoteQ :: forall a (d' :: Dimension).(KnownDimension d') => DynQuantity a -> Maybe (Quantity d' a)
     promoteQ (DynQuantity (AnyQuantity dim val)) | dim == dim' = Just . Quantity $ val
                                                  | otherwise   = Nothing
       where
-        dim' = dimension (Proxy :: Proxy d')
+        dim' = dimension (Proxy :: Proxy d)
     promoteQ InvalidQuantity = Nothing
     promoteQ (Zero z) = Just . Quantity $ z
 
