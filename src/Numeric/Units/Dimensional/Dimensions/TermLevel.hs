@@ -82,6 +82,9 @@ class HasDynamicDimension a => HasDimension a where
   -- | Obtains a term-level representation of a value's dimension.
   dimension :: a -> Dimension'
 
+instance HasDynamicDimension DynamicDimension where
+  dynamicDimension = id
+
 instance HasDynamicDimension Dimension' where
 
 instance HasDimension Dimension' where
