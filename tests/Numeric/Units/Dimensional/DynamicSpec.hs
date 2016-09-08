@@ -63,17 +63,35 @@ spec = do
            context "Num instance" $ do
              it "matches static addition" $ do
                promoteQuantity (x1' P.+ x2') `shouldBe` Just (x1 + x2)
+             it "allows addition with polydimensional zero" $ do
+               (t' P.+ polydimensionalZero) `shouldBe` t'
+               (polydimensionalZero P.+ t') `shouldBe` t'
+               (polydimensionalZero P.+ polydimensionalZero) `shouldBe` (polydimensionalZero :: DynQuantity Double)               
              it "matches static subtraction" $ do
                promoteQuantity (x2' P.- x1') `shouldBe` Just (x2 - x1)
+             it "allows subtraction with polydimensional zero" $ do
+               (m' P.- polydimensionalZero) `shouldBe` m'
+               (polydimensionalZero P.- m') `shouldBe` (P.negate m')
+               (polydimensionalZero P.- polydimensionalZero) `shouldBe` (polydimensionalZero :: DynQuantity Double)               
              it "matches static multiplication" $ do
                promoteQuantity (x1' P.* f') `shouldBe` Just (x1 * f)
+             it "allows multiplication with polydimensional zero" $ do
+               (f' P.* polydimensionalZero) `shouldBe` polydimensionalZero
+               (polydimensionalZero P.* m') `shouldBe` polydimensionalZero
+               (polydimensionalZero P.* polydimensionalZero) `shouldBe` (polydimensionalZero :: DynQuantity Double)
              it "matches static negation" $ do
                promoteQuantity (P.negate m') `shouldBe` Just (negate m)
+             it "negates polydimensional zero" $ do
+               (P.negate polydimensionalZero) `shouldBe` (polydimensionalZero :: DynQuantity Double)
              it "matches static absolute value" $ do
                promoteQuantity (P.abs x2') `shouldBe` Just (abs x2)
+             it "takes absolute value of polydimensional zero" $ do
+               (P.abs polydimensionalZero) `shouldBe` (polydimensionalZero :: DynQuantity Double)
              it "matches static signum" $ do
                promoteQuantity (P.signum x1') `shouldBe` Just (signum x1)
                promoteQuantity (P.signum x2') `shouldBe` Just (signum x2)
+             it "takes signum of polydimensional zero" $ do
+               (P.signum polydimensionalZero) `shouldBe` demoteQuantity (_0 :: Dimensionless Double)
              it "implements fromInteger with dimensionless result" $ do
                promoteQuantity (P.fromInteger 7 :: DynQuantity Double) `shouldBe` Just _7
            context "Fractional instance" $ do
@@ -84,6 +102,12 @@ spec = do
              it "implements fromRational with dimensionless result" $ do
                let pi' = 22 P./ 7 :: Rational
                promoteQuantity (P.fromRational pi' :: DynQuantity Rational) `shouldBe` Just (pi' *~ one)
+             it "permits polydimensional zero as a dividend" $ do
+               (polydimensionalZero P./ m') `shouldBe` polydimensionalZero
+             it "does not permit polydimensional zero as a divisor" $ do
+               (t' P./ polydimensionalZero) `shouldBe` invalidQuantity
+               (polydimensionalZero P./ polydimensionalZero) `shouldBe` (invalidQuantity :: DynQuantity Double)
+               (P.recip polydimensionalZero) `shouldBe` (invalidQuantity :: DynQuantity Double)
            context "Floating instance" $ do
              it "implements dimensionless pi" $ do
                promoteQuantity (P.pi :: DynQuantity Double) `shouldBe` Just pi
@@ -92,10 +116,14 @@ spec = do
                promoteQuantity (P.sin phi') `shouldBe` Just (sin phi)
              it "rejects non-dimensionless arguments to sin" $ do
                promoteQuantity (P.sin m') `shouldBe` (Nothing :: Maybe (Dimensionless Double))
+             it "implements dimensionless sin of polydimensional zero" $ do
+               promoteQuantity (P.sin polydimensionalZero) `shouldBe` Just (_0 :: Dimensionless Double)
              it "matches static square root" $ do
                promoteQuantity (P.sqrt a') `shouldBe` Just (sqrt a)
              it "rejects arguments to square root with non-square dimensions" $ do
                dynamicDimension (P.sqrt f') `shouldBe` NoDimension
+             it "takes the square root of polydimensional zero" $ do
+               (P.sqrt polydimensionalZero) `shouldBe` (polydimensionalZero :: DynQuantity Double)
              it "matches static dimensionless exponentiation" $ do
                promoteQuantity (phi' P.** phi') `shouldBe` Just (phi ** phi)
              it "rejects non-dimensionless arguments to dimensionless exponentiation" $ do
