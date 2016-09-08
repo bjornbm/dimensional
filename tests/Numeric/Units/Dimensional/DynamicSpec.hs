@@ -34,11 +34,16 @@ spec = do
                  x' = demoteQuantity x :: DynQuantity Double
              (promoteQuantity x' :: Maybe (Time Double)) `shouldBe` Nothing
            it "properly combines with dynamic units" $ do
-             pending
+             let meter' = demoteUnit' meter
+             (promoteQuantity (139.4 Dyn.*~ meter' :: AnyQuantity Double)) `shouldBe` Just (139.4 *~ meter)
            it "properly eliminates dynamic units" $ do
-             pending
+             let ampere' = demoteUnit' ampere
+                 i = demoteQuantity $ 47 *~ ampere :: AnyQuantity Double
+             i Dyn./~ ampere' `shouldBe` Just 47
            it "doesn't eliminate dynamic units of the wrong dimension" $ do
-             pending
+             let ampere' = demoteUnit' ampere
+                 i = demoteQuantity $ 47 *~ joule :: AnyQuantity Double
+             i Dyn./~ ampere' `shouldBe` Nothing
          describe "DynQuantity arithmetic" $ do
            -- declare some static quantities and their dynamic counterparts for arithmetic tests
            let x1 = 12.3 *~ meter
