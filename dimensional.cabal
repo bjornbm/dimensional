@@ -73,14 +73,15 @@ library
 
 test-suite tests
   type:                exitcode-stdio-1.0
-  main-is:             Test.hs
+  main-is:             Spec.hs
   hs-source-dirs:      tests
-  other-modules:       Numeric.Units.Dimensional.QuantitiesTest,
-                       Numeric.Units.Dimensional.Test
   default-language:    Haskell2010
+  default-extensions:  NoImplicitPrelude
+  other-modules:       Numeric.Units.DimensionalSpec
+                       Numeric.Units.Dimensional.QuantitiesSpec
   ghc-options:         -Wall
   build-depends:       dimensional,
-                       HUnit,
+                       hspec,
                        base
 
 test-suite doctests
