@@ -40,58 +40,67 @@ spec = do
            it "doesn't eliminate dynamic units of the wrong dimension" $ do
              pending
          describe "DynQuantity arithmetic" $ do
+           -- declare some static quantities and their dynamic counterparts for arithmetic tests
            let x1 = 12.3 *~ meter
                x2 = (-7.9) *~ meter
+               a = 93 *~ square (kilo meter)
                m = 147 *~ kilo gram
                t = 14.9 *~ second
                f = 87.2 *~ milli newton
+               phi = 1.61803398875 *~ one
                x1' = demoteQuantity x1 :: DynQuantity Double
                x2' = demoteQuantity x2 :: DynQuantity Double
+               a' = demoteQuantity a :: DynQuantity Double
                m' = demoteQuantity m :: DynQuantity Double
                t' = demoteQuantity t :: DynQuantity Double
                f' = demoteQuantity f :: DynQuantity Double
+               phi' = demoteQuantity phi :: DynQuantity Double
            context "Num instance" $ do
              it "matches static addition" $ do
                promoteQuantity (x1' P.+ x2') `shouldBe` Just (x1 + x2)
              it "matches static subtraction" $ do
-               pending
+               promoteQuantity (x2' P.- x1') `shouldBe` Just (x2 - x1)
              it "matches static multiplication" $ do
-               pending
+               promoteQuantity (x1' P.* f') `shouldBe` Just (x1 * f)
              it "matches static negation" $ do
-               pending
+               promoteQuantity (P.negate m') `shouldBe` Just (negate m)
              it "matches static absolute value" $ do
-               pending
-             it "implements signum with dimensionless result" $ do
-               pending
+               promoteQuantity (P.abs x2') `shouldBe` Just (abs x2)
+             it "matches static signum" $ do
+               promoteQuantity (P.signum x1') `shouldBe` Just (signum x1)
+               promoteQuantity (P.signum x2') `shouldBe` Just (signum x2)
              it "implements fromInteger with dimensionless result" $ do
-               pending
+               promoteQuantity (P.fromInteger 7 :: DynQuantity Double) `shouldBe` Just _7
            context "Fractional instance" $ do
              it "matches static division" $ do
-               pending
+               promoteQuantity ((f' P.* x1') P./ t') `shouldBe` Just ((f * x1) / t)
              it "matches static reciprocal" $ do
-               pending
+               promoteQuantity (P.recip m') `shouldBe` Just (recip m)
              it "implements fromRational with dimensionless result" $ do
-               pending
+               let pi' = 22 P./ 7 :: Rational
+               promoteQuantity (P.fromRational pi' :: DynQuantity Rational) `shouldBe` Just (pi' *~ one)
            context "Floating instance" $ do
              it "implements dimensionless pi" $ do
-               pending
+               promoteQuantity (P.pi :: DynQuantity Double) `shouldBe` Just pi
              it "implements dimensionless sin" $ do
                -- this will serve as a test for all the single-argument dimensionless functions
-               pending
+               promoteQuantity (P.sin phi') `shouldBe` Just (sin phi)
              it "rejects non-dimensionless arguments to sin" $ do
-               pending
+               promoteQuantity (P.sin m') `shouldBe` (Nothing :: Maybe (Dimensionless Double))
              it "matches static square root" $ do
-               pending
+               promoteQuantity (P.sqrt a') `shouldBe` Just (sqrt a)
              it "rejects arguments to square root with non-square dimensions" $ do
-               pending
+               dynamicDimension (P.sqrt f') `shouldBe` Nothing
              it "matches static dimensionless exponentiation" $ do
-               pending
+               promoteQuantity (phi' P.** phi') `shouldBe` Just (phi ** phi)
              it "rejects non-dimensionless arguments to dimensionless exponentiation" $ do
-               pending
+               dynamicDimension (phi' P.** m') `shouldBe` Nothing
+               dynamicDimension (x1' P.** phi') `shouldBe` Nothing
              it "matches static logBase" $ do
-               pending
+               promoteQuantity (P.logBase 10 phi') `shouldBe` Just (logBase (10 *~ one) phi)
              it "rejects non-dimensionless arguments to logBase" $ do
-               pending
+               dynamicDimension (P.logBase 10 x1') `shouldBe` Nothing
+               dynamicDimension (P.logBase x1' 10) `shouldBe` Nothing
          describe "Dynamic units" $ do
            describe "Promotion and demotion" $ do
              return ()
