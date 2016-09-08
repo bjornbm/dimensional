@@ -5,8 +5,8 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-         describe "Quantity Synonyms" $ do
-           it "Compiles Quantity Synonyms With Correct Dimensions" $ do
+         describe "Quantity synonyms" $ do
+           it "compile with correct dimensions" $ do
              success -- If I compiled I'm OK!
 
 success :: IO ()
