@@ -158,8 +158,8 @@ instance Num a => Num (DynQuantity a) where
 
 instance Fractional a => Fractional (DynQuantity a) where
   (Zero _) / InvalidQuantity = InvalidQuantity
-  z@(Zero _) / _ = z
   _ / (Zero _) = InvalidQuantity
+  z@(Zero _) / _ = z
   x / y = liftDQ2 (valid2 (D./)) (P./) x y
   recip = liftDQ (valid D.recip) P.recip InvalidQuantity
   fromRational = demoteQuantity . (Dim.*~ one) . P.fromRational
