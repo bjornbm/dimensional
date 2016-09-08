@@ -95,17 +95,17 @@ spec = do
              it "matches static square root" $ do
                promoteQuantity (P.sqrt a') `shouldBe` Just (sqrt a)
              it "rejects arguments to square root with non-square dimensions" $ do
-               dynamicDimension (P.sqrt f') `shouldBe` Nothing
+               dynamicDimension (P.sqrt f') `shouldBe` NoDimension
              it "matches static dimensionless exponentiation" $ do
                promoteQuantity (phi' P.** phi') `shouldBe` Just (phi ** phi)
              it "rejects non-dimensionless arguments to dimensionless exponentiation" $ do
-               dynamicDimension (phi' P.** m') `shouldBe` Nothing
-               dynamicDimension (x1' P.** phi') `shouldBe` Nothing
+               dynamicDimension (phi' P.** m') `shouldBe` NoDimension
+               dynamicDimension (x1' P.** phi') `shouldBe` NoDimension
              it "matches static logBase" $ do
                promoteQuantity (P.logBase 10 phi') `shouldBe` Just (logBase (10 *~ one) phi)
              it "rejects non-dimensionless arguments to logBase" $ do
-               dynamicDimension (P.logBase 10 x1') `shouldBe` Nothing
-               dynamicDimension (P.logBase x1' 10) `shouldBe` Nothing
+               dynamicDimension (P.logBase 10 x1') `shouldBe` NoDimension
+               dynamicDimension (P.logBase x1' 10) `shouldBe` NoDimension
          describe "Dynamic units" $ do
            describe "Promotion and demotion" $ do
              return ()
