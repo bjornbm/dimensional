@@ -40,9 +40,19 @@ spec = do
            it "doesn't eliminate dynamic units of the wrong dimension" $ do
              pending
          describe "DynQuantity arithmetic" $ do
+           let x1 = 12.3 *~ meter
+               x2 = (-7.9) *~ meter
+               m = 147 *~ kilo gram
+               t = 14.9 *~ second
+               f = 87.2 *~ milli newton
+               x1' = demoteQuantity x1 :: DynQuantity Double
+               x2' = demoteQuantity x2 :: DynQuantity Double
+               m' = demoteQuantity m :: DynQuantity Double
+               t' = demoteQuantity t :: DynQuantity Double
+               f' = demoteQuantity f :: DynQuantity Double
            context "Num instance" $ do
              it "matches static addition" $ do
-               pending
+               promoteQuantity (x1' P.+ x2') `shouldBe` Just (x1 + x2)
              it "matches static subtraction" $ do
                pending
              it "matches static multiplication" $ do
