@@ -1,7 +1,16 @@
-module Numeric.Units.Dimensional.QuantitiesTest where
+module Numeric.Units.Dimensional.QuantitiesSpec where
 
 import Numeric.Units.Dimensional.Prelude
-import qualified Prelude
+import Test.Hspec
+
+spec :: Spec
+spec = do
+         describe "Quantity Synonyms" $ do
+           it "Compiles Quantity Synonyms With Correct Dimensions" $ do
+             success -- If I compiled I'm OK!
+
+success :: IO ()
+success = return ()
 
 -- These definitions simply verify that the type synonyms are
 -- consistent with the appropriate units from table 2. If the
@@ -126,7 +135,3 @@ z21 = 1 *~ (gray / second)
 -- Other quantitites.
 mu :: GravitationalParameter Double
 mu = 398600.4418 *~ (kilo meter ^ pos3 / second ^ pos2)
-
--- Dummy main function.
-main :: IO ()
-main = Prelude.putStrLn "If I compiled I'm OK!"
