@@ -83,6 +83,7 @@ test-suite tests
   ghc-options:         -Wall
   build-depends:       dimensional,
                        hspec,
+                       QuickCheck,
                        base
 
 test-suite doctests

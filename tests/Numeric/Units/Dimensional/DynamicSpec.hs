@@ -5,20 +5,34 @@ import Numeric.Units.Dimensional.Dynamic hiding ((*),(/),(^),(*~),(/~), recip)
 import qualified Numeric.Units.Dimensional.Dynamic as Dyn
 import qualified Prelude as P
 import Test.Hspec
+import Test.QuickCheck
 
 spec :: Spec
 spec = do
          describe "Dynamic quantity promotion and demotion" $ do
-           it "round-trips through AnyQuantity" $ do
-             pending
-           it "round-trips through DynQuantity" $ do
-             pending
-           it "round-trips through AnyQuantity then DynQuantity" $ do
-             pending
+           it "round-trips through AnyQuantity" $ property $
+             \x -> let x' = x *~ kilo newton
+                       x'' = demoteQuantity x' :: AnyQuantity Double
+                    in Just x' == promoteQuantity x''
+           it "round-trips through DynQuantity" $ property $
+             \x -> let x' = x *~ micro watt
+                       x'' = demoteQuantity x' :: DynQuantity Rational
+                    in Just x' == promoteQuantity x''
+           it "round-trips through AnyQuantity then DynQuantity" $ property $
+             \x -> let x' = x *~ gram
+                       x'' = demoteQuantity x' :: AnyQuantity Double
+                       x''' = demoteQuantity x'' :: DynQuantity Double
+                    in Just x' == promoteQuantity x'''
            it "doesn't promote invalid quantities" $ do
-             pending
-           it "doesn't promote to the wrong dimension" $ do
-             pending
+             (promoteQuantity invalidQuantity :: Maybe (Length Double)) `shouldBe` Nothing
+           it "doesn't promote AnyQuantity to the wrong dimension" $ do
+             let x = 12.3 *~ meter
+                 x' = demoteQuantity x :: AnyQuantity Double
+             (promoteQuantity x' :: Maybe (Mass Double)) `shouldBe` Nothing
+           it "doesn't promote DynQuantity to the wrong dimension" $ do
+             let x = 12.3 *~ mole
+                 x' = demoteQuantity x :: DynQuantity Double
+             (promoteQuantity x' :: Maybe (Time Double)) `shouldBe` Nothing
            it "properly combines with dynamic units" $ do
              pending
            it "properly eliminates dynamic units" $ do
