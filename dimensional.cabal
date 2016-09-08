@@ -78,6 +78,7 @@ test-suite tests
   default-language:    Haskell2010
   default-extensions:  NoImplicitPrelude
   other-modules:       Numeric.Units.DimensionalSpec
+                       Numeric.Units.Dimensional.DynamicSpec
                        Numeric.Units.Dimensional.QuantitiesSpec
   ghc-options:         -Wall
   build-depends:       dimensional,
