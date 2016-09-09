@@ -67,6 +67,15 @@ spec = do
                (t' P.+ polydimensionalZero) `shouldBe` t'
                (polydimensionalZero P.+ t') `shouldBe` t'
                (polydimensionalZero P.+ polydimensionalZero) `shouldBe` (polydimensionalZero :: DynQuantity Double)               
+             it "propagates witnesses to zero during addition" $ do
+               -- We want to test that the witness for polymorphic zero was actually added to the other addend.
+               -- The reason for this property is that if the other addend is some element of the underlying type
+               -- which can't act as a divisor (such as a propagating nAn), then we want that information to still
+               -- be around when we go to promote the result.
+               let nan = 0 P./ 0 :: Double
+                   x = demoteQuantity $ nan *~ meter
+                   Just y = promoteQuantity (polydimensionalZero P.+ x) :: Maybe (Length Double)
+               (y /~ meter) `shouldSatisfy` P.isNaN
              it "matches static subtraction" $ do
                promoteQuantity (x2' P.- x1') `shouldBe` Just (x2 - x1)
              it "allows subtraction with polydimensional zero" $ do
@@ -108,6 +117,16 @@ spec = do
                (t' P./ polydimensionalZero) `shouldBe` invalidQuantity
                (polydimensionalZero P./ polydimensionalZero) `shouldBe` (invalidQuantity :: DynQuantity Double)
                (P.recip polydimensionalZero) `shouldBe` (invalidQuantity :: DynQuantity Double)
+             it "propagates witnesses to zero during division" $ do
+               -- We want to test that the witness for polymorphic zero was actually divided by the divisor.
+               -- The reason for this property is that if the divisor is itself zero (but not polydimensionalZero),
+               -- or some other element of the underlying type which can't act as a divisor (such as a propagating nAn),
+               -- then we want that information to still be around when we go to promote the result.
+               let nan = 0 P./ 0 :: Double
+                   x = demoteQuantity $ nan *~ meter
+                   y = polydimensionalZero P./ x
+                   Just y' = promoteQuantity y :: Maybe (Length Double)
+               (y' /~ meter) `shouldSatisfy` P.isNaN
            context "Floating instance" $ do
              it "implements dimensionless pi" $ do
                promoteQuantity (P.pi :: DynQuantity Double) `shouldBe` Just pi
