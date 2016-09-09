@@ -29,7 +29,9 @@ module Numeric.Units.Dimensional.Dimensions.TermLevel
   dOne,
   dLength, dMass, dTime, dElectricCurrent, dThermodynamicTemperature, dAmountOfSubstance, dLuminousIntensity,
   -- * Deconstruction
-  asList
+  asList,
+  -- * Examining Dynamic Dimensions
+  matchDimensions, isCompatibleWith, hasSomeDimension
 )
 where
 
@@ -37,7 +39,7 @@ import Control.DeepSeq
 import Data.Data
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), (&&), Int, Show, Eq(..), Ord(..), Maybe(..))
+import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), (&&), Int, Show, Eq(..), Ord(..), Maybe(..), Bool(..))
 import qualified Prelude as P
 
 -- $setup
@@ -89,6 +91,29 @@ instance HasDynamicDimension Dimension' where
 
 instance HasDimension Dimension' where
   dimension = id
+
+-- | Combines two 'DynamicDimension's, determining the 'DynamicDimension' of a quantity that must
+-- match both inputs.
+--
+-- This is the lattice meet operation for 'DynamicDimension'.
+matchDimensions :: DynamicDimension -> DynamicDimension -> DynamicDimension
+matchDimensions AnyDimension        AnyDimension                   = AnyDimension
+matchDimensions d@(SomeDimension _) AnyDimension                   = d
+matchDimensions AnyDimension        d@(SomeDimension _)            = d
+matchDimensions (SomeDimension d1)  (SomeDimension d2) | d1 == d2  = SomeDimension d1
+matchDimensions _                   _                              = NoDimension
+
+-- | Determines if a value that has a 'DynamicDimension' is compatible with a specified 'Dimension''.
+isCompatibleWith :: (HasDynamicDimension a) => a -> Dimension' -> Bool
+isCompatibleWith = f . dynamicDimension
+  where
+    f AnyDimension       _             = True
+    f (SomeDimension d1) d2 | d1 == d2 = True
+    f _                  _             = False
+
+-- | Determines if a value that has a 'DynamicDimension' in fact has any valid dimension at all.
+hasSomeDimension :: (HasDynamicDimension a) => a -> Bool
+hasSomeDimension = (/= NoDimension) . dynamicDimension
 
 -- | The dimension of dimensionless values.
 dOne :: Dimension'

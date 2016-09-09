@@ -2,6 +2,7 @@ module Numeric.Units.Dimensional.DynamicSpec where
 
 import Numeric.Units.Dimensional.Prelude
 import Numeric.Units.Dimensional.Dynamic hiding ((*),(/),(^),(*~),(/~), recip)
+import Numeric.Units.Dimensional.Dimensions.TermLevel (hasSomeDimension)
 import qualified Numeric.Units.Dimensional.Dynamic as Dyn
 import qualified Prelude as P
 import Test.Hspec
@@ -140,19 +141,19 @@ spec = do
              it "matches static square root" $ do
                promoteQuantity (P.sqrt a') `shouldBe` Just (sqrt a)
              it "rejects arguments to square root with non-square dimensions" $ do
-               dynamicDimension (P.sqrt f') `shouldBe` NoDimension
+               (P.sqrt f') `shouldNotSatisfy` hasSomeDimension
              it "takes the square root of polydimensional zero" $ do
                (P.sqrt polydimensionalZero) `shouldBe` (polydimensionalZero :: DynQuantity Double)
              it "matches static dimensionless exponentiation" $ do
                promoteQuantity (phi' P.** phi') `shouldBe` Just (phi ** phi)
              it "rejects non-dimensionless arguments to dimensionless exponentiation" $ do
-               dynamicDimension (phi' P.** m') `shouldBe` NoDimension
-               dynamicDimension (x1' P.** phi') `shouldBe` NoDimension
+               (phi' P.** m') `shouldNotSatisfy` hasSomeDimension
+               (x1' P.** phi') `shouldNotSatisfy` hasSomeDimension
              it "matches static logBase" $ do
                promoteQuantity (P.logBase 10 phi') `shouldBe` Just (logBase (10 *~ one) phi)
              it "rejects non-dimensionless arguments to logBase" $ do
-               dynamicDimension (P.logBase 10 x1') `shouldBe` NoDimension
-               dynamicDimension (P.logBase x1' 10) `shouldBe` NoDimension
+               (P.logBase 10 x1') `shouldNotSatisfy` hasSomeDimension
+               (P.logBase x1' 10) `shouldNotSatisfy` hasSomeDimension
          describe "Dynamic units" $ do
            describe "Promotion and demotion" $ do
              return ()
