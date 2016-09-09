@@ -41,7 +41,7 @@ import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (&&), (++), const, id, otherwise)
+import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (&&), (++), const, id, otherwise, error)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*~), (/~), (*), (/), (^), recip, nroot, siUnit)
 import qualified Numeric.Units.Dimensional as Dim
@@ -73,12 +73,9 @@ demoteQuantity = promotableIn . demotableOut
 promoteQuantity :: forall a d q.(Promotable q, KnownDimension d) => q a -> Maybe (Quantity d a)
 promoteQuantity = promoteQ . promotableOut
   where
-    promoteQ (DynQuantity (AnyQuantity dim val)) | dim == dim' = Just . Quantity $ val
-                                                 | otherwise   = Nothing
-      where
-        dim' = dimension (Proxy :: Proxy d)
-    promoteQ InvalidQuantity = Nothing
-    promoteQ (Zero z) = Just . Quantity $ z
+    dim' = dimension (Proxy :: Proxy d)
+    promoteQ (DynQuantity d v) | d `D.isCompatibleWith` dim' = Just . Quantity $ v
+                               | otherwise                   = Nothing
 
 instance (KnownDimension d) => Demotable (Quantity d) where
   demotableOut q@(Quantity x) = AnyQuantity (dimension q) x    
@@ -100,7 +97,7 @@ instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic 
 
 instance Promotable AnyQuantity where
   promotableIn = id
-  promotableOut = DynQuantity
+  promotableOut (AnyQuantity d a) = DynQuantity (SomeDimension d) a
 
 instance Demotable AnyQuantity where
   demotableOut = id
@@ -123,21 +120,17 @@ instance Num a => Monoid (AnyQuantity a) where
 --
 -- Note that the 'Eq' instance for 'DynQuantity' equates all representations of an invalid value,
 -- and also does not equate polydimensional zero with zero of any specific dimension.
-data DynQuantity a = DynQuantity !(AnyQuantity a)
-                   | InvalidQuantity
-                   | Zero !a
+data DynQuantity a = DynQuantity !DynamicDimension a -- we can't have strictness annotation on a as it is sometimes undefined
   deriving (Eq, Data, Generic, Generic1, Typeable, Show)
 
 instance NFData a => NFData (DynQuantity a) -- instance is derived from Generic instance
 
 instance Promotable DynQuantity where
-  promotableIn = DynQuantity
+  promotableIn (AnyQuantity d a) = DynQuantity (SomeDimension d) a
   promotableOut = id
 
 instance HasDynamicDimension (DynQuantity a) where
-  dynamicDimension (DynQuantity q) = dynamicDimension q
-  dynamicDimension InvalidQuantity = D.NoDimension
-  dynamicDimension (Zero _) = D.AnyDimension
+  dynamicDimension (DynQuantity d _) = d
 
 instance Num a => Num (DynQuantity a) where
   (Zero _) + y = y
@@ -192,11 +185,11 @@ instance Num a => Monoid (DynQuantity a) where
 
 -- | A 'DynQuantity' which does not correspond to a value of any dimension.
 invalidQuantity :: DynQuantity a
-invalidQuantity = InvalidQuantity
+invalidQuantity = DynQuantity NoDimension $ error "Attempt to evaluate the value of an invalid quantity."
 
 -- | A 'DynQuantity' which corresponds to zero value of any dimension.
 polydimensionalZero :: (Num a) => DynQuantity a
-polydimensionalZero = Zero 0
+polydimensionalZero = DynQuantity AnyDimension 0
 
 -- Lifts a function which is only valid on dimensionless quantities into a function on DynQuantitys.
 liftDimensionless :: (Num a) => (a -> a) -> DynQuantity a -> DynQuantity a
