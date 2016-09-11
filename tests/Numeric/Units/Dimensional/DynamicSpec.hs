@@ -114,10 +114,6 @@ spec = do
                (P.fromRational pi' :: DynQuantity Rational) `shouldBe` demoteQuantity (pi' *~ one)
              it "permits polydimensional zero as a dividend" $ do
                (polydimensionalZero P./ m') `shouldBe` polydimensionalZero
-             it "does not permit polydimensional zero as a divisor" $ do
-               (t' P./ polydimensionalZero) `shouldBe` invalidQuantity
-               (polydimensionalZero P./ polydimensionalZero) `shouldBe` (invalidQuantity :: DynQuantity Double)
-               (P.recip polydimensionalZero) `shouldBe` (invalidQuantity :: DynQuantity Double)
              it "propagates witnesses to zero during division" $ do
                -- We want to test that the witness for polymorphic zero was actually divided by the divisor.
                -- The reason for this property is that if the divisor is itself zero (but not polydimensionalZero),
