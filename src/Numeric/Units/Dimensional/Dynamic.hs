@@ -187,6 +187,14 @@ invalidQuantity :: DynQuantity a
 invalidQuantity = DynQuantity NoDimension $ error "Attempt to evaluate the value of an invalid quantity."
 
 -- | A 'DynQuantity' which corresponds to zero value of any dimension.
+--
+-- When combined through arithmetic with other 'DynQuantity's, inference is performed. For example,
+-- adding a length to polydimensional zero produces that length. Adding two polydimensional zeros produces another.
+-- Taking the sine of a polydimensional zero interprets it as a dimensionless zero and produces a dimensionless result.
+--
+-- Note that division by 'polydimensionalZero' produces a polydimensional result, which may be an error or some representation
+-- of infinity, as determined by the underlying arithmetic type. This behavior was chosen for consistency with the behavior of division
+-- by zero 'DynQuantity's of a specific dimension.
 polydimensionalZero :: (Num a) => DynQuantity a
 polydimensionalZero = DynQuantity AnyDimension 0
 
