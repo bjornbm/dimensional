@@ -12,6 +12,10 @@ extra-deps:
 - exact-pi-0.4.1.2
 - numtype-dk-0.5.0.1
 - doctest-0.10.1
+- hspec-2.2.3
+- hspec-core-2.2.3
+- hspec-discover-2.2.3
+- hspec-expectations-0.7.2
 
 # Override default flag values for local packages and extra-deps
 flags: {}
