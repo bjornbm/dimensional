@@ -1,3 +1,7 @@
+1.0.1.3 (2016-09)
+-----------------
+* Fixed an issue with applying metric prefixes to units with non-rational conversion factors.
+
 1.0.1.2 (2016-05)
 -----------------
 * Support for GHC 8.0.1-rc4, avoiding GHC Trac issue 12026.
