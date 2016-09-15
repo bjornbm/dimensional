@@ -22,14 +22,16 @@ module Numeric.Units.Dimensional.Dimensions.TermLevel
   -- * Type
   Dimension'(..),
   -- * Access to Dimension of Dimensional Values
-  HasDimension(..), HasDynamicDimension(..),
+  HasDimension(..), HasDynamicDimension(..), DynamicDimension(..),
   -- * Dimension Arithmetic
   (*), (/), (^), recip, nroot, sqrt, cbrt,
   -- * Synonyms for Base Dimensions
   dOne,
   dLength, dMass, dTime, dElectricCurrent, dThermodynamicTemperature, dAmountOfSubstance, dLuminousIntensity,
   -- * Deconstruction
-  asList
+  asList,
+  -- * Examining Dynamic Dimensions
+  matchDimensions, isCompatibleWith, hasSomeDimension
 )
 where
 
@@ -37,7 +39,7 @@ import Control.DeepSeq
 import Data.Data
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), (&&), Int, Show, Eq(..), Ord(..), Maybe(..))
+import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), (&&), Int, Show, Eq(..), Ord(..), Maybe(..), Bool(..))
 import qualified Prelude as P
 
 -- $setup
@@ -60,26 +62,60 @@ instance Monoid Dimension' where
   mempty = dOne
   mappend = (*)
 
+-- | The dimension of a dynamic value, which may not have any dimension at all.
+data DynamicDimension = NoDimension -- ^ The value has no valid dimension.
+                      | SomeDimension Dimension' -- ^ The value has the given dimension.
+                      | AnyDimension -- ^ The value may be interpreted as having any dimension.
+  deriving (Eq, Ord, Show, Data, Generic, Typeable)
+
+instance NFData DynamicDimension where
+
 -- | Dimensional values, or those that are only possibly dimensional, inhabit this class,
 -- which allows access to a term-level representation of their dimension.
 class HasDynamicDimension a where
-  -- | Gets the 'Dimension'' of a dynamic dimensional value, or 'Nothing' if it does not represent
+  -- | Gets the 'DynamicDimension of a dynamic dimensional value, which may be 'NoDimension' if it does not represent
   -- a dimensional value of any 'Dimension'.
   --
   -- A default implementation is available for types that are also in the `HasDimension` typeclass.
-  dynamicDimension :: a -> Maybe Dimension'
-  default dynamicDimension :: (HasDimension a) => a -> Maybe Dimension'
-  dynamicDimension = Just . dimension
+  dynamicDimension :: a -> DynamicDimension
+  default dynamicDimension :: (HasDimension a) => a -> DynamicDimension
+  dynamicDimension = SomeDimension . dimension
 
 -- | Dimensional values inhabit this class, which allows access to a term-level representation of their dimension.
 class HasDynamicDimension a => HasDimension a where
   -- | Obtains a term-level representation of a value's dimension.
   dimension :: a -> Dimension'
 
+instance HasDynamicDimension DynamicDimension where
+  dynamicDimension = id
+
 instance HasDynamicDimension Dimension' where
 
 instance HasDimension Dimension' where
   dimension = id
+
+-- | Combines two 'DynamicDimension's, determining the 'DynamicDimension' of a quantity that must
+-- match both inputs.
+--
+-- This is the lattice meet operation for 'DynamicDimension'.
+matchDimensions :: DynamicDimension -> DynamicDimension -> DynamicDimension
+matchDimensions AnyDimension        AnyDimension                   = AnyDimension
+matchDimensions d@(SomeDimension _) AnyDimension                   = d
+matchDimensions AnyDimension        d@(SomeDimension _)            = d
+matchDimensions (SomeDimension d1)  (SomeDimension d2) | d1 == d2  = SomeDimension d1
+matchDimensions _                   _                              = NoDimension
+
+-- | Determines if a value that has a 'DynamicDimension' is compatible with a specified 'Dimension''.
+isCompatibleWith :: (HasDynamicDimension a) => a -> Dimension' -> Bool
+isCompatibleWith = f . dynamicDimension
+  where
+    f AnyDimension       _             = True
+    f (SomeDimension d1) d2 | d1 == d2 = True
+    f _                  _             = False
+
+-- | Determines if a value that has a 'DynamicDimension' in fact has any valid dimension at all.
+hasSomeDimension :: (HasDynamicDimension a) => a -> Bool
+hasSomeDimension = (/= NoDimension) . dynamicDimension
 
 -- | The dimension of dimensionless values.
 dOne :: Dimension'
