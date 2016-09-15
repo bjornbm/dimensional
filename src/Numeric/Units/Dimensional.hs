@@ -743,8 +743,11 @@ we provide a means for converting from type-level dimensions to term-level dimen
 -- Supplying negative defining quantities is allowed and handled gracefully, but is discouraged
 -- on the grounds that it may be unexpected by other readers.
 mkUnitR :: Floating a => UnitName m -> ExactPi -> Unit m1 d a -> Unit m d a
-mkUnitR n s' (Unit _ s x) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
-                          | otherwise     = Unit n (s' Prelude.* s) (approximateValue s' Prelude.* x)
+mkUnitR n s (Unit _ e _) | isExactZero s = error "Supplying zero as a conversion factor is not valid."
+                         | otherwise     = Unit n e' x'
+  where
+    e' = s Prelude.* e
+    x' = approximateValue e'
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 --
@@ -753,11 +756,12 @@ mkUnitR n s' (Unit _ s x) | isExactZero s = error "Supplying zero as a conversio
 --
 -- For more information see 'mkUnitR'.
 mkUnitQ :: Fractional a => UnitName m -> Rational -> Unit m1 d a -> Unit m d a
-mkUnitQ n s' (Unit _ s _) | s' == 0                       = error "Supplying zero as a conversion factor is not valid."
-                          | Just q <- toExactRational s'' = Unit n s'' (fromRational q)
-                          | otherwise                     = error "The resulting conversion factor is not an exact rational."
+mkUnitQ n s (Unit _ e x) | s == 0    = error "Supplying zero as a conversion factor is not valid."
+                         | Just x'' <- toExactRational e' = Unit n e' (fromRational x'')
+                         | otherwise = Unit n e' x'
   where
-    s'' = fromRational s' Prelude.* s
+    e' = fromRational s Prelude.* e
+    x' = fromRational s Prelude.* x
 
 -- | Forms a new atomic 'Unit' by specifying its 'UnitName' and its definition as a multiple of another 'Unit'.
 --
@@ -766,8 +770,9 @@ mkUnitQ n s' (Unit _ s _) | s' == 0                       = error "Supplying zer
 --
 -- For more information see 'mkUnitR'.
 mkUnitZ :: Num a => UnitName m -> Integer -> Unit m1 d a -> Unit m d a
-mkUnitZ n s' (Unit _ s _) | s' == 0                      = error "Supplying zero as a conversion factor is not valid."
-                          | Just z <- toExactInteger s'' = Unit n s'' (fromInteger z)
-                          | otherwise                    = error "The resulting conversion factor is not an exact integer."
+mkUnitZ n s (Unit _ e x) | s == 0    = error "Supplying zero as a conversion factor is not valid."
+                         | Just x'' <- toExactInteger e' = Unit n e' (fromInteger x'')
+                         | otherwise = Unit n e' x'
   where
-    s'' = fromInteger s' Prelude.* s
+    e' = fromInteger s Prelude.* e
+    x' = fromInteger s Prelude.* x
