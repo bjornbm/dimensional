@@ -191,7 +191,7 @@ module Numeric.Units.Dimensional
     exp, log, logBase, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
     -- ** Operations on Collections
     -- $collections
-    (*~~), (/~~), sum, mean, dimensionlessLength, nFromTo,
+    (*~~), (/~~), sum, mean, product, dimensionlessLength, nFromTo,
     -- * Dimension Synonyms
     -- $dimension-synonyms
     DOne, DLength, DMass, DTime, DElectricCurrent, DThermodynamicTemperature, DAmountOfSubstance, DLuminousIntensity,
@@ -233,7 +233,7 @@ import Data.Maybe
 import Data.Ratio
 import Numeric.Units.Dimensional.Dimensions
 import Numeric.Units.Dimensional.Internal
-import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen)
+import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen, product)
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.Variants hiding (type (*), type (/))
 import qualified Numeric.Units.Dimensional.Variants as V
@@ -547,7 +547,7 @@ xs /~~ u = fmap (/~ u) xs
 
 infixl 7  *~~, /~~
 
--- | The sum of all elements in a list.
+-- | The sum of all elements in a foldable structure.
 --
 -- >>> sum ([] :: [Mass Double])
 -- 0.0 kg
@@ -557,7 +557,17 @@ infixl 7  *~~, /~~
 sum :: (Num a, Foldable f) => f (Quantity d a) -> Quantity d a
 sum = foldr (+) _0
 
--- | The arithmetic mean of all elements in a list.
+-- | The product of all elements in a foldable structure.
+--
+-- >>> product ([] :: [Dimensionless Double])
+-- 1.0
+--
+-- >>> product [pi, _4, 0.36 *~ one]
+-- 4.523893421169302
+product :: (Num a, Foldable f) => f (Dimensionless a) -> Dimensionless a
+product = foldr (*) _1
+
+-- | The arithmetic mean of all elements in a foldable structure.
 --
 -- >>> mean [pi, _7]
 -- 5.070796326794897
