@@ -26,8 +26,7 @@ import Data.Foldable (toList)
 import Data.Foldable (Foldable, toList)
 #endif
 import Data.Function (on)
-import Data.List (sortBy, nubBy, find)
-import Data.Maybe (fromMaybe)
+import Data.List (sortBy, nubBy)
 import Data.Ord
 import GHC.Generics hiding (Prefix)
 import Numeric.Units.Dimensional.Dimensions.TermLevel (Dimension', asList, HasDimension(..))
@@ -236,8 +235,12 @@ filterPrefixSet p = prefixSet . filter p . unPrefixSet
 -- whose 'scaleExponent' is least, while still greater than the supplied scale exponent. If no prefix in the set has a 
 -- 'scaleExponent' greater than the supplied scale exponent, then the member with the least 'scaleExponent' will be returned.
 selectPrefix :: PrefixSet -> Int -> Prefix
-selectPrefix ps e = fromMaybe (Prelude.head ps') $ find ((<= e) . scaleExponent) ps'
+selectPrefix ps e = go ((<= e) . scaleExponent) ps'
   where
+    go _ (x:[]) = x
+    go f (x:xs) | f x = x
+                | otherwise = go f xs
+    go _ _ = emptyPrefix
     ps' = unPrefixSet ps
 
 -- | The set of all 'Prefix'es defined by the SI.
