@@ -1,5 +1,5 @@
 name:                dimensional
-version:             1.0.1.1
+version:             1.0.1.3
 license:             BSD3
 license-file:        LICENSE
 copyright:           Bjorn Buckwalter 2006-2015
@@ -73,14 +73,17 @@ library
 
 test-suite tests
   type:                exitcode-stdio-1.0
-  main-is:             Test.hs
+  main-is:             Spec.hs
   hs-source-dirs:      tests
-  other-modules:       Numeric.Units.Dimensional.QuantitiesTest,
-                       Numeric.Units.Dimensional.Test
   default-language:    Haskell2010
+  default-extensions:  NoImplicitPrelude
+  other-modules:       Numeric.Units.DimensionalSpec
+                       Numeric.Units.Dimensional.DynamicSpec
+                       Numeric.Units.Dimensional.QuantitiesSpec
   ghc-options:         -Wall
   build-depends:       dimensional,
-                       HUnit,
+                       hspec,
+                       QuickCheck,
                        base
 
 test-suite doctests

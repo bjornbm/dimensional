@@ -2,10 +2,13 @@ vNext
 -----
 * Breaking: Renamed `Root` type family to `NRoot`. Added `Sqrt` and `Cbrt` type
   synonyms. Added `sqrt` and `cbrt` for term level dimensions.
-* Breaking: Changed Numeric.Units.Dimensional.Prelude to export dimensionally
+* Breaking: Changed `Numeric.Units.Dimensional.Prelude` to export dimensionally
   typed `signum`, `recip`, and `logBase` instead of the ones from `Prelude`.
-* Breaking: Changed Numeric.Units.Dimensional.Prelude to export `(.)` and `id`
+* Breaking: Changed `Numeric.Units.Dimensional.Prelude` to export `(.)` and `id`
   from `Control.Category` instead of from `Prelude`.
+* Breaking: Created a `product` function which take the product of a foldable structure of
+  `Dimensionless` values. Exported this `product` function from Numeric.Units.Dimensional.Prelude
+  instead of the one from `Prelude`.
 * Breaking: Changed the `HasDimension` typeclass to require an instance of the new
   `HasDynamicDimension` typeclass.
 * Breaking: Added operators for `AnyUnit` to the Numeric.Units.Dimensional.Dynamic
@@ -43,6 +46,10 @@ vNext
 * Added the `gauss`, a unit of magnetic flux density.
 * Added the `angstrom`, a unit of length.
 * Relocated git repository to https://github.com/bjornbm/dimensional
+
+1.0.1.3 (2016-09)
+-----------------
+* Fixed an issue with applying metric prefixes to units with non-rational conversion factors.
 
 1.0.1.2 (2016-05)
 -----------------

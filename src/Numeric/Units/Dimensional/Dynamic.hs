@@ -24,9 +24,9 @@ module Numeric.Units.Dimensional.Dynamic
 , DynQuantity
 , Demotable
 , Promotable
-, HasDynamicDimension(..)
+, HasDynamicDimension(..), DynamicDimension(..)
 , promoteQuantity, demoteQuantity
-, (*~), (/~), invalidQuantity
+, (*~), (/~), invalidQuantity, polydimensionalZero
   -- * Dynamic Units
 , AnyUnit
 , demoteUnit, promoteUnit, demoteUnit'
@@ -41,7 +41,7 @@ import Data.Data
 import Data.ExactPi
 import Data.Monoid (Monoid(..))
 import GHC.Generics
-import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Maybe(..), (.), ($), (&&), (++), const, id, otherwise)
+import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Bool(..), Maybe(..), (.), ($), (++), (&&), id, otherwise, error)
 import qualified Prelude as P
 import Numeric.Units.Dimensional hiding ((*~), (/~), (*), (/), (^), recip, nroot, siUnit)
 import qualified Numeric.Units.Dimensional as Dim
@@ -49,49 +49,39 @@ import Numeric.Units.Dimensional.Coercion
 import Numeric.Units.Dimensional.UnitNames (UnitName, baseUnitName)
 import qualified Numeric.Units.Dimensional.UnitNames.InterchangeNames as I
 import qualified Numeric.Units.Dimensional.UnitNames as N
-import Numeric.Units.Dimensional.Dimensions.TermLevel (HasDynamicDimension(..))
+import Numeric.Units.Dimensional.Dimensions.TermLevel (HasDynamicDimension(..), DynamicDimension(..), matchDimensions, isCompatibleWith)
 import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 
 -- | The class of types that can be used to model 'Quantity's that are certain to have a value with
 -- some dimension.
 class Demotable (q :: * -> *) where
   demotableOut :: q a -> AnyQuantity a
-  demotableIn :: AnyQuantity a -> Maybe (q a)
 
 -- | The class of types that can be used to model 'Quantity's whose 'Dimension's are
 -- only known dynamically.
 class Promotable (q :: * -> *) where
   promotableIn :: AnyQuantity a -> q a
-  promotableOut :: q a -> Maybe (AnyQuantity a)
+  promotableOut :: q a -> DynQuantity a
 
 -- | Forgets information about a 'Quantity' or 'AnyQuantity', yielding an 'AnyQuantity' or a 'DynQuantity'.
 demoteQuantity :: (Demotable q, Promotable d) => q a -> d a
 demoteQuantity = promotableIn . demotableOut
 
 -- | Converts a dynamic quantity such as an 'AnyQuantity' or a 'DynQuantity' into a
--- quantity which is known to have some dimension (which may be statically encoded),
--- such as an 'AnyQuantity' or 'Quantity d', or to 'Nothing' if the dynamic quantity
--- cannot be represented in the narrower result type.
-promoteQuantity :: (Demotable q, Promotable d) => d a -> Maybe (q a)
-promoteQuantity = demotableIn <=< promotableOut
+-- 'Quantity', or to 'Nothing' if the dynamic quantity cannot be represented in the
+-- narrower result type.
+promoteQuantity :: forall a d q.(Promotable q, KnownDimension d) => q a -> Maybe (Quantity d a)
+promoteQuantity = promoteQ . promotableOut
+  where
+    dim' = dimension (Proxy :: Proxy d)
+    promoteQ (DynQuantity d v) | d `isCompatibleWith` dim' = Just . Quantity $ v
+                               | otherwise                 = Nothing
 
 instance (KnownDimension d) => Demotable (Quantity d) where
-  demotableOut q@(Quantity x) = AnyQuantity (dimension q) x
-  demotableIn = demoteQ
-    where
-      -- This implementation is not provided directly inside the instance because it requires ScopedTypeVariables
-      -- Placing the signatures inside the instance requires InstanceSigs, which interacts poorly with associated type families
-      -- like Dimensional in GHC 7.8.
-      demoteQ :: forall a (d' :: Dimension).KnownDimension d' => AnyQuantity a -> Maybe (Quantity d' a)
-      demoteQ (AnyQuantity dim val) | dim == dim' = Just . Quantity $ val
-                                    | otherwise   = Nothing
-        where
-          dim' = dimension (Proxy :: Proxy d')
-
-
+  demotableOut q@(Quantity x) = AnyQuantity (dimension q) x    
 
 -- | A 'Quantity' whose 'Dimension' is only known dynamically.
-data AnyQuantity a = AnyQuantity Dimension' a
+data AnyQuantity a = AnyQuantity !Dimension' !a
   deriving (Eq, Data, Generic, Generic1, Typeable)
 
 instance (Show a) => Show (AnyQuantity a) where
@@ -107,18 +97,16 @@ instance NFData a => NFData (AnyQuantity a) -- instance is derived from Generic 
 
 instance Promotable AnyQuantity where
   promotableIn = id
-  promotableOut = Just
+  promotableOut (AnyQuantity d a) = DynQuantity (SomeDimension d) a
 
 instance Demotable AnyQuantity where
   demotableOut = id
-  demotableIn = Just
 
 -- | 'AnyQuantity's form a 'Monoid' under multiplication, but not under addition because
 -- they may not be added together if their dimensions do not match.
 instance Num a => Monoid (AnyQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
   mappend (AnyQuantity d1 a1) (AnyQuantity d2 a2) = AnyQuantity (d1 D.* d2) (a1 P.* a2)
-
 
 -- | Possibly a 'Quantity' whose 'Dimension' is only known dynamically.
 --
@@ -127,30 +115,44 @@ instance Num a => Monoid (AnyQuantity a) where
 -- for the common numeric classes. It's therefore useful for manipulating, and not merely storing,
 -- quantities of unknown dimension.
 --
--- Note that the 'Eq' instance for 'DynQuantity' equates all representations of an invalid value.
-newtype DynQuantity a = DynQuantity (Maybe (AnyQuantity a))
-  deriving (Eq, Data, Generic, Generic1, Typeable, Show)
+-- This type also contains a 'polydimensionalZero', representing zero value of any dimension.
+--
+-- Note that the 'Eq' instance for 'DynQuantity' equates all representations of an invalid value,
+-- and also does not equate polydimensional zero with zero of any specific dimension.
+data DynQuantity a = DynQuantity !DynamicDimension a -- we can't have strictness annotation on a as it is sometimes undefined
+  deriving (Data, Generic, Generic1, Typeable)
+
+instance Eq a => Eq (DynQuantity a) where
+  (DynQuantity NoDimension _) == (DynQuantity NoDimension _) = True -- all invalid quantities are equal
+  (DynQuantity NoDimension _) == _                           = False -- invalid quanties are not equal to any other quantity
+  _                           == (DynQuantity NoDimension _) = False
+  (DynQuantity d1 v1)         == (DynQuantity d2 v2)         = d1 == d2 && v1 == v2
 
 instance NFData a => NFData (DynQuantity a) -- instance is derived from Generic instance
 
+instance Show a => Show (DynQuantity a) where
+  show (DynQuantity NoDimension _) = "invalidQuantity"
+  show (DynQuantity AnyDimension v) = show v
+  show (DynQuantity (SomeDimension d) v) = show $ AnyQuantity d v
+
 instance Promotable DynQuantity where
-  promotableIn = DynQuantity . Just
-  promotableOut (DynQuantity q) = q
+  promotableIn (AnyQuantity d a) = DynQuantity (SomeDimension d) a
+  promotableOut = id
 
 instance HasDynamicDimension (DynQuantity a) where
-  dynamicDimension (DynQuantity q) = q >>= dynamicDimension
+  dynamicDimension (DynQuantity d _) = d
 
 instance Num a => Num (DynQuantity a) where
-  (+) = liftDQ2 matching (P.+)
-  (-) = liftDQ2 matching (P.-)
-  (*) = liftDQ2 (valid2 (D.*)) (P.*)
-  negate = liftDQ (valid id) P.negate
-  abs = liftDQ (valid id) P.abs
-  signum = liftDQ (valid $ const D.dOne) P.signum
+  x + y = liftDQ2 matchDimensions (P.+) x y
+  x - y = liftDQ2 matchDimensions (P.-) x y
+  x * y = liftDQ2 (valid2 (D.*)) (P.*) x y
+  negate = liftDQ id P.negate
+  abs = liftDQ id P.abs
+  signum = liftDQ (constant D.dOne) P.signum
   fromInteger = demoteQuantity . (Dim.*~ one) . P.fromInteger
 
 instance Fractional a => Fractional (DynQuantity a) where
-  (/) = liftDQ2 (valid2 (D./)) (P./)
+  x / y = liftDQ2 (valid2 (D./)) (P./) x y
   recip = liftDQ (valid D.recip) P.recip
   fromRational = demoteQuantity . (Dim.*~ one) . P.fromRational
 
@@ -158,9 +160,9 @@ instance Floating a => Floating (DynQuantity a) where
   pi = demoteQuantity pi
   exp = liftDimensionless P.exp
   log = liftDimensionless P.log
-  sqrt = liftDQ (D.nroot 2) P.sqrt
-  (**) = liftDQ2 (matching3 D.dOne) (P.**)
-  logBase = liftDQ2 (matching3 D.dOne) P.logBase
+  sqrt = liftDQ (whenValid $ D.nroot 2) P.sqrt
+  (**) = liftDQ2 (matchDimensions3 $ SomeDimension D.dOne) (P.**)
+  logBase = liftDQ2 (matchDimensions3 $ SomeDimension D.dOne) P.logBase
   sin = liftDimensionless P.sin
   cos = liftDimensionless P.cos
   tan = liftDimensionless P.tan
@@ -174,61 +176,77 @@ instance Floating a => Floating (DynQuantity a) where
   acosh = liftDimensionless P.acosh
   atanh = liftDimensionless P.atanh
 
+-- | 'DynQuantity's form a 'Monoid' under multiplication, but not under addition because
+-- they may not be added together if their dimensions do not match.
 instance Num a => Monoid (DynQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
   mappend = (P.*)
 
+-- | A 'DynQuantity' which does not correspond to a value of any dimension.
 invalidQuantity :: DynQuantity a
-invalidQuantity = DynQuantity Nothing
+invalidQuantity = DynQuantity NoDimension $ error "Attempt to evaluate the value of an invalid quantity."
+
+-- | A 'DynQuantity' which corresponds to zero value of any dimension.
+--
+-- When combined through arithmetic with other 'DynQuantity's, inference is performed. For example,
+-- adding a length to polydimensional zero produces that length. Adding two polydimensional zeros produces another.
+-- Taking the sine of a polydimensional zero interprets it as a dimensionless zero and produces a dimensionless result.
+--
+-- Note that division by 'polydimensionalZero' produces a polydimensional result, which may be an error or some representation
+-- of infinity, as determined by the underlying arithmetic type. This behavior was chosen for consistency with the behavior of division
+-- by zero 'DynQuantity's of a specific dimension.
+polydimensionalZero :: (Num a) => DynQuantity a
+polydimensionalZero = DynQuantity AnyDimension 0
 
 -- Lifts a function which is only valid on dimensionless quantities into a function on DynQuantitys.
 liftDimensionless :: (a -> a) -> DynQuantity a -> DynQuantity a
-liftDimensionless = liftDQ (matching D.dOne)
+liftDimensionless f = liftDQ (matchDimensions $ SomeDimension D.dOne) f
 
 -- Lifts a function on values into a function on DynQuantitys.
-liftDQ :: (Dimension' -> Maybe Dimension')
-       -> (a -> a)
+liftDQ :: (DynamicDimension -> DynamicDimension) -- ^ How the function operates on dimensions.
+       -> (a -> a) -- ^ How the function operates on values.
        -> DynQuantity a -> DynQuantity a
-liftDQ fd fv = coerce f
-  where
-    f q = do
-            (AnyQuantity d v) <- q
-            d' <- fd d
-            let v' = fv v
-            return $ AnyQuantity d' v'
+liftDQ fd fv (DynQuantity d v) = case fd d of
+                                   NoDimension -> invalidQuantity
+                                   d' -> DynQuantity d' $ fv v
 
 -- Lifts a function on values into a function on DynQuantitys.
-liftDQ2 :: (Dimension' -> Dimension' -> Maybe Dimension')
+--
+-- This works by treating polydimensional zeros as dimensionless zeros. If that is not the desired behavior,
+-- handle polydimensional zeros first and then call this function.
+liftDQ2 :: (DynamicDimension -> DynamicDimension -> DynamicDimension)
         -> (a -> a -> a)
         -> DynQuantity a -> DynQuantity a -> DynQuantity a
-liftDQ2 fd fv = coerce f
-  where
-    f q1 q2 = do
-                (AnyQuantity d1 v1) <- q1
-                (AnyQuantity d2 v2) <- q2
-                d' <- fd d1 d2
-                let v' = fv v1 v2
-                return $ AnyQuantity d' v'
+liftDQ2 fd fv (DynQuantity d1 v1) (DynQuantity d2 v2) = case fd d1 d2 of
+                                                          NoDimension -> invalidQuantity
+                                                          d' -> DynQuantity d' $ fv v1 v2
 
--- Transforms an item in a way which is always valid
-valid :: (a -> a) -> a -> Maybe a
-valid = (Just .)
+-- Transforms a dynamic dimension in a way which is always valid
+valid :: (Dimension' -> Dimension') -> DynamicDimension -> DynamicDimension
+valid _ AnyDimension      = AnyDimension
+valid f (SomeDimension d) = SomeDimension (f d)
+valid _ NoDimension       = NoDimension
 
--- Transforms two items in a way which is always valid
-valid2 :: (a -> a -> a) -> a -> a -> Maybe a
-valid2 f x y = Just $ f x y
+whenValid :: (Dimension' -> Maybe Dimension') -> DynamicDimension -> DynamicDimension
+whenValid _ AnyDimension = AnyDimension
+whenValid f (SomeDimension d) | Just d' <- f d = SomeDimension d'
+whenValid _ _ = NoDimension
 
--- If two items match, then Just that item, otherwise Nothing.
-matching :: Eq a => a -> a -> Maybe a
-matching x y | x == y    = Just x
-             | otherwise = Nothing
+constant :: Dimension' -> DynamicDimension -> DynamicDimension
+constant d AnyDimension = SomeDimension d
+constant d (SomeDimension _) = SomeDimension d
+constant _ _ = NoDimension
 
--- If three items match, then Just that item, otherwise Nothing.
-matching3 :: Eq a => a -> a -> a -> Maybe a
-matching3 x y z | x == y && x == z = Just x
-                | otherwise        = Nothing
+-- Transforms two dynamic dimensions in a way which is always valid
+valid2 :: (Dimension' -> Dimension' -> Dimension') -> DynamicDimension -> DynamicDimension -> DynamicDimension
+valid2 _ AnyDimension       (SomeDimension _)  = AnyDimension
+valid2 _ (SomeDimension _)  AnyDimension       = AnyDimension
+valid2 _ AnyDimension       AnyDimension       = AnyDimension
+valid2 f (SomeDimension d1) (SomeDimension d2) = SomeDimension (f d1 d2)
+valid2 _ _                  _                  = NoDimension
 
-
+matchDimensions3 :: DynamicDimension -> DynamicDimension -> DynamicDimension -> DynamicDimension
+matchDimensions3 x y z = matchDimensions x (matchDimensions y z)
 
 -- | A 'Unit' whose 'Dimension' is only known dynamically.
 data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
@@ -313,8 +331,6 @@ x *~ (AnyUnit d _ e) = promotableIn $ AnyQuantity d (x P.* approximateValue e)
 -- | Divides a dynamic quantity by a dynamic unit, obtaining the numerical value of the quantity
 -- expressed in that unit if they are of the same physical dimension, or 'Nothing' otherwise.
 (/~) :: (Floating a, Promotable q) => q a -> AnyUnit -> Maybe a
-x /~ (AnyUnit d _ e) = do
-                         (AnyQuantity d' x') <- promotableOut x
-                         if (d == d')
-                           then Just $ x' P./ approximateValue e
-                           else Nothing
+x /~ (AnyUnit d _ e) = case promotableOut x of
+                         DynQuantity d' x' | d' `isCompatibleWith` d -> Just $ x' P./ approximateValue e
+                                           | otherwise -> Nothing

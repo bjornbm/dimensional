@@ -40,7 +40,7 @@ import Control.Category
     ( Category(..) )
 
 import Data.Foldable
-    ( product, minimum, maximum )
+    ( minimum, maximum )
 
 import Prelude hiding
     ( (+), (-), (*), (/), (^), (**)
