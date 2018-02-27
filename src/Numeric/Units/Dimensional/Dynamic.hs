@@ -39,6 +39,7 @@ import Control.DeepSeq
 import Control.Monad
 import Data.Data
 import Data.ExactPi
+import Data.Semigroup (Semigroup(..))
 import Data.Monoid (Monoid(..))
 import GHC.Generics
 import Prelude (Eq(..), Num, Fractional, Floating, Show(..), Bool(..), Maybe(..), (.), ($), (++), (&&), id, otherwise, error)
@@ -102,11 +103,16 @@ instance Promotable AnyQuantity where
 instance Demotable AnyQuantity where
   demotableOut = id
 
+-- | 'AnyQuantity's form a 'Semigroup' under multiplication, but not under addition because
+-- they may not be added together if their dimensions do not match.
+instance Num a => Semigroup (AnyQuantity a) where
+  (AnyQuantity d1 a1) <> (AnyQuantity d2 a2) = AnyQuantity (d1 D.* d2) (a1 P.* a2)
+
 -- | 'AnyQuantity's form a 'Monoid' under multiplication, but not under addition because
 -- they may not be added together if their dimensions do not match.
 instance Num a => Monoid (AnyQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
-  mappend (AnyQuantity d1 a1) (AnyQuantity d2 a2) = AnyQuantity (d1 D.* d2) (a1 P.* a2)
+  mappend = (Data.Semigroup.<>)
 
 -- | Possibly a 'Quantity' whose 'Dimension' is only known dynamically.
 --
@@ -176,11 +182,16 @@ instance Floating a => Floating (DynQuantity a) where
   acosh = liftDimensionless P.acosh
   atanh = liftDimensionless P.atanh
 
+-- | 'DynQuantity's form a 'Semigroup' under multiplication, but not under addition because
+-- they may not be added together if their dimensions do not match.
+instance Num a => Semigroup (DynQuantity a) where
+    (<>) = (P.*)
+
 -- | 'DynQuantity's form a 'Monoid' under multiplication, but not under addition because
 -- they may not be added together if their dimensions do not match.
 instance Num a => Monoid (DynQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
-  mappend = (P.*)
+  mappend = (Data.Semigroup.<>)
 
 -- | A 'DynQuantity' which does not correspond to a value of any dimension.
 invalidQuantity :: DynQuantity a
@@ -263,10 +274,14 @@ instance HasDimension AnyUnit where
 instance I.HasInterchangeName AnyUnit where
   interchangeName (AnyUnit _ n _) = I.interchangeName n
 
+-- | 'AnyUnit's form a 'Semigroup' under multiplication.
+instance Semigroup AnyUnit where
+  (<>) = (Numeric.Units.Dimensional.Dynamic.*)
+
 -- | 'AnyUnit's form a 'Monoid' under multiplication.
 instance Monoid AnyUnit where
   mempty = demoteUnit' one
-  mappend = (Numeric.Units.Dimensional.Dynamic.*)
+  mappend = (Data.Semigroup.<>)
 
 anyUnitName :: AnyUnit -> UnitName 'NonMetric
 anyUnitName (AnyUnit _ n _) = n
