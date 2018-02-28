@@ -24,3 +24,7 @@ setup-info:
     windows64:
       8.4.0.20180224:
         url: https://downloads.haskell.org/~ghc/8.4.1-rc1/ghc-8.4.0.20180224-x86_64-unknown-mingw32.tar.xz
+        
+    linux64:
+      8.4.0.20180224:
+        url: https://downloads.haskell.org/~ghc/8.4.1-rc1/ghc-8.4.0.20180224-x86_64-unknown-linux.tar.xz

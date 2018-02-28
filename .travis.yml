@@ -20,7 +20,11 @@ env:
 - ARGS="--resolver lts-2 --stack-yaml stack.lts2.yaml"
 - ARGS="--resolver lts-3 --stack-yaml stack.lts3.yaml"
 - ARGS="--resolver lts-5 --stack-yaml stack.lts5.yaml"
-- ARGS="--resolver lts-7 --stack-yaml stack.yaml"
+- ARGS="--resolver lts-6 --stack-yaml stack.yaml"
+- ARGS="--resolver lts-7 --stack-yaml stack.lts7.yaml"
+- ARGS="--resolver lts-9 --stack-yaml stack.lts9.yaml"
+- ARGS="--resolver lts-10 --stack-yaml stack.lts10.yaml"
+- ARGS="--stack-yaml stack.ghc84.yaml"
 
 before_install:
 # Download and unpack the stack executable
