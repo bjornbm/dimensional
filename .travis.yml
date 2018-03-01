@@ -10,7 +10,6 @@ addons:
   apt:
     packages:
     - libgmp-dev
-    - ncurses-libs
 
 # The different configurations we want to test. You could also do things like
 # change flags or use --stack-yaml to point to a different file.
@@ -29,6 +28,7 @@ env:
 
 before_install:
 # Download and unpack the stack executable
+- sudo ln -s /usr/lib/libncurses.so.6 /usr/lib/libtinfo.so.6
 - mkdir -p ~/.local/bin
 - export PATH=$HOME/.local/bin:$PATH
 - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
