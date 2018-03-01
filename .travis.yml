@@ -10,6 +10,7 @@ addons:
   apt:
     packages:
     - libgmp-dev
+    - ncurses-libs
 
 # The different configurations we want to test. You could also do things like
 # change flags or use --stack-yaml to point to a different file.
@@ -17,14 +18,14 @@ addons:
 # The stack.lts2.yaml file is required because LTS2 uses a version of doctest that
 # is too old to run our test suite.
 env:
-- ARGS="--resolver lts-2 --stack-yaml stack.lts2.yaml"
-- ARGS="--resolver lts-3 --stack-yaml stack.lts3.yaml"
-- ARGS="--resolver lts-5 --stack-yaml stack.lts5.yaml"
-- ARGS="--resolver lts-6 --stack-yaml stack.yaml"
-- ARGS="--resolver lts-7 --stack-yaml stack.lts7.yaml"
-- ARGS="--resolver lts-9 --stack-yaml stack.lts9.yaml"
-- ARGS="--resolver lts-10 --stack-yaml stack.lts10.yaml"
 - ARGS="--stack-yaml stack.ghc84.yaml"
+  #- ARGS="--resolver lts-2 --stack-yaml stack.lts2.yaml"
+  #- ARGS="--resolver lts-3 --stack-yaml stack.lts3.yaml"
+  #- ARGS="--resolver lts-5 --stack-yaml stack.lts5.yaml"
+  #- ARGS="--resolver lts-6 --stack-yaml stack.yaml"
+  #- ARGS="--resolver lts-7 --stack-yaml stack.lts7.yaml"
+  #- ARGS="--resolver lts-9 --stack-yaml stack.lts9.yaml"
+  #- ARGS="--resolver lts-10 --stack-yaml stack.lts10.yaml"
 
 before_install:
 # Download and unpack the stack executable
