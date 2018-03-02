@@ -1,5 +1,6 @@
-vNext
------
+1.0.1.4 (2018-03)
+-----------------
+* Added `Semigroup` instances for [GHC 8.4 compatibility](https://ghc.haskell.org/trac/ghc/wiki/Migration/8.4#SemigroupMonoidsuperclasses).
 * Breaking: Renamed `Root` type family to `NRoot`. Added `Sqrt` and `Cbrt` type
   synonyms. Added `sqrt` and `cbrt` for term level dimensions.
 * Breaking: Changed `Numeric.Units.Dimensional.Prelude` to export dimensionally
