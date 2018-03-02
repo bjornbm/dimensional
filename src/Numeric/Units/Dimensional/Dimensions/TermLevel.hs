@@ -37,6 +37,7 @@ where
 
 import Control.DeepSeq
 import Data.Data
+import Data.Semigroup (Semigroup(..))
 import Data.Monoid (Monoid(..))
 import GHC.Generics
 import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), (&&), Int, Show, Eq(..), Ord(..), Maybe(..), Bool(..))
@@ -57,10 +58,13 @@ data Dimension' = Dim' !Int !Int !Int !Int !Int !Int !Int
 instance NFData Dimension' where
   rnf !_ = () -- The Dimension' constructor is already fully strict.
 
+instance Semigroup Dimension' where
+  (<>) = (*)
+
 -- | The monoid of dimensions under multiplication.
 instance Monoid Dimension' where
   mempty = dOne
-  mappend = (*)
+  mappend = (Data.Semigroup.<>)
 
 -- | The dimension of a dynamic value, which may not have any dimension at all.
 data DynamicDimension = NoDimension -- ^ The value has no valid dimension.
