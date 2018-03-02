@@ -1,5 +1,5 @@
 {- |
-    Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
+    Copyright  : Copyright (C) 2006-2018 Bjorn Buckwalter
     License    : BSD3
 
     Maintainer : bjorn@buckwalter.se
@@ -79,7 +79,7 @@ promoteQuantity = promoteQ . promotableOut
                                | otherwise                 = Nothing
 
 instance (KnownDimension d) => Demotable (Quantity d) where
-  demotableOut q@(Quantity x) = AnyQuantity (dimension q) x    
+  demotableOut q@(Quantity x) = AnyQuantity (dimension q) x
 
 -- | A 'Quantity' whose 'Dimension' is only known dynamically.
 data AnyQuantity a = AnyQuantity !Dimension' !a

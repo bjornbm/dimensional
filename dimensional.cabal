@@ -2,7 +2,7 @@ name:                dimensional
 version:             1.0.1.4
 license:             BSD3
 license-file:        LICENSE
-copyright:           Bjorn Buckwalter 2006-2015
+copyright:           Bjorn Buckwalter 2006-2018
 author:              Bjorn Buckwalter
 maintainer:          bjorn@buckwalter.se
 stability:           experimental

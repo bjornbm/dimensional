@@ -7,7 +7,7 @@
 {-# LANGUAGE TypeOperators #-}
 
 {- |
-    Copyright  : Copyright (C) 2006-2014 Bjorn Buckwalter
+    Copyright  : Copyright (C) 2006-2018 Bjorn Buckwalter
     License    : BSD3
 
     Maintainer : bjorn@buckwalter.se
@@ -282,10 +282,10 @@ Changes of Representation
 
 -- | Convenient conversion between numerical types while retaining dimensional information.
 changeRep :: forall v1 v2 d a b.
-            (KnownVariant v1, KnownVariant v2, 
+            (KnownVariant v1, KnownVariant v2,
              CompatibleVariants v1 v2,
              E.MinCtxt (ScaleFactor v1 E./ ScaleFactor v2) b,
-             Real a, Fractional b) 
+             Real a, Fractional b)
           => Dimensional v1 d a -> Dimensional v2 d b
 changeRep = liftD (P.* s) ((P.* s') . realToFrac) Name.weaken
   where
@@ -296,10 +296,10 @@ changeRep = liftD (P.* s) ((P.* s') . realToFrac) Name.weaken
 
 -- | Convenient conversion to types with `Integral` representations using `round`.
 changeRepRound :: forall v1 v2 d a b.
-                 (KnownVariant v1, KnownVariant v2, 
+                 (KnownVariant v1, KnownVariant v2,
                   CompatibleVariants v1 v2,
                   E.MinCtxt (ScaleFactor v1 E./ ScaleFactor v2) a,
-                  RealFrac a, Integral b) 
+                  RealFrac a, Integral b)
                => Dimensional v1 d a -> Dimensional v2 d b
 changeRepRound = liftD (P.* s) (round . (P.* s')) Name.weaken
   where

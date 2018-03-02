@@ -1,5 +1,5 @@
 {- |
-    Copyright  : Copyright (C) 2006-2016 Bjorn Buckwalter
+    Copyright  : Copyright (C) 2006-2018 Bjorn Buckwalter
     License    : BSD3
 
     Maintainer : bjorn@buckwalter.se
