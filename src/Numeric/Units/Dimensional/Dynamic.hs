@@ -39,6 +39,7 @@ import Control.DeepSeq
 import Control.Monad
 import Data.Data
 import Data.ExactPi
+import Data.Kind
 import Data.Semigroup (Semigroup(..))
 import Data.Monoid (Monoid(..))
 import GHC.Generics
@@ -55,12 +56,12 @@ import qualified Numeric.Units.Dimensional.Dimensions.TermLevel as D
 
 -- | The class of types that can be used to model 'Quantity's that are certain to have a value with
 -- some dimension.
-class Demotable (q :: * -> *) where
+class Demotable (q :: Type -> Type) where
   demotableOut :: q a -> AnyQuantity a
 
 -- | The class of types that can be used to model 'Quantity's whose 'Dimension's are
 -- only known dynamically.
-class Promotable (q :: * -> *) where
+class Promotable (q :: Type -> Type) where
   promotableIn :: AnyQuantity a -> q a
   promotableOut :: q a -> DynQuantity a
 

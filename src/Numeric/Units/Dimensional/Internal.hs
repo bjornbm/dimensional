@@ -31,6 +31,7 @@ import Control.Monad (liftM)
 import Data.AEq (AEq)
 import Data.Coerce (coerce)
 import Data.Data
+import Data.Kind
 import Data.ExactPi
 #if MIN_VERSION_base(4,9,0)
 import Data.Functor.Classes (Eq1(..), Ord1(..))
@@ -78,7 +79,7 @@ type SQuantity s = Dimensional ('DQuantity s)
 -- Each validly constructed type of kind 'Variant' has a 'KnownVariant' instance.
 class KnownVariant (v :: Variant) where
   -- | A dimensional value, either a 'Quantity' or a 'Unit', parameterized by its 'Dimension' and representation.
-  data Dimensional v :: Dimension -> * -> *
+  data Dimensional v :: Dimension -> Type -> Type
   -- | A scale factor by which the numerical value of this dimensional value is implicitly multiplied.
   type ScaleFactor v :: E.ExactPi'
   extractValue :: Dimensional v d a -> (a, Maybe ExactPi)

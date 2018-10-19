@@ -12,7 +12,7 @@ category:            Math, Physics
 synopsis:            Statically checked physical dimensions,
                      using Type Families and Data Kinds.
 cabal-version:       >= 1.10
-tested-with:         GHC == 7.8.4, GHC == 7.10.1, GHC == 7.10.2, GHC == 7.10.3, GHC == 8.0.1, GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.1
+tested-with:         GHC == 7.8.4, GHC == 7.10.1, GHC == 7.10.2, GHC == 7.10.3, GHC == 8.0.1, GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.1, GHC == 8.4.3, GHC == 8.6.1
 build-type:          Simple
 
 description:
@@ -52,6 +52,8 @@ library
   hs-source-dirs:      src
   default-language:    Haskell2010
   default-extensions:  NoImplicitPrelude
+  if impl(ghc >= 8.6)
+    default-extensions: NoStarIsType
   ghc-options:         -Wall
   exposed-modules:     Numeric.Units.Dimensional,
                        Numeric.Units.Dimensional.Coercion,
@@ -78,6 +80,8 @@ test-suite tests
   hs-source-dirs:      tests
   default-language:    Haskell2010
   default-extensions:  NoImplicitPrelude
+  if impl(ghc >= 8.6)
+    default-extensions: NoStarIsType
   other-modules:       Numeric.Units.DimensionalSpec
                        Numeric.Units.Dimensional.DynamicSpec
                        Numeric.Units.Dimensional.QuantitiesSpec
