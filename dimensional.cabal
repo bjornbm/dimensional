@@ -86,6 +86,7 @@ test-suite tests
                        hspec,
                        QuickCheck,
                        base
+  build-tool-depends: hspec-discover:hspec-discover == 2.*
 
 test-suite doctests
   type:                exitcode-stdio-1.0
