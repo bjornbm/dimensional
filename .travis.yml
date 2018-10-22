@@ -24,9 +24,8 @@ env:
 #- ARGS="--resolver lts-7 --stack-yaml stack.lts7.yaml"
 #- ARGS="--resolver lts-9 --stack-yaml stack.lts9.yaml"
 #- ARGS="--resolver lts-10 --stack-yaml stack.lts10.yaml"
-- ARGS="--resolver lts-10"
-- ARGS="--resolver lts-11"
-- ARGS="--resolver lts-12"
+- ARGS="--resolver lts-6"
+- ARGS="--resolver lts-7"
 - ARGS="--resolver nightly-2018-10-22"  # GHC-6.8.1
 # - ARGS="--stack-yaml stack.ghc84.yaml"
 
