@@ -1,6 +1,6 @@
 # Based on a template from http://docs.haskellstack.org/en/stable/GUIDE.html#travis-with-caching
 # Use new container infrastructure to enable caching
-sudo: false
+sudo: true
 
 # Choose a lightweight base image; we provide our own build tools.
 language: c
@@ -17,18 +17,16 @@ addons:
 # The stack.lts2.yaml file is required because LTS2 uses a version of doctest that
 # is too old to run our test suite.
 env:
-- ARGS="--resolver lts-2 --stack-yaml stack.lts2.yaml"
-- ARGS="--resolver lts-3 --stack-yaml stack.lts3.yaml"
-- ARGS="--resolver lts-5 --stack-yaml stack.lts5.yaml"
-- ARGS="--resolver lts-6 --stack-yaml stack.yaml"
-- ARGS="--resolver lts-7 --stack-yaml stack.lts7.yaml"
-- ARGS="--resolver lts-9 --stack-yaml stack.lts9.yaml"
-- ARGS="--resolver lts-10 --stack-yaml stack.lts10.yaml"
-- ARGS="--resolver lts-12 --stack-yaml stack.lts10.yaml"
-- ARGS="--resolver nightly-2018-10-22"  # GHC-8.6.1
+- ARGS="--resolver lts-7"
+- ARGS="--resolver lts-9"
+- ARGS="--resolver lts-11"
+- ARGS="--resolver lts-12"
+- ARGS="--resolver nightly-2018-10-22"  # GHC-6.8.1
 
 before_install:
 # Download and unpack the stack executable
+- sudo ln -s /lib/libncurses.so.6 /usr/lib/libtinfo.so.6
+- sudo ln -s /usr/lib/libtinfo.so.6 /usr/lib/libtinfo.so
 - mkdir -p ~/.local/bin
 - export PATH=$HOME/.local/bin:$PATH
 - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
