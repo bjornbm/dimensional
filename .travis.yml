@@ -17,7 +17,6 @@ addons:
 # The stack.lts2.yaml file is required because LTS2 uses a version of doctest that
 # is too old to run our test suite.
 env:
-- ARGS="--resolver lts-6"
 - ARGS="--resolver lts-7"
 - ARGS="--resolver lts-9"
 - ARGS="--resolver lts-11"
