@@ -2,6 +2,7 @@
 -------------
 * Breaking: Changed the `Show` instances for `UnitName`, `Unit`, `SQuantity` to use non-breaking spaces
   within unit names and between values and their units.
+* Bumped exact-pi dependency to < 0.6.
 
 1.2 (2018-11)
 -------------
