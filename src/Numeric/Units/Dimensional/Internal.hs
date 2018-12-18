@@ -52,8 +52,8 @@ import qualified Data.Vector.Generic as G
 import qualified Data.Vector.Unboxed.Base as U
 import Prelude
   ( Show, Eq(..), Ord, Bounded(..), Num, Fractional, Functor, Real(..)
-  , String, Maybe(..), Double
-  , (.), ($), (++), (+), (/)
+  , String, Maybe(..), Double, Bool(..)
+  , (.), ($), (++), (+), (/), (&&)
   , show, otherwise, undefined, error, fmap, realToFrac
   )
 import qualified Prelude as P
@@ -132,6 +132,18 @@ instance Eq1 (SQuantity s d) where
 instance Ord1 (SQuantity s d) where
   liftCompare = coerce
 #endif
+
+instance (Eq a) => Eq (Unit m d a) where
+  (==) = areEqualUnitsBy (==)
+
+#if MIN_VERSION_base(4,9,0)
+instance Eq1 (Unit m d) where
+  liftEq = areEqualUnitsBy
+#endif
+
+-- define this here so that it is usable even when we are not conditionally compiling a Eq1 instance to define the Eq instance
+areEqualUnitsBy :: (a -> b -> Bool) -> Unit m d a -> Unit m d b -> Bool
+areEqualUnitsBy f (Unit n1 e1 x1) (Unit n2 e2 x2) = n1 == n2 && areExactlyEqual e1 e2 && f x1 x2
 
 instance HasInterchangeName (Unit m d a) where
   interchangeName (Unit n _ _) = interchangeName n

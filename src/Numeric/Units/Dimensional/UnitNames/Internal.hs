@@ -25,6 +25,8 @@ import Data.Foldable (toList)
 #else
 import Data.Foldable (Foldable, toList)
 #endif
+import Data.Function (on)
+import Data.List (sortBy, nubBy)
 import Data.Ord
 import GHC.Generics hiding (Prefix)
 import Numeric.Units.Dimensional.Dimensions.TermLevel (Dimension', asList, HasDimension(..))
@@ -139,19 +141,16 @@ type PrefixName = NameAtom 'PrefixAtom
 data Prefix = Prefix
               {
                 -- | The name of a metric prefix.
-                prefixName :: PrefixName,
+                prefixName :: Maybe PrefixName,
                 -- | The scale factor denoted by a metric prefix.
-                scaleFactor :: Rational
+                scaleExponent :: Int
               }
   deriving (Eq, Data, Typeable, Generic)
 
 instance Ord Prefix where
-  compare = comparing scaleFactor
+  compare = comparing scaleExponent
 
 instance NFData Prefix where -- instance is derived from Generic instance
-
-instance HasInterchangeName Prefix where
-  interchangeName = interchangeName . prefixName
 
 -- | The name of the unit of dimensionless values.
 nOne :: UnitName 'NonMetric
@@ -189,36 +188,76 @@ baseUnitName d = let powers = asList $ dimension d
 baseUnitNames :: [UnitName 'NonMetric]
 baseUnitNames = [weaken nMeter, nKilogram, weaken nSecond, weaken nAmpere, weaken nKelvin, weaken nMole, weaken nCandela]
 
-deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta :: Prefix
-deka  = prefix "da" "da" "deka" 1e1
-hecto = prefix "h" "h" "hecto"  1e2
-kilo  = prefix "k" "k" "kilo"   1e3
-mega  = prefix "M" "M" "mega"   1e6
-giga  = prefix "G" "G" "giga"   1e9
-tera  = prefix "T" "T" "tera"   1e12
-peta  = prefix "P" "P" "peta"   1e15
-exa   = prefix "E" "E" "exa"    1e18
-zetta = prefix "Z" "Z" "zetta"  1e21
-yotta = prefix "Y" "Y" "yotta"  1e24
-deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto :: Prefix
-deci  = prefix "d" "d" "deci"   1e-1
-centi = prefix "c" "c" "centi"  1e-2
-milli = prefix "m" "m" "milli"  1e-3
-micro = prefix "u" "μ" "micro"  1e-6
-nano  = prefix "n" "n" "nano"   1e-9
-pico  = prefix "p" "p" "pico"   1e-12
-femto = prefix "f" "f" "femto"  1e-15
-atto  = prefix "a" "a" "atto"   1e-18
-zepto = prefix "z" "z" "zepto"  1e-21
-yocto = prefix "y" "y" "yocto"  1e-24
+-- | This is the SI 'Prefix' that is no prefix at all, and that consequently doesn't alter the value of the base unit to
+-- which it is applied.
+emptyPrefix :: Prefix
+emptyPrefix = Prefix Nothing 0
 
--- | A list of all 'Prefix'es defined by the SI.
-siPrefixes :: [Prefix]
-siPrefixes = [yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta]
+deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta :: Prefix
+deka  = prefix "da" "da" "deka" 1
+hecto = prefix "h" "h" "hecto"  2
+kilo  = prefix "k" "k" "kilo"   3
+mega  = prefix "M" "M" "mega"   6
+giga  = prefix "G" "G" "giga"   9
+tera  = prefix "T" "T" "tera"   12
+peta  = prefix "P" "P" "peta"   15
+exa   = prefix "E" "E" "exa"    18
+zetta = prefix "Z" "Z" "zetta"  21
+yotta = prefix "Y" "Y" "yotta"  24
+deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto :: Prefix
+deci  = prefix "d" "d" "deci"   $ -1
+centi = prefix "c" "c" "centi"  $ -2
+milli = prefix "m" "m" "milli"  $ -3
+micro = prefix "u" "μ" "micro"  $ -6
+nano  = prefix "n" "n" "nano"   $ -9
+pico  = prefix "p" "p" "pico"   $ -12
+femto = prefix "f" "f" "femto"  $ -15
+atto  = prefix "a" "a" "atto"   $ -18
+zepto = prefix "z" "z" "zepto"  $ -21
+yocto = prefix "y" "y" "yocto"  $ -24
+
+-- | A set of 'Prefix'es which necessarily includes the 'emptyPrefix'.
+newtype PrefixSet = PrefixSet { unPrefixSet :: [Prefix] }
+  deriving (Eq, Data, Typeable)
+
+-- | Constructs a 'PrefixSet' from a list of 'Prefix'es by ensuring that the 'emptyPrefix' is present,
+-- removing duplicates, and sorting the prefixes.
+prefixSet :: [Prefix] -> PrefixSet
+prefixSet = PrefixSet . sortBy (comparing $ Down . scaleExponent) . nubBy ((==) `on` scaleExponent) . (emptyPrefix :)
+
+-- | Filters a 'PrefixSet', retaining only those 'Prefix'es which match a supplied predicate.
+--
+-- The 'emptyPrefix' is always retained, as it must be a member of every 'PrefixSet'.
+filterPrefixSet :: (Prefix -> Bool) -> PrefixSet -> PrefixSet
+filterPrefixSet p = prefixSet . filter p . unPrefixSet
+
+-- | Chooses a 'Prefix' from a 'PrefixSet', given a scale exponent. The resulting prefix will be that in the prefix set
+-- whose 'scaleExponent' is least, while still greater than the supplied scale exponent. If no prefix in the set has a 
+-- 'scaleExponent' greater than the supplied scale exponent, then the member with the least 'scaleExponent' will be returned.
+selectPrefix :: PrefixSet -> Int -> Prefix
+selectPrefix ps e = go ((<= e) . scaleExponent) ps'
+  where
+    go _ (x:[]) = x
+    go f (x:xs) | f x = x
+                | otherwise = go f xs
+    go _ _ = emptyPrefix
+    ps' = unPrefixSet ps
+
+-- | The set of all 'Prefix'es defined by the SI.
+siPrefixes :: PrefixSet
+siPrefixes = prefixSet [yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta]
+
+-- | The set of all major 'Prefix'es defined by the SI.
+--
+-- A major prefix is one whose scale exponent is a multiple of three.
+majorSiPrefixes :: PrefixSet
+majorSiPrefixes = filterPrefixSet ((== 0) . (`mod` 3) . scaleExponent) siPrefixes
 
 -- | Forms a 'UnitName' from a 'Metric' name by applying a metric prefix.
 applyPrefix :: Prefix -> UnitName 'Metric -> UnitName 'NonMetric
-applyPrefix = Prefixed . prefixName
+applyPrefix p = case prefixName p of
+                  Just n -> Prefixed n
+                  Nothing -> Weaken
 
 {-
 We will reuse the operators and function names from the Prelude.
@@ -319,10 +358,10 @@ instance HasInterchangeName (UnitName m) where
                                  in InterchangeName { name = n', authority = authority . interchangeName $ n, I.isAtomic = False }
   interchangeName (Weaken n) = interchangeName n
 
-prefix :: String -> String -> String -> Rational -> Prefix
+prefix :: String -> String -> String -> Int -> Prefix
 prefix i a f q = Prefix n q
   where
-    n = NameAtom (InterchangeName i UCUM True) a f
+    n = Just $ NameAtom (InterchangeName i UCUM True) a f
 
 ucumMetric :: String -> String -> String -> UnitName 'Metric
 ucumMetric i a f = MetricAtomic $ NameAtom (InterchangeName i UCUM True) a f
