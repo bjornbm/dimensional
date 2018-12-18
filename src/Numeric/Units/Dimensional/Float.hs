@@ -104,7 +104,7 @@ isNegativeZero = P.isNegativeZero . unQuantity
 --
 -- >>> let x = 3 *~ meter
 -- >>> scaleFloat 3 x
--- 24.0 m
+-- 24.0 m
 scaleFloat :: RealFloat a => Int -> Quantity d a -> Quantity d a
 scaleFloat x = Quantity . P.scaleFloat x . unQuantity
 

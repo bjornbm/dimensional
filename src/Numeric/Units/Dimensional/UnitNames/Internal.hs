@@ -73,13 +73,14 @@ instance NFData (UnitName m) where
     Grouped n' -> rnf n'
     Weaken n' -> rnf n'
 
+-- | `UnitName`s are shown with non-breaking spaces.
 instance Show (UnitName m) where
   show One = "1"
   show (MetricAtomic a) = abbreviation_en a
   show (Atomic a) = abbreviation_en a
   show (Prefixed a n) = abbreviation_en a ++ show n
-  show (Product n1 n2) = show n1 ++ " " ++ show n2
-  show (Quotient n1 n2) = show n1 ++ " / " ++ show n2
+  show (Product n1 n2) = show n1 ++ "\xA0" ++ show n2
+  show (Quotient n1 n2) = show n1 ++ "\xA0/\xA0" ++ show n2
   show (Power x n) = show x ++ "^" ++ show n
   show (Grouped n) = "(" ++ show n ++ ")"
   show (Weaken n) = show n
