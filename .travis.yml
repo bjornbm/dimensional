@@ -21,7 +21,7 @@ env:
 - ARGS="--resolver lts-9"
 - ARGS="--resolver lts-11"
 - ARGS="--resolver lts-12"
-- ARGS="--resolver nightly-2018-10-22"  # GHC-6.8.1
+- ARGS="--resolver nightly-2018-10-22"  # GHC-8.6.1
 
 before_install:
 # Download and unpack the stack executable
