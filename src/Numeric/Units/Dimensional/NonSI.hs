@@ -121,10 +121,10 @@ dalton = mkUnitR (ucumMetric "u" "Da" "Dalton") 1 $ unifiedAtomicMassUnit
 -- See <https://en.wikipedia.org/wiki/Standard_gravity here> for further information.
 --
 -- >>> 1 *~ gee
--- 9.80665 m s^-2
+-- 9.80665 m s^-2
 --
 -- >>> 1 *~ gee :: Acceleration Rational
--- 196133 % 20000 m s^-2
+-- 196133 % 20000 m s^-2
 gee :: Fractional a => Unit 'Metric DAcceleration a
 gee = mkUnitQ (ucumMetric "[g]" "g" "gee") 9.80665 $ meter / second ^ pos2
 
@@ -137,12 +137,12 @@ Some US customary (that is, inch-pound) units.
 -- See <https://en.wikipedia.org/wiki/Foot_%28unit%29#International_foot here> for further information.
 --
 -- >>> 1 *~ foot
--- 0.3048 m
+-- 0.3048 m
 --
 -- prop> 3 *~ foot === 1 *~ yard
 --
 -- >>> 1 *~ foot :: Length Rational
--- 381 % 1250 m
+-- 381 % 1250 m
 foot :: Fractional a => Unit 'NonMetric DLength a
 foot = mkUnitQ (ucum "[ft_i]" "ft" "foot") (1 Prelude./ 3) $ yard
 
@@ -153,12 +153,12 @@ foot = mkUnitQ (ucum "[ft_i]" "ft" "foot") (1 Prelude./ 3) $ yard
 -- See <https://en.wikipedia.org/wiki/Inch#Modern_standardisation here> for further information.
 --
 -- >>> 1 *~ inch
--- 2.54e-2 m
+-- 2.54e-2 m
 --
 -- prop> 12 *~ inch === 1 *~ foot
 --
 -- >>> 1 *~ inch :: Length Rational
--- 127 % 5000 m
+-- 127 % 5000 m
 inch :: Fractional a => Unit 'NonMetric DLength a
 inch = mkUnitQ (ucum "[in_i]" "in" "inch") (1 Prelude./ 12) $ foot
 
@@ -169,12 +169,12 @@ inch = mkUnitQ (ucum "[in_i]" "in" "inch") (1 Prelude./ 12) $ foot
 -- See <https://en.wikipedia.org/wiki/Thousandth_of_an_inch here> for further information.
 --
 -- >>> 1 *~ mil
--- 2.54e-5 m
+-- 2.54e-5 m
 --
 -- prop> 1000 *~ mil === 1 *~ inch
 --
 -- >>> 1 *~ mil :: Length Rational
--- 127 % 5000000 m
+-- 127 % 5000000 m
 mil :: Fractional a => Unit 'NonMetric DLength a
 mil = mkUnitQ (ucum "[mil_i]" "mil" "mil") 0.001 $ inch
 
@@ -184,10 +184,10 @@ mil = mkUnitQ (ucum "[mil_i]" "mil" "mil") 0.001 $ inch
 -- See <https://en.wikipedia.org/wiki/Yard here> for further information.
 --
 -- >>> 1 *~ yard
--- 0.9144 m
+-- 0.9144 m
 --
 -- >>> 1 *~ yard :: Length Rational
--- 1143 % 1250 m
+-- 1143 % 1250 m
 yard :: (Fractional a) => Unit 'NonMetric DLength a
 yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 0.9144 $ meter
 
@@ -198,12 +198,12 @@ yard = mkUnitQ (ucum "[yd_i]" "yd" "yard") 0.9144 $ meter
 -- See <https://en.wikipedia.org/wiki/Mile#International_mile here> for further information.
 --
 -- >>> 1 *~ mile
--- 1609.344 m
+-- 1609.344 m
 --
 -- prop> 1 *~ mile === 5280 *~ foot
 --
 -- >>> 1 *~ mile :: Length Rational
--- 201168 % 125 m
+-- 201168 % 125 m
 mile :: (Fractional a) => Unit 'NonMetric DLength a
 mile = mkUnitQ (ucum "[mi_i]" "mi" "mile") 5280 $ foot
 
@@ -216,12 +216,12 @@ mile = mkUnitQ (ucum "[mi_i]" "mi" "mile") 5280 $ foot
 -- See <https://en.wikipedia.org/wiki/Acre#Differences_between_international_and_US_survey_acres here> for further information.
 --
 -- >>> 1 *~ acre
--- 4046.8564224 m^2
+-- 4046.8564224 m^2
 --
 -- prop> 1 *~ acre === 43560 *~ foot ^ pos2
 --
 -- >>> 1 *~ acre :: Area Rational
--- 316160658 % 78125 m^2
+-- 316160658 % 78125 m^2
 acre :: (Fractional a) => Unit 'NonMetric DArea a
 acre = mkUnitQ (dimensionalAtom "[acr_i]" "ac" "acre") 43560 $ square foot
 
@@ -233,10 +233,10 @@ acre = mkUnitQ (dimensionalAtom "[acr_i]" "ac" "acre") 43560 $ square foot
 -- See <https://en.wikipedia.org/wiki/Foot_%28unit%29#US_survey_foot here> for further information.
 --
 -- >>> 1 *~ usSurveyFoot
--- 0.3048006096012192 m
+-- 0.3048006096012192 m
 --
 -- >>> 1 *~ usSurveyFoot :: Length Rational
--- 1200 % 3937 m
+-- 1200 % 3937 m
 usSurveyFoot :: Fractional a => Unit 'NonMetric DLength a
 usSurveyFoot = mkUnitQ (ucum "[ft_us]" "ft" "foot") (1200 Prelude./ 3937) $ meter
 
@@ -248,12 +248,12 @@ usSurveyFoot = mkUnitQ (ucum "[ft_us]" "ft" "foot") (1200 Prelude./ 3937) $ mete
 -- See <https://en.wikipedia.org/wiki/Inch here> for further information.
 --
 -- >>> 1 *~ usSurveyInch
--- 2.54000508001016e-2 m
+-- 2.54000508001016e-2 m
 --
 -- prop> 12 *~ usSurveyInch === 1 *~ usSurveyFoot
 --
 -- >>> 1 *~ usSurveyInch :: Length Rational
--- 100 % 3937 m
+-- 100 % 3937 m
 usSurveyInch :: Fractional a => Unit 'NonMetric DLength a
 usSurveyInch = mkUnitQ (ucum "[in_us]" "in" "inch") (1 Prelude./ 12) $ usSurveyFoot
 
@@ -265,12 +265,12 @@ usSurveyInch = mkUnitQ (ucum "[in_us]" "in" "inch") (1 Prelude./ 12) $ usSurveyF
 -- See <https://en.wikipedia.org/wiki/Thousandth_of_an_inch here> for further information.
 --
 -- >>> 1 *~ usSurveyMil
--- 2.54000508001016e-5 m
+-- 2.54000508001016e-5 m
 --
 -- prop> 1000 *~ usSurveyMil === 1 *~ usSurveyInch
 --
 -- >>> 1 *~ usSurveyMil :: Length Rational
--- 1 % 39370 m
+-- 1 % 39370 m
 usSurveyMil :: Fractional a => Unit 'NonMetric DLength a
 usSurveyMil = mkUnitQ (ucum "[mil_us]" "mil" "mil") 0.001 $ usSurveyInch
 
@@ -282,12 +282,12 @@ usSurveyMil = mkUnitQ (ucum "[mil_us]" "mil" "mil") 0.001 $ usSurveyInch
 -- See <https://en.wikipedia.org/wiki/Yard here> for further information.
 --
 -- >>> 1 *~ usSurveyYard
--- 0.9144018288036576 m
+-- 0.9144018288036576 m
 --
 -- prop> 1 *~ usSurveyYard === 3 *~ usSurveyFoot
 --
 -- >>> 1 *~ usSurveyYard :: Length Rational
--- 3600 % 3937 m
+-- 3600 % 3937 m
 usSurveyYard :: (Fractional a) => Unit 'NonMetric DLength a
 usSurveyYard = mkUnitQ (ucum "[yd_us]" "yd" "yard") 3 $ usSurveyFoot
 
@@ -299,12 +299,12 @@ usSurveyYard = mkUnitQ (ucum "[yd_us]" "yd" "yard") 3 $ usSurveyFoot
 -- See <https://en.wikipedia.org/wiki/Mile#US_survey_mile here> for further information.
 --
 -- >>> 1 *~ usSurveyMile
--- 1609.3472186944373 m
+-- 1609.3472186944373 m
 --
 -- prop> 1 *~ usSurveyMile === 5280 *~ usSurveyFoot
 --
 -- >>> 1 *~ usSurveyMile :: Length Rational
--- 6336000 % 3937 m
+-- 6336000 % 3937 m
 usSurveyMile :: (Fractional a) => Unit 'NonMetric DLength a
 usSurveyMile = mkUnitQ (ucum "[mi_us]" "mi" "mile") 5280 $ usSurveyFoot
 
@@ -317,12 +317,12 @@ usSurveyMile = mkUnitQ (ucum "[mi_us]" "mi" "mile") 5280 $ usSurveyFoot
 -- See <https://en.wikipedia.org/wiki/Acre#Differences_between_international_and_US_survey_acres here> for further information.
 --
 -- >>> 1 *~ usSurveyAcre
--- 4046.872609874252 m^2
+-- 4046.872609874252 m^2
 --
 -- prop> 1 *~ usSurveyAcre === 43560 *~ usSurveyFoot ^ pos2
 --
 -- >>> 1 *~ usSurveyAcre :: Area Rational
--- 62726400000 % 15499969 m^2
+-- 62726400000 % 15499969 m^2
 usSurveyAcre :: (Fractional a) => Unit 'NonMetric DArea a
 usSurveyAcre = mkUnitQ (ucum "[acr_us]" "ac" "acre") 43560 $ square usSurveyFoot
 
@@ -332,10 +332,10 @@ usSurveyAcre = mkUnitQ (ucum "[acr_us]" "ac" "acre") 43560 $ square usSurveyFoot
 -- See <https://en.wikipedia.org/wiki/Avoirdupois#Internationalization here> for further information.
 --
 -- >>> 1 *~ poundMass
--- 0.45359237 kg
+-- 0.45359237 kg
 --
 -- >>> 1 *~ poundMass :: Mass Rational
--- 45359237 % 100000000 kg
+-- 45359237 % 100000000 kg
 poundMass :: Fractional a => Unit 'NonMetric DMass a
 poundMass = mkUnitQ (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
 
@@ -344,12 +344,12 @@ poundMass = mkUnitQ (ucum "[lb_av]" "lb" "pound") 0.45359237 $ kilo gram
 -- See <https://en.wikipedia.org/wiki/Ounce#International_avoirdupois_ounce here> for further information.
 --
 -- >>> 1 *~ ounce
--- 2.8349523125e-2 kg
+-- 2.8349523125e-2 kg
 --
 -- prop> 16 *~ ounce === 1 *~ poundMass
 --
 -- >>> 1 *~ ounce :: Mass Rational
--- 45359237 % 1600000000 kg
+-- 45359237 % 1600000000 kg
 ounce :: Fractional a => Unit 'NonMetric DMass a
 ounce = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
 
@@ -358,10 +358,10 @@ ounce = mkUnitQ (ucum "[oz_av]" "oz" "ounce") (1 Prelude./ 16) $ poundMass
 -- See <https://en.wikipedia.org/wiki/Short_ton#United_States here> for further information.
 --
 -- >>> 1 *~ shortTon
--- 907.18474 kg
+-- 907.18474 kg
 --
 -- >>> 1 *~ shortTon :: Mass Rational
--- 45359237 % 50000 kg
+-- 45359237 % 50000 kg
 shortTon :: Fractional a => Unit 'NonMetric DMass a
 shortTon = mkUnitQ (ucum "[ston_av]" "ton" "short ton") 2000 $ poundMass
 
@@ -374,12 +374,12 @@ shortTon = mkUnitQ (ucum "[ston_av]" "ton" "short ton") 2000 $ poundMass
 -- See <https://en.wikipedia.org/wiki/Pound_%28force%29 here> for further information.
 --
 -- >>> 1 *~ poundForce
--- 4.4482216152605 m kg s^-2
+-- 4.4482216152605 m kg s^-2
 --
 -- prop> 1 *~ poundForce === 1 *~ poundMass * (1 *~ gee)
 --
 -- >>> 1 *~ poundForce :: Force Rational
--- 8896443230521 % 2000000000000 m kg s^-2
+-- 8896443230521 % 2000000000000 m kg s^-2
 poundForce :: Fractional a => Unit 'NonMetric DForce a
 poundForce = mkUnitQ (ucum "[lbf_av]" "lbf" "pound force") 1 $ poundMass * gee
 
@@ -390,12 +390,12 @@ poundForce = mkUnitQ (ucum "[lbf_av]" "lbf" "pound force") 1 $ poundMass * gee
 -- See <https://en.wikipedia.org/wiki/Horsepower#Mechanical_horsepower here> for further information.
 --
 -- >>> 1 *~ horsepower
--- 745.6998715822702 m^2 kg s^-3
+-- 745.6998715822702 m^2 kg s^-3
 --
 -- prop> 1 *~ horsepower === 550 *~ poundForce * (1 *~ foot) / (1 *~ second)
 --
 -- >>> 1 *~ horsepower :: Power Rational
--- 37284993579113511 % 50000000000000 m^2 kg s^-3
+-- 37284993579113511 % 50000000000000 m^2 kg s^-3
 horsepower :: Fractional a => Unit 'NonMetric DPower a
 horsepower = mkUnitQ (ucum "[HP]" "hp" "horsepower") 550 $ foot * poundForce / second
 
@@ -407,10 +407,10 @@ horsepower = mkUnitQ (ucum "[HP]" "hp" "horsepower") 550 $ foot * poundForce / s
 -- See <https://en.wikipedia.org/wiki/Slug_%28mass%29 here> for further information.
 --
 -- >>> 1 *~ slug
--- 14.593902937206364 kg
+-- 14.593902937206364 kg
 --
 -- >>> 1 *~ slug :: Mass Rational
--- 8896443230521 % 609600000000 kg
+-- 8896443230521 % 609600000000 kg
 slug :: Fractional a => Unit 'NonMetric DMass a
 slug = mkUnitQ (dimensionalAtom "slug" "slug" "slug") 1 $ poundForce * (second^pos2) / foot
 
@@ -419,10 +419,10 @@ slug = mkUnitQ (dimensionalAtom "slug" "slug" "slug") 1 $ poundForce * (second^p
 -- See <https://en.wikipedia.org/wiki/Pounds_per_square_inch here> for further information.
 --
 -- >>> 1 *~ psi
--- 6894.757293168362 m^-1 kg s^-2
+-- 6894.757293168362 m^-1 kg s^-2
 --
 -- >>> 1 *~ psi :: Pressure Rational
--- 8896443230521 % 1290320000 m^-1 kg s^-2
+-- 8896443230521 % 1290320000 m^-1 kg s^-2
 psi :: Fractional a => Unit 'NonMetric DPressure a
 psi = mkUnitQ (ucum "[psi]" "psi" "pound per square inch") 1 $ poundForce / inch ^ pos2
 
@@ -433,10 +433,10 @@ psi = mkUnitQ (ucum "[psi]" "psi" "pound per square inch") 1 $ poundForce / inch
 -- See <https://en.wikipedia.org/wiki/Nautical_mile here> for further information.
 --
 -- >>> 1 *~ nauticalMile
--- 1852.0 m
+-- 1852.0 m
 --
 -- >>> 1 *~ nauticalMile :: Length Rational
--- 1852 % 1 m
+-- 1852 % 1 m
 nauticalMile :: (Num a) => Unit 'NonMetric DLength a
 nauticalMile = mkUnitZ (ucum "[nmi_i]" "NM" "nautical mile") 1852 $ meter
 
@@ -445,10 +445,10 @@ nauticalMile = mkUnitZ (ucum "[nmi_i]" "NM" "nautical mile") 1852 $ meter
 -- See <https://en.wikipedia.org/wiki/Knot_%28unit%29 here> for further information.
 --
 -- >>> 1 *~ knot
--- 0.5144444444444445 m s^-1
+-- 0.5144444444444445 m s^-1
 --
 -- >>> 1 *~ knot :: Velocity Rational
--- 463 % 900 m s^-1
+-- 463 % 900 m s^-1
 knot :: (Fractional a) => Unit 'NonMetric DVelocity a
 knot = mkUnitQ (ucum "[kt_i]" "kt" "knot") 1 $ nauticalMile / hour
 
@@ -481,10 +481,10 @@ teaspoon = mkUnitQ (ucum "[tsp_m]" "tsp" "teaspoon") 5 $ milli liter
 -- See <https://en.wikipedia.org/wiki/British_thermal_unit#Definitions here> for further information.
 --
 -- >>> 1 *~ btu
--- 1055.05585262 m^2 kg s^-2
+-- 1055.05585262 m^2 kg s^-2
 --
 -- >>> 1 *~ btu :: Energy Rational
--- 52752792631 % 50000000 m^2 kg s^-2
+-- 52752792631 % 50000000 m^2 kg s^-2
 btu :: Fractional a => Unit 'NonMetric DEnergy a
 btu = mkUnitQ (ucum "[Btu_IT]" "btu" "British thermal unit") 1055.05585262 $ joule
 
@@ -504,20 +504,20 @@ The IAU recommends <#note2 [2]> that:
 -- See <https://en.wikipedia.org/wiki/Julian_year_%28astronomy%29 here> for further information.
 --
 -- >>> 1 *~ year
--- 3.15576e7 s
+-- 3.15576e7 s
 --
 -- >>> 1 *~ year :: Time Rational
--- 31557600 % 1 s
+-- 31557600 % 1 s
 year :: Num a => Unit 'NonMetric DTime a
 year = mkUnitZ (ucum "a_j" "a" "mean Julian year") 31557600 $ second
 
 -- | One mean Julian century is one hundred mean Julian 'year's.
 --
 -- >>> 1 *~ century
--- 3.15576e9 s
+-- 3.15576e9 s
 --
 -- >>> 1 *~ century :: Time Rational
--- 3155760000 % 1 s
+-- 3155760000 % 1 s
 century :: Num a => Unit 'NonMetric DTime a
 century = mkUnitZ (dimensionalAtom "c_j" "cen" "mean Julian century") 100 $ year
 
@@ -533,10 +533,10 @@ We include some of the common ones here. 'psi' was defined earlier.
 --  It is about equal to the atmospheric pressure on Earth at sea level.
 --
 -- >>> 1 *~ bar
--- 100000.0 m^-1 kg s^-2
+-- 100000.0 m^-1 kg s^-2
 --
 -- >>> 1 *~ bar :: Pressure Rational
--- 100000 % 1 m^-1 kg s^-2
+-- 100000 % 1 m^-1 kg s^-2
 bar :: (Num a) => Unit 'Metric DPressure a
 bar = mkUnitZ (ucumMetric "bar" "bar" "bar") 1e5 $ pascal
 
@@ -549,10 +549,10 @@ bar = mkUnitZ (ucumMetric "bar" "bar" "bar") 1e5 $ pascal
 --  level.
 --
 -- >>> 1 *~ atmosphere
--- 101325.0 m^-1 kg s^-2
+-- 101325.0 m^-1 kg s^-2
 --
 -- >>> 1 *~ atmosphere :: Pressure Rational
--- 101325 % 1 m^-1 kg s^-2
+-- 101325 % 1 m^-1 kg s^-2
 atmosphere :: (Num a) => Unit 'NonMetric DPressure a
 atmosphere = mkUnitZ (ucum "atm" "atm" "standard atmosphere") 101325 $ pascal
 
@@ -564,10 +564,10 @@ atmosphere = mkUnitZ (ucum "atm" "atm" "standard atmosphere") 101325 $ pascal
 --  to one kilogram-force per square centimeter.
 --
 -- >>> 1 *~ technicalAtmosphere
--- 98066.5 m^-1 kg s^-2
+-- 98066.5 m^-1 kg s^-2
 --
 -- >>> 1 *~ technicalAtmosphere :: Pressure Rational
--- 196133 % 2 m^-1 kg s^-2
+-- 196133 % 2 m^-1 kg s^-2
 technicalAtmosphere :: (Fractional a) => Unit 'NonMetric DPressure a
 technicalAtmosphere = mkUnitQ (ucum "att" "at" "technical atmosphere") 1 $ kilo gram * gee * centi meter ^ neg2
 
@@ -583,10 +583,10 @@ technicalAtmosphere = mkUnitQ (ucum "att" "at" "technical atmosphere") 1 $ kilo 
 -- at 0 deg. Under most conditions, 1 mmHg is approximately equal to 1 'torr'.
 --
 -- >>> 1 *~ mmHg
--- 133.322 m^-1 kg s^-2
+-- 133.322 m^-1 kg s^-2
 --
 -- >>> 1 *~ mmHg :: Pressure Rational
--- 66661 % 500 m^-1 kg s^-2
+-- 66661 % 500 m^-1 kg s^-2
 mmHg :: (Fractional a) => Unit 'NonMetric DPressure a
 mmHg = milli mHg
 
@@ -601,10 +601,10 @@ mHg = mkUnitQ (ucumMetric "m[Hg]" "m Hg" "meter of mercury") 133.3220 $ kilo pas
 -- This is the value defined by UCUM. For the value defined by NIST, see 'inHg_NIST'.
 --
 -- >>> 1 *~ inHg
--- 3386.3788 m^-1 kg s^-2
+-- 3386.3788 m^-1 kg s^-2
 --
 -- >>> 1 *~ inHg :: Pressure Rational
--- 8465947 % 2500 m^-1 kg s^-2
+-- 8465947 % 2500 m^-1 kg s^-2
 inHg :: (Fractional a) => Unit 'NonMetric DPressure a
 inHg = inHg_UCUM
 
@@ -616,10 +616,10 @@ inHg = inHg_UCUM
 -- This is the value defined by UCUM. For the value defined by NIST, see 'inHg_NIST'.
 --
 -- >>> 1 *~ inHg_UCUM
--- 3386.3788 m^-1 kg s^-2
+-- 3386.3788 m^-1 kg s^-2
 --
 -- >>> 1 *~ inHg_UCUM :: Pressure Rational
--- 8465947 % 2500 m^-1 kg s^-2
+-- 8465947 % 2500 m^-1 kg s^-2
 inHg_UCUM :: (Fractional a) => Unit 'NonMetric DPressure a
 inHg_UCUM = mkUnitQ (ucum "[in_i'Hg]" "in Hg" "inch of mercury") 1 $ mHg * inch / meter
 
@@ -631,10 +631,10 @@ inHg_UCUM = mkUnitQ (ucum "[in_i'Hg]" "in Hg" "inch of mercury") 1 $ mHg * inch 
 -- This is the value defined by NIST. For the value defined by UCUM, see 'inHg_UCUM'.
 --
 -- >>> 1 *~ inHg_NIST
--- 3386.389 m^-1 kg s^-2
+-- 3386.389 m^-1 kg s^-2
 --
 -- >>> 1 *~ inHg_NIST :: Pressure Rational
--- 3386389 % 1000 m^-1 kg s^-2
+-- 3386389 % 1000 m^-1 kg s^-2
 inHg_NIST :: (Fractional a) => Unit 'NonMetric DPressure a
 inHg_NIST = mkUnitQ (dimensionalAtom "[in_i'Hg_NIST]" "in Hg" "inch of mercury") 3.386389e3 $ pascal
 
@@ -643,10 +643,10 @@ inHg_NIST = mkUnitQ (dimensionalAtom "[in_i'Hg_NIST]" "in Hg" "inch of mercury")
 -- See <https://en.wikipedia.org/wiki/Torr here> for further information.
 --
 -- >>> 1 *~ torr
--- 133.32236842105263 m^-1 kg s^-2
+-- 133.32236842105263 m^-1 kg s^-2
 --
 -- >>> 1 *~ torr :: Pressure Rational
--- 20265 % 152 m^-1 kg s^-2
+-- 20265 % 152 m^-1 kg s^-2
 torr :: (Fractional a) => Unit 'NonMetric DPressure a
 torr = mkUnitQ (dimensionalAtom "Torr" "Torr" "Torr") (1 Prelude./ 760) $ atmosphere
 
@@ -656,10 +656,10 @@ torr = mkUnitQ (dimensionalAtom "Torr" "Torr" "Torr") (1 Prelude./ 760) $ atmosp
 -- See <https://en.wikipedia.org/wiki/Rad_%28unit%29 here> for further information.
 --
 -- >>> 1 *~ rad
--- 1.0e-2 m^2 s^-2
+-- 1.0e-2 m^2 s^-2
 --
 -- >>> 1 *~ rad :: AbsorbedDose Rational
--- 1 % 100 m^2 s^-2
+-- 1 % 100 m^2 s^-2
 rad :: (Fractional a) => Unit 'Metric DAbsorbedDose a
 rad = mkUnitQ (ucumMetric "RAD" "RAD" "RAD") 1 $ centi gray
 
@@ -668,10 +668,10 @@ rad = mkUnitQ (ucumMetric "RAD" "RAD" "RAD") 1 $ centi gray
 -- See <https://en.wikipedia.org/wiki/Viscosity#Kinematic_viscosity_.CE.BD here> for further information.
 --
 -- >>> 1 *~ stokes
--- 1.0e-4 m^2 s^-1
+-- 1.0e-4 m^2 s^-1
 --
 -- >>> 1 *~ stokes :: KinematicViscosity Rational
--- 1 % 10000 m^2 s^-1
+-- 1 % 10000 m^2 s^-1
 stokes :: (Fractional a) => Unit 'Metric DKinematicViscosity a
 stokes = mkUnitQ (ucumMetric "St" "St" "Stokes") 1 $ centi meter ^ pos2 / second
 
@@ -687,10 +687,10 @@ These units of temperature are relative. For absolute temperatures, see 'Numeric
 -- See <https://en.wikipedia.org/wiki/Fahrenheit#Definition_and_conversions here> for further information.
 --
 -- >>> 1 *~ degreeFahrenheit
--- 0.5555555555555556 K
+-- 0.5555555555555556 K
 --
 -- >>> 1 *~ degreeFahrenheit :: ThermodynamicTemperature Rational
--- 5 % 9 K
+-- 5 % 9 K
 degreeFahrenheit :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
 degreeFahrenheit = mkUnitQ (ucum "[degF]" "°F" "degree Fahrenheit") (5 Prelude./ 9) $ degreeCelsius
 
@@ -702,10 +702,10 @@ degreeFahrenheit = mkUnitQ (ucum "[degF]" "°F" "degree Fahrenheit") (5 Prelude.
 -- See <https://en.wikipedia.org/wiki/Rankine_scale here> for further information.
 --
 -- >>> 1 *~ degreeRankine
--- 0.5555555555555556 K
+-- 0.5555555555555556 K
 --
 -- >>> 1 *~ degreeRankine :: ThermodynamicTemperature Rational
--- 5 % 9 K
+-- 5 % 9 K
 degreeRankine :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
 degreeRankine = mkUnitQ (ucum "[degR]" "°R" "degree Rankine") 1 $ degreeFahrenheit
 
@@ -719,10 +719,10 @@ Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki
 -- See <https://en.wikipedia.org/wiki/Imperial_units#Volume here> for further information.
 --
 -- >>> 1 *~ imperialGallon
--- 4.54609e-3 m^3
+-- 4.54609e-3 m^3
 --
 -- >>> 1 *~ imperialGallon :: Volume Rational
--- 454609 % 100000000 m^3
+-- 454609 % 100000000 m^3
 imperialGallon :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialGallon = mkUnitQ (ucum "[gal_br]" "gal" "gallon") 4.54609 $ liter
 
@@ -731,10 +731,10 @@ imperialGallon = mkUnitQ (ucum "[gal_br]" "gal" "gallon") 4.54609 $ liter
 -- See <https://en.wikipedia.org/wiki/Imperial_units#Volume here> for further information.
 --
 -- >>> 1 *~ imperialQuart
--- 1.1365225e-3 m^3
+-- 1.1365225e-3 m^3
 --
 -- >>> 1 *~ imperialQuart :: Volume Rational
--- 454609 % 400000000 m^3
+-- 454609 % 400000000 m^3
 imperialQuart :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialQuart = mkUnitQ (ucum "[qt_br]" "qt" "quart") (1 Prelude./ 4) $ imperialGallon
 
@@ -743,10 +743,10 @@ imperialQuart = mkUnitQ (ucum "[qt_br]" "qt" "quart") (1 Prelude./ 4) $ imperial
 -- See <https://en.wikipedia.org/wiki/Imperial_units#Volume here> for further information.
 --
 -- >>> 1 *~ imperialPint
--- 5.6826125e-4 m^3
+-- 5.6826125e-4 m^3
 --
 -- >>> 1 *~ imperialPint :: Volume Rational
--- 454609 % 800000000 m^3
+-- 454609 % 800000000 m^3
 imperialPint :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialPint = mkUnitQ (ucum "[pt_br]" "pt" "pint") (1 Prelude./ 8) $ imperialGallon
 
@@ -758,10 +758,10 @@ imperialPint = mkUnitQ (ucum "[pt_br]" "pt" "pint") (1 Prelude./ 8) $ imperialGa
 -- See <https://en.wikipedia.org/wiki/Cup_%28unit%29#Imperial_cup here> for further information.
 --
 -- >>> 1 *~ imperialCup
--- 2.84130625e-4 m^3
+-- 2.84130625e-4 m^3
 --
 -- >>> 1 *~ imperialCup :: Volume Rational
--- 454609 % 1600000000 m^3
+-- 454609 % 1600000000 m^3
 imperialCup :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialCup = mkUnitQ (dimensionalAtom "[cup_br]" "cup" "cup") 0.5 $ imperialPint
 
@@ -770,10 +770,10 @@ imperialCup = mkUnitQ (dimensionalAtom "[cup_br]" "cup" "cup") 0.5 $ imperialPin
 -- See <https://en.wikipedia.org/wiki/Imperial_units#Volume here> for further information.
 --
 -- >>> 1 *~ imperialGill
--- 1.420653125e-4 m^3
+-- 1.420653125e-4 m^3
 --
 -- >>> 1 *~ imperialGill :: Volume Rational
--- 454609 % 3200000000 m^3
+-- 454609 % 3200000000 m^3
 imperialGill :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialGill = mkUnitQ (ucum "[gil_br]" "gill" "gill") (1 Prelude./ 4) $ imperialPint
 
@@ -782,10 +782,10 @@ imperialGill = mkUnitQ (ucum "[gil_br]" "gill" "gill") (1 Prelude./ 4) $ imperia
 -- See <https://en.wikipedia.org/wiki/Imperial_units#Volume here> for further information.
 --
 -- >>> 1 *~ imperialFluidOunce
--- 2.84130625e-5 m^3
+-- 2.84130625e-5 m^3
 --
 -- >>> 1 *~ imperialFluidOunce :: Volume Rational
--- 454609 % 16000000000 m^3
+-- 454609 % 16000000000 m^3
 imperialFluidOunce :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialFluidOunce = mkUnitQ (ucum "[foz_br]" "fl oz" "fluid ounce") (1 Prelude./ 20) $ imperialPint
 
@@ -799,10 +799,10 @@ Note that there exist rarely-used "dry" variants of units with overlapping names
 -- See <https://en.wikipedia.org/wiki/Gallon#The_US_liquid_gallon here> for further information.
 --
 -- >>> 1 *~ usGallon
--- 3.785411784e-3 m^3
+-- 3.785411784e-3 m^3
 --
 -- >>> 1 *~ usGallon :: Volume Rational
--- 473176473 % 125000000000 m^3
+-- 473176473 % 125000000000 m^3
 usGallon :: (Fractional a) => Unit 'NonMetric DVolume a
 usGallon = mkUnitQ (ucum "[gal_us]" "gal" "gallon") 231 $ (cubic inch)
 
@@ -811,10 +811,10 @@ usGallon = mkUnitQ (ucum "[gal_us]" "gal" "gallon") 231 $ (cubic inch)
 -- See <https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume here> for further information.
 --
 -- >>> 1 *~ usQuart
--- 9.46352946e-4 m^3
+-- 9.46352946e-4 m^3
 --
 -- >>> 1 *~ usQuart :: Volume Rational
--- 473176473 % 500000000000 m^3
+-- 473176473 % 500000000000 m^3
 usQuart :: (Fractional a) => Unit 'NonMetric DVolume a
 usQuart = mkUnitQ (ucum "[qt_us]" "qt" "quart") (1 Prelude./ 4) $ usGallon
 
@@ -823,10 +823,10 @@ usQuart = mkUnitQ (ucum "[qt_us]" "qt" "quart") (1 Prelude./ 4) $ usGallon
 -- See <https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume here> for further information.
 --
 -- >>> 1 *~ usPint
--- 4.73176473e-4 m^3
+-- 4.73176473e-4 m^3
 --
 -- >>> 1 *~ usPint :: Volume Rational
--- 473176473 % 1000000000000 m^3
+-- 473176473 % 1000000000000 m^3
 usPint :: (Fractional a) => Unit 'NonMetric DVolume a
 usPint = mkUnitQ (ucum "[pt_us]" "pt" "pint") (1 Prelude./ 8) $ usGallon
 
@@ -835,10 +835,10 @@ usPint = mkUnitQ (ucum "[pt_us]" "pt" "pint") (1 Prelude./ 8) $ usGallon
 -- See <https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume here> for further information.
 --
 -- >>> 1 *~ usCup
--- 2.365882365e-4 m^3
+-- 2.365882365e-4 m^3
 --
 -- >>> 1 *~ usCup :: Volume Rational
--- 473176473 % 2000000000000 m^3
+-- 473176473 % 2000000000000 m^3
 usCup :: (Fractional a) => Unit 'NonMetric DVolume a
 usCup = mkUnitQ (ucum "[cup_us]" "cup" "cup") (1 Prelude./ 2) $ usPint
 
@@ -847,10 +847,10 @@ usCup = mkUnitQ (ucum "[cup_us]" "cup" "cup") (1 Prelude./ 2) $ usPint
 -- See <https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume here> for further information.
 --
 -- >>> 1 *~ usGill
--- 1.1829411825e-4 m^3
+-- 1.1829411825e-4 m^3
 --
 -- >>> 1 *~ usGill :: Volume Rational
--- 473176473 % 4000000000000 m^3
+-- 473176473 % 4000000000000 m^3
 usGill :: (Fractional a) => Unit 'NonMetric DVolume a
 usGill = mkUnitQ (ucum "[gil_us]" "gill" "gill") (1 Prelude./ 4) $ usPint
 
@@ -859,10 +859,10 @@ usGill = mkUnitQ (ucum "[gil_us]" "gill" "gill") (1 Prelude./ 4) $ usPint
 -- See <https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume here> for further information.
 --
 -- >>> 1 *~ usFluidOunce
--- 2.95735295625e-5 m^3
+-- 2.95735295625e-5 m^3
 --
 -- >>> 1 *~ usFluidOunce :: Volume Rational
--- 473176473 % 16000000000000 m^3
+-- 473176473 % 16000000000000 m^3
 usFluidOunce :: (Fractional a) => Unit 'NonMetric DVolume a
 usFluidOunce = mkUnitQ (ucum "[foz_us]" "fl oz" "fluid ounce") (1 Prelude./ 16) $ usPint -- sic, does not match factor used in imperial system
 
@@ -871,10 +871,10 @@ usFluidOunce = mkUnitQ (ucum "[foz_us]" "fl oz" "fluid ounce") (1 Prelude./ 16) 
 -- See <https://en.wikipedia.org/wiki/%C3%85ngstr%C3%B6m here> for further information.
 --
 -- >>> 1 *~ angstrom
--- 1.0e-10 m
+-- 1.0e-10 m
 --
 -- >>> 1 *~ angstrom :: Length Rational
--- 1 % 10000000000 m
+-- 1 % 10000000000 m
 angstrom :: (Fractional a) => Unit 'NonMetric DLength a
 angstrom = mkUnitQ (ucum "Ao" "Å" "Ångström") 0.1 $ nano meter
 
@@ -883,9 +883,9 @@ angstrom = mkUnitQ (ucum "Ao" "Å" "Ångström") 0.1 $ nano meter
 -- See <https://en.wikipedia.org/wiki/Gauss_%28unit%29 here> for further information.
 --
 -- >>> 1 *~ gauss
--- 1.0e-4 kg s^-2 A^-1
+-- 1.0e-4 kg s^-2 A^-1
 --
 -- >>> 1 *~ gauss :: MagneticFluxDensity Rational
--- 1 % 10000 kg s^-2 A^-1
+-- 1 % 10000 kg s^-2 A^-1
 gauss :: (Fractional a) => Unit 'NonMetric DMagneticFluxDensity a
 gauss = mkUnitQ (ucum "G" "G" "Gauss") 1e-4 $ tesla

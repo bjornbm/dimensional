@@ -411,7 +411,7 @@ Multiplication, division and powers apply to both units and quantities.
 -- | Forms the reciprocal of a 'Quantity', which has the reciprocal dimension.
 --
 -- >>> recip $ 47 *~ hertz
--- 2.127659574468085e-2 s
+-- 2.127659574468085e-2 s
 recip :: (Fractional a) => Quantity d a -> Quantity (Recip d) a
 recip = liftQ Prelude.recip
 
@@ -550,10 +550,10 @@ infixl 7  *~~, /~~
 -- | The sum of all elements in a foldable structure.
 --
 -- >>> sum ([] :: [Mass Double])
--- 0.0 kg
+-- 0.0 kg
 --
 -- >>> sum [12.4 *~ meter, 1 *~ foot]
--- 12.7048 m
+-- 12.7048 m
 sum :: (Num a, Foldable f) => f (Quantity d a) -> Quantity d a
 sum = foldr (+) _0
 
@@ -716,7 +716,7 @@ If you feel your work requires this instance, it is provided as an orphan in "Nu
 --
 -- >>> let x = (37 :: Rational) *~ poundMass
 -- >>> changeRep x :: Mass Double
--- 16.78291769 kg
+-- 16.78291769 kg
 changeRep :: (KnownVariant v, Real a, Fractional b) => Dimensional v d a -> Dimensional v d b
 changeRep = dmap realToFrac
 

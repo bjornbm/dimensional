@@ -1,3 +1,8 @@
+1.3
+-------------
+* Breaking: Changed the `Show` instances for `UnitName`, `Unit`, `SQuantity` to use non-breaking spaces
+  within unit names and between values and their units.
+
 1.2 (2018-11)
 -------------
 * Add `NoStarIsType` extension and import `Data.Kind.Type` for [GHC 8.6 compitbility](https://github.com/ghc-proposals/ghc-proposals/blob/05721788de9ab6538def68c3c2c9dec50c9f24a8/proposals/0020-no-type-in-type.rst). Abandon compatibility with GHC < 8.

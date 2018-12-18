@@ -17,10 +17,11 @@ spec = do
 
          describe "Show instance" $ do
            it "properly prints basic quantities" $ do
+             -- note: these comparison literals use non-breaking spaces
              show ((1.0::Double) *~ one) `shouldBe` "1.0"
-             show ((2.0::Double) *~ meter) `shouldBe` "2.0 m"
-             show ((2.0::Double) *~ (meter / second)) `shouldBe` "2.0 m s^-1"
-             show ((2.0::Double) *~ (meter ^ pos2 / second ^ pos2)) `shouldBe` "2.0 m^2 s^-2"
+             show ((2.0::Double) *~ meter) `shouldBe` "2.0 m"
+             show ((2.0::Double) *~ (meter / second)) `shouldBe` "2.0 m s^-1"
+             show ((2.0::Double) *~ (meter ^ pos2 / second ^ pos2)) `shouldBe` "2.0 m^2 s^-2"
 
          describe "Ord instance" $ do
            it "properly sorts quantities" $ do

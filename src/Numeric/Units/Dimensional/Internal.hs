@@ -227,6 +227,7 @@ We will conclude by providing a reasonable 'Show' instance for
 quantities. The SI unit of the quantity is inferred
 from its dimension.
 -}
+-- | Uses non-breaking spaces between the value and the unit, and within the unit name.
 instance (KnownDimension d, E.KnownExactPi s, Show a, Real a) => Show (SQuantity s d a) where
   show (Quantity x) | isExactOne s' = show x ++ showName n
                     | otherwise = "Quantity " ++ show x ++ " {- " ++ show q ++ " -}"
@@ -238,15 +239,18 @@ instance (KnownDimension d, E.KnownExactPi s, Show a, Real a) => Show (SQuantity
 
 -- | Shows the value of a 'Quantity' expressed in a specified 'Unit' of the same 'Dimension'.
 --
--- >>> showIn watt $ (37 *~ volt) * (4 *~ ampere)
--- "148.0 W"
+-- Uses non-breaking spaces between the value and the unit, and within the unit name.
+--
+-- >>> putStrLn $ showIn watt $ (37 *~ volt) * (4 *~ ampere)
+-- 148.0 W
 showIn :: (Show a, Fractional a) => Unit m d a -> Quantity d a -> String
 showIn (Unit n _ y) (Quantity x) = show (x / y) ++ (showName . Name.weaken $ n)
 
 showName :: UnitName 'NonMetric -> String
 showName n | n == nOne = ""
-           | otherwise = " " ++ show n
+           | otherwise = "\xA0" ++ show n
 
+-- | Unit names are shown with non-breaking spaces.
 instance (Show a) => Show (Unit m d a) where
   show (Unit n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
 
