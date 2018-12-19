@@ -33,9 +33,7 @@ import Data.Coerce (coerce)
 import Data.Data
 import Data.Kind
 import Data.ExactPi
-#if MIN_VERSION_base(4,9,0)
 import Data.Functor.Classes (Eq1(..), Ord1(..))
-#endif
 import qualified Data.ExactPi.TypeLevel as E
 import Data.Monoid (Monoid(..))
 import Data.Semigroup (Semigroup(..))
@@ -94,11 +92,7 @@ deriving instance Typeable Dimensional
 
 instance KnownVariant ('DQuantity s) where
   newtype Dimensional ('DQuantity s) d a = Quantity a
-    deriving (Eq, Ord, AEq, Data, Generic, Generic1
-#if MIN_VERSION_base(4,8,0)
-     , Typeable -- GHC 7.8 doesn't support deriving this instance
-#endif
-    )
+    deriving (Eq, Ord, AEq, Data, Generic, Generic1, Typeable)
   type (ScaleFactor ('DQuantity s)) = s
   extractValue (Quantity x) = (x, Nothing)
   extractName _ = Nothing
@@ -107,11 +101,7 @@ instance KnownVariant ('DQuantity s) where
 
 instance (Typeable m) => KnownVariant ('DUnit m) where
   data Dimensional ('DUnit m) d a = Unit !(UnitName m) !ExactPi !a
-    deriving (Generic, Generic1
-#if MIN_VERSION_base(4,8,0)
-     , Typeable -- GHC 7.8 doesn't support deriving this instance
-#endif
-    )
+    deriving (Generic, Generic1, Typeable)
   type (ScaleFactor ('DUnit m)) = E.One
   extractValue (Unit _ e x) = (x, Just e)
   extractName (Unit n _ _) = Just . Name.weaken $ n
@@ -125,13 +115,11 @@ instance (Bounded a) => Bounded (SQuantity s d a) where
   minBound = Quantity minBound
   maxBound = Quantity maxBound
 
-#if MIN_VERSION_base(4,9,0)
 instance Eq1 (SQuantity s d) where
   liftEq = coerce
 
 instance Ord1 (SQuantity s d) where
   liftCompare = coerce
-#endif
 
 instance HasInterchangeName (Unit m d a) where
   interchangeName (Unit n _ _) = interchangeName n

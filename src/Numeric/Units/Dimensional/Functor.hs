@@ -1,14 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# OPTIONS_HADDOCK show-extensions #-}
 
-{-# LANGUAGE CPP #-}
-#if MIN_VERSION_base(4,8,0)
--- OverlappingInstances was deprecated by GHC 7.10 in favor of OVERLAPPING pragmas.
-#else
-{-# LANGUAGE OverlappingInstances #-}
-{-# OPTIONS_GHC -fno-warn-unrecognised-pragmas #-}
-#endif
-
 {- |
    Copyright  : Copyright (C) 2006-2018 Bjorn Buckwalter
    License    : BSD3
