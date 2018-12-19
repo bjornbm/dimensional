@@ -2,7 +2,6 @@
 
 {-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -228,7 +227,7 @@ import Numeric.NumType.DK.Integers
   )
 import Data.Data
 import Data.ExactPi
-import Data.Foldable (Foldable(foldr))
+import Data.Foldable (Foldable(foldr, length))
 import Data.Maybe
 import Data.Ratio
 import Numeric.Units.Dimensional.Dimensions
@@ -237,18 +236,6 @@ import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, streng
 import qualified Numeric.Units.Dimensional.UnitNames.Internal as Name
 import Numeric.Units.Dimensional.Variants hiding (type (*), type (/))
 import qualified Numeric.Units.Dimensional.Variants as V
-
--- Provide a version of length which is compatible with base-4.8's version.
--- Where 4.8 is available we use that version as it may have performance advantages.
--- Where it is not available we implement it in terms of foldl'.
-#if MIN_VERSION_base(4,8,0)
-import Data.Foldable (Foldable(length))
-#else
-import Data.Foldable (Foldable(foldl'))
-
-length :: Foldable t => t a -> Int
-length = foldl' (\c _ -> c Prelude.+ 1) 0
-#endif
 
 -- $setup
 -- >>> :set -XFlexibleInstances
