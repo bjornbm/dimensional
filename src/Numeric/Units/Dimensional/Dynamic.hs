@@ -88,7 +88,7 @@ data AnyQuantity a = AnyQuantity !Dimension' !a
 
 instance (Show a) => Show (AnyQuantity a) where
   show (AnyQuantity d a) | d == D.dOne = show a
-                         | otherwise   = (show a) ++ " " ++ (show . baseUnitName $ d)
+                         | otherwise   = show a ++ " " ++ (show . baseUnitName $ d)
 
 instance HasDynamicDimension (AnyQuantity a) where
 
@@ -212,7 +212,7 @@ polydimensionalZero = DynQuantity AnyDimension 0
 
 -- Lifts a function which is only valid on dimensionless quantities into a function on DynQuantitys.
 liftDimensionless :: (a -> a) -> DynQuantity a -> DynQuantity a
-liftDimensionless f = liftDQ (matchDimensions $ SomeDimension D.dOne) f
+liftDimensionless = liftDQ (matchDimensions $ SomeDimension D.dOne)
 
 -- Lifts a function on values into a function on DynQuantitys.
 liftDQ :: (DynamicDimension -> DynamicDimension) -- ^ How the function operates on dimensions.
@@ -265,7 +265,7 @@ data AnyUnit = AnyUnit Dimension' (UnitName 'NonMetric) ExactPi
   deriving (Generic, Typeable)
 
 instance Show AnyUnit where
-  show (AnyUnit _ n e) = (show n) ++ " =def= " ++ (show e) ++ " of the SI base unit"
+  show (AnyUnit _ n e) = show n ++ " =def= " ++ show e ++ " of the SI base unit"
 
 instance HasDynamicDimension AnyUnit where
 

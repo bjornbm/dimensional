@@ -1,5 +1,4 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE NumDecimals #-}
 {-# LANGUAGE RankNTypes #-}
 
 {- |

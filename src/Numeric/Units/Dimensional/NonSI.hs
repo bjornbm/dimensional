@@ -804,7 +804,7 @@ Note that there exist rarely-used "dry" variants of units with overlapping names
 -- >>> 1 *~ usGallon :: Volume Rational
 -- 473176473 % 125000000000 m^3
 usGallon :: (Fractional a) => Unit 'NonMetric DVolume a
-usGallon = mkUnitQ (ucum "[gal_us]" "gal" "gallon") 231 $ (cubic inch)
+usGallon = mkUnitQ (ucum "[gal_us]" "gal" "gallon") 231 $ cubic inch
 
 -- | One US liquid quart is one quarter of a 'usGallon'.
 --

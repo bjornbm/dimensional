@@ -58,7 +58,7 @@ reflect only the author's needs to date. Again, patches are welcome.
 
 == Preliminaries
 
-This module requires GHC 7.8 or later. We utilize Data Kinds, TypeNats,
+This module requires GHC 8 or later. We utilize Data Kinds, TypeNats,
 Closed Type Families, etc. Clients of the module are generally not
 required to use these extensions.
 
