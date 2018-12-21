@@ -110,19 +110,19 @@ scaleFloat x = Quantity . P.scaleFloat x . unQuantity
 
 -- | An infinite floating-point quantity.
 infinity :: IEEE a => Quantity d a
-infinity = Quantity $ F.infinity
+infinity = Quantity F.infinity
 
 -- | The smallest representable positive quantity whose representation is normalized.
 minNormal :: IEEE a => Quantity d a
-minNormal = Quantity $ F.minNormal
+minNormal = Quantity F.minNormal
 
 -- | The largest representable finite floating-point quantity.
 maxFinite :: IEEE a => Quantity d a
-maxFinite = Quantity $ F.maxFinite
+maxFinite = Quantity F.maxFinite
 
 -- | The smallest positive value @x@ such that @_1 + x@ is representable.
 epsilon :: IEEE a => Dimensionless a
-epsilon = Quantity $ F.epsilon
+epsilon = Quantity F.epsilon
 
 -- | @copySign x y@ returns the quantity @x@ with its sign changed to match that of @y@.
 copySign :: IEEE a => Quantity d a -> Quantity d a -> Quantity d a
@@ -148,7 +148,7 @@ bisectIEEE (Quantity x) (Quantity y) = Quantity $ F.bisectIEEE x y
 
 -- | Default @NaN@ quantity.
 nan :: IEEE a => Quantity d a
-nan = Quantity $ F.nan
+nan = Quantity F.nan
 
 -- | Quiet @NaN@ quantity with a positive integer payload.
 -- Payload must be less than 'maxNaNPayload' of the representation type.

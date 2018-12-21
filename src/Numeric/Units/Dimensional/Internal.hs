@@ -27,7 +27,6 @@ where
 
 import Control.Applicative
 import Control.DeepSeq
-import Control.Monad (liftM)
 import Data.AEq (AEq)
 import Data.Coerce (coerce)
 import Data.Data
@@ -82,7 +81,7 @@ class KnownVariant (v :: Variant) where
   type ScaleFactor v :: E.ExactPi'
   extractValue :: Dimensional v d a -> (a, Maybe ExactPi)
   extractName :: Dimensional v d a -> Maybe (UnitName 'NonMetric)
-  injectValue :: (Maybe (UnitName 'NonMetric)) -> (a, Maybe ExactPi) -> Dimensional v d a
+  injectValue :: Maybe (UnitName 'NonMetric) -> (a, Maybe ExactPi) -> Dimensional v d a
   -- | Maps over the underlying representation of a dimensional value.
   -- The caller is responsible for ensuring that the supplied function respects the dimensional abstraction.
   -- This means that the function must preserve numerical values, or linearly scale them while preserving the origin.
@@ -170,7 +169,7 @@ instance Storable a => Storable (SQuantity s d a) where
   {-# INLINE alignment #-}
   poke ptr = poke (castPtr ptr :: Ptr a) . coerce
   {-# INLINE poke #-}
-  peek ptr = liftM Quantity (peek (castPtr ptr :: Ptr a))
+  peek ptr = fmap Quantity (peek (castPtr ptr :: Ptr a))
   {-# INLINE peek #-}
 
 {-
@@ -187,9 +186,9 @@ instance (M.MVector U.MVector a) => M.MVector U.MVector (SQuantity s d a) where
   {-# INLINE basicUnsafeSlice #-}
   basicOverlaps u v    = M.basicOverlaps (unMVQ u) (unMVQ v)
   {-# INLINE basicOverlaps #-}
-  basicUnsafeNew       = liftM MV_Quantity . M.basicUnsafeNew
+  basicUnsafeNew       = fmap MV_Quantity . M.basicUnsafeNew
   {-# INLINE basicUnsafeNew #-}
-  basicUnsafeRead v    = liftM Quantity . M.basicUnsafeRead (unMVQ v)
+  basicUnsafeRead v    = fmap Quantity . M.basicUnsafeRead (unMVQ v)
   {-# INLINE basicUnsafeRead #-}
   basicUnsafeWrite v i = M.basicUnsafeWrite (unMVQ v) i . coerce
   {-# INLINE basicUnsafeWrite #-}
@@ -199,15 +198,15 @@ instance (M.MVector U.MVector a) => M.MVector U.MVector (SQuantity s d a) where
 #endif
 
 instance (G.Vector U.Vector a) => G.Vector U.Vector (SQuantity s d a) where
-  basicUnsafeFreeze    = liftM V_Quantity  . G.basicUnsafeFreeze . unMVQ
+  basicUnsafeFreeze    = fmap V_Quantity  . G.basicUnsafeFreeze . unMVQ
   {-# INLINE basicUnsafeFreeze #-}
-  basicUnsafeThaw      = liftM MV_Quantity . G.basicUnsafeThaw   . unVQ
+  basicUnsafeThaw      = fmap MV_Quantity . G.basicUnsafeThaw   . unVQ
   {-# INLINE basicUnsafeThaw #-}
   basicLength          = G.basicLength . unVQ
   {-# INLINE basicLength #-}
   basicUnsafeSlice m n = V_Quantity . G.basicUnsafeSlice m n . unVQ
   {-# INLINE basicUnsafeSlice #-}
-  basicUnsafeIndexM v  = liftM Quantity . G.basicUnsafeIndexM (unVQ v)
+  basicUnsafeIndexM v  = fmap Quantity . G.basicUnsafeIndexM (unVQ v)
   {-# INLINE basicUnsafeIndexM #-}
 
 {-
@@ -243,10 +242,10 @@ instance (Show a) => Show (Unit m d a) where
   show (Unit n e x) = "The unit " ++ show n ++ ", with value " ++ show e ++ " (or " ++ show x ++ ")"
 
 -- Operates on a dimensional value using a unary operation on values, possibly yielding a Unit.
-liftD :: (KnownVariant v1, KnownVariant v2) => (ExactPi -> ExactPi) -> (a -> b) -> UnitNameTransformer -> (Dimensional v1 d1 a) -> (Dimensional v2 d2 b)
+liftD :: (KnownVariant v1, KnownVariant v2) => (ExactPi -> ExactPi) -> (a -> b) -> UnitNameTransformer -> Dimensional v1 d1 a -> Dimensional v2 d2 b
 liftD fe f nt x = let (x', e') = extractValue x
                       n = extractName x
-                      n' = (liftA nt) n
+                      n' = fmap nt n
                    in injectValue n' (f x', fmap fe e')
 
 -- Operates on a dimensional value using a unary operation on values, yielding a Quantity.
@@ -259,7 +258,7 @@ liftD2 fe f nt x1 x2 = let (x1', e1') = extractValue x1
                            (x2', e2') = extractValue x2
                            n1 = extractName x1
                            n2 = extractName x2
-                           n' = (liftA2 nt) n1 n2
+                           n' = liftA2 nt n1 n2
                         in injectValue n' (f x1' x2', fe <$> e1' <*> e2')
 
 -- Combines two dimensional values using a binary operation on values, yielding a Quantity.

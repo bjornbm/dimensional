@@ -83,11 +83,11 @@ instance Show (UnitName m) where
 asAtomic :: UnitName m -> Maybe (NameAtom ('UnitAtom m))
 asAtomic (MetricAtomic a) = Just a
 asAtomic (Atomic a) = Just a
-asAtomic (Weaken n) = fmap coerce $ asAtomic n
+asAtomic (Weaken n) = coerce <$> asAtomic n
 asAtomic _ = Nothing
 
 isAtomic :: UnitName m -> Bool
-isAtomic (One) = True
+isAtomic One = True
 isAtomic (MetricAtomic _) = True
 isAtomic (Atomic _) = True
 isAtomic (Prefixed _ _) = True
@@ -101,13 +101,13 @@ isAtomicOrProduct n = isAtomic n
 
 -- reduce by algebraic simplifications
 reduce :: UnitName m -> UnitName m
-reduce (One) = One
+reduce One = One
 reduce n@(MetricAtomic _) = n
 reduce n@(Atomic _) = n
 reduce n@(Prefixed _ _) = n
 reduce (Product n1 n2) = reduce' (reduce n1 * reduce n2)
 reduce (Quotient n1 n2) = reduce' (reduce n1 * reduce n2)
-reduce (Power n x) = reduce' ((reduce n) ^ x)
+reduce (Power n x) = reduce' (reduce n ^ x)
 reduce (Grouped n) = reduce' (Grouped (reduce n))
 reduce (Weaken n) = reduce' (Weaken (reduce n))
 
@@ -263,7 +263,7 @@ strengthen _ = Nothing
 -- strengthening or weakening if neccessary. Because it may not be possible to strengthen,
 -- the result is returned in a 'Maybe' wrapper.
 relax :: forall m1 m2.(Typeable m1, Typeable m2) => UnitName m1 -> Maybe (UnitName m2)
-relax n = go (typeRep (Proxy :: Proxy m1)) (typeRep (Proxy :: Proxy m2)) n
+relax = go (typeRep (Proxy :: Proxy m1)) (typeRep (Proxy :: Proxy m2))
   where
     metric = typeRep (Proxy :: Proxy 'Metric)
     nonMetric = typeRep (Proxy :: Proxy 'NonMetric)
@@ -309,14 +309,14 @@ instance HasInterchangeName (UnitName m) where
   -- TODO #109: note in this case that the UCUM is changing their grammar to not accept exponents after
   -- as a result it will become necessary to distribute the exponentiation over the items in the base name
   -- prior to generating the interchange name
-  interchangeName (Power n x) = let n' = (name . interchangeName $ n) ++ (show x)
+  interchangeName (Power n x) = let n' = (name . interchangeName $ n) ++ show x
                                  in InterchangeName { name = n', authority = authority . interchangeName $ n, I.isAtomic = False }
   interchangeName (Grouped n) = let n' = "(" ++ (name . interchangeName $ n) ++ ")"
                                  in InterchangeName { name = n', authority = authority . interchangeName $ n, I.isAtomic = False }
   interchangeName (Weaken n) = interchangeName n
 
 prefix :: String -> String -> String -> Rational -> Prefix
-prefix i a f q = Prefix n q
+prefix i a f = Prefix n
   where
     n = NameAtom (InterchangeName i UCUM True) a f
 
