@@ -39,6 +39,8 @@ module Numeric.Units.Dimensional.NonSI
   -- * Units Defined By Experiment
   -- $values-obtained-experimentally
   electronVolt, unifiedAtomicMassUnit, dalton,
+  -- * Dimensionless Units
+  percent,
   -- * Standard Gravity
   gee,
   -- * Inch-pound Units
@@ -111,6 +113,17 @@ unifiedAtomicMassUnit = mkUnitR (ucumMetric "u" "u" "atomic mass unit") 1.660540
 
 dalton :: Floating a => Unit 'Metric DMass a
 dalton = mkUnitR (ucumMetric "u" "Da" "Dalton") 1 $ unifiedAtomicMassUnit
+
+-- | One percent is one hundrendth.
+--
+-- The dimensionless number 0.01 , represented by the symbol %, is commonly used as a dimensionless unit.
+--
+-- See section 7.10.2 of the <#note1 [1]> for further information.
+--
+-- >>> 1 *~ percent
+-- 1.0e-2
+percent :: (Fractional a) => Unit 'NonMetric DOne a
+percent = mkUnitQ (ucum "%" "%" "percent") (1 Prelude./ 100) one
 
 -- | One gee is the standard value of the acceleration due to gravity at the
 -- Earth's surface, as standardized by CIPM.
