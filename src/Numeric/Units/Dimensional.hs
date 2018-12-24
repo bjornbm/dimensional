@@ -187,7 +187,7 @@ module Numeric.Units.Dimensional
     (^), (^/), (**), (*), (/), (+), (-),
     negate, abs, signum, recip, nroot, sqrt, cbrt,
     -- ** Transcendental Functions
-    exp, log, logBase, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2,
+    exp, log, logBase, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, atan2, log1p, expm1, log1pexp, log1mexp,
     -- ** Operations on Collections
     -- $collections
     (*~~), (/~~), sum, mean, product, dimensionlessLength, nFromTo,
@@ -230,6 +230,7 @@ import Data.ExactPi
 import Data.Foldable (Foldable(foldr, length))
 import Data.Maybe
 import Data.Ratio
+import qualified Numeric
 import Numeric.Units.Dimensional.Dimensions
 import Numeric.Units.Dimensional.Internal
 import Numeric.Units.Dimensional.UnitNames hiding ((*), (/), (^), weaken, strengthen, product)
@@ -599,7 +600,7 @@ We continue by defining elementary functions on 'Dimensionless'
 that may be obviously useful.
 -}
 
-exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh
+exp, log, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, log1p, expm1, log1pexp, log1mexp
   :: Floating a => Dimensionless a -> Dimensionless a
 exp   = fmap Prelude.exp
 log   = fmap Prelude.log
@@ -615,6 +616,10 @@ tanh  = fmap Prelude.tanh
 asinh = fmap Prelude.asinh
 acosh = fmap Prelude.acosh
 atanh = fmap Prelude.atanh
+log1p = fmap Numeric.log1p
+expm1 = fmap Numeric.expm1
+log1pexp = fmap Numeric.log1pexp
+log1mexp = fmap Numeric.log1mexp
 
 -- | Raises a dimensionless quantity to a dimensionless power.
 (**) :: Floating a => Dimensionless a -> Dimensionless a -> Dimensionless a
