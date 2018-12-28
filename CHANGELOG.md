@@ -1,9 +1,10 @@
-1.3
+1.3 (2018-12)
 -------------
 * Breaking: Changed the `Show` instances for `UnitName`, `Unit`, `SQuantity` to use non-breaking spaces
   within unit names and between values and their units.
 * Bumped exact-pi dependency to < 0.6.
 * Added the dimensionless unit `percent`.
+* Added dimensionless wrappers for `log1p`, `expm1`, `log1pexp`, and `log1mexp` from the `Floating` class.
 
 1.2 (2018-11)
 -------------
