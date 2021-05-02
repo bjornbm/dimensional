@@ -1,6 +1,7 @@
-1.3.1 (2021-05)
----------------
+1.4 (2021-05)
+-------------
 * Add `calorie` to `NonSI`.
+* Remove deprecated `AutoDeriveTypeable` pragmas. This means that `Typable` instances are no provided on GHC prior to 8.2.
 
 1.3 (2018-12)
 -------------
