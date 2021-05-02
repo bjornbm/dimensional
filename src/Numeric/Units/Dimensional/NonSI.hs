@@ -38,7 +38,7 @@ module Numeric.Units.Dimensional.NonSI
 (
   -- * Units Defined By Experiment
   -- $values-obtained-experimentally
-  electronVolt, unifiedAtomicMassUnit, dalton,
+  electronVolt, calorie, unifiedAtomicMassUnit, dalton,
   -- * Dimensionless Units
   percent,
   -- * Standard Gravity
@@ -107,6 +107,9 @@ had a combined uncertainty of 0.0000010e-27 kg.
 
 electronVolt :: Floating a => Unit 'Metric DEnergy a
 electronVolt = mkUnitR (ucumMetric "eV" "eV" "electron volt") 1.60217733e-19 $ joule
+
+calorie :: Floating a => Unit 'Metric DEnergy a
+calorie = mkUnitR (ucumMetric "cal" "cal" "calorie") 4.184 $ joule
 
 unifiedAtomicMassUnit :: Floating a => Unit 'Metric DMass a
 unifiedAtomicMassUnit = mkUnitR (ucumMetric "u" "u" "atomic mass unit") 1.6605402e-27 $ kilo gram
