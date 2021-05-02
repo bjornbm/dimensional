@@ -1,6 +1,5 @@
 {-# OPTIONS_HADDOCK show-extensions #-}
 
-{-# LANGUAGE AutoDeriveTypeable #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
