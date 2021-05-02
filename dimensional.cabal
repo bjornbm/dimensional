@@ -9,8 +9,7 @@ stability:           experimental
 homepage:            https://github.com/bjornbm/dimensional/
 bug-reports:         https://github.com/bjornbm/dimensional/issues/
 category:            Math, Physics
-synopsis:            Statically checked physical dimensions,
-                     using Type Families and Data Kinds.
+synopsis:            Statically checked physical dimensions
 cabal-version:       >= 1.10
 tested-with:         GHC == 8.0.1, GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.1, GHC == 8.8.3, GHC == 8.10.4
 build-type:          Simple
