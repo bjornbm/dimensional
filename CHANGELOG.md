@@ -1,3 +1,7 @@
+1.3.1 (2021-05)
+---------------
+* Add `calorie` to `NonSI`.
+
 1.3 (2018-12)
 -------------
 * Breaking: Changed the `Show` instances for `UnitName`, `Unit`, `SQuantity` to use non-breaking spaces
