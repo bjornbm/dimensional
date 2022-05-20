@@ -8,8 +8,8 @@
 Defines convenience functions for inspecting and manipulating quantities with 'RealFloat'
 floating-point representations.
 
-The dimensionally-typed versions of functions from Patrick Perry's @ieee754@ package
-copy that package's API as closely as possible, by permission. In turn they are based on
+The dimensionally-typed versions of functions from Patrick Perry's [ieee754](https://hackage.haskell.org/package/ieee754) package
+copy that packages API as closely as possible, by permission. In turn they are based on
 the @tango@ math library for the D language.
 
 -}

@@ -135,7 +135,7 @@ instance (Num a) => Semigroup (SQuantity s d a) where
 -- | 'Quantity's of a given 'Dimension' form a 'Monoid' under addition.
 instance (Num a) => Monoid (SQuantity s d a) where
   mempty = Quantity 0
-  mappend = liftQ2 (+)
+  mappend = (<>)
 
 {-
 
@@ -163,9 +163,9 @@ siUnit = Unit (baseUnitName $ dimension (Proxy :: Proxy d)) 1 1
 instance NFData a => NFData (Quantity d a) -- instance is derived from Generic instance
 
 instance Storable a => Storable (SQuantity s d a) where
-  sizeOf _ = sizeOf (undefined::a)
+  sizeOf _ = sizeOf (undefined :: a)
   {-# INLINE sizeOf #-}
-  alignment _ = alignment (undefined::a)
+  alignment _ = alignment (undefined :: a)
   {-# INLINE alignment #-}
   poke ptr = poke (castPtr ptr :: Ptr a) . coerce
   {-# INLINE poke #-}

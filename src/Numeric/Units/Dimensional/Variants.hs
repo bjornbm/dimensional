@@ -71,6 +71,11 @@ type family (v1 :: Variant) * (v2 :: Variant) :: Variant where
   'DUnit m1 * 'DUnit m2 = 'DUnit 'NonMetric
   'DQuantity s1 * 'DQuantity s2 = 'DQuantity (s1 E.* s2)
 
+-- | Forms the quotient of two 'Variant's.
+--
+-- The quotient of units is a non-metric unit.
+--
+-- The quotient of quantities is a quantity.
 type family (v1 :: Variant) / (v2 :: Variant) :: Variant where
   'DUnit m1 / 'DUnit m2 = 'DUnit 'NonMetric
   'DQuantity s1 / 'DQuantity s2 = 'DQuantity (s1 E./ s2)
@@ -83,8 +88,8 @@ type family Weaken (v :: Variant) :: Variant where
 -- | Two 'Variant's are compatible when dimensional values of the first may be converted
 -- into the second merely by changing the representation of their values.
 type family AreCompatible (v1 :: Variant) (v2 :: Variant) :: Bool where
-  AreCompatible ('DQuantity s1)  ('DQuantity s2) = 'True
-  AreCompatible ('DUnit m) ('DUnit 'NonMetric)   = 'True
+  AreCompatible ('DQuantity s1) ('DQuantity s2) = 'True
+  AreCompatible ('DUnit m) ('DUnit 'NonMetric)  = 'True
   AreCompatible s s   = 'True
   AreCompatible s1 s2 = 'False
 

@@ -20,7 +20,7 @@ The definitions in this module are grouped so that a type synonym
 for the dimensionality is defined first in terms of base dimension
 exponents. Then a type synonym for the corresponding quantity type
 is defined. If there are several quantity types with the same
-dimensionality type synonyms are provided for each quantity type.
+dimensionality, type synonyms are provided for each quantity type.
 
 = References
 

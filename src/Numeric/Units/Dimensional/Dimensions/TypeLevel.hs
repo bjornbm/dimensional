@@ -78,9 +78,9 @@ as the Prelude.
 infixr 8  ^
 infixl 7  *, /
 
--- | Multiplication of dimensions corresponds to adding of the base
+-- | Multiplication of dimensions corresponds to addition of the base
 -- dimensions' exponents.
-type family (a::Dimension) * (b::Dimension) where
+type family (a :: Dimension) * (b :: Dimension) where
   DOne * d = d
   d * DOne = d
   ('Dim l  m  t  i  th  n  j) * ('Dim l' m' t' i' th' n' j')
@@ -88,7 +88,7 @@ type family (a::Dimension) * (b::Dimension) where
 
 -- | Division of dimensions corresponds to subtraction of the base
 -- dimensions' exponents.
-type family (a::Dimension) / (d::Dimension) where
+type family (a :: Dimension) / (d :: Dimension) where
   d / DOne = d
   d / d = DOne
   ('Dim l  m  t  i  th  n  j) / ('Dim l' m' t' i' th' n' j')
@@ -98,21 +98,21 @@ type family (a::Dimension) / (d::Dimension) where
 -- or of negating each of the base dimensions' exponents.
 type Recip (d :: Dimension) = DOne / d
 
--- | Powers of dimensions corresponds to multiplication of the base
+-- | Powers of dimensions correspond to multiplication of the base
 -- dimensions' exponents by the exponent.
 --
 -- We limit ourselves to integer powers of Dimensionals as fractional
 -- powers make little physical sense.
-type family (d::Dimension) ^ (x::TypeInt) where
+type family (d :: Dimension) ^ (x :: TypeInt) where
   DOne ^ x = DOne
   d ^ 'Zero = DOne
   d ^ 'Pos1 = d
   ('Dim l  m  t  i  th  n  j) ^ x
     = 'Dim (l N.* x) (m N.* x) (t N.* x) (i N.* x) (th N.* x) (n N.* x) (j N.* x)
 
--- | Roots of dimensions corresponds to division of the base dimensions'
+-- | Roots of dimensions correspond to division of the base dimensions'
 -- exponents by the order of the root.
-type family NRoot (d::Dimension) (x::TypeInt) where
+type family NRoot (d :: Dimension) (x :: TypeInt) where
   NRoot DOne x = DOne
   NRoot d 'Pos1 = d
   NRoot ('Dim l  m  t  i  th  n  j) x
@@ -128,7 +128,7 @@ type Cbrt d = NRoot d 'Pos3
 -- Each validly constructed type of kind 'Dimension' has a 'KnownDimension' instance.
 --
 -- While 'KnownDimension' is a constraint synonym, the presence of @'KnownDimension' d@ in
---  a context allows use of @'dimension' :: 'Proxy' d -> 'Dimension''@.
+-- a context allows use of @'dimension' :: 'Proxy' d -> 'Dimension''@.
 type KnownDimension (d :: Dimension) = HasDimension (Proxy d)
 
 instance ( KnownTypeInt l

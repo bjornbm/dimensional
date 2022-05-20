@@ -30,23 +30,23 @@ import qualified Prelude as P
 
 -- | The name of a unit.
 data UnitName (m :: Metricality) where
-  -- The name of the unit of dimensionless values.
+  -- | The name of the unit of dimensionless values.
   One :: UnitName 'NonMetric
-  -- A name of an atomic unit to which metric prefixes may be applied.
+  -- | A name of an atomic unit to which metric prefixes may be applied.
   MetricAtomic :: NameAtom ('UnitAtom 'Metric) -> UnitName 'Metric
-  -- A name of an atomic unit to which metric prefixes may not be applied.
+  -- | A name of an atomic unit to which metric prefixes may not be applied.
   Atomic :: NameAtom ('UnitAtom 'NonMetric) -> UnitName 'NonMetric
-  -- A name of a prefixed unit.
+  -- | A name of a prefixed unit.
   Prefixed :: PrefixName -> UnitName 'Metric -> UnitName 'NonMetric
-  -- A compound name formed from the product of two names.
+  -- | A compound name formed from the product of two names.
   Product :: UnitName 'NonMetric -> UnitName 'NonMetric -> UnitName 'NonMetric
-  -- A compound name formed from the quotient of two names.
+  -- | A compound name formed from the quotient of two names.
   Quotient :: UnitName 'NonMetric -> UnitName 'NonMetric -> UnitName 'NonMetric
-  -- A compound name formed by raising a unit name to an integer power.
+  -- | A compound name formed by raising a unit name to an integer power.
   Power :: UnitName 'NonMetric -> Int -> UnitName 'NonMetric
-  -- A compound name formed by grouping another name, which is generally compound.
+  -- | A compound name formed by grouping another name, which is generally compound.
   Grouped :: UnitName 'NonMetric -> UnitName 'NonMetric
-  -- A weakened name formed by forgetting that it could accept a metric prefix.
+  -- | A weakened name formed by forgetting that it could accept a metric prefix.
   --
   -- Also available is the smart constructor `weaken` which accepts any `UnitName` as input.
   Weaken :: UnitName 'Metric -> UnitName 'NonMetric
@@ -282,8 +282,8 @@ data NameAtom (m :: NameAtomType)
   = NameAtom
   {
     _interchangeName :: InterchangeName, -- ^ The interchange name of the unit.
-    abbreviation_en :: String, -- ^ The abbreviated name of the unit in international English
-    name_en :: String -- ^ The full name of the unit in international English
+    abbreviation_en :: String, -- ^ The abbreviated name of the unit in international English.
+    name_en :: String -- ^ The full name of the unit in international English.
   }
   deriving (Eq, Ord, Data, Typeable, Generic)
 
