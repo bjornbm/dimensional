@@ -155,13 +155,13 @@ particularly noteworthy.
 
 == References
 
-1. #note1# http://physics.nist.gov/Pubs/SP811/
-2. #note2# http://en.wikipedia.org/wiki/Escape_velocity
-3. #note3# http://jscience.org/api/org/jscience/physics/models/package-summary.html
-4. #note4# http://www.haskell.org/haskellwiki/Physical_units
-5. #note5# http://liftm.wordpress.com/2007/06/03/scientificdimension-type-arithmetic-and-physical-units-in-haskell/
+1. #note1# https://www.nist.gov/pml/special-publication-811
+2. #note2# https://en.wikipedia.org/wiki/Escape_velocity
+3. #note3# https://web.archive.org/web/20080905151927/http://jscience.org/api/org/jscience/physics/models/package-summary.html
+4. #note4# https://wiki.haskell.org/Physical_units
+5. #note5# https://liftm.wordpress.com/2007/06/03/scientificdimension-type-arithmetic-and-physical-units-in-haskell/
 6. #note6# http://jscience.org/
-7. #note7# http://research.sun.com/projects/plrg/fortress.pdf
+6. #note6# https://github.com/stokito/fortress-lang
 
 -}
 
@@ -690,8 +690,8 @@ pi = Prelude.pi *~ one
 
 -- | Twice 'pi'.
 --
--- For background on 'tau' see http://tauday.com/tau-manifesto (but also
--- feel free to review http://www.thepimanifesto.com).
+-- For background on 'tau' see https://tauday.com/tau-manifesto (but also
+-- feel free to review https://web.archive.org/web/20200926221249/http://www.thepimanifesto.com/).
 tau :: Floating a => Dimensionless a
 tau = _2 * pi
 

@@ -18,9 +18,9 @@ referenced are from <#note1 [1]> unless otherwise specified.
 
 = References
 
-1. #note1# http://physics.nist.gov/Pubs/SP811/
-2. #note2# http://en.wikipedia.org/wiki/Minute_of_arc
-3. #note3# http://en.wikipedia.org/wiki/Astronomical_unit
+1. #note1# https://www.nist.gov/pml/special-publication-811
+2. #note2# https://en.wikipedia.org/wiki/Minute_of_arc
+3. #note3# https://en.wikipedia.org/wiki/Astronomical_unit
 
 -}
 
