@@ -99,7 +99,7 @@ import qualified Prelude
 From Table 7, units accepted for use with the SI whose values in SI units are
 obtained experimentally.
 
-When <#note1 [1]> was published the electron volt had a standard combined
+When <#note1 [1]> was published, the electron volt had a standard combined
 uncertainity of 0.00000049e-19 J and the unified atomic mass unit
 had a combined uncertainty of 0.0000010e-27 kg.
 
@@ -119,7 +119,7 @@ dalton = mkUnitR (ucumMetric "u" "Da" "Dalton") 1 $ unifiedAtomicMassUnit
 
 -- | One percent is one hundrendth.
 --
--- The dimensionless number 0.01 , represented by the symbol %, is commonly used as a dimensionless unit.
+-- The dimensionless number 0.01, represented by the symbol %, is commonly used as a dimensionless unit.
 --
 -- See section 7.10.2 of the <#note1 [1]> for further information.
 --
@@ -468,7 +468,7 @@ nauticalMile = mkUnitZ (ucum "[nmi_i]" "NM" "nautical mile") 1852 $ meter
 knot :: (Fractional a) => Unit 'NonMetric DVelocity a
 knot = mkUnitQ (ucum "[kt_i]" "kt" "knot") 1 $ nauticalMile / hour
 
--- | One revolution is an angle equal to 2 pi radians; a full circle.
+-- | One revolution is an angle equal to 2*pi radians; a full circle.
 --
 -- See <https://en.wikipedia.org/wiki/Turn_%28geometry%29 here> for further information.
 --

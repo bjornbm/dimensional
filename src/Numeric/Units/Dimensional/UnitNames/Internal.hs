@@ -79,12 +79,14 @@ instance Show (UnitName m) where
   show (Grouped n) = "(" ++ show n ++ ")"
   show (Weaken n) = show n
 
+-- | Converts a 'UnitName' to a 'NameAtom', if possible.
 asAtomic :: UnitName m -> Maybe (NameAtom ('UnitAtom m))
 asAtomic (MetricAtomic a) = Just a
 asAtomic (Atomic a) = Just a
 asAtomic (Weaken n) = coerce <$> asAtomic n
 asAtomic _ = Nothing
 
+-- | Returns 'True' if the 'UnitName' is atomic.
 isAtomic :: UnitName m -> Bool
 isAtomic One = True
 isAtomic (MetricAtomic _) = True
@@ -98,7 +100,7 @@ isAtomicOrProduct :: UnitName m -> Bool
 isAtomicOrProduct (Product _ _) = True
 isAtomicOrProduct n = isAtomic n
 
--- reduce by algebraic simplifications
+-- | Reduce a 'UnitName' by algebraic simplifications.
 reduce :: UnitName m -> UnitName m
 reduce One = One
 reduce n@(MetricAtomic _) = n
@@ -131,6 +133,7 @@ instance NFData NameAtomType where -- instance is derived from Generic instance
 -- | The name of a metric prefix.
 type PrefixName = NameAtom 'PrefixAtom
 
+-- | A metric prefix.
 data Prefix = Prefix
               {
                 -- | The name of a metric prefix.
@@ -184,8 +187,8 @@ baseUnitName d = let powers = asList $ dimension d
 baseUnitNames :: [UnitName 'NonMetric]
 baseUnitNames = [weaken nMeter, nKilogram, weaken nSecond, weaken nAmpere, weaken nKelvin, weaken nMole, weaken nCandela]
 
-deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta :: Prefix
-deka  = prefix "da" "da" "deka" 1e1
+deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta :: Prefix
+deca  = prefix "da" "da" "deca" 1e1
 hecto = prefix "h" "h" "hecto"  1e2
 kilo  = prefix "k" "k" "kilo"   1e3
 mega  = prefix "M" "M" "mega"   1e6
@@ -209,7 +212,7 @@ yocto = prefix "y" "y" "yocto"  1e-24
 
 -- | A list of all 'Prefix'es defined by the SI.
 siPrefixes :: [Prefix]
-siPrefixes = [yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta]
+siPrefixes = [yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta]
 
 -- | Forms a 'UnitName' from a 'Metric' name by applying a metric prefix.
 applyPrefix :: Prefix -> UnitName 'Metric -> UnitName 'NonMetric
