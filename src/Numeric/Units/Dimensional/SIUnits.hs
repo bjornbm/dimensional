@@ -92,7 +92,7 @@ deca, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta
   :: Num a => Unit 'Metric d a -> Unit 'NonMetric d a
 -- | The "deca" prefix, denoting a factor of 10.
 deca  = applyMultiple I.deca -- International English.
--- | An alias for 'deka'.
+-- | An alias for 'deca'.
 deka  = deca      -- American English.
 -- | The "hecto" prefix, denoting a factor of 100.
 hecto = applyMultiple I.hecto
