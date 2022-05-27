@@ -24,7 +24,7 @@ dimensionality, type synonyms are provided for each quantity type.
 
 = References
 
-1. #note1# http://physics.nist.gov/Pubs/SP811/
+1. #note1# https://www.nist.gov/pml/special-publication-811
 
 -}
 
@@ -373,7 +373,7 @@ type ThermalResistivity = Quantity DThermalResistivity
 
 {-
 
-Thermal conductance and resistance quantities after http://en.wikipedia.org/wiki/Thermal_conductivity#Definitions.
+Thermal conductance and resistance quantities after https://en.wikipedia.org/wiki/Thermal_conductivity#Definitions.
 
 -}
 

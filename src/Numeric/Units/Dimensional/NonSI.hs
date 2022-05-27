@@ -27,10 +27,10 @@ a conversion function similar to for degrees Celsius.
 
 = References
 
-1. #note1# http://physics.nist.gov/Pubs/SP811/
-2. #note2# http://www.iau.org/science/publications/proceedings_rules/units/
-3. #note3# http://en.m.wikipedia.org/wiki/Pressure
-4. #note4# http://en.m.wikipedia.org/wiki/Torr
+1. #note1# https://www.nist.gov/pml/special-publication-811
+2. #note2# https://www.iau.org/publications/proceedings_rules/units/
+3. #note3# https://en.wikipedia.org/wiki/Pressure
+4. #note4# https://en.wikipedia.org/wiki/Torr
 
 -}
 
@@ -726,7 +726,7 @@ degreeRankine :: (Fractional a) => Unit 'NonMetric DThermodynamicTemperature a
 degreeRankine = mkUnitQ (ucum "[degR]" "°R" "degree Rankine") 1 $ degreeFahrenheit
 
 {- $imperial-volumes
-Per http://en.wikipedia.org/wiki/Imperial_units and http://en.wikipedia.org/wiki/Cup_(unit)#Imperial_cup.
+Per https://en.wikipedia.org/wiki/Imperial_units and https://en.wikipedia.org/wiki/Cup_(unit)#Imperial_cup.
 -}
 
 -- | One imperial gallon is defined exactly in terms of the 'liter'
@@ -806,7 +806,7 @@ imperialFluidOunce :: (Fractional a) => Unit 'NonMetric DVolume a
 imperialFluidOunce = mkUnitQ (ucum "[foz_br]" "fl oz" "fluid ounce") (1 Prelude./ 20) $ imperialPint
 
 {- $us-customary-volumes
-Per http://www.nist.gov/pml/wmd/pubs/upload/2012-hb44-final.pdf page 452 and http://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume
+Per https://www.nist.gov/system/files/documents/2017/05/09/2012-hb44-final.pdf page 452 and https://en.wikipedia.org/wiki/United_States_customary_units#Fluid_volume
 Note that there exist rarely-used "dry" variants of units with overlapping names.
 -}
 

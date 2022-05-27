@@ -135,7 +135,7 @@
 *  Added [`tau`][3].
 *  Added `KinematicViscosity`.
 
-[3]: http://tauday.com/tau-manifesto
+[3]: https://tauday.com/tau-manifesto
 
 
 0.10.1.2 (2011-09)
@@ -159,11 +159,11 @@ GHC 7.2.1 compatibility fix:
 --------------
 See the [announcement][2].
 
-[2]: http://flygdynamikern.blogspot.se/2011/05/announce-dimensional-010.html
+[2]: https://flygdynamikern.blogspot.se/2011/05/announce-dimensional-010.html
 
 
 0.9 (2011-04)
 -------------
 See the [announcement][1].
 
-[1]: http://flygdynamikern.blogspot.se/2011/04/announce-dimensional-09.html
+[1]: https://flygdynamikern.blogspot.se/2011/04/announce-dimensional-09.html
