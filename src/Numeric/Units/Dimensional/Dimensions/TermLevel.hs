@@ -77,7 +77,7 @@ instance NFData DynamicDimension where
 -- | Dimensional values, or those that are only possibly dimensional, inhabit this class,
 -- which allows access to a term-level representation of their dimension.
 class HasDynamicDimension a where
-  -- | Gets the 'DynamicDimension of a dynamic dimensional value, which may be 'NoDimension' if it does not represent
+  -- | Gets the 'DynamicDimension' of a dynamic dimensional value, which may be 'NoDimension' if it does not represent
   -- a dimensional value of any 'Dimension'.
   --
   -- A default implementation is available for types that are also in the `HasDimension` typeclass.
@@ -187,6 +187,9 @@ cbrt = nroot 3
 asList :: Dimension' -> [Int]
 asList (Dim' l m t i th n j) = [l, m, t, i, th, n, j]
 
+-- | Converts a list of integers, representing the exponent associated with each
+-- of the 7 SI base dimensions in the standard order, to a dimension.
+-- Returns 'Nothing' if the list doesn't contain exactly 7 elements.
 fromList :: [Int] -> Maybe Dimension'
 fromList [l, m, t, i, th, n, j] = Just $ Dim' l m t i th n j
 fromList _ = Nothing

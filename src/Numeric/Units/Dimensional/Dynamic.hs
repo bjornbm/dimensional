@@ -210,11 +210,11 @@ invalidQuantity = DynQuantity NoDimension $ error "Attempt to evaluate the value
 polydimensionalZero :: (Num a) => DynQuantity a
 polydimensionalZero = DynQuantity AnyDimension 0
 
--- Lifts a function which is only valid on dimensionless quantities into a function on DynQuantitys.
+-- | Lifts a function which is only valid on dimensionless quantities into a function on 'DynQuantity's.
 liftDimensionless :: (a -> a) -> DynQuantity a -> DynQuantity a
 liftDimensionless = liftDQ (matchDimensions $ SomeDimension D.dOne)
 
--- Lifts a function on values into a function on DynQuantitys.
+-- | Lifts a function on values into a function on 'DynQuantity's.
 liftDQ :: (DynamicDimension -> DynamicDimension) -- ^ How the function operates on dimensions.
        -> (a -> a) -- ^ How the function operates on values.
        -> DynQuantity a -> DynQuantity a
@@ -222,7 +222,7 @@ liftDQ fd fv (DynQuantity d v) = case fd d of
                                    NoDimension -> invalidQuantity
                                    d' -> DynQuantity d' $ fv v
 
--- Lifts a function on values into a function on DynQuantitys.
+-- | Lifts a function on values into a function on 'DynQuantity's.
 --
 -- This works by treating polydimensional zeros as dimensionless zeros. If that is not the desired behavior,
 -- handle polydimensional zeros first and then call this function.
@@ -233,7 +233,7 @@ liftDQ2 fd fv (DynQuantity d1 v1) (DynQuantity d2 v2) = case fd d1 d2 of
                                                           NoDimension -> invalidQuantity
                                                           d' -> DynQuantity d' $ fv v1 v2
 
--- Transforms a dynamic dimension in a way which is always valid
+-- | Transforms a dynamic dimension in a way which is always valid.
 valid :: (Dimension' -> Dimension') -> DynamicDimension -> DynamicDimension
 valid _ AnyDimension      = AnyDimension
 valid f (SomeDimension d) = SomeDimension (f d)
@@ -249,7 +249,7 @@ constant d AnyDimension = SomeDimension d
 constant d (SomeDimension _) = SomeDimension d
 constant _ _ = NoDimension
 
--- Transforms two dynamic dimensions in a way which is always valid
+-- | Transforms two dynamic dimensions in a way which is always valid.
 valid2 :: (Dimension' -> Dimension' -> Dimension') -> DynamicDimension -> DynamicDimension -> DynamicDimension
 valid2 _ AnyDimension       (SomeDimension _)  = AnyDimension
 valid2 _ (SomeDimension _)  AnyDimension       = AnyDimension
@@ -284,6 +284,7 @@ instance Monoid AnyUnit where
   mempty = demoteUnit' one
   mappend = (<>)
 
+-- | Extracts the 'UnitName' of an 'AnyUnit'.
 anyUnitName :: AnyUnit -> UnitName 'NonMetric
 anyUnitName (AnyUnit _ n _) = n
 

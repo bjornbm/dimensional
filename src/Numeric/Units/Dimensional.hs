@@ -31,7 +31,7 @@ In this module we provide data types for performing arithmetic with
 physical quantities and units. Information about the physical
 dimensions of the quantities/units is embedded in their types and
 the validity of operations is verified by the type checker at compile
-time. The boxing and unboxing of numerical values as quantities is
+time. The wrapping and unwrapping of numerical values as quantities is
 done by multiplication and division of units, of which an incomplete
 set is provided.
 
@@ -47,7 +47,7 @@ sections from the guide and deviations will be explained.
 == Disclaimer
 
 Merely an engineer, the author doubtlessly uses a language and
-notation that makes mathematicians and physicist cringe. He does
+notation that makes mathematicians and physicists cringe. He does
 not mind constructive criticism (or pull requests).
 
 The sets of functions and units defined herein are incomplete and
@@ -61,7 +61,7 @@ This module requires GHC 8 or later. We utilize Data Kinds, TypeNats,
 Closed Type Families, etc. Clients of the module are generally not
 required to use these extensions.
 
-Clients probably will want to use the NegativeLiterals extension.
+Clients probably will want to use the @NegativeLiterals@ extension though.
 
 == Examples
 
@@ -69,23 +69,23 @@ We have defined operators and units that allow us to define and
 work with physical quantities. A physical quantity is defined by
 multiplying a number with a unit (the type signature is optional).
 
-> v :: Velocity Prelude.Double
+> v :: Velocity Double
 > v = 90 *~ (kilo meter / hour)
 
 It follows naturally that the numerical value of a quantity is
 obtained by division by a unit.
 
-> numval :: Prelude.Double
+> numval :: Double
 > numval = v /~ (meter / second)
 
 The notion of a quantity as the product of a numerical value and a
 unit is supported by 7.1 "Value and numerical value of a quantity" of
-<#note1 [1]>. While the above syntax is fairly natural it is unfortunate that
+<#note1 [1]>. While the above syntax is fairly natural, it is unfortunate that
 it must violate a number of the guidelines in <#note1 [1]>, in particular 9.3
 "Spelling unit names with prefixes", 9.4 "Spelling unit names obtained
 by multiplication", 9.5 "Spelling unit names obtained by division".
 
-As a more elaborate example of how to use the module we define a
+As a more elaborate example of how to use the module, we define a
 function for calculating the escape velocity of a celestial body
 <#note2 [2]>.
 
@@ -95,9 +95,9 @@ function for calculating the escape velocity of a celestial body
 >       two = 2 *~ one
 >       g = 6.6720e-11 *~ (newton * meter ^ pos2 / kilo gram ^ pos2)
 
-For completeness we should also show an example of the error messages
+For completeness, we should also show an example of the error messages
 we will get from GHC when performing invalid arithmetic. In the
-best case GHC will be able to use the type synonyms we have defined
+best case, GHC will be able to use the type synonyms we have defined
 in its error messages.
 
 > let x = 1 *~ meter + 1 *~ second
@@ -109,7 +109,7 @@ in its error messages.
 > In the second argument of `(*~)', namely `second'
 > In the second argument of `(+)', namely `1 *~ second'
 
-In other cases the error messages aren't very friendly.
+In other cases, the error messages aren't very friendly.
 
 > let x = 1 *~ meter / (1 *~ second) + 1 *~ kilo gram
 >
@@ -139,7 +139,7 @@ Additional physics models could be implemented. See <#note3 [3]> for ideas.
 
 == Related work
 
-Henning Thielemann numeric prelude has a physical units library,
+Henning Thielemann's numeric prelude has a physical units library,
 however, checking of dimensions is dynamic rather than static.
 Aaron Denney has created a toy example of statically checked
 physical dimensions covering only length and time. HaskellWiki
@@ -316,12 +316,12 @@ units using '*' and '/', e.g. "1 *~ (meter / second)".
 infixl 7  *~, /~
 
 {- $dimensions
-The phantom type variable d encompasses the physical dimension of
-a 'Dimensional'. As detailed in <#note5 [5]> there are seven base dimensions,
+The phantom type variable @d@ encompasses the physical dimension of
+a 'Dimensional'. As detailed in <#note5 [5]>, there are seven base dimensions,
 which can be combined in integer powers to a given physical dimension.
 We represent physical dimensions as the powers of the seven base
 dimensions that make up the given dimension. The powers are represented
-using NumTypes. For convenience we collect all seven base dimensions
+using NumTypes. For convenience, we collect all seven base dimensions
 in a data kind 'Dimension'.
 
 We could have chosen to provide type variables for the seven base
@@ -357,7 +357,7 @@ type AmountOfSubstance        = Quantity DAmountOfSubstance
 type LuminousIntensity        = Quantity DLuminousIntensity
 
 {- $dimension-arithmetic
-When performing arithmetic on units and quantities the arithmetics
+When performing arithmetic on units and quantities, the arithmetics
 must be applied to both the numerical values of the Dimensionals
 but also to their physical dimensions. The type level arithmetic
 on physical dimensions is governed by closed type families expressed
@@ -391,7 +391,7 @@ Multiplication, division and powers apply to both units and quantities.
 -- | Divides one 'Quantity' by another or one 'Unit' by another.
 --
 -- The intimidating type signature captures the similarity between these operations
--- and ensures that composite 'Unit's are 'NotPrefixable'.
+-- and ensures that composite 'Unit's are 'NonMetric'.
 (/) :: (KnownVariant v1, KnownVariant v2, KnownVariant (v1 V./ v2), Fractional a) => Dimensional v1 d1 a -> Dimensional v2 d2 a -> Dimensional (v1 V./ v2) (d1 / d2) a
 (/) = liftD2 (Prelude./) (Prelude./) (Name./)
 
@@ -410,7 +410,7 @@ recip = liftQ Prelude.recip
 -- also reexported by "Numeric.Units.Dimensional.Prelude".
 --
 -- The intimidating type signature captures the similarity between these operations
--- and ensures that composite 'Unit's are 'NotPrefixable'.
+-- and ensures that composite 'Unit's are 'NonMetric'.
 (^) :: (Fractional a, KnownTypeInt i, KnownVariant v, KnownVariant (Weaken v))
     => Dimensional v d1 a -> Proxy i -> Dimensional (Weaken v) (d1 ^ i) a
 x ^ n = let n' = (toNum n) :: Int
@@ -517,7 +517,7 @@ prefer such.
 (^/) = flip nroot
 
 {- $collections
-Here we define operators and functions to make working with homogenuous
+Here we define operators and functions to make working with homogeneous
 lists of dimensionals more convenient.
 
 We define two convenience operators for applying units to all
@@ -655,9 +655,9 @@ The only unit we will define in this module is 'one'.
 -- | The unit 'one' has dimension 'DOne' and is the base unit of dimensionless values.
 --
 -- As detailed in 7.10 "Values of quantities expressed simply as numbers:
--- the unit one, symbol 1" of <#note1 [1]> the unit one generally does not
+-- the unit one, symbol 1" of <#note1 [1]>, the unit one generally does not
 -- appear in expressions. However, for us it is necessary to use 'one'
--- as we would any other unit to perform the "boxing" of dimensionless values.
+-- as we would any other unit to perform the "wrapping" of dimensionless values.
 one :: Num a => Unit 'NonMetric DOne a
 one = Unit nOne 1 1
 

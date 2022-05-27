@@ -123,7 +123,7 @@ infixl 7  *~~, /~~
 xs *~~ u = fmap (*~ u) xs
 
 -- | Applies '/~' to all values in a functor.
-(/~~) :: (Functor f, Real a, Fractional b,  E.MinCtxt s b) => f (SQuantity s d a) -> Unit m d b -> f b
+(/~~) :: (Functor f, Real a, Fractional b, E.MinCtxt s b) => f (SQuantity s d a) -> Unit m d b -> f b
 xs /~~ u = fmap (/~ u) xs
 
 -- | The sum of all elements in a list.
@@ -181,11 +181,11 @@ atanhVia = liftDimensionlessVia P.atanh
 atan2Via :: forall s1 s2 s3 a b c d.(Integral a, RealFloat b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b, E.MinCtxt s3 b, KnownDimension d) => Proxy b -> SQuantity s1 d a -> SQuantity s2 d a -> SQuantity s3 DOne c
 atan2Via _ y x = (*~ siUnit) $ (P.atan2 :: b -> b -> b) (y /~ siUnit) (x /~ siUnit)
 
--- | Lift a function on dimensionless values of a specified intermediate type to operate on possibly scaled dimensionless.
+-- | Lift a function on dimensionless values of a specified intermediate type to operate on possibly scaled dimensionless values.
 liftDimensionlessVia :: forall s1 s2 a b c.(Real a, RealFrac b, Integral c, E.MinCtxt s1 b, E.MinCtxt s2 b) => (b -> b) -> Proxy b -> SQuantity s1 DOne a -> SQuantity s2 DOne c
 liftDimensionlessVia f _ = (*~ siUnit) . (f :: b -> b) . (/~ siUnit)
 
--- | Lift a periodic function on dimensionless values of a specified intermediate type to operate on possibly scaled dimensionless.
+-- | Lift a periodic function on dimensionless values of a specified intermediate type to operate on possibly scaled dimensionless values.
 --
 -- If the scale factor of the input type is an exact integer divisor of the function's period, the argument
 -- will be clamped via an integer `mod` operation prior to applying the function to avoid errors introduced by a floating point modulus.
@@ -347,7 +347,7 @@ pi = rescale (epsilon :: SQuantity E.Pi DOne Integer)
 tau :: (Integral a, E.KnownExactPi s) => SQuantity s DOne a
 tau = rescale (epsilon :: SQuantity (E.ExactNatural 2 E.* E.Pi) DOne Integer)
 
--- | The least positive representable value in a given fixed-point scaled quantity type.
+-- | The smallest positive representable value in a given fixed-point scaled quantity type.
 epsilon :: (Integral a) => SQuantity s d a
 epsilon = Quantity 1
 

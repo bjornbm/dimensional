@@ -20,7 +20,7 @@ description:
     with physical quantities and units. Information about the physical
     dimensions of the quantities and units is embedded in their types and the
     validity of operations is verified by the type checker at compile time.
-    The boxing and unboxing of numerical values as quantities is done by
+    The wrapping and unwrapping of numerical values as quantities is done by
     multiplication and division with units. The library is designed to, as
     far as is practical, enforce/encourage best practices of unit usage.
 
@@ -34,7 +34,8 @@ description:
 extra-source-files:  README.md,
                      CHANGELOG.md,
                      examples/ReadmeExample.hs,
-                     examples/GM.lhs
+                     examples/GM.lhs,
+                     examples/NewtonianMechanics.hs
 
 source-repository head
   type:     git
@@ -53,23 +54,23 @@ library
   if impl(ghc >= 8.6)
     default-extensions: NoStarIsType
   ghc-options:         -Wall
-  exposed-modules:     Numeric.Units.Dimensional,
-                       Numeric.Units.Dimensional.Coercion,
-                       Numeric.Units.Dimensional.Dimensions,
-                       Numeric.Units.Dimensional.Dimensions.TermLevel,
-                       Numeric.Units.Dimensional.Dimensions.TypeLevel,
-                       Numeric.Units.Dimensional.Dynamic,
-                       Numeric.Units.Dimensional.FixedPoint,
-                       Numeric.Units.Dimensional.Functor,
-                       Numeric.Units.Dimensional.NonSI,
-                       Numeric.Units.Dimensional.Prelude,
-                       Numeric.Units.Dimensional.Quantities,
-                       Numeric.Units.Dimensional.SIUnits,
-                       Numeric.Units.Dimensional.UnitNames,
-                       Numeric.Units.Dimensional.UnitNames.InterchangeNames,
-                       Numeric.Units.Dimensional.Variants,
+  exposed-modules:     Numeric.Units.Dimensional
+                       Numeric.Units.Dimensional.Coercion
+                       Numeric.Units.Dimensional.Dimensions
+                       Numeric.Units.Dimensional.Dimensions.TermLevel
+                       Numeric.Units.Dimensional.Dimensions.TypeLevel
+                       Numeric.Units.Dimensional.Dynamic
+                       Numeric.Units.Dimensional.FixedPoint
+                       Numeric.Units.Dimensional.Functor
+                       Numeric.Units.Dimensional.NonSI
+                       Numeric.Units.Dimensional.Prelude
+                       Numeric.Units.Dimensional.Quantities
+                       Numeric.Units.Dimensional.SIUnits
+                       Numeric.Units.Dimensional.UnitNames
+                       Numeric.Units.Dimensional.UnitNames.InterchangeNames
+                       Numeric.Units.Dimensional.Variants
                        Numeric.Units.Dimensional.Float
-  other-modules:       Numeric.Units.Dimensional.Internal,
+  other-modules:       Numeric.Units.Dimensional.Internal
                        Numeric.Units.Dimensional.UnitNames.Internal
 
 test-suite tests
@@ -87,7 +88,7 @@ test-suite tests
   build-depends:       dimensional,
                        hspec,
                        QuickCheck,
-                       base < 5
+                       base
   build-tool-depends: hspec-discover:hspec-discover == 2.*
 
 test-suite doctests
