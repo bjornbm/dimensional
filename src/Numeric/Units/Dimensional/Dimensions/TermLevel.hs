@@ -64,7 +64,7 @@ instance Semigroup Dimension' where
 -- | The monoid of dimensions under multiplication.
 instance Monoid Dimension' where
   mempty = dOne
-  mappend = (Data.Semigroup.<>)
+  mappend = (<>)
 
 -- | The dimension of a dynamic value, which may not have any dimension at all.
 data DynamicDimension = NoDimension -- ^ The value has no valid dimension.

@@ -113,7 +113,7 @@ instance Num a => Semigroup (AnyQuantity a) where
 -- they may not be added together if their dimensions do not match.
 instance Num a => Monoid (AnyQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
-  mappend = (Data.Semigroup.<>)
+  mappend = (<>)
 
 -- | Possibly a 'Quantity' whose 'Dimension' is only known dynamically.
 --
@@ -192,7 +192,7 @@ instance Num a => Semigroup (DynQuantity a) where
 -- they may not be added together if their dimensions do not match.
 instance Num a => Monoid (DynQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
-  mappend = (Data.Semigroup.<>)
+  mappend = (<>)
 
 -- | A 'DynQuantity' which does not correspond to a value of any dimension.
 invalidQuantity :: DynQuantity a
@@ -282,7 +282,7 @@ instance Semigroup AnyUnit where
 -- | 'AnyUnit's form a 'Monoid' under multiplication.
 instance Monoid AnyUnit where
   mempty = demoteUnit' one
-  mappend = (Data.Semigroup.<>)
+  mappend = (<>)
 
 anyUnitName :: AnyUnit -> UnitName 'NonMetric
 anyUnitName (AnyUnit _ n _) = n
