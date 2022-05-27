@@ -5,7 +5,7 @@ This library provides statically-checked dimensional arithmetic for physical qua
 Data kinds and closed type families provide a flexible, safe, and discoverable implementation that leads to largely self-documenting
 client code.
 
-[![Build Status](https://travis-ci.org/bjornbm/dimensional.svg?branch=master)](https://travis-ci.org/bjornbm/dimensional)
+[![Build Status](https://api.travis-ci.com/bjornbm/dimensional.svg?branch=master)](https://app.travis-ci.com/github/bjornbm/dimensional)
 [![Hackage Version](https://img.shields.io/hackage/v/dimensional.svg)](https://hackage.haskell.org/package/dimensional)
 [![Stackage version](https://www.stackage.org/package/dimensional/badge/lts?label=Stackage)](https://www.stackage.org/package/dimensional)
 
