@@ -73,9 +73,7 @@ import qualified Prelude
 
 {- $multiples
 Prefixes are used to form decimal multiples and submultiples of SI
-Units as described in section 4.4. We will define the SI prefixes
-in terms of the 'prefix' function which applies a scale factor to a
-unit.
+Units as described in section 4.4.
 
 By defining SI prefixes as functions applied to a 'Unit' we satisfy
 section 6.2.6 "Unacceptability of stand-alone prefixes".
@@ -90,24 +88,36 @@ applyMultiple p u | denominator x == 1 = mkUnitZ n' (numerator x) u
     n' = N.applyPrefix p (name u)
     x = N.scaleFactor p
 
-deka, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta
+deca, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta
   :: Num a => Unit 'Metric d a -> Unit 'NonMetric d a
-deka  = applyMultiple I.deka -- International English.
-deca  = deka      -- American English.
+-- | The "deca" prefix, denoting a factor of 10.
+deca  = applyMultiple I.deca -- International English.
+-- | An alias for 'deca'.
+deka  = deca      -- American English.
+-- | The "hecto" prefix, denoting a factor of 100.
 hecto = applyMultiple I.hecto
+-- | The "kilo" prefix, denoting a factor of 1000.
 kilo  = applyMultiple I.kilo
+-- | The "mega" prefix, denoting a factor of 10^6.
 mega  = applyMultiple I.mega
+-- | The "giga" prefix, denoting a factor of 10^9.
 giga  = applyMultiple I.giga
+-- | The "tera" prefix, denoting a factor of 10^12.
 tera  = applyMultiple I.tera
+-- | The "peta" prefix, denoting a factor of 10^15.
 peta  = applyMultiple I.peta
+-- | The "exa" prefix, denoting a factor of 10^18.
 exa   = applyMultiple I.exa
+-- | The "zetta" prefix, denoting a factor of 10^21.
 zetta = applyMultiple I.zetta
+-- | The "yotta" prefix, denoting a factor of 10^24.
 yotta = applyMultiple I.yotta
 
 {- $submultiples
 Then the submultiples.
 -}
 
+-- | Apply a 'Prefix' to a metric 'Unit'.
 applyPrefix :: (Fractional a) => Prefix -> Unit 'Metric d a -> Unit 'NonMetric d a
 applyPrefix p u = mkUnitQ n' x u
   where
@@ -116,15 +126,25 @@ applyPrefix p u = mkUnitQ n' x u
 
 deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto
   :: Fractional a => Unit 'Metric d a -> Unit 'NonMetric d a
+-- | The "deci" prefix, denoting a factor of 0.1.
 deci  = applyPrefix I.deci
+-- | The "centi" prefix, denoting a factor of 0.01.
 centi = applyPrefix I.centi
+-- | The "milli" prefix, denoting a factor of 0.001.
 milli = applyPrefix I.milli
+-- | The "micro" prefix, denoting a factor of 10^-6.
 micro = applyPrefix I.micro
+-- | The "nano" prefix, denoting a factor of 10^-9.
 nano  = applyPrefix I.nano
+-- | The "pico" prefix, denoting a factor of 10^-12.
 pico  = applyPrefix I.pico
+-- | The "femto" prefix, denoting a factor of 10^-15.
 femto = applyPrefix I.femto
+-- | The "atto" prefix, denoting a factor of 10^-18.
 atto  = applyPrefix I.atto
+-- | The "zepto" prefix, denoting a factor of 10^-21.
 zepto = applyPrefix I.zepto
+-- | The "yocto" prefix, denoting a factor of 10^-24.
 yocto = applyPrefix I.yocto
 
 {- $reified-prefixes
@@ -137,7 +157,7 @@ list of all prefixes defined by the SI.
 {- $base-units
 These are the base units from section 4.1. To avoid a
 myriad of one-letter functions that would doubtlessly cause clashes
-and frustration in users' code we spell out all unit names in full,
+and frustration in users' code, we spell out all unit names in full,
 as we did for prefixes. We also elect to spell the unit names in
 singular form, as allowed by section 9.7 "Other spelling conventions".
 
