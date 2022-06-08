@@ -56,7 +56,7 @@ module Numeric.Units.Dimensional.NonSI
   usSurveyFoot, usSurveyInch, usSurveyMil, usSurveyYard, usSurveyMile, usSurveyAcre,
   -- * Years
   -- $year
-  year, century,
+  year, decade, century, millennium,
   -- * Pressure Units
   -- $pressure-units
   bar, atmosphere, technicalAtmosphere, mmHg, inHg, inHg_UCUM, inHg_NIST, torr,
@@ -527,6 +527,16 @@ The IAU recommends <#note2 [2]> that:
 year :: Num a => Unit 'NonMetric DTime a
 year = mkUnitZ (ucum "a_j" "a" "mean Julian year") 31557600 $ second
 
+-- | One mean Julian decade is ten mean Julian 'year's.
+--
+-- >>> 1 *~ decade
+-- 3.15576e8 s
+--
+-- >>> 1 *~ decade :: Time Rational
+-- 315576000 % 1 s
+decade :: Num a => Unit 'NonMetric DTime a
+decade = mkUnitZ (dimensionalAtom "d_j" "dec" "mean Julian decade") 10 $ year
+
 -- | One mean Julian century is one hundred mean Julian 'year's.
 --
 -- >>> 1 *~ century
@@ -536,6 +546,16 @@ year = mkUnitZ (ucum "a_j" "a" "mean Julian year") 31557600 $ second
 -- 3155760000 % 1 s
 century :: Num a => Unit 'NonMetric DTime a
 century = mkUnitZ (dimensionalAtom "c_j" "cen" "mean Julian century") 100 $ year
+
+-- | One mean Julian millennium is one thousand mean Julian 'year's.
+--
+-- >>> 1 *~ millennium
+-- 3.15576e10 s
+--
+-- >>> 1 *~ millennium :: Time Rational
+-- 31557600000 % 1 s
+millennium :: Num a => Unit 'NonMetric DTime a
+millennium = mkUnitZ (dimensionalAtom "m_j" "mil" "mean Julian millennium") 1000 $ year
 
 {- $pressure-units
 It seems that nearly every area of application has its own customary unit for measuring pressure.
