@@ -331,4 +331,4 @@ unit of length directly tied to the meter, with a length of exactly
 -}
 
 astronomicalUnit :: Num a => Unit 'NonMetric DLength a
-astronomicalUnit = mkUnitZ (ucum "AU" "AU" "astronomical unit") 149597870700 $ meter
+astronomicalUnit = mkUnitZ (ucum "au" "au" "astronomical unit") 149597870700 $ meter
