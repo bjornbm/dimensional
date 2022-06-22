@@ -510,14 +510,16 @@ btu = mkUnitQ (ucum "[Btu_IT]" "btu" "British thermal unit") 1055.05585262 $ jou
 The IAU recommends <#note2 [2]> that:
 
   Although there are several different kinds of year (as there are
-  several kinds of day), it is best to regard a year as a julian
-  year of 365.25 days (31.5576 Ms) unless otherwise specified.
+  several kinds of day), it is best to regard a year as a Julian
+  year of 365.25 days (31557600 s) unless otherwise specified.
 
 -}
 
--- | One mean Julian year is a unit of measurement of time defined as exactly 365.25 days of 86 400 'second's each.
+-- | One Julian year is a unit of measurement of time defined as exactly 365.25 days of 86 400 'second's each.
 --
 -- See <https://en.wikipedia.org/wiki/Julian_year_%28astronomy%29 here> for further information.
+--
+-- prop> 1 *~ year === 365.25 *~ day
 --
 -- >>> 1 *~ year
 -- 3.15576e7 s
@@ -527,7 +529,9 @@ The IAU recommends <#note2 [2]> that:
 year :: Num a => Unit 'NonMetric DTime a
 year = mkUnitZ (ucum "a_j" "a" "mean Julian year") 31557600 $ second
 
--- | One mean Julian decade is ten mean Julian 'year's.
+-- | One Julian decade is ten Julian 'year's.
+--
+-- prop> 1 *~ decade === 10 *~ year
 --
 -- >>> 1 *~ decade
 -- 3.15576e8 s
@@ -537,7 +541,11 @@ year = mkUnitZ (ucum "a_j" "a" "mean Julian year") 31557600 $ second
 decade :: Num a => Unit 'NonMetric DTime a
 decade = mkUnitZ (dimensionalAtom "d_j" "dec" "mean Julian decade") 10 $ year
 
--- | One mean Julian century is one hundred mean Julian 'year's.
+-- | One Julian century is one hundred Julian 'year's, or 35 525 'day's of 86 400 'second's each.
+--
+-- prop> 1 *~ century === 100 *~ year
+--
+-- prop> 1 *~ century === 36525 *~ day
 --
 -- >>> 1 *~ century
 -- 3.15576e9 s
@@ -547,7 +555,9 @@ decade = mkUnitZ (dimensionalAtom "d_j" "dec" "mean Julian decade") 10 $ year
 century :: Num a => Unit 'NonMetric DTime a
 century = mkUnitZ (dimensionalAtom "c_j" "cen" "mean Julian century") 100 $ year
 
--- | One mean Julian millennium is one thousand mean Julian 'year's.
+-- | One Julian millennium is one thousand Julian 'year's.
+--
+-- prop> 1 *~ millennium === 1000 *~ year
 --
 -- >>> 1 *~ millennium
 -- 3.15576e10 s
