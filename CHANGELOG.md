@@ -1,6 +1,6 @@
 1.5 (2022-06)
 -------------
-* Add Julian `decade`, `century`, and `millennium` to `NonSI`.
+* Add Julian `decade` and `millennium` to `NonSI`.
 * Rename `deka` prefix to `deca` in accordance with [international spelling](https://www.bipm.org/documents/20126/41483022/SI-Brochure-9.pdf/fcf090b2-04e6-88cc-1149-c3e029ad8232).
 * Change `astronomicalUnit` symbol to lowercase (`au`).
 * Remove `semigroups` dependency.
