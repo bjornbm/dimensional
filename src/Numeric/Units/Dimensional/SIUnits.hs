@@ -52,9 +52,9 @@ module Numeric.Units.Dimensional.SIUnits
   astronomicalUnit,
   -- * SI Prefixes
   -- $multiples
-  deka, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta,
+  deka, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta, ronna, quetta,
   -- $submultiples
-  deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto,
+  deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto, ronto, quecto,
   -- $reified-prefixes
   Prefix, applyPrefix, siPrefixes
 )
@@ -88,7 +88,7 @@ applyMultiple p u | denominator x == 1 = mkUnitZ n' (numerator x) u
     n' = N.applyPrefix p (name u)
     x = N.scaleFactor p
 
-deca, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta
+deca, deka, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta, ronna, quetta
   :: Num a => Unit 'Metric d a -> Unit 'NonMetric d a
 -- | The "deca" prefix, denoting a factor of 10.
 deca  = applyMultiple I.deca -- International English.
@@ -112,6 +112,11 @@ exa   = applyMultiple I.exa
 zetta = applyMultiple I.zetta
 -- | The "yotta" prefix, denoting a factor of 10^24.
 yotta = applyMultiple I.yotta
+-- | The "ronna" prefix, denoting a factor of 10^27.
+ronna = applyMultiple I.ronna
+-- | The "quetta" prefix, denoting a factor of 10^30.
+quetta = applyMultiple I.quetta
+
 
 {- $submultiples
 Then the submultiples.
@@ -124,7 +129,7 @@ applyPrefix p u = mkUnitQ n' x u
     n' = N.applyPrefix p (name u)
     x = N.scaleFactor p
 
-deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto
+deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto, ronto, quecto
   :: Fractional a => Unit 'Metric d a -> Unit 'NonMetric d a
 -- | The "deci" prefix, denoting a factor of 0.1.
 deci  = applyPrefix I.deci
@@ -146,6 +151,11 @@ atto  = applyPrefix I.atto
 zepto = applyPrefix I.zepto
 -- | The "yocto" prefix, denoting a factor of 10^-24.
 yocto = applyPrefix I.yocto
+-- | The "ronto" prefix, denoting a factor of 10^-27.
+ronto = applyPrefix I.ronto
+-- | The "quecto" prefix, denoting a factor of 10^-30.
+quecto = applyPrefix I.quecto
+
 
 {- $reified-prefixes
 
