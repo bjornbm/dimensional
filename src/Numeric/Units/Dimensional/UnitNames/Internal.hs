@@ -187,7 +187,7 @@ baseUnitName d = let powers = asList $ dimension d
 baseUnitNames :: [UnitName 'NonMetric]
 baseUnitNames = [weaken nMeter, nKilogram, weaken nSecond, weaken nAmpere, weaken nKelvin, weaken nMole, weaken nCandela]
 
-deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta :: Prefix
+deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta, ronna, quetta :: Prefix
 deca  = prefix "da" "da" "deca" 1e1
 hecto = prefix "h" "h" "hecto"  1e2
 kilo  = prefix "k" "k" "kilo"   1e3
@@ -198,7 +198,10 @@ peta  = prefix "P" "P" "peta"   1e15
 exa   = prefix "E" "E" "exa"    1e18
 zetta = prefix "Z" "Z" "zetta"  1e21
 yotta = prefix "Y" "Y" "yotta"  1e24
-deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto :: Prefix
+ronna = prefix "R" "R" "ronna" 1e27
+quetta = prefix "Q" "Q" "quetta" 1e30
+
+deci, centi, milli, micro, nano, pico, femto, atto, zepto, yocto, ronto, quecto :: Prefix
 deci  = prefix "d" "d" "deci"   1e-1
 centi = prefix "c" "c" "centi"  1e-2
 milli = prefix "m" "m" "milli"  1e-3
@@ -209,10 +212,13 @@ femto = prefix "f" "f" "femto"  1e-15
 atto  = prefix "a" "a" "atto"   1e-18
 zepto = prefix "z" "z" "zepto"  1e-21
 yocto = prefix "y" "y" "yocto"  1e-24
+ronto = prefix "r" "r" "ronto"  1e-27
+quecto = prefix "q" "q" "quecto"  1e-30
+
 
 -- | A list of all 'Prefix'es defined by the SI.
 siPrefixes :: [Prefix]
-siPrefixes = [yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta]
+siPrefixes = [quecto, ronto, yocto, zepto, atto, femto, pico, nano, micro, milli, centi, deci, deca, hecto, kilo, mega, giga, tera, peta, exa, zetta, yotta, ronna, quetta]
 
 -- | Forms a 'UnitName' from a 'Metric' name by applying a metric prefix.
 applyPrefix :: Prefix -> UnitName 'Metric -> UnitName 'NonMetric
