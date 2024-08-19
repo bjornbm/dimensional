@@ -9,6 +9,7 @@
 Defines types for manipulation of units and quantities without phantom types for their dimensions.
 -}
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -37,6 +38,9 @@ module Numeric.Units.Dimensional.Dynamic
 
 import Control.DeepSeq
 import Control.Monad
+#if USE_BINARY
+import qualified Data.Binary
+#endif
 import Data.Data
 import Data.ExactPi
 import Data.Kind
@@ -114,6 +118,10 @@ instance Num a => Semigroup (AnyQuantity a) where
 instance Num a => Monoid (AnyQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
   mappend = (<>)
+
+#if USE_BINARY
+instance (Data.Binary.Binary a) => Data.Binary.Binary (AnyQuantity a)
+#endif
 
 -- | Possibly a 'Quantity' whose 'Dimension' is only known dynamically.
 --
@@ -193,6 +201,10 @@ instance Num a => Semigroup (DynQuantity a) where
 instance Num a => Monoid (DynQuantity a) where
   mempty = demoteQuantity (1 Dim.*~ one)
   mappend = (<>)
+
+#if USE_BINARY
+instance (Data.Binary.Binary a) => Data.Binary.Binary (DynQuantity a)
+#endif
 
 -- | A 'DynQuantity' which does not correspond to a value of any dimension.
 invalidQuantity :: DynQuantity a

@@ -28,6 +28,9 @@ where
 import Control.Applicative
 import Control.DeepSeq
 import Data.AEq (AEq)
+#if USE_BINARY
+import qualified Data.Binary
+#endif
 import Data.Coerce (coerce)
 import Data.Data
 import Data.Kind
@@ -136,6 +139,10 @@ instance (Num a) => Semigroup (SQuantity s d a) where
 instance (Num a) => Monoid (SQuantity s d a) where
   mempty = Quantity 0
   mappend = (<>)
+
+#if USE_BINARY
+deriving instance (Data.Binary.Binary a) => Data.Binary.Binary (SQuantity s d a)
+#endif
 
 {-
 

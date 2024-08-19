@@ -64,6 +64,23 @@ main = do
          putStrLn $ "The journey requires " ++ show wholeSeconds ++ " seconds, rounded up to the nearest second."
 ```
 
+## Package Flags
+
+Package flags are available which enable us to provide instances for `Quantity` that are useful to interoperate with various popular packages without burdening all users with those dependencies or creating orphan instances.
+
+To provide `Binary` serialiaztion for `Quantity` from the `binary` package, the `binary` flag can be used like so:
+
+```bash
+cabal install dimensional -f binary
+```
+
+If you use a `cabal.project` file, you can instead add the following clause:
+
+```txt
+package dimensional
+    flags: +binary
+```
+
 ## Contributing
 
 For project information (issues, updates, wiki, examples) see:
