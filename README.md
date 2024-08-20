@@ -66,15 +66,15 @@ main = do
 
 ## Package Flags
 
-Package flags are available which enable us to provide instances for `Quantity` that are useful to interoperate with various popular packages without burdening all users with those dependencies or creating orphan instances.
+Package flags enable users get instances for `Quantity` that are useful to interoperate with various popular packages, without adding dependencies for those who do not need it.
 
-To provide `Binary` serialiaztion for `Quantity` from the `binary` package, the `binary` flag can be used like so:
+To provide `Binary` serialization for `Quantity` from the `binary` package, the `binary` flag can be used like so:
 
 ```bash
 cabal install dimensional -f binary
 ```
 
-If you use a `cabal.project` file, you can instead add the following clause:
+If you use a `cabal.project` file, you can instead add the following clause to activate this package flag:
 
 ```txt
 package dimensional
