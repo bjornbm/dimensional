@@ -58,7 +58,9 @@ jobs:
       run: |
         cabal test
     
+    # Note that we ignore the cabal freeze file (--ignore-project) because
+    # the `doctest` dependencies may clash with `dimensional` dependencies.
     - name: Run doctests
       run: |
-        cabal install doctest --ignore-project
+        cabal install doctest --ignore-project --disable-optimization
         cabal repl dimensional --build-depends=QuickCheck --with-ghc=doctest

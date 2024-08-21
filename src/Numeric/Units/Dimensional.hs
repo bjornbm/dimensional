@@ -240,7 +240,7 @@ import qualified Numeric.Units.Dimensional.Variants as V
 -- $setup
 -- >>> :set -XFlexibleInstances
 -- >>> :set -XNoImplicitPrelude
--- >>> :seti -fno-warn-orphans
+-- >>> :set -fno-warn-orphans
 -- >>> :set -fno-warn-type-defaults
 -- >>> import Test.QuickCheck.Arbitrary
 -- >>> import Numeric.Units.Dimensional.Prelude
