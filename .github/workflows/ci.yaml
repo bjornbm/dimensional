@@ -17,9 +17,9 @@ jobs:
           - "9.6.6"
           - "9.8.2"
           - "9.10.1"
-        flags:
+        constraints:
           - "" # base case
-          - "+binary"
+          - "--constraint=\"dimensional +binary\""
 
     steps:
     - uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
     - name: Generate freeze file
       run: |
         cabal update
-        cabal configure --disable-optimization --flags="${{ matrix.flags }}" --enable-tests
+        cabal configure --disable-optimization ${{ matrix.constraints }} --enable-tests
         cabal freeze
     
     - name: Cache cabal work
