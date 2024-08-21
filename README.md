@@ -66,8 +66,6 @@ main = do
 
 ## Package Flags
 
-Package flags enable users get instances for `Quantity` that are useful to interoperate with various popular packages, without adding dependencies for those who do not need it.
-
 To provide `Binary` serialization for `Quantity` from the `binary` package, the `binary` flag can be used like so:
 
 ```bash
