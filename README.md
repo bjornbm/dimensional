@@ -63,6 +63,21 @@ main = do
          putStrLn $ "The journey requires " ++ show wholeSeconds ++ " seconds, rounded up to the nearest second."
 ```
 
+## Package Flags
+
+To provide `Binary` serialization for `Quantity` from the `binary` package, the `binary` flag can be used like so:
+
+```bash
+cabal install dimensional -f binary
+```
+
+If you use a `cabal.project` file, you can instead add the following clause to activate this package flag:
+
+```txt
+package dimensional
+    flags: +binary
+```
+
 ## Contributing
 
 For project information (issues, updates, wiki, examples) see:

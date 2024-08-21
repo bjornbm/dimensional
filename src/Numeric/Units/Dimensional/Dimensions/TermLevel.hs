@@ -1,6 +1,7 @@
 {-# OPTIONS_HADDOCK not-home, show-extensions #-}
 
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -36,6 +37,9 @@ module Numeric.Units.Dimensional.Dimensions.TermLevel
 where
 
 import Control.DeepSeq
+#if USE_BINARY
+import qualified Data.Binary
+#endif
 import Data.Data
 import Data.Semigroup (Semigroup(..))
 import Data.Monoid (Monoid(..))
@@ -67,6 +71,10 @@ instance Monoid Dimension' where
   mempty = dOne
   mappend = (<>)
 
+#if USE_BINARY
+instance Data.Binary.Binary Dimension'
+#endif
+
 -- | The dimension of a dynamic value, which may not have any dimension at all.
 data DynamicDimension = NoDimension -- ^ The value has no valid dimension.
                       | SomeDimension Dimension' -- ^ The value has the given dimension.
@@ -74,6 +82,10 @@ data DynamicDimension = NoDimension -- ^ The value has no valid dimension.
   deriving (Eq, Ord, Show, Data, Generic, Typeable)
 
 instance NFData DynamicDimension where
+
+#if USE_BINARY
+instance Data.Binary.Binary DynamicDimension
+#endif
 
 -- | Dimensional values, or those that are only possibly dimensional, inhabit this class,
 -- which allows access to a term-level representation of their dimension.

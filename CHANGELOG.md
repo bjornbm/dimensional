@@ -1,3 +1,8 @@
+1.6 (2024-08)
+-------------
+
+* Added a package flag `binary`, enabling optional dependency on the `binary` package to provide instances of `Binary`.
+
 1.5 (2022-06)
 -------------
 * Add Julian `decade` and `millennium` to `NonSI`.
