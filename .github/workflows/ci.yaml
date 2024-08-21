@@ -57,3 +57,8 @@ jobs:
     - name: Run tests
       run: |
         cabal test
+    
+    - name: Run doctests
+      run: |
+        cabal install doctest --ignore-project
+        cabal repl dimensional --build-depends=QuickCheck --with-ghc=doctest
