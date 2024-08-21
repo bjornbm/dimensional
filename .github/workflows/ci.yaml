@@ -1,0 +1,65 @@
+name: Continuous Integration
+
+on:
+  push:
+
+jobs:
+  continuous-integration:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ghc-version:
+          - "8.10.7"
+          - "9.0.2"
+          - "9.2.8"
+          - "9.4.8"
+          - "9.6.6"
+          - "9.8.2"
+          - "9.10.1"
+        flags:
+          - "" # base case
+          - "+binary"
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install cabal/ghc
+      uses: haskell-actions/setup@v2
+      id: setup-haskell
+      with:
+        ghc-version: ${{ matrix.ghc-version }}
+        cabal-version: '3.10.3.0'
+    
+    - name: Generate freeze file
+      run: |
+        cabal update
+        cabal configure --disable-optimization --flags="${{ matrix.flags }}" --enable-tests
+        cabal freeze
+    
+    - name: Cache cabal work
+      uses: actions/cache@v4
+      with:
+        path: |
+          dist-newstyle
+          ${{ steps.setup-haskell.outputs.cabal-store }}
+        key: ${{ runner.os }}-${{ hashFiles('cabal.project.freeze', 'cabal.project.local') }}-cabal-install
+    
+    - name: Build dependencies
+      run: |
+        cabal build --only-dependencies
+    
+    - name: Build dimensional
+      run: |
+        cabal build
+        
+    - name: Run tests
+      run: |
+        cabal test
+    
+    # Note that we ignore the cabal freeze file (--ignore-project) because
+    # the `doctest` dependencies may clash with `dimensional` dependencies.
+    - name: Run doctests
+      run: |
+        cabal install doctest --ignore-project --disable-optimization
+        cabal repl dimensional --build-depends=QuickCheck --with-ghc=doctest

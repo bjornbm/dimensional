@@ -45,6 +45,7 @@ import Numeric.Units.Dimensional.Prelude hiding (RealFloat(..))
 import Numeric.Units.Dimensional.Coercion
 
 -- $setup
+-- >>> :set -fno-warn-type-defaults
 -- >>> :set -XExtendedDefaultRules
 -- >>> :set -XNegativeLiterals
 

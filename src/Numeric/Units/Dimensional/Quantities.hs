@@ -418,6 +418,7 @@ to the definitions of 'DArea' and 'DVolume'.
 -}
 
 -- $setup
+-- >>> :set -fno-warn-type-defaults
 -- >>> import Numeric.Units.Dimensional.Prelude
 
 -- | Constructs a unit of area from a unit of length, taking the area of a square whose sides are that length.

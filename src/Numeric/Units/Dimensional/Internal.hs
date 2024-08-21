@@ -60,6 +60,7 @@ import qualified Prelude as P
 
 -- $setup
 -- >>> :set -XNoImplicitPrelude
+-- >>> :set -fno-warn-type-defaults
 -- >>> import Numeric.Units.Dimensional.Prelude
 
 -- | A unit of measurement.

@@ -48,6 +48,7 @@ import Prelude (id, all, fst, snd, fmap, otherwise, divMod, ($), (+), (-), (.), 
 import qualified Prelude as P
 
 -- $setup
+-- >>> :set -fno-warn-orphans
 -- >>> import Prelude (negate)
 -- >>> import Control.Applicative
 -- >>> import Test.QuickCheck.Arbitrary

@@ -11,7 +11,13 @@ bug-reports:         https://github.com/bjornbm/dimensional/issues/
 category:            Math, Physics
 synopsis:            Statically checked physical dimensions
 cabal-version:       >= 1.10
-tested-with:         GHC == 8.0.1, GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.1, GHC == 8.8.3, GHC == 8.10.4
+tested-with:         GHC == 8.10.7,
+                     GHC == 9.0.2,
+                     GHC == 9.2.8,
+                     GHC == 9.4.8,
+                     GHC == 9.6.6,
+                     GHC == 9.8.2,
+                     GHC == 9.10.1
 build-type:          Simple
 
 description:
@@ -98,19 +104,6 @@ test-suite tests
                        QuickCheck,
                        base
   build-tool-depends: hspec-discover:hspec-discover == 2.*
-
-test-suite doctests
-  type:                exitcode-stdio-1.0
-  ghc-options:         -threaded
-  main-is:             DocTests.hs
-  hs-source-dirs:      tests
-  default-language:    Haskell2010
-  build-depends:       dimensional,
-                       doctest,
-                       Glob,
-                       QuickCheck,
-                       template-haskell,
-                       base
 
 benchmark simple
   type:                exitcode-stdio-1.0
