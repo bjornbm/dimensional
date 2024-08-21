@@ -85,6 +85,7 @@ import Numeric.Units.Dimensional.UnitNames.Internal (ucumMetric, ucum, dimension
 import qualified Prelude
 
 -- $setup
+-- >>> :set -fno-warn-type-defaults
 -- >>> import Data.ExactPi
 -- >>> import Data.Function (on)
 -- >>> import Numeric.Units.Dimensional.Coercion
