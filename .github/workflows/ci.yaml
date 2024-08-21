@@ -19,8 +19,7 @@ jobs:
           - "9.10.1"
         flags:
           - "" # base case
-        # Only activate after #224 has landed
-        #   - "+binary"
+          - "+binary"
 
     steps:
     - uses: actions/checkout@v4
