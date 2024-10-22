@@ -36,7 +36,7 @@ module Numeric.Units.Dimensional.Dimensions.TermLevel
 )
 where
 
-import Control.DeepSeq
+import Control.DeepSeq (NFData(..))
 #if USE_BINARY
 import qualified Data.Binary
 #endif

@@ -9,7 +9,7 @@ module Numeric.Units.Dimensional.UnitNames.InterchangeNames
 )
 where
 
-import Control.DeepSeq
+import Control.DeepSeq (NFData)
 import Data.Data
 import GHC.Generics
 import Prelude

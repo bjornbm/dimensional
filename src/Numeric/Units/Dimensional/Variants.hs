@@ -28,7 +28,7 @@ module Numeric.Units.Dimensional.Variants
 )
 where
 
-import Control.DeepSeq
+import Control.DeepSeq (NFData)
 import Data.Data
 import qualified Data.ExactPi.TypeLevel as E
 import GHC.Generics

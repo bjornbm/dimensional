@@ -14,7 +14,7 @@
 module Numeric.Units.Dimensional.UnitNames.Internal
 where
 
-import Control.DeepSeq
+import Control.DeepSeq (NFData(..))
 import Control.Monad (join)
 import Data.Coerce
 import Data.Data hiding (Prefix)

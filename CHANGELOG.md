@@ -1,3 +1,8 @@
+XX (Unreleased)
+-------------
+
+* Fixed an issue where `Control.DeepSeq.Unit`, exported as of version 1.5.1.0, conflicts with `Numeric.Units.Dimensional.Unit` (#228).
+
 1.6 (2024-08)
 -------------
 

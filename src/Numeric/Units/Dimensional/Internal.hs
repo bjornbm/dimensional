@@ -26,7 +26,7 @@ module Numeric.Units.Dimensional.Internal
 where
 
 import Control.Applicative
-import Control.DeepSeq
+import Control.DeepSeq (NFData)
 import Data.AEq (AEq)
 #if USE_BINARY
 import qualified Data.Binary

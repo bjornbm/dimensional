@@ -36,7 +36,7 @@ module Numeric.Units.Dimensional.Dynamic
 , (*), (/), (^), recip, applyPrefix
 ) where
 
-import Control.DeepSeq
+import Control.DeepSeq (NFData)
 import Control.Monad
 #if USE_BINARY
 import qualified Data.Binary
