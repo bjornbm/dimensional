@@ -342,8 +342,8 @@ pi = rescale (epsilon :: SQuantity E.Pi DOne Integer)
 
 -- | Twice 'pi'.
 --
--- For background on 'tau' see https://tauday.com/tau-manifesto (but also
--- feel free to review https://web.archive.org/web/20200926221249/http://www.thepimanifesto.com/).
+-- For background on 'tau' see [The Tau Manifesto](https://tauday.com/tau-manifesto) (but also
+-- feel free to review [The Pi Manifesto](https://web.archive.org/web/20200926221249/http://www.thepimanifesto.com/)).
 tau :: (Integral a, E.KnownExactPi s) => SQuantity s DOne a
 tau = rescale (epsilon :: SQuantity (E.ExactNatural 2 E.* E.Pi) DOne Integer)
 
